@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+<properties>
+  <nutzboot.version>2.4.1.v20201014</nutzboot.version>
+</properties>
+  <parent>
+    <artifactId>mpm</artifactId>
+    <groupId>org.mpm</groupId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>mpm-server</artifactId>
+  <packaging>war</packaging>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.nutz</groupId>
+        <artifactId>nutzboot-parent</artifactId>
+        <version>${nutzboot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-servlet</artifactId>
+      <version>${gwt.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>${servlets.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Use SQLDataSources 
+    <dependency>
+        <groupId>com.isomorphic.smartgwt.lgpl</groupId>
+        <artifactId>isomorphic-sql</artifactId>
+        <version>${smartgwt.version}</version>
+    </dependency>
+-->
+
+     <!-- Use a context listener to start the sample database
+    <dependency>
+        <groupId>org.hsqldb</groupId>
+        <artifactId>hsqldb</artifactId>
+        <version>2.5.1</version>
+    </dependency>
+-->
+    <!-- 
+      Uncomment to include the SmartGWT "Admin Console" tool's server component, various data 
+      importers / exporters, and the server-side components of the BatchUploader.  
+      Refer to 'Tools Deployment' documentation topic.
+     -->
+    <!--
+    <dependency>
+        <groupId>com.isomorphic.smartgwt.lgpl</groupId>
+        <artifactId>isomorphic-tools</artifactId>
+        <version>${smartgwt.version}</version>
+    </dependency>
+    -->
+
+    <!-- https://mvnrepository.com/artifact/org.nutz/nutzboot-servlet3 -->
+    <dependency>
+      <groupId>org.nutz</groupId>
+      <artifactId>nutzboot-servlet3</artifactId>
+      <version>2.4.1.v20201014</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.nutz</groupId>
+      <artifactId>nutzboot-starter-nutz-mvc</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.nutz</groupId>
+      <artifactId>nutzboot-starter-nutz-dao</artifactId>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+          <groupId>com.isomorphic</groupId>
+          <artifactId>isc-maven-plugin</artifactId>
+          <configuration>
+
+            <!-- 
+              Here, we use a runtime extracted by gwt:codeserver.  You could just as easily use something like the following to 
+              use one extracted by the normal gwt compile process:
+
+              ${project.parent.basedir}/mpm-client/target/mpm-client-${project.version}/app/sc
+            -->
+            <smartclientRuntimeDir>${project.parent.build.directory}/gwt/launcherDir/app/sc</smartclientRuntimeDir>
+            <dataSourcesDir>WEB-INF/ds/classic-models</dataSourcesDir>
+          </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <!-- XXX: We want to exclude foo-client from 'env-dev' profile, Maven forces us to make a 'env-prod' profile -->
+      <id>prod</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>mpm-client</artifactId>
+          <version>${project.version}</version>
+          <type>war</type>
+          <scope>runtime</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>dev</id>
+      <activation>
+        <property>
+          <name>env</name>
+          <value>dev</value>
+        </property>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-maven-plugin</artifactId>
+              <version>9.4.31.v20200723</version>
+              <configuration>
+                <webApp>
+                  <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+                    <resourcesAsCSV>${project.basedir}/src/main/webapp,${project.parent.build.directory}/gwt/launcherDir/</resourcesAsCSV>
+                  </baseResource>
+                  <jettyEnvXml>${project.basedir}/src/etc/jetty/jetty-env.xml</jettyEnvXml>
+                </webApp>
+              </configuration>
+            </plugin>
+          </plugins>
+
+        </pluginManagement>
+      </build>
+    </profile>
+  </profiles>
+
+</project>
