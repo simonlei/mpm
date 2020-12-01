@@ -2,14 +2,15 @@ package org.mpm.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.smartgwt.client.core.KeyIdentifier;
-import com.smartgwt.client.data.SortSpecifier;
-import com.smartgwt.client.types.SortDirection;
-import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.Page;
+import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
-import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.grid.ListGrid;
+import com.smartgwt.client.widgets.layout.HLayout;
+import com.smartgwt.client.widgets.layout.SplitPane;
 import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.tile.TileGrid;
+import com.smartgwt.client.widgets.toolbar.ToolStrip;
+import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 
 public final class PhotoManagerEntryPoint implements EntryPoint {
 
@@ -34,15 +35,33 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
         grid.setSortField("buyPrice");
         grid.setSortByGroupFirst(true);
 */
-        VLayout layout = new VLayout();
-        layout.setWidth100();
-        layout.setHeight100();
-        layout.setPadding(20);
-            Label label = new Label( "hello world!");
-            layout.addMember(label);
+        VLayout root = new VLayout();
+        root.setWidth100();
+        root.setHeight100();
+        root.setPadding(20);
+
+        root.addMember( new HeaderPanel());
+        root.addMember( createContentPane());
   //      layout.addMember(grid);
 
-        layout.draw();
+        root.draw();
     }
 
+    private SplitPane createContentPane() {
+        SplitPane contentPane = new SplitPane();
+        contentPane.setWidth100();
+        contentPane.setHeight100();
+
+        contentPane.setNavigationPane( createLeftPanel());
+        contentPane.setListPane( createPicsGrid());
+        return contentPane;
+    }
+
+    private TileGrid createPicsGrid() {
+	    return new TileGrid();
+    }
+
+    private VLayout createLeftPanel() {
+	    return new VLayout();
+    }
 }

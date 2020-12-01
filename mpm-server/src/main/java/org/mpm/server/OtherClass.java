@@ -9,6 +9,8 @@ public class OtherClass {
     @Ok("raw")
     @At("/now")
     public long now() {
+
         return System.currentTimeMillis();
+
     }
 }
