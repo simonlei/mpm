@@ -56,6 +56,15 @@
             <artifactId>nutzboot-starter-nutz-mvc</artifactId>
             <groupId>org.nutz</groupId>
         </dependency>
+        <dependency>
+            <artifactId>mysql-connector-java</artifactId>
+            <groupId>mysql</groupId>
+            <version>8.0.20</version>
+        </dependency>
+        <dependency>
+            <artifactId>nutzboot-starter-jdbc</artifactId>
+            <groupId>org.nutz</groupId>
+        </dependency>
 
         <dependency>
             <artifactId>nutzboot-starter-nutz-dao</artifactId>
