@@ -1,22 +1,26 @@
 package org.mpm.client;
 
+import com.google.gwt.user.client.Timer;
 import com.smartgwt.client.data.DataSourceField;
 import com.smartgwt.client.data.RestDataSource;
 import com.smartgwt.client.rpc.RPCManager;
 import com.smartgwt.client.rpc.RPCRequest;
 import com.smartgwt.client.types.FieldType;
 import com.smartgwt.client.types.SelectionStyle;
+import com.smartgwt.client.util.JSOHelper;
+import com.smartgwt.client.util.JSON;
 import com.smartgwt.client.util.Offline;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Button;
 import com.smartgwt.client.widgets.Dialog;
+import com.smartgwt.client.widgets.Progressbar;
 import com.smartgwt.client.widgets.grid.events.DataArrivedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.tree.TreeGrid;
 import com.smartgwt.client.widgets.tree.TreeNode;
-import java.util.HashMap;
+import java.util.Map;
 import org.mpm.client.util.Utils;
 
 public class HeaderPanel extends HLayout {
@@ -72,22 +76,18 @@ public class HeaderPanel extends HLayout {
             dialog.addItem(grid);
             dialog.setButtons(new Button("OK"));
             dialog.addButtonClickHandler(event -> {
-                dialog.hide();
+                dialog.close();
                 TreeNode selected1 = grid.getSelectedRecord();
 
                 String path = selected1.getAttribute("path");
                 Offline.put("Selected.Folder", path);
-                RPCRequest req = new RPCRequest();
-                req.setUseSimpleHttp(true);
+                RPCRequest req = Utils.makeRPCRequest("/fileSystem/importImages", "folder", path);
 
-                req.setActionURL("/fileSystem/importImages");
-                // req.setContentType("text/json");
-                HashMap data = new HashMap();
-                data.put("folder", path);
-                req.setParams(data);
-
-                RPCManager.sendRequest(req,
-                        (rpcResponse, o, rpcRequest) -> SC.logWarn("response " + rpcResponse));
+                RPCManager.sendRequest(req, (rpcResponse, o, rpcRequest) -> {
+                    String taskId = rpcResponse.getDataAsString();
+                    SC.logWarn("taskid: " + taskId);
+                    showProgressDialog(taskId);
+                });
             });
 
             dialog.draw();
@@ -95,5 +95,43 @@ public class HeaderPanel extends HLayout {
         toolStrip.addButton(uploadButton);
 
         addMember(toolStrip);
+    }
+
+    private void showProgressDialog(String taskId) {
+        Dialog dialog = new Dialog();
+        dialog.setTitle("正在导入照片...");
+        dialog.setIsModal(true);
+        dialog.setShowCloseButton(false);
+
+        Progressbar progressbar = new Progressbar();
+        progressbar.setPercentDone(0);
+        dialog.addItem(progressbar);
+        dialog.draw();
+
+        new Timer() {
+            @Override
+            public void run() {
+                RPCRequest req = Utils
+                        .makeRPCRequest("/fileSystem/importProgress", "taskId", taskId);
+                RPCManager.sendRequest(req, (rpcResponse, o, rpcRequest) -> {
+
+                    Map result = JSOHelper.convertToMap(JSON.decode(rpcResponse.getDataAsString()));
+                    // rpcResponse.getDataAsMap();
+                    Object count = result.get("count");
+                    Object total = result.get("total");
+                    Integer progress = (Integer) result.get("progress");
+                    SC.logWarn("Progress " + rpcResponse.getDataAsString());
+                    SC.logWarn("count " + count + " total " + total + " progress " + progress);
+                    progressbar.setPercentDone(progress);
+                    if (progress < 100) {
+                        schedule(500);
+                    } else {
+                        dialog.close();
+                        SC.say("导入完成，共导入 " + count + " 张图片");
+                    }
+
+                });
+            }
+        }.schedule(500);
     }
 }

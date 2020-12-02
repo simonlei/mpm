@@ -1,37 +1,31 @@
 package org.mpm.server.filesystem;
 
-import java.util.Map;
-import java.util.UUID;
 import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.lang.Lang;
-import org.nutz.lang.Strings;
-import org.nutz.log.Log;
-import org.nutz.log.Logs;
-import org.nutz.mvc.adaptor.WhaleAdaptor;
-import org.nutz.mvc.annotation.AdaptBy;
-import org.nutz.mvc.annotation.At;
-import org.nutz.mvc.annotation.Ok;
-import org.nutz.mvc.annotation.Param;
+import org.nutz.lang.util.NutMap;
 
-@IocBean
-public class PhotoImporter {
+@IocBean(singleton = false)
+public class PhotoImporter implements Runnable {
 
-    private final static Log log = Logs.get();
+    String taskId;
+    String folder;
 
-    @AdaptBy(type = WhaleAdaptor.class)
-    @At("/fileSystem/importImages")
-    @Ok("raw")
-    public String importImagesApi(@Param("..") Map map) {
-        String folder = (String) map.get("folder");
-        if (Strings.isBlank(folder)) {
-            throw Lang.makeThrow("No folder selected");
-        }
+    @Override
+    public void run() {
 
-        log.info("Folder: " + folder);
-        return importImages(folder);
     }
 
-    private String importImages(String folder) {
-        return UUID.randomUUID().toString();
+    public PhotoImporter init(String taskId, String folder) {
+        this.taskId = taskId;
+        this.folder = folder;
+        return this;
+    }
+
+    public boolean isFinished() {
+        return true;
+    }
+
+    public NutMap getProgress() {
+        return Lang.map("count", 100).setv("total", 100).setv("progress", 100);
     }
 }
