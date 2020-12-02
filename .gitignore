@@ -2,3 +2,4 @@ target/
 .idea
 *.iml
 
+/mpm-server/src/main/resources/application.properties
