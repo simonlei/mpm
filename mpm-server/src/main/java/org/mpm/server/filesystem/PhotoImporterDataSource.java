@@ -57,7 +57,7 @@ public class PhotoImporterDataSource {
         String taskId = UUID.randomUUID().toString();
         PhotoImporter importer = Mvcs.getIoc().get(PhotoImporter.class);
         tasks.put(taskId, importer);
-        importer.init(taskId, folder).run();
+        new Thread(importer.init(taskId, folder)).start();
         return taskId;
     }
 }

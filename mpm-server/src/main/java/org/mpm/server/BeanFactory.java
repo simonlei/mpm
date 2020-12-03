@@ -6,13 +6,16 @@ import com.qcloud.cos.auth.BasicCOSCredentials;
 import com.qcloud.cos.auth.COSCredentials;
 import com.qcloud.cos.region.Region;
 import lombok.extern.slf4j.Slf4j;
+import org.nutz.ioc.impl.PropertiesProxy;
+import org.nutz.ioc.loader.annotation.Inject;
 import org.nutz.ioc.loader.annotation.IocBean;
-import org.nutz.lang.Configurable;
-import org.nutz.lang.util.NutMap;
 
-@IocBean
+@IocBean(create = "init")
 @Slf4j
-public class BeanFactory implements Configurable {
+public class BeanFactory {
+
+    @Inject
+    PropertiesProxy conf;
 
     String secretId;
     String secretKey;
@@ -20,7 +23,7 @@ public class BeanFactory implements Configurable {
 
     @IocBean
     public COSClient getCosClient() {
-        log.info(secretId + ":" + secretKey);
+        log.info("cosClient config:" + secretId + ":" + secretKey);
         COSCredentials cred = new BasicCOSCredentials(secretId, secretKey);
         Region region = new Region(regionStr);
         ClientConfig clientConfig = new ClientConfig(region);
@@ -28,10 +31,10 @@ public class BeanFactory implements Configurable {
         return cosClient;
     }
 
-    @Override
-    public void setupProperties(NutMap conf) {
-        this.secretId = conf.getString("cos.secretId");
-        this.secretKey = conf.getString("cos.secretKey");
-        this.regionStr = conf.getString("cos.region");
+    public void init() {
+        log.info("Setups : " + conf);
+        this.secretId = conf.get("cos.secretId");
+        this.secretKey = conf.get("cos.secretKey");
+        this.regionStr = conf.get("cos.region");
     }
 }

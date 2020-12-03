@@ -65,10 +65,16 @@
             <artifactId>nutzboot-starter-jdbc</artifactId>
             <groupId>org.nutz</groupId>
         </dependency>
-
         <dependency>
             <artifactId>nutzboot-starter-nutz-dao</artifactId>
             <groupId>org.nutz</groupId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.drewnoakes/metadata-extractor -->
+        <dependency>
+            <artifactId>metadata-extractor</artifactId>
+            <groupId>com.drewnoakes</groupId>
+            <version>2.14.0</version>
         </dependency>
     </dependencies>
 
