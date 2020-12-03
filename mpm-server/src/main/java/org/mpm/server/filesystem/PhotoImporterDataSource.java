@@ -50,7 +50,8 @@ public class PhotoImporterDataSource {
     }
 
     private NutMap getFinishedProgress() {
-        return Lang.map("count", 100).setv("total", 100).setv("progress", 100);
+        return Lang.map("count", 100).setv("total", 100)
+                .setv("picsCount", 100).setv("progress", 100);
     }
 
     private String importImages(String folder) {

@@ -13,6 +13,7 @@ import com.smartgwt.client.util.Offline;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Button;
 import com.smartgwt.client.widgets.Dialog;
+import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Progressbar;
 import com.smartgwt.client.widgets.grid.events.DataArrivedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -103,9 +104,14 @@ public class HeaderPanel extends HLayout {
         dialog.setIsModal(true);
         dialog.setShowCloseButton(false);
 
+        Label progressLabel = new Label();
+        progressLabel.setContents("正在导入");
+        dialog.addItem(progressLabel);
+
         Progressbar progressbar = new Progressbar();
         progressbar.setPercentDone(0);
         dialog.addItem(progressbar);
+        dialog.setHeight(300);
         dialog.draw();
 
         new Timer() {
@@ -119,15 +125,19 @@ public class HeaderPanel extends HLayout {
                     // rpcResponse.getDataAsMap();
                     Object count = result.get("count");
                     Object total = result.get("total");
+                    Object picsCount = result.get("picsCount");
                     Integer progress = (Integer) result.get("progress");
                     SC.logWarn("Progress " + rpcResponse.getDataAsString());
                     SC.logWarn("count " + count + " total " + total + " progress " + progress);
+                    progressLabel
+                            .setContents("已扫描 " + count + "/" + total + " 文件，其中照片数 " + picsCount);
                     progressbar.setPercentDone(progress);
+
                     if (progress < 100) {
                         schedule(500);
                     } else {
                         dialog.close();
-                        SC.say("导入完成，共导入 " + count + " 张图片");
+                        SC.say("导入完成，共导入 " + picsCount + " 张图片");
                     }
 
                 });

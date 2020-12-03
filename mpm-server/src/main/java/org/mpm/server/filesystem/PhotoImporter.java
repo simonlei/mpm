@@ -117,11 +117,12 @@ public class PhotoImporter implements Runnable {
     }
 
     public boolean isFinished() {
-        return true;
+        return calcProgress() >= 100;
     }
 
     public NutMap getProgress() {
-        return Lang.map("count", count).setv("total", total).setv("progress", calcProgress());
+        return Lang.map("count", count).setv("total", total)
+                .setv("picsCount", picsCount).setv("progress", calcProgress());
     }
 
     private int calcProgress() {
