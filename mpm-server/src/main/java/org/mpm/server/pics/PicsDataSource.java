@@ -8,6 +8,7 @@ import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.lang.util.NutMap;
 import org.nutz.mvc.annotation.At;
 import org.nutz.mvc.annotation.Ok;
+import org.nutz.mvc.annotation.Param;
 
 @IocBean
 public class PicsDataSource {
@@ -18,11 +19,12 @@ public class PicsDataSource {
 
     @At("/pics/fetch")
     @Ok("json")
-    public NutMap fetchPics() {
+    public NutMap fetchPics(@Param("_startRow") int startRow, @Param("_endRow") int endRow) {
         int count = picsModule.count();
-        List<EntityPhoto> photos = picsModule.query();
+        List<EntityPhoto> photos = picsModule.query(startRow, endRow);
 
-        DataSourceResponse resp = new DataSourceResponse(0, 0, photos.size(), count, photos);
+        DataSourceResponse resp = new DataSourceResponse(0, startRow, startRow + photos.size(),
+                count, photos);
         return resp.wrapResult();
     }
 }

@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityBlockPicture;
 import org.mpm.server.entity.EntityPhoto;
+import org.mpm.server.util.ExplicitPager;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.http.Http;
@@ -47,8 +48,8 @@ public class PicsModule {
         return dao.count(EntityPhoto.class);
     }
 
-    public List<EntityPhoto> query() {
-        return dao.query(EntityPhoto.class, null);
+    public List<EntityPhoto> query(int startRow, int endRow) {
+        return dao.query(EntityPhoto.class, null, new ExplicitPager(startRow, endRow - startRow));
     }
 
     public EntityPhoto saveFileInRepository(File file, String desc) {
