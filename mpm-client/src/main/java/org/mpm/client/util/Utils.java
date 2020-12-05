@@ -2,8 +2,12 @@ package org.mpm.client.util;
 
 import com.smartgwt.client.data.RestDataSource;
 import com.smartgwt.client.rpc.RPCRequest;
+import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.DSDataFormat;
+import com.smartgwt.client.util.JSOHelper;
+import com.smartgwt.client.util.JSON;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Utils {
 
@@ -31,5 +35,9 @@ public class Utils {
         data.put(key, value);
         req.setParams(data);
         return req;
+    }
+
+    public static Map getResponseAsMap(RPCResponse rpcResponse) {
+        return JSOHelper.convertToMap(JSON.decode(rpcResponse.getDataAsString()));
     }
 }

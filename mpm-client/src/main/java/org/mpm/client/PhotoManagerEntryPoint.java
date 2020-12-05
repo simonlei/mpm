@@ -2,12 +2,16 @@ package org.mpm.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.smartgwt.client.core.KeyIdentifier;
+import com.smartgwt.client.rpc.RPCManager;
+import com.smartgwt.client.rpc.RPCRequest;
 import com.smartgwt.client.util.Page;
 import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.layout.SplitPane;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.tile.TileGrid;
+import java.util.Map;
+import org.mpm.client.util.Utils;
 
 public final class PhotoManagerEntryPoint implements EntryPoint {
 
@@ -23,6 +27,8 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
             }
         });
 
+        loadServerConfig();
+
         VLayout root = new VLayout();
         root.setWidth100();
         root.setHeight100();
@@ -32,6 +38,14 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
         root.addMember(createContentPane());
 
         root.draw();
+    }
+
+    private void loadServerConfig() {
+        RPCRequest req = Utils.makeRPCRequest("/meta/config");
+        RPCManager.sendRequest(req, (rpcResponse, o, rpcRequest) -> {
+            Map map = Utils.getResponseAsMap(rpcResponse);
+            ServerConfig.thumbUrl = (String) map.get("thumbUrl");
+        });
     }
 
     private SplitPane createContentPane() {

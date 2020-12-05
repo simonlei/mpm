@@ -7,8 +7,6 @@ import com.smartgwt.client.rpc.RPCManager;
 import com.smartgwt.client.rpc.RPCRequest;
 import com.smartgwt.client.types.FieldType;
 import com.smartgwt.client.types.SelectionStyle;
-import com.smartgwt.client.util.JSOHelper;
-import com.smartgwt.client.util.JSON;
 import com.smartgwt.client.util.Offline;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Button;
@@ -121,7 +119,7 @@ public class HeaderPanel extends HLayout {
                         .makeRPCRequest("/fileSystem/importProgress", "taskId", taskId);
                 RPCManager.sendRequest(req, (rpcResponse, o, rpcRequest) -> {
 
-                    Map result = JSOHelper.convertToMap(JSON.decode(rpcResponse.getDataAsString()));
+                    Map result = Utils.getResponseAsMap(rpcResponse);
                     // rpcResponse.getDataAsMap();
                     Object count = result.get("count");
                     Object total = result.get("total");
