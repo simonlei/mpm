@@ -29,7 +29,7 @@ public class Utils {
         return req;
     }
 
-    public static RPCRequest makeRPCRequest(String url, String key, String value) {
+    public static RPCRequest makeRPCRequest(String url, String key, Object value) {
         RPCRequest req = makeRPCRequest(url);
         HashMap data = new HashMap();
         data.put(key, value);

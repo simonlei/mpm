@@ -48,8 +48,9 @@ public class PicsModule {
         return dao.count(EntityPhoto.class);
     }
 
-    public List<EntityPhoto> query(int startRow, int endRow) {
-        return dao.query(EntityPhoto.class, null, new ExplicitPager(startRow, endRow - startRow));
+    public List<EntityPhoto> query(int startRow, int endRow, boolean trashed) {
+        return dao.query(EntityPhoto.class, Cnd.where("trashed", "=", trashed),
+                new ExplicitPager(startRow, endRow - startRow));
     }
 
     public EntityPhoto saveFileInRepository(File file, String desc) {

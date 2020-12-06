@@ -19,12 +19,15 @@ public class PicsDataSource {
 
     @At("/pics/fetch")
     @Ok("json")
-    public NutMap fetchPics(@Param("_startRow") int startRow, @Param("_endRow") int endRow) {
+    public NutMap fetchPics(@Param("_startRow") int startRow, @Param("_endRow") int endRow,
+            @Param("trashed") boolean trashed) {
         int count = picsModule.count();
-        List<EntityPhoto> photos = picsModule.query(startRow, endRow);
+        List<EntityPhoto> photos = picsModule.query(startRow, endRow, trashed);
 
         DataSourceResponse resp = new DataSourceResponse(0, startRow, startRow + photos.size(),
                 count, photos);
         return resp.wrapResult();
     }
+
+
 }

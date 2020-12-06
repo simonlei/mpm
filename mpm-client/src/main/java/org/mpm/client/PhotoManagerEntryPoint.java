@@ -19,7 +19,7 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
 
         KeyIdentifier debugKey = new KeyIdentifier();
         debugKey.setCtrlKey(true);
-        debugKey.setKeyName("D");
+        debugKey.setKeyName("E");
 
         Page.registerKey(debugKey, new PageKeyHandler() {
             public void execute(String keyName) {
