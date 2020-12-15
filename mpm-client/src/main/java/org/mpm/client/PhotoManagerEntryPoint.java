@@ -1,6 +1,8 @@
 package org.mpm.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.smartgwt.client.core.KeyIdentifier;
 import com.smartgwt.client.rpc.RPCManager;
 import com.smartgwt.client.rpc.RPCRequest;
@@ -11,9 +13,11 @@ import com.smartgwt.client.widgets.layout.SplitPane;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.tile.TileGrid;
 import java.util.Map;
-import org.mpm.client.util.Utils;
+import org.mpm.client.util.ClientUtils;
 
 public final class PhotoManagerEntryPoint implements EntryPoint {
+
+    public static EventBus eventBus = new SimpleEventBus();
 
     public void onModuleLoad() {
 
@@ -41,9 +45,9 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
     }
 
     private void loadServerConfig() {
-        RPCRequest req = Utils.makeRPCRequest("/meta/config");
+        RPCRequest req = ClientUtils.makeRPCRequest("/meta/config");
         RPCManager.sendRequest(req, (rpcResponse, o, rpcRequest) -> {
-            Map map = Utils.getResponseAsMap(rpcResponse);
+            Map map = ClientUtils.getResponseAsMap(rpcResponse);
             ServerConfig.thumbUrl = (String) map.get("thumbUrl");
         });
     }

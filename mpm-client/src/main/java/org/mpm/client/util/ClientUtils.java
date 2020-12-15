@@ -9,7 +9,7 @@ import com.smartgwt.client.util.JSON;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Utils {
+public class ClientUtils {
 
     public static RestDataSource createDataSource(String id, String fetchUrl) {
         RestDataSource dataSource = new RestDataSource();

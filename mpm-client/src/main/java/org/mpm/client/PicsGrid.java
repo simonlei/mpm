@@ -16,18 +16,17 @@ import com.smartgwt.client.widgets.tile.TileGrid;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import java.util.ArrayList;
 import java.util.List;
-import org.mpm.client.util.Utils;
+import org.mpm.client.events.PicsChangeEvent;
+import org.mpm.client.util.ClientUtils;
 
 public class PicsGrid extends TileGrid {
 
-    private final Criteria criteria;
+    private static PicsGrid instance;
+    private boolean trashed = false;
 
     public PicsGrid() {
         super();
-        criteria = new Criteria();
-        criteria.addCriteria("trashed", false);
-
-        setInitialCriteria(criteria);
+        instance = this;
 
         Page.registerKey("D", new PageKeyHandler() {
             @Override
@@ -37,9 +36,13 @@ public class PicsGrid extends TileGrid {
         });
 
         GWT.create(ImageCellMetaFactory.class);
-        RestDataSource dataSource = Utils.createDataSource("pics", "/pics/fetch");
+        RestDataSource dataSource = ClientUtils.createDataSource("pics", "/pics/fetch");
         dataSource.addField(new DataSourceTextField("name"));
         setDataSource(dataSource);
+        addDataArrivedHandler(dataArrivedEvent -> {
+            PhotoManagerEntryPoint.eventBus
+                    .fireEvent(new PicsChangeEvent(getResultSet().getLength()));
+        });
         setAutoFetchData(true);
         setTileWidth(200);
         setTileHeight(150);
@@ -52,9 +55,36 @@ public class PicsGrid extends TileGrid {
         imgField.setImageURLPrefix("/thumb/");
 
         setFields(imgField);
+        Criteria criteria = new Criteria();
+        criteria.addCriteria("trashed", false);
+        dataSource.fetchData(criteria);
+    }
+
+    public static boolean isTrashed() {
+        return instance.trashed;
+    }
+
+    public static void setTrashed(boolean trashed) {
+        instance.trashed = trashed;
+        instance.reloadData();
+    }
+
+    private void reloadData() {
+        Criteria criteria = new Criteria();
+        criteria.addCriteria("trashed", trashed);
+        // setInitialCriteria(criteria);
+        setImplicitCriteria(criteria);
+//        getDataSource().fetchData(criteria);
+//        getDataSource().filterData(criteria);
+
+        // getDataSource()
+//        markForRedraw();
+//        setImplicitCriteria(criteria);
+//        invalidateCache();
     }
 
     private void trashSelectedPics() {
+//        removeSelectedData();
         // TODO: record the action to undo
         List<Long> ids = new ArrayList<>();
         Record[] selection = getSelection();
@@ -62,11 +92,12 @@ public class PicsGrid extends TileGrid {
             ids.add(r.getAttributeAsLong("id"));
             SC.logWarn("Trash selected:" + r.getAttribute("id"));
         }
-        RPCRequest switchTrashRequest = Utils.makeRPCRequest("/pics/switchTrash", "ids", ids);
+        RPCRequest switchTrashRequest = ClientUtils.makeRPCRequest("/pics/switchTrash", "ids", ids);
         RPCManager.sendRequest(switchTrashRequest, (rpcResponse, o, rpcRequest) -> {
             SC.logWarn("Trashed."); // to reload.
-            fetchData(criteria);
-            markForRedraw();
+            // fetchData();
+            // markForRedraw();
+            // invalidateCache();
         });
     }
 

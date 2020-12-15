@@ -17,9 +17,11 @@ public class DataSourceResponse {
     int endRow;
     int totalRows;
     List data;
+    NutMap customData;
 
     public static NutMap wrapData(List data) {
-        DataSourceResponse resp = new DataSourceResponse(0, 0, data.size(), data.size(), data);
+        DataSourceResponse resp = new DataSourceResponse(0, 0, data.size(), data.size(), data,
+                new NutMap());
         return resp.wrapResult();
     }
 

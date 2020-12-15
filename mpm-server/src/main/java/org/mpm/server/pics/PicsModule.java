@@ -44,8 +44,8 @@ public class PicsModule {
     String qqlbsToken;
     String bucket;
 
-    public int count() {
-        return dao.count(EntityPhoto.class);
+    public int count(boolean trashed) {
+        return dao.count(EntityPhoto.class, Cnd.where("trashed", "=", trashed));
     }
 
     public List<EntityPhoto> query(int startRow, int endRow, boolean trashed) {

@@ -18,7 +18,7 @@ import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.tree.TreeGrid;
 import com.smartgwt.client.widgets.tree.TreeNode;
 import java.util.Map;
-import org.mpm.client.util.Utils;
+import org.mpm.client.util.ClientUtils;
 
 public class ImportPhotoButton extends ToolStripButton {
 
@@ -33,7 +33,8 @@ public class ImportPhotoButton extends ToolStripButton {
             dialog.setIsModal(true);
 
             TreeGrid grid = new TreeGrid();
-            RestDataSource dataSource = Utils.createDataSource("fileSystem", "/fileSystem/fetch");
+            RestDataSource dataSource = ClientUtils
+                    .createDataSource("fileSystem", "/fileSystem/fetch");
             DataSourceField pathField = new DataSourceField("path", FieldType.TEXT);
             pathField.setPrimaryKey(true);
             dataSource.addField(pathField);
@@ -76,7 +77,8 @@ public class ImportPhotoButton extends ToolStripButton {
 
                 String path = selected1.getAttribute("path");
                 Offline.put("Selected.Folder", path);
-                RPCRequest req = Utils.makeRPCRequest("/fileSystem/importImages", "folder", path);
+                RPCRequest req = ClientUtils
+                        .makeRPCRequest("/fileSystem/importImages", "folder", path);
 
                 RPCManager.sendRequest(req, (rpcResponse, o, rpcRequest) -> {
                     String taskId = rpcResponse.getDataAsString();
@@ -108,11 +110,11 @@ public class ImportPhotoButton extends ToolStripButton {
         new Timer() {
             @Override
             public void run() {
-                RPCRequest req = Utils
+                RPCRequest req = ClientUtils
                         .makeRPCRequest("/fileSystem/importProgress", "taskId", taskId);
                 RPCManager.sendRequest(req, (rpcResponse, o, rpcRequest) -> {
 
-                    Map result = Utils.getResponseAsMap(rpcResponse);
+                    Map result = ClientUtils.getResponseAsMap(rpcResponse);
                     // rpcResponse.getDataAsMap();
                     Object count = result.get("count");
                     Object total = result.get("total");
