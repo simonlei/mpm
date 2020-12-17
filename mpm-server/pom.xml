@@ -76,6 +76,36 @@
             <groupId>com.drewnoakes</groupId>
             <version>2.14.0</version>
         </dependency>
+
+        <dependency>
+            <artifactId>junit-jupiter-api</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <scope>test</scope>
+            <version>5.7.0</version>
+        </dependency>
+        <dependency>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <scope>test</scope>
+            <version>5.7.0</version>
+        </dependency>
+        <dependency>
+            <artifactId>junit-jupiter-params</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <artifactId>junit-jupiter-migrationsupport</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <artifactId>nutzboot-starter-test</artifactId>
+            <groupId>org.nutz</groupId>
+            <scope>test</scope>
+            <version>${nutzboot.version}</version>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>

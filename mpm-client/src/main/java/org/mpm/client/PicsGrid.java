@@ -5,6 +5,7 @@ import com.smartgwt.client.bean.BeanFactory;
 import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.data.RestDataSource;
+import com.smartgwt.client.data.fields.DataSourceSequenceField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.rpc.RPCManager;
 import com.smartgwt.client.rpc.RPCRequest;
@@ -31,13 +32,20 @@ public class PicsGrid extends TileGrid {
         Page.registerKey("D", new PageKeyHandler() {
             @Override
             public void execute(String s) {
-                trashSelectedPics();
+                removeSelectedData();
+
+                // trashSelectedPics();
             }
         });
 
         GWT.create(ImageCellMetaFactory.class);
         RestDataSource dataSource = ClientUtils.createDataSource("pics", "/pics/fetch");
+        dataSource.setRemoveDataURL("/pics/remove");
+        DataSourceSequenceField id = new DataSourceSequenceField("id");
+        id.setPrimaryKey(true);
+        dataSource.addField(id);
         dataSource.addField(new DataSourceTextField("name"));
+        SC.logWarn("Primary key" + dataSource.getPrimaryKeyFieldName());
         setDataSource(dataSource);
         addDataArrivedHandler(dataArrivedEvent -> {
             PhotoManagerEntryPoint.eventBus
@@ -84,7 +92,7 @@ public class PicsGrid extends TileGrid {
     }
 
     private void trashSelectedPics() {
-//        removeSelectedData();
+        removeSelectedData();
         // TODO: record the action to undo
         List<Long> ids = new ArrayList<>();
         Record[] selection = getSelection();

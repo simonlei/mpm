@@ -1,6 +1,7 @@
 package org.mpm.server.metas;
 
 import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,12 +17,15 @@ public class DataSourceResponse {
     int startRow;
     int endRow;
     int totalRows;
-    List data;
-    NutMap customData;
+    Object data;
 
     public static NutMap wrapData(List data) {
-        DataSourceResponse resp = new DataSourceResponse(0, 0, data.size(), data.size(), data,
-                new NutMap());
+        DataSourceResponse resp = new DataSourceResponse(0, 0, data.size(), data.size(), data);
+        return resp.wrapResult();
+    }
+
+    public static NutMap wrapData(Map data) {
+        DataSourceResponse resp = new DataSourceResponse(0, 0, 1, 1, data);
         return resp.wrapResult();
     }
 
