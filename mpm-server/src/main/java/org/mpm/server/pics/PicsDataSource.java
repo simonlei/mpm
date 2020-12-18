@@ -3,6 +3,7 @@ package org.mpm.server.pics;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.metas.DataSourceResponse;
+import org.mpm.server.metas.ModifyResponse;
 import org.nutz.dao.Dao;
 import org.nutz.dao.Sqls;
 import org.nutz.dao.sql.Sql;
@@ -50,31 +52,49 @@ public class PicsDataSource {
         return resp.wrapResult();
     }
 
+    public List<NutMap> switchTrash(List ids) {
+        log.info("to trash " + ids);
+        Sql sql = Sqls.create("update t_photos set trashed = !trashed where id in (@ids)");
+        sql.setParam("ids", ids);
+        dao.execute(sql);
+        List<NutMap> result = new ArrayList<>();
+        for (Object o : ids) {
+            result.add(Lang.map("id", o));
+        }
+        return result;
+    }
+
+
     @AdaptBy(type = WhaleAdaptor.class)
     @At("/pics/remove")
     @Ok("json")
-    public NutMap removePics(@Param("..") Reader reader, HttpServletRequest request)
+    public Object removePics(@Param("..") Reader reader, HttpServletRequest request)
             throws UnsupportedEncodingException {
         String oldValues = request.getParameter("_oldValues");
         String req = Streams.readAndClose(reader);
         if (oldValues == null) { // 删除单条记录
             Integer v = getOldId(req);
-            log.info("old value:" + v + " and id: " + v);
-            Sql sql = Sqls.create("update t_photos set trashed = !trashed where id in (@ids)");
-            sql.setParam("ids", Lang.list(v));
-            dao.execute(sql);
 
-            return DataSourceResponse.wrapData(Lang.list(Lang.map("id", v)));
+            return ModifyResponse.makeResponse("remove", switchTrash(Lang.list(v)).get(0));
+
+            // Lang.list(Lang.map("id", v)));
         } else { // 多条
-
+            log.info("req:" + req);
+            List list = (List) Mapl.cell(Json.fromJson(req), "transaction.operations");
+            List<Integer> ids = new ArrayList<>();
+            for (Object o : list) {
+                ids.add((Integer) Mapl.cell(o, "id"));
+            }
+            log.info("ids:" + ids);
+            List<NutMap> data = switchTrash(ids);
+            List<NutMap> result = new ArrayList<>();
+            for (NutMap d : data) {
+                result.add(ModifyResponse.makeResponse("remove", d));
+            }
+            // return DataSourceResponse.wrapData(data);
+            // return Lang.map("result", result);
+            return result;
         }
-        // log.info("req " + Dumps.obj(req));
-        log.info("request: " + request);
-        log.info("oldvalues: " + oldValues);
-
-        //log.info("old values:" + oldValues);
-        log.info("req:" + req);
-        return Lang.map("1", 2);
     }
 
     public Integer getOldId(String req) throws UnsupportedEncodingException {

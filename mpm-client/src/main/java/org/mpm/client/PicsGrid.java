@@ -45,7 +45,6 @@ public class PicsGrid extends TileGrid {
         id.setPrimaryKey(true);
         dataSource.addField(id);
         dataSource.addField(new DataSourceTextField("name"));
-        SC.logWarn("Primary key" + dataSource.getPrimaryKeyFieldName());
         setDataSource(dataSource);
         addDataArrivedHandler(dataArrivedEvent -> {
             PhotoManagerEntryPoint.eventBus
