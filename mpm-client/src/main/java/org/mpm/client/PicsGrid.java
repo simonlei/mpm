@@ -32,9 +32,12 @@ public class PicsGrid extends TileGrid {
         Page.registerKey("D", new PageKeyHandler() {
             @Override
             public void execute(String s) {
+                int count = getSelection().length;
                 removeSelectedData();
-
-                // trashSelectedPics();
+                if (count > 0) {
+                    PhotoManagerEntryPoint.eventBus
+                            .fireEvent(new PicsChangeEvent(getResultSet().getLength() - count));
+                }
             }
         });
 

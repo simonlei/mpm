@@ -20,7 +20,8 @@ public class ModifyResponse {
 
     public static NutMap makeResponse(String operationType, Map data) {
         return Lang.map("response",
-                ModifyResponse.builder().operationType(operationType).data(data).build());
+                ModifyResponse.builder().operationType(operationType).isDSResponse(true).data(data)
+                        .affectedRows(1).build());
     }
 
 }
