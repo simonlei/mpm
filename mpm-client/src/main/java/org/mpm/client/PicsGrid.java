@@ -14,6 +14,8 @@ import com.smartgwt.client.util.Page;
 import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.tile.TileGrid;
+import com.smartgwt.client.widgets.tile.events.RecordDoubleClickEvent;
+import com.smartgwt.client.widgets.tile.events.RecordDoubleClickHandler;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,14 @@ public class PicsGrid extends TileGrid {
                     PhotoManagerEntryPoint.eventBus
                             .fireEvent(new PicsChangeEvent(getResultSet().getLength() - count));
                 }
+            }
+        });
+        addRecordDoubleClickHandler(new RecordDoubleClickHandler() {
+            @Override
+            public void onRecordDoubleClick(RecordDoubleClickEvent recordDoubleClickEvent) {
+
+                SC.logWarn("double" + recordDoubleClickEvent.getRecord());
+
             }
         });
 

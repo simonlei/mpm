@@ -52,7 +52,7 @@ public class PicsDataSource {
         return resp.wrapResult();
     }
 
-    public List<NutMap> switchTrash(List ids) {
+    private List<NutMap> switchTrash(List ids) {
         log.info("to trash " + ids);
         Sql sql = Sqls.create("update t_photos set trashed = !trashed where id in (@ids)");
         sql.setParam("ids", ids);
