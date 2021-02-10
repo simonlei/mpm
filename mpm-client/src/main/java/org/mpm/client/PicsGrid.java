@@ -26,6 +26,7 @@ public class PicsGrid extends TileGrid {
 
     private static PicsGrid instance;
     private boolean trashed = false;
+    private SinglePhotoDialog singlePhotoDialog = new SinglePhotoDialog();
 
     public PicsGrid() {
         super();
@@ -47,7 +48,7 @@ public class PicsGrid extends TileGrid {
             public void onRecordDoubleClick(RecordDoubleClickEvent recordDoubleClickEvent) {
 
                 SC.logWarn("double" + recordDoubleClickEvent.getRecord());
-
+                singlePhotoDialog.setPhoto(recordDoubleClickEvent.getRecord());
             }
         });
 
