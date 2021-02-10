@@ -9,13 +9,12 @@ import com.smartgwt.client.data.fields.DataSourceSequenceField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.rpc.RPCManager;
 import com.smartgwt.client.rpc.RPCRequest;
+import com.smartgwt.client.types.KeyNames;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.util.Page;
 import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.tile.TileGrid;
-import com.smartgwt.client.widgets.tile.events.RecordDoubleClickEvent;
-import com.smartgwt.client.widgets.tile.events.RecordDoubleClickHandler;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,13 +42,14 @@ public class PicsGrid extends TileGrid {
                 }
             }
         });
-        addRecordDoubleClickHandler(new RecordDoubleClickHandler() {
+        Page.registerKey(KeyNames.ENTER, new PageKeyHandler() {
             @Override
-            public void onRecordDoubleClick(RecordDoubleClickEvent recordDoubleClickEvent) {
-
-                SC.logWarn("double" + recordDoubleClickEvent.getRecord());
-                singlePhotoDialog.setPhoto(recordDoubleClickEvent.getRecord());
+            public void execute(String s) {
+                singlePhotoDialog.setPhoto(instance.getSelectedRecord());
             }
+        });
+        addRecordDoubleClickHandler(recordDoubleClickEvent -> {
+            singlePhotoDialog.setPhoto(recordDoubleClickEvent.getRecord());
         });
 
         GWT.create(ImageCellMetaFactory.class);
