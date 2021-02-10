@@ -23,20 +23,21 @@ import org.mpm.client.util.ClientUtils;
 
 public class PicsGrid extends TileGrid {
 
-    private static PicsGrid instance;
+    static PicsGrid instance;
     private boolean trashed = false;
-    private SinglePhotoDialog singlePhotoDialog = new SinglePhotoDialog();
+    private SinglePhotoDialog singlePhotoDialog;
 
     public PicsGrid() {
         super();
         instance = this;
-
+        singlePhotoDialog = new SinglePhotoDialog(this);
         Page.registerKey("D", new PageKeyHandler() {
             @Override
             public void execute(String s) {
                 int count = getSelection().length;
-                removeSelectedData();
                 if (count > 0) {
+                    SC.logWarn("Delete tile...");
+                    removeSelectedData();
                     PhotoManagerEntryPoint.eventBus
                             .fireEvent(new PicsChangeEvent(getResultSet().getLength() - count));
                 }
