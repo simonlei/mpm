@@ -43,14 +43,9 @@ public class SinglePhotoDialog extends Canvas {
                     } else { // get next one
                         nextRecord = picsGrid.getTileRecord(picsGrid.getTile(index + 1));
                     }
-                    SC.logWarn("1");
                     picsGrid.deselectAllRecords();
-                    SC.logWarn("2");
                     picsGrid.removeData(record);
-                    // picsGrid.removeSelectedData();
-                    SC.logWarn("3");
                     PhotoManagerEntryPoint.eventBus.fireEvent(new PicsChangeEvent(totalCount - 1));
-                    SC.logWarn("4");
                     if (nextRecord == null) {
                         record = null;
                         hide();
