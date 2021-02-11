@@ -34,8 +34,9 @@ public class SinglePhotoDialog extends Canvas {
                 if (record != null) {
                     int index = picsGrid.getRecordIndex(record);
                     SC.logWarn("Delete current..." + index);
-                    // TODO: if it's last one, get prev one.
-                    Record nextRecord = picsGrid.getTileRecord(picsGrid.getTile(index + 1));
+                    Record nextRecord = index == picsGrid.getResultSet().getLength() - 1
+                            ? picsGrid.getTileRecord(picsGrid.getTile(index - 1))
+                            : picsGrid.getTileRecord(picsGrid.getTile(index + 1));
                     picsGrid.selectRecord(record);
                     picsGrid.removeSelectedData();
                     PhotoManagerEntryPoint.eventBus.fireEvent(
