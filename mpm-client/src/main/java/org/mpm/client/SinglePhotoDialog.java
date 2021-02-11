@@ -34,14 +34,24 @@ public class SinglePhotoDialog extends Canvas {
                 if (record != null) {
                     int index = picsGrid.getRecordIndex(record);
                     SC.logWarn("Delete current..." + index);
-                    Record nextRecord = index == picsGrid.getResultSet().getLength() - 1
-                            ? picsGrid.getTileRecord(picsGrid.getTile(index - 1))
-                            : picsGrid.getTileRecord(picsGrid.getTile(index + 1));
+                    int totalCount = picsGrid.getResultSet().getLength();
+                    Record nextRecord;
+                    if (totalCount == 1) { // only one, exit
+                        nextRecord = null;
+                    } else if (index == totalCount - 1) { // last one, get prev one
+                        nextRecord = picsGrid.getTileRecord(picsGrid.getTile(index - 1));
+                    } else { // get next one
+                        nextRecord = picsGrid.getTileRecord(picsGrid.getTile(index + 1));
+                    }
                     picsGrid.selectRecord(record);
                     picsGrid.removeSelectedData();
-                    PhotoManagerEntryPoint.eventBus.fireEvent(
-                            new PicsChangeEvent(picsGrid.getResultSet().getLength() - 1));
-                    setPhoto(nextRecord);
+                    PhotoManagerEntryPoint.eventBus.fireEvent(new PicsChangeEvent(totalCount - 1));
+                    if (nextRecord == null) {
+                        record = null;
+                        hide();
+                    } else {
+                        setPhoto(nextRecord);
+                    }
                 }
             }
         });
@@ -68,7 +78,6 @@ public class SinglePhotoDialog extends Canvas {
         );
 
         pane.redraw("xx");
-        // pane.();
         show();
     }
 }
