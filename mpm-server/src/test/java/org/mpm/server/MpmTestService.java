@@ -18,8 +18,8 @@ public class MpmTestService {
 
     @Test
     public void testNothing() throws UnsupportedEncodingException {
-        Integer value = picsDataSource.getOldId(
-                "_operationType=remove&_textMatchStyle=exact&_oldValues=%7B%22id%22%3A96%2C%22name%22%3A%22p7ijpt2vjujdlocmk8ie3bkgqb%22%7D&_componentId=isc_PicsGrid_0&_dataSource=pics&isc_metaDataPrefix=_&isc_dataFormat=json");
+        Integer value = picsDataSource.getOldId("id=96&name=xxx");
+        // "_operationType=remove&_textMatchStyle=exact&_oldValues=%7B%22id%22%3A96%2C%22name%22%3A%22p7ijpt2vjujdlocmk8ie3bkgqb%22%7D&_componentId=isc_PicsGrid_0&_dataSource=pics&isc_metaDataPrefix=_&isc_dataFormat=json");
         assertEquals(value, 96);
 
     }

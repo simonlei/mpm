@@ -2,7 +2,6 @@ package org.mpm.server.pics;
 
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -76,8 +75,6 @@ public class PicsDataSource {
             Integer v = getOldId(req);
 
             return ModifyResponse.makeResponse("remove", switchTrash(Lang.list(v)).get(0));
-
-            // Lang.list(Lang.map("id", v)));
         } else { // 多条
             log.info("req:" + req);
             List list = (List) Mapl.cell(Json.fromJson(req), "transaction.operations");
@@ -91,18 +88,15 @@ public class PicsDataSource {
             for (NutMap d : data) {
                 result.add(ModifyResponse.makeResponse("remove", d));
             }
-            // return DataSourceResponse.wrapData(data);
-            // return Lang.map("result", result);
             return result;
         }
     }
 
     public Integer getOldId(String req) throws UnsupportedEncodingException {
-        Pattern pattern = Regex.getPattern("_oldValues=([^\\&]*)\\&");
+        Pattern pattern = Regex.getPattern("id=([^\\&]*)\\&");
         Matcher matcher = pattern.matcher(req);
         matcher.find();
-        String v = URLDecoder.decode(matcher.group(1), "UTF-8");
-        return (Integer) Mapl.cell(Json.fromJson(v), "id");
+        return Integer.parseInt(matcher.group(1));
     }
 
     @AdaptBy(type = WhaleAdaptor.class)

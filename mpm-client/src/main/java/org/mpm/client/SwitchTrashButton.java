@@ -1,10 +1,8 @@
 package org.mpm.client;
 
 import com.google.gwt.user.client.Window;
-import com.smartgwt.client.rpc.RPCCallback;
 import com.smartgwt.client.rpc.RPCManager;
 import com.smartgwt.client.rpc.RPCRequest;
-import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
@@ -26,14 +24,10 @@ public class SwitchTrashButton extends ToolStripButton implements PicsChangeHand
         // set text for self.
         RPCRequest countRequest = ClientUtils
                 .makeRPCRequest("/pics/count", "trashed", !PicsGrid.isTrashed());
-        RPCManager.sendRequest(countRequest, new RPCCallback() {
-            @Override
-            public void execute(RPCResponse rpcResponse, Object o, RPCRequest rpcRequest) {
-                setTitle(PicsGrid.isTrashed()
+        RPCManager.sendRequest(countRequest,
+                (rpcResponse, o, rpcRequest) -> setTitle(PicsGrid.isTrashed()
                         ? "正常照片(" + rpcResponse.getDataAsString() + ")"
-                        : "回收站(" + rpcResponse.getDataAsString() + ")");
-            }
-        });
+                        : "回收站(" + rpcResponse.getDataAsString() + ")"));
     }
 
     @Override
