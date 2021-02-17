@@ -11,7 +11,6 @@ import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.layout.SplitPane;
 import com.smartgwt.client.widgets.layout.VLayout;
-import com.smartgwt.client.widgets.tile.TileGrid;
 import java.util.Map;
 import org.mpm.client.util.ClientUtils;
 
@@ -58,16 +57,9 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
         contentPane.setHeight100();
         contentPane.setShowListToolStrip(false);
 
-        contentPane.setNavigationPane(createLeftPanel());
-        contentPane.setListPane(createPicsGrid());
+        contentPane.setNavigationPane(new LeftTabSet());
+        contentPane.setListPane(new PicsGrid());
         return contentPane;
     }
 
-    private TileGrid createPicsGrid() {
-        return new PicsGrid();
-    }
-
-    private VLayout createLeftPanel() {
-        return new VLayout();
-    }
 }

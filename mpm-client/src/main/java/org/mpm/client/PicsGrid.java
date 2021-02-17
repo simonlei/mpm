@@ -15,8 +15,6 @@ import com.smartgwt.client.util.Page;
 import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.tile.TileGrid;
-import com.smartgwt.client.widgets.tile.events.SelectionChangedEvent;
-import com.smartgwt.client.widgets.tile.events.SelectionChangedHandler;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,13 +80,6 @@ public class PicsGrid extends TileGrid {
         Criteria criteria = new Criteria();
         criteria.addCriteria("trashed", false);
         dataSource.fetchData(criteria);
-        addSelectionChangedHandler(new SelectionChangedHandler() {
-            @Override
-            public void onSelectionChanged(SelectionChangedEvent selectionChangedEvent) {
-                SC.logWarn("Selected " + selectionChangedEvent.getRecord() + " state "
-                        + selectionChangedEvent.getState());
-            }
-        });
     }
 
     public static boolean isTrashed() {

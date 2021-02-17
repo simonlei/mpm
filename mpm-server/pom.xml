@@ -69,6 +69,11 @@
             <artifactId>nutzboot-starter-nutz-dao</artifactId>
             <groupId>org.nutz</groupId>
         </dependency>
+        <dependency>
+            <artifactId>isomorphic-core-rpc</artifactId>
+            <groupId>com.isomorphic.smartgwt.eval</groupId>
+            <version>${smartgwt.version}</version>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.drewnoakes/metadata-extractor -->
         <dependency>
