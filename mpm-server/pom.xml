@@ -74,6 +74,16 @@
             <groupId>com.isomorphic.smartgwt.eval</groupId>
             <version>${smartgwt.version}</version>
         </dependency>
+        <dependency>
+            <artifactId>isomorphic-tools</artifactId>
+            <groupId>com.isomorphic.smartgwt.eval</groupId>
+            <version>${smartgwt.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>isomorphic-sql</artifactId>
+            <groupId>com.isomorphic.smartgwt.eval</groupId>
+            <version>${smartgwt.version}</version>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.drewnoakes/metadata-extractor -->
         <dependency>
