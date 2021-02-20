@@ -1,0 +1,9 @@
+<DataSource
+    ID="meta"
+    serverType="custom">
+    <serverObject className="org.mpm.server.metas.ConfigDataSource"/>
+    <fields>
+        <field name="key"      type="text"       primaryKey="true"/>
+        <field name="value"    type="text"     title="Value"       required="true"/>
+    </fields>
+</DataSource>

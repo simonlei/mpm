@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="3.0" 
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    version="3.0"
     xmlns="http://java.sun.com/xml/ns/javaee"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"> 
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
     <context-param>
         <param-name>nutzboot.mainClass</param-name>
@@ -33,18 +33,19 @@
         
         Also see:
         https://www.smartclient.com/smartgwt/javadoc/com/smartgwt/client/docs/ServerInit.html
-    <listener>
-         <listener-class>com.isomorphic.base.InitListener</listener-class>
-    </listener>
     -->
+    <listener>
+        <listener-class>com.isomorphic.base.InitListener</listener-class>
+    </listener>
     <listener>
         <listener-class>org.nutz.boot.starter.servlet3.NbServletContextListener</listener-class>
     </listener>
 
-    
+
     <!-- 
         Handles built-in SmartClient datasource operations, as documented at
         https://www.smartclient.com/smartgwtee-latest/server/javadoc/com/isomorphic/servlet/IDACall.html
+    -->
     <servlet>
         <servlet-name>IDACall</servlet-name>
         <servlet-class>com.isomorphic.servlet.IDACall</servlet-class>
@@ -53,7 +54,6 @@
         <servlet-name>IDACall</servlet-name>
         <url-pattern>/app/sc/IDACall/*</url-pattern>
     </servlet-mapping>
-    -->
 
     <!-- 
         The RESTHandler servlet is like IDACall, but for REST requests, and is documented at
@@ -81,6 +81,7 @@
       
       For further discussion, please refer to
       https://www.smartclient.com/smartgwtee-latest/server/javadoc/com/isomorphic/servlet/DataSourceLoader.html
+    -->
     <servlet>
         <servlet-name>DataSourceLoader</servlet-name>
         <servlet-class>com.isomorphic.servlet.DataSourceLoader</servlet-class>
@@ -89,7 +90,6 @@
         <servlet-name>DataSourceLoader</servlet-name>
         <url-pattern>/app/sc/DataSourceLoader</url-pattern>
     </servlet-mapping>
-    -->
 
     <!-- 
         The projectLoader servlet returns a JavaScript fragment that when executed loads a named project and caches all 

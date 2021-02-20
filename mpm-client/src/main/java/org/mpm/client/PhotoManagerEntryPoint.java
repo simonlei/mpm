@@ -4,15 +4,13 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.smartgwt.client.core.KeyIdentifier;
-import com.smartgwt.client.rpc.RPCManager;
-import com.smartgwt.client.rpc.RPCRequest;
+import com.smartgwt.client.rpc.DMI;
 import com.smartgwt.client.util.Page;
 import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.layout.SplitPane;
 import com.smartgwt.client.widgets.layout.VLayout;
 import java.util.Map;
-import org.mpm.client.util.ClientUtils;
 
 public final class PhotoManagerEntryPoint implements EntryPoint {
 
@@ -44,11 +42,12 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
     }
 
     private void loadServerConfig() {
-        RPCRequest req = ClientUtils.makeRPCRequest("/meta/config");
-        RPCManager.sendRequest(req, (rpcResponse, o, rpcRequest) -> {
-            Map map = ClientUtils.getResponseAsMap(rpcResponse);
-            ServerConfig.thumbUrl = (String) map.get("thumbUrl");
-        });
+        DMI.call("mpm", "org.mpm.server.metas.ConfigDataSource", "fetchConfig",
+                (rpcResponse, o, rpcRequest) -> {
+                    Map map = rpcResponse.getDataAsMap();
+                    SC.logWarn("thumbUrl is :" + map.get("thumbUrl"));
+                    ServerConfig.thumbUrl = (String) map.get("thumbUrl");
+                }, null);
     }
 
     private SplitPane createContentPane() {

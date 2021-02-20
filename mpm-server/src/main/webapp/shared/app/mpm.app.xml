@@ -1,0 +1,9 @@
+<Application>
+    <rpcBindings>
+        <ServerObject ID="meta" className="org.mpm.server.metas.ConfigDataSource">
+            <visibleMethods>
+                <method name="fetchConfig"/>
+            </visibleMethods>
+        </ServerObject>
+    </rpcBindings>
+</Application>
