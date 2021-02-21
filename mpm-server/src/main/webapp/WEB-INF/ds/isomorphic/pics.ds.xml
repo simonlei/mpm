@@ -5,9 +5,14 @@
     autoDeriveSchema="true"
     serverType="sql">
     <fields>
-        <field name="id" primaryKey="true">
-
-        </field>
-        <field name="trashed" sqlStorageStrategy="number"></field>
+        <field name="id" primaryKey="true"/>
+        <field name="trashed" sqlStorageStrategy="number"/>
     </fields>
+    <operationBindings>
+        <operationBinding operationType="remove">
+            <customSQL>
+                UPDATE $defaultTableClause SET trashed = !trashed WHERE $defaultWhereClause
+            </customSQL>
+        </operationBinding>
+    </operationBindings>
 </DataSource>
