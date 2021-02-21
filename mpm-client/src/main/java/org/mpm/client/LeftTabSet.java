@@ -1,5 +1,6 @@
 package org.mpm.client;
 
+import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.tab.Tab;
@@ -11,10 +12,14 @@ import com.smartgwt.client.widgets.tree.events.NodeClickHandler;
 
 public class LeftTabSet extends TabSet {
 
+    public static LeftTabSet instance;
+    private TreeGrid datesGrid;
+
     public LeftTabSet() {
         super();
         addDatesTab();
         addFilesTab();
+        instance = this;
     }
 
     private void addFilesTab() {
@@ -24,7 +29,7 @@ public class LeftTabSet extends TabSet {
 
     private void addDatesTab() {
         Tab datesTab = new Tab("按时间查看");
-        TreeGrid datesGrid = new TreeGrid();
+        datesGrid = new TreeGrid();
         datesGrid.setShowHeader(false);
         DataSource dataSource = DataSource.get("datesTree");
 
@@ -42,6 +47,14 @@ public class LeftTabSet extends TabSet {
         });
         datesTab.setPane(datesGrid);
         addTab(datesTab);
-        datesGrid.fetchData();
+        Criteria criteria = new Criteria();
+        criteria.addCriteria("trashed", false);
+        datesGrid.fetchData(criteria);
+    }
+
+    public void reloadData(boolean trashed) {
+        Criteria criteria = new Criteria();
+        criteria.addCriteria("trashed", trashed);
+        datesGrid.fetchData(criteria);
     }
 }

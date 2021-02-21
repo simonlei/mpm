@@ -64,6 +64,7 @@ public class PicsGrid extends TileGrid {
         DataSource dataSource = DataSource.get("pics");
         dataSource.addDataChangedHandler(dataChangedEvent -> {
             fireChangeEvent(getResultSet().getLength());
+            LeftTabSet.instance.reloadData(trashed);
         });
         setDataSource(dataSource);
         setAutoFetchData(true);
@@ -92,6 +93,7 @@ public class PicsGrid extends TileGrid {
     public static void setTrashed(boolean trashed) {
         instance.trashed = trashed;
         instance.reloadData();
+        LeftTabSet.instance.reloadData(trashed);
     }
 
     private void fireChangeEvent(int length) {

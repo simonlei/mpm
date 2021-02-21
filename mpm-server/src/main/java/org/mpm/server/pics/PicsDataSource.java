@@ -117,7 +117,7 @@ public class PicsDataSource {
     public DSResponse fetch(DSRequest req) {
         DSResponse resp = new DSResponse();
         Dao dao = MyUtils.getByType(Dao.class);
-        List<Record> photoDates = getPhotoDates(dao);
+        List<Record> photoDates = getPhotoDates(dao, (Boolean) req.getCriteria().get("trashed"));
         NutMap lastYear = null;
         List<NutMap> result = new ArrayList<>();
         for (Record r : photoDates) {
@@ -135,12 +135,13 @@ public class PicsDataSource {
         return resp;
     }
 
-    private List<Record> getPhotoDates(Dao dao) {
+    private List<Record> getPhotoDates(Dao dao, Boolean trashed) {
         // photo dates...include years and months
         Sql sql = Sqls
                 .create("select concat(y,'年') theYear, concat(m,'月') theMonth, photoCount"
                         + " from ( select year(takenDate) y, month(takenDate) m, count(*) photoCount "
-                        + "        from t_photos group by y, m order by y desc, m desc) x");
+                        + "        from t_photos where trashed = " + trashed
+                        + " group by y, m order by y desc, m desc) x");
         sql.setCallback(Sqls.callback.records());
         dao.execute(sql);
         return sql.getList(Record.class);
