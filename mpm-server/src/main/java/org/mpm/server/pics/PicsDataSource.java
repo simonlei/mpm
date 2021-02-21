@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.metas.DataSourceResponse;
 import org.mpm.server.metas.ModifyResponse;
+import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Dao;
 import org.nutz.dao.Sqls;
 import org.nutz.dao.sql.Sql;
@@ -106,4 +107,7 @@ public class PicsDataSource {
         return picsModule.count(trashed);
     }
 
+    public int count(boolean trashed) {
+        return MyUtils.getByType(PicsModule.class).count(trashed);
+    }
 }

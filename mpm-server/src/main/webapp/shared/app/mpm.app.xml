@@ -5,5 +5,10 @@
                 <method name="fetchConfig"/>
             </visibleMethods>
         </ServerObject>
+        <ServerObject ID="pics" className="org.mpm.server.pics.PicsDataSource">
+            <visibleMethods>
+                <method name="count"/>
+            </visibleMethods>
+        </ServerObject>
     </rpcBindings>
 </Application>

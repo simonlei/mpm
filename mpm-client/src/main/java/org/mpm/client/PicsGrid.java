@@ -56,11 +56,11 @@ public class PicsGrid extends TileGrid {
         dataSource.addField(new DataSourceTextField("name"));
         setDataSource(dataSource);
 
+         */
         addDataArrivedHandler(dataArrivedEvent -> {
             PhotoManagerEntryPoint.eventBus
                     .fireEvent(new PicsChangeEvent(getResultSet().getLength()));
         });
-         */
         setAutoFetchTextMatchStyle(TextMatchStyle.EXACT);
         DataSource dataSource = DataSource.get("pics");
         setDataSource(dataSource);

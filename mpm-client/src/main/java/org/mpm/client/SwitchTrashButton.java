@@ -1,14 +1,12 @@
 package org.mpm.client;
 
 import com.google.gwt.user.client.Window;
-import com.smartgwt.client.rpc.RPCManager;
-import com.smartgwt.client.rpc.RPCRequest;
+import com.smartgwt.client.rpc.DMI;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import org.mpm.client.events.PicsChangeEvent;
 import org.mpm.client.events.PicsChangeHandler;
-import org.mpm.client.util.ClientUtils;
 
 public class SwitchTrashButton extends ToolStripButton implements PicsChangeHandler, ClickHandler {
 
@@ -22,12 +20,12 @@ public class SwitchTrashButton extends ToolStripButton implements PicsChangeHand
     public void onDataChanged(PicsChangeEvent evt) {
         Window.setTitle("My photos manager - " + evt.getCount() + " 张");
         // set text for self.
-        RPCRequest countRequest = ClientUtils
-                .makeRPCRequest("/pics/count", "trashed", !PicsGrid.isTrashed());
-        RPCManager.sendRequest(countRequest,
-                (rpcResponse, o, rpcRequest) -> setTitle(PicsGrid.isTrashed()
-                        ? "正常照片(" + rpcResponse.getDataAsString() + ")"
-                        : "回收站(" + rpcResponse.getDataAsString() + ")"));
+        DMI.call("mpm", "org.mpm.server.pics.PicsDataSource", "count",
+                (rpcResponse, o, rpcRequest) ->
+                        setTitle(PicsGrid.isTrashed()
+                                ? "正常照片(" + rpcResponse.getDataAsString() + ")"
+                                : "回收站(" + rpcResponse.getDataAsString() + ")")
+                , new Object[]{!PicsGrid.isTrashed()});
     }
 
     @Override
