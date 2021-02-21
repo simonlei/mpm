@@ -1,10 +1,13 @@
 package org.mpm.client;
 
-import com.smartgwt.client.data.RestDataSource;
+import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
 import com.smartgwt.client.widgets.tree.TreeGrid;
-import org.mpm.client.util.ClientUtils;
+import com.smartgwt.client.widgets.tree.TreeGridField;
+import com.smartgwt.client.widgets.tree.events.NodeClickEvent;
+import com.smartgwt.client.widgets.tree.events.NodeClickHandler;
 
 public class LeftTabSet extends TabSet {
 
@@ -23,11 +26,22 @@ public class LeftTabSet extends TabSet {
         Tab datesTab = new Tab("按时间查看");
         TreeGrid datesGrid = new TreeGrid();
         datesGrid.setShowHeader(false);
-        RestDataSource dataSource = ClientUtils.createDataSource("datesTree", "/pics/datesTree");
+        DataSource dataSource = DataSource.get("datesTree");
 
+        datesGrid.setFields(new TreeGridField("title"));
         datesGrid.setDataSource(dataSource);
-        // datesGrid.setAutoFetchData(true);
+        datesGrid.setAutoFetchData(false);
+        // datesGrid.setCanEdit(false);
+        datesGrid.setLoadDataOnDemand(false);
+        datesGrid.addNodeClickHandler(new NodeClickHandler() {
+            @Override
+            public void onNodeClick(NodeClickEvent nodeClickEvent) {
+
+                SC.logWarn("Click:" + nodeClickEvent.getNode().getTitle());
+            }
+        });
         datesTab.setPane(datesGrid);
         addTab(datesTab);
+        datesGrid.fetchData();
     }
 }

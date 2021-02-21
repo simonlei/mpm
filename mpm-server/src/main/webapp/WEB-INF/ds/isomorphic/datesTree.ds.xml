@@ -1,0 +1,11 @@
+<DataSource
+    ID="datesTree"
+    serverType="generic">
+    <fields>
+        <field name="title" type="text" primaryKey="true"/>
+        <field name="year" type="text" foreignKey="datesTree.title"/>
+        <field name="month" type="integer"/>
+        <field name="photoCount" type="integer"/>
+    </fields>
+    <serverObject lookStyle="new" className="org.mpm.server.pics.PicsDataSource"/>
+</DataSource>

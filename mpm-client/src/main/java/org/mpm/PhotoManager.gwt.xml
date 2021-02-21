@@ -6,7 +6,9 @@
     <!-- Import com.smartgwt.tools.SmartGwtTools (for the Developer Console) -->
     <inherits name="com.smartgwt.tools.SmartGwtTools"/>
 
-    <!-- Import standard modules -->
+    <!-- Import standard modules
+    <inherits name="com.smartgwt.debug.SmartGwtNoScriptDebug"/>
+    -->
     <inherits name="com.smartgwt.SmartGwtNoScript"/>
 
     <!--

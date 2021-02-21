@@ -10,7 +10,7 @@ public class ImageCell extends SimpleTile {
 
     public ImageCell() {
         super();
-        SC.logWarn("ImageCellllllll");
+        // SC.logWarn("ImageCellllllll");
         setOverflow(Overflow.HIDDEN);
         //setHeight(150);
         //setWidth(200);
