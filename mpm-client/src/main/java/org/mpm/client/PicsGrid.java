@@ -31,8 +31,7 @@ public class PicsGrid extends TileGrid {
                 if (!singlePhotoDialog.isShow() && count > 0) {
                     SC.logWarn("Delete tile...");
                     removeSelectedData();
-                    PhotoManagerEntryPoint.eventBus
-                            .fireEvent(new PicsChangeEvent(getResultSet().getLength() - count));
+                    // fireChangeEvent(getResultSet().getLength() - count);
                 }
             }
         });
@@ -58,11 +57,14 @@ public class PicsGrid extends TileGrid {
 
          */
         addDataArrivedHandler(dataArrivedEvent -> {
-            PhotoManagerEntryPoint.eventBus
-                    .fireEvent(new PicsChangeEvent(getResultSet().getLength()));
+            fireChangeEvent(getResultSet().getLength());
         });
+
         setAutoFetchTextMatchStyle(TextMatchStyle.EXACT);
         DataSource dataSource = DataSource.get("pics");
+        dataSource.addDataChangedHandler(dataChangedEvent -> {
+            fireChangeEvent(getResultSet().getLength());
+        });
         setDataSource(dataSource);
         setAutoFetchData(true);
         setTileWidth(200);
@@ -90,6 +92,10 @@ public class PicsGrid extends TileGrid {
     public static void setTrashed(boolean trashed) {
         instance.trashed = trashed;
         instance.reloadData();
+    }
+
+    private void fireChangeEvent(int length) {
+        PhotoManagerEntryPoint.eventBus.fireEvent(new PicsChangeEvent(length));
     }
 
     private void reloadData() {

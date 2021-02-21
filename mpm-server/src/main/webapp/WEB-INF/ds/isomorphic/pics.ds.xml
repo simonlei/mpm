@@ -9,7 +9,10 @@
         <field name="trashed" sqlStorageStrategy="number"/>
     </fields>
     <operationBindings>
-        <operationBinding operationType="remove">
+        <operationBinding operationType="remove" canSyncCache="true">
+            <!--
+            <ServerObject className="org.mpm.server.pics.PicsDataSource" methodName="swapPics"/>
+            -->
             <customSQL>
                 UPDATE $defaultTableClause SET trashed = !trashed WHERE $defaultWhereClause
             </customSQL>
