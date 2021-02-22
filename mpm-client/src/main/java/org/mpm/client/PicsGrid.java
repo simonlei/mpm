@@ -67,7 +67,7 @@ public class PicsGrid extends TileGrid {
             LeftTabSet.instance.reloadData(trashed);
         });
         setDataSource(dataSource);
-        setAutoFetchData(true);
+        // setAutoFetchData(true);
         setTileWidth(200);
         setTileHeight(150);
 
@@ -82,7 +82,8 @@ public class PicsGrid extends TileGrid {
 
         Criteria criteria = new Criteria();
         criteria.addCriteria("trashed", false);
-        setInitialCriteria(criteria);
+        // setInitialCriteria(criteria);
+        fetchData(criteria);
         // dataSource.fetchData(criteria);
     }
 
@@ -96,15 +97,19 @@ public class PicsGrid extends TileGrid {
         LeftTabSet.instance.reloadData(trashed);
     }
 
-    private void fireChangeEvent(int length) {
-        PhotoManagerEntryPoint.eventBus.fireEvent(new PicsChangeEvent(length));
-    }
-
-    private void reloadData() {
+    static void reloadData() {
+        Criteria criteria = new Criteria();
+        criteria.addCriteria("trashed", instance.trashed);
+        criteria.addCriteria(LeftTabSet.getCriteria());
+        instance.invalidateCache();
+        instance.fetchData(criteria);
+        /*
         Criteria criteria = new Criteria();
         criteria.addCriteria("trashed", trashed);
         // setInitialCriteria(criteria);
         fetchData(criteria);
+
+         */
         // setImplicitCriteria(criteria);
 //        getDataSource().fetchData(criteria);
 //        getDataSource().filterData(criteria);
@@ -113,6 +118,10 @@ public class PicsGrid extends TileGrid {
 //        markForRedraw();
 //        setImplicitCriteria(criteria);
 //        invalidateCache();
+    }
+
+    private void fireChangeEvent(int length) {
+        PhotoManagerEntryPoint.eventBus.fireEvent(new PicsChangeEvent(length));
     }
 
     public interface ImageCellMetaFactory extends BeanFactory.MetaFactory {

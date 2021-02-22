@@ -7,6 +7,8 @@
     <fields>
         <field name="id" primaryKey="true"/>
         <field name="trashed" sqlStorageStrategy="number"/>
+        <field name="theYear" customSelectExpression="year(takenDate)"/>
+        <field name="theMonth" customSelectExpression="month(takenDate)"/>
     </fields>
     <operationBindings>
         <operationBinding operationType="remove" canSyncCache="true">
