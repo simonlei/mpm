@@ -11,6 +11,9 @@
         <field name="theMonth" customSelectExpression="month(takenDate)"/>
     </fields>
     <operationBindings>
+        <operationBinding operationType="fetch">
+            <whereClause>$defaultWhereClause #if ($criteria.fileId) AND id in ( select f.photoId from t_files f where f.parentId=$criteria.fileId) #end</whereClause>
+        </operationBinding>
         <operationBinding operationType="remove" canSyncCache="true">
             <!--
             <ServerObject className="org.mpm.server.pics.PicsDataSource" methodName="swapPics"/>

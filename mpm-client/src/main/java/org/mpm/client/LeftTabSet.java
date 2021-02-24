@@ -48,6 +48,13 @@ public class LeftTabSet extends TabSet {
         filesGrid.setFields(new TreeGridField("name"));
         filesGrid.setDataSource(dataSource);
         filesGrid.setAutoFetchData(false);
+        filesGrid.addNodeClickHandler(nodeClickEvent -> {
+            TreeNode node = nodeClickEvent.getNode();
+            criteria = new Criteria();
+            criteria.addCriteria("fileId", node.getAttributeAsInt("id"));
+            PicsGrid.reloadData();
+            SC.logWarn("reload fileid");
+        });
         filesTab.setPane(filesGrid);
         addTab(filesTab);
     }
