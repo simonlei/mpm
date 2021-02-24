@@ -8,19 +8,26 @@ import com.smartgwt.client.widgets.tab.TabSet;
 import com.smartgwt.client.widgets.tree.TreeGrid;
 import com.smartgwt.client.widgets.tree.TreeGridField;
 import com.smartgwt.client.widgets.tree.TreeNode;
-import com.smartgwt.client.widgets.tree.events.NodeClickEvent;
-import com.smartgwt.client.widgets.tree.events.NodeClickHandler;
 
 public class LeftTabSet extends TabSet {
 
     public static LeftTabSet instance;
     private TreeGrid datesGrid;
+    private TreeGrid filesGrid;
     private Criteria criteria;
+    private int selectedTab = 0;
 
     public LeftTabSet() {
         super();
         addDatesTab();
         addFilesTab();
+        addTabSelectedHandler(tabSelectedEvent -> {
+            int oldSelected = selectedTab;
+            selectedTab = tabSelectedEvent.getTabNum();
+            if (oldSelected != selectedTab) {
+                reloadData();
+            }
+        });
         instance = this;
     }
 
@@ -34,6 +41,14 @@ public class LeftTabSet extends TabSet {
 
     private void addFilesTab() {
         Tab filesTab = new Tab("按图片库查看");
+        filesGrid = new TreeGrid();
+        filesGrid.setShowHeader(false);
+        filesGrid.setShowRoot(false);
+        DataSource dataSource = DataSource.get("filesTree");
+        filesGrid.setFields(new TreeGridField("name"));
+        filesGrid.setDataSource(dataSource);
+        filesGrid.setAutoFetchData(false);
+        filesTab.setPane(filesGrid);
         addTab(filesTab);
     }
 
@@ -46,23 +61,19 @@ public class LeftTabSet extends TabSet {
         datesGrid.setFields(new TreeGridField("title"));
         datesGrid.setDataSource(dataSource);
         datesGrid.setAutoFetchData(false);
-        // datesGrid.setCanEdit(false);
         datesGrid.setLoadDataOnDemand(false);
-        datesGrid.addNodeClickHandler(new NodeClickHandler() {
-            @Override
-            public void onNodeClick(NodeClickEvent nodeClickEvent) {
-                TreeNode node = nodeClickEvent.getNode();
-                String title = node.getTitle();
-                criteria = new Criteria();
-                if (title.contains("年")) {
-                    criteria.addCriteria("theYear", title.substring(0, title.length() - 1));
-                } else {
-                    criteria.addCriteria("theYear", node.getAttributeAsInt("year"));
-                    criteria.addCriteria("theMonth", node.getAttributeAsInt("month"));
-                }
-                PicsGrid.reloadData();
-                SC.logWarn("Click:" + node.getTitle());
+        datesGrid.addNodeClickHandler(nodeClickEvent -> {
+            TreeNode node = nodeClickEvent.getNode();
+            String title = node.getTitle();
+            criteria = new Criteria();
+            if (title.contains("年")) {
+                criteria.addCriteria("theYear", title.substring(0, title.length() - 1));
+            } else {
+                criteria.addCriteria("theYear", node.getAttributeAsInt("year"));
+                criteria.addCriteria("theMonth", node.getAttributeAsInt("month"));
             }
+            PicsGrid.reloadData();
+            SC.logWarn("Click:" + node.getTitle());
         });
         datesTab.setPane(datesGrid);
         addTab(datesTab);
@@ -71,12 +82,13 @@ public class LeftTabSet extends TabSet {
         datesGrid.fetchData(criteria);
     }
 
-    public void reloadData(boolean trashed) {
+    public void reloadData() {
         Criteria criteria = new Criteria();
-        criteria.addCriteria("trashed", trashed);
-        TreeNode selectedRecord = datesGrid.getSelectedRecord();
-        datesGrid.invalidateCache();
-        datesGrid.fetchData(criteria);
-        datesGrid.selectRecord(selectedRecord);
+        criteria.addCriteria("trashed", PicsGrid.isTrashed());
+        TreeGrid grid = selectedTab == 0 ? datesGrid : filesGrid;
+        TreeNode selectedRecord = grid.getSelectedRecord();
+        grid.invalidateCache();
+        grid.fetchData(criteria);
+        grid.selectRecord(selectedRecord);
     }
 }

@@ -1,0 +1,16 @@
+<DataSource
+    ID="filesTree"
+    schemaBean="org.mpm.server.entity.EntityFile"
+    tableName="t_files"
+    autoDeriveSchema="true"
+    serverType="sql">
+    <fields>
+        <field name="id" primaryKey="true"/>
+        <field name="parentId" type="integer" foreignKey="filesTree.id"/>
+    </fields>
+    <operationBindings>
+        <operationBinding operationType="fetch">
+            <criteria fieldName="isFolder" value="1"/>
+        </operationBinding>
+    </operationBindings>
+</DataSource>
