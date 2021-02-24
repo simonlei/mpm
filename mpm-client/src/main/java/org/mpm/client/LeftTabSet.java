@@ -96,6 +96,8 @@ public class LeftTabSet extends TabSet {
         TreeNode selectedRecord = grid.getSelectedRecord();
         grid.invalidateCache();
         grid.fetchData(criteria);
-        grid.selectRecord(selectedRecord);
+        if (selectedRecord != null) {
+            grid.selectRecord(selectedRecord);
+        }
     }
 }
