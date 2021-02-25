@@ -3,9 +3,12 @@ package org.mpm.client;
 import com.google.gwt.core.client.GWT;
 import com.smartgwt.client.bean.BeanFactory;
 import com.smartgwt.client.data.Criteria;
+import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.data.SortSpecifier;
 import com.smartgwt.client.types.KeyNames;
 import com.smartgwt.client.types.SelectionStyle;
+import com.smartgwt.client.types.SortDirection;
 import com.smartgwt.client.types.TextMatchStyle;
 import com.smartgwt.client.util.Page;
 import com.smartgwt.client.util.PageKeyHandler;
@@ -46,16 +49,6 @@ public class PicsGrid extends TileGrid {
         });
 
         GWT.create(ImageCellMetaFactory.class);
-        /*
-        RestDataSource dataSource = ClientUtils.createDataSource("pics", "/pics/fetch");
-        dataSource.setRemoveDataURL("/pics/remove");
-        DataSourceSequenceField id = new DataSourceSequenceField("id");
-        id.setPrimaryKey(true);
-        dataSource.addField(id);
-        dataSource.addField(new DataSourceTextField("name"));
-        setDataSource(dataSource);
-
-         */
         addDataArrivedHandler(dataArrivedEvent -> {
             fireChangeEvent(getResultSet().getLength());
         });
@@ -67,7 +60,7 @@ public class PicsGrid extends TileGrid {
             LeftTabSet.instance.reloadData();
         });
         setDataSource(dataSource);
-        // setAutoFetchData(true);
+        setAutoFetchData(false);
         setTileWidth(200);
         setTileHeight(150);
 
@@ -82,9 +75,8 @@ public class PicsGrid extends TileGrid {
 
         Criteria criteria = new Criteria();
         criteria.addCriteria("trashed", false);
-        // setInitialCriteria(criteria);
-        fetchData(criteria);
-        // dataSource.fetchData(criteria);
+        // 默认按id逆序
+        fetchData(criteria, null, makeDSRequest("id", false));
     }
 
     public static boolean isTrashed() {
@@ -101,23 +93,19 @@ public class PicsGrid extends TileGrid {
         Criteria criteria = new Criteria();
         criteria.addCriteria("trashed", instance.trashed);
         criteria.addCriteria(LeftTabSet.getCriteria());
-        instance.invalidateCache();
+
+        instance.getResultSet().setSort(HeaderPanel.getSortSpecifier());
+        instance.getResultSet().setCriteria(criteria);
+
+        // SC.logWarn("Will fetch: " + instance.getResultSet().willFetchData(criteria));
         instance.fetchData(criteria);
-        /*
-        Criteria criteria = new Criteria();
-        criteria.addCriteria("trashed", trashed);
-        // setInitialCriteria(criteria);
-        fetchData(criteria);
+    }
 
-         */
-        // setImplicitCriteria(criteria);
-//        getDataSource().fetchData(criteria);
-//        getDataSource().filterData(criteria);
-
-        // getDataSource()
-//        markForRedraw();
-//        setImplicitCriteria(criteria);
-//        invalidateCache();
+    private static DSRequest makeDSRequest(String field, boolean asc) {
+        DSRequest dsRequest = new DSRequest();
+        dsRequest.setSortBy(new SortSpecifier[]{new SortSpecifier(field,
+                asc ? SortDirection.ASCENDING : SortDirection.DESCENDING)});
+        return dsRequest;
     }
 
     private void fireChangeEvent(int length) {
