@@ -34,7 +34,7 @@ public class HeaderPanel extends HLayout {
     class OrderSelectItem extends SelectItem {
 
         public OrderSelectItem() {
-            setWidth(100);
+            setWidth(90);
             setShowTitle(false);
             LinkedHashMap<SortSpecifier, String> valueMap = new LinkedHashMap<>();
             selectedValue = new SortSpecifier("id", SortDirection.DESCENDING);

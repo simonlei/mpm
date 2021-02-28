@@ -22,6 +22,7 @@ public class PicsGrid extends TileGrid {
     static PicsGrid instance;
     private boolean trashed = false;
     private SinglePhotoDialog singlePhotoDialog;
+    private int lastTxnNum = 0;
 
     public PicsGrid() {
         super();
@@ -56,8 +57,12 @@ public class PicsGrid extends TileGrid {
         setAutoFetchTextMatchStyle(TextMatchStyle.EXACT);
         DataSource dataSource = DataSource.get("pics");
         dataSource.addDataChangedHandler(dataChangedEvent -> {
-            fireChangeEvent(getResultSet().getLength());
-            LeftTabSet.instance.reloadData();
+            int txnNum = dataChangedEvent.getDsResponse().getTransactionNum();
+            if (txnNum > lastTxnNum) {
+                lastTxnNum = txnNum;
+                fireChangeEvent(getResultSet().getLength());
+                LeftTabSet.instance.reloadData();
+            }
         });
         setDataSource(dataSource);
         setAutoFetchData(false);
