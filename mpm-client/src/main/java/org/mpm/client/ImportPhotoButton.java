@@ -1,11 +1,9 @@
 package org.mpm.client;
 
 import com.google.gwt.user.client.Timer;
-import com.smartgwt.client.data.DataSourceField;
-import com.smartgwt.client.data.RestDataSource;
+import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.rpc.RPCManager;
 import com.smartgwt.client.rpc.RPCRequest;
-import com.smartgwt.client.types.FieldType;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.util.Offline;
 import com.smartgwt.client.util.SC;
@@ -33,16 +31,7 @@ public class ImportPhotoButton extends ToolStripButton {
             dialog.setIsModal(true);
 
             TreeGrid grid = new TreeGrid();
-            RestDataSource dataSource = ClientUtils
-                    .createDataSource("fileSystem", "/fileSystem/fetch");
-            DataSourceField pathField = new DataSourceField("path", FieldType.TEXT);
-            pathField.setPrimaryKey(true);
-            dataSource.addField(pathField);
-            dataSource.addField(new DataSourceField("name", FieldType.TEXT));
-            DataSourceField parentField = new DataSourceField("parent", FieldType.TEXT);
-            parentField.setForeignKey("path");
-            dataSource.addField(parentField);
-
+            DataSource dataSource = DataSource.get("fileSystem");
             grid.setDataSource(dataSource);
 
             grid.setAutoFetchData(true);
@@ -50,7 +39,7 @@ public class ImportPhotoButton extends ToolStripButton {
             grid.setWidth100();
             grid.setHeight100();
             grid.setSelectionType(SelectionStyle.SINGLE);
-            grid.setShowRoot(true);
+            grid.setShowRoot(false);
             String selected = (String) Offline.get("Selected.Folder");
             SC.logWarn("Selected " + selected);
             grid.addDataArrivedHandler((DataArrivedHandler) dataArrivedEvent -> {
