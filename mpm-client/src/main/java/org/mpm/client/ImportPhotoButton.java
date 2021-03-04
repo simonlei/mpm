@@ -11,6 +11,7 @@ import com.smartgwt.client.widgets.Button;
 import com.smartgwt.client.widgets.Dialog;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Progressbar;
+import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.grid.events.DataArrivedHandler;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.tree.TreeGrid;
@@ -19,6 +20,9 @@ import java.util.Map;
 import org.mpm.client.util.ClientUtils;
 
 public class ImportPhotoButton extends ToolStripButton {
+
+    private String selected = null;
+    private boolean autoSelect = true;
 
     public ImportPhotoButton() {
         super("导入图片");
@@ -40,9 +44,10 @@ public class ImportPhotoButton extends ToolStripButton {
             grid.setHeight100();
             grid.setSelectionType(SelectionStyle.SINGLE);
             grid.setShowRoot(false);
-            String selected = (String) Offline.get("Selected.Folder");
+            selected = (String) Offline.get("Selected.Folder");
             SC.logWarn("Selected " + selected);
             grid.addDataArrivedHandler((DataArrivedHandler) dataArrivedEvent -> {
+                autoSelect = true;
                 TreeNode[] allNodes = grid.getTree().getAllNodes();
 
                 for (int i = allNodes.length - 1; i >= 0; i--) {
@@ -54,6 +59,15 @@ public class ImportPhotoButton extends ToolStripButton {
                         SC.logWarn("Select " + i);
                         grid.openFolder(allNodes[i]);
                         break;
+                    }
+                }
+                autoSelect = false;
+            });
+            grid.addSelectionChangedHandler(selectionEvent -> {
+                if (!autoSelect) {
+                    ListGridRecord selectedRecord = selectionEvent.getSelectedRecord();
+                    if (selectedRecord != null) {
+                        selected = selectedRecord.getAttribute("path");
                     }
                 }
             });
@@ -85,15 +99,19 @@ public class ImportPhotoButton extends ToolStripButton {
         dialog.setTitle("正在导入照片...");
         dialog.setIsModal(true);
         dialog.setShowCloseButton(false);
+        dialog.setHeight(300);
+        dialog.setWidth(500);
 
         Label progressLabel = new Label();
+        progressLabel.setWidth100();
         progressLabel.setContents("正在导入");
         dialog.addItem(progressLabel);
 
         Progressbar progressbar = new Progressbar();
         progressbar.setPercentDone(0);
+        progressbar.setLength(400);
+
         dialog.addItem(progressbar);
-        dialog.setHeight(300);
         dialog.draw();
 
         new Timer() {
