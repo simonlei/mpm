@@ -5,16 +5,29 @@ import com.smartgwt.client.types.KeyNames;
 import com.smartgwt.client.util.Page;
 import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.HTMLPane;
 import com.smartgwt.client.widgets.Window;
+import com.smartgwt.client.widgets.events.HoverEvent;
+import com.smartgwt.client.widgets.events.HoverHandler;
 import org.mpm.client.events.PicsChangeEvent;
 
 
 public class SinglePhotoDialog extends Window {
 
-    HTMLPane pane = new HTMLPane();
     PicsGrid picsGrid;
     Record record;
+    HTMLPane pane = new HTMLPane() {
+        @Override
+        public Canvas getHoverComponent() {
+            SC.logWarn("Hover " + record);
+            if (record != null) {
+                return ImageCell.getHoverComponent(record);
+            } else {
+                return null;
+            }
+        }
+    };
     private boolean show = false;
 
     public SinglePhotoDialog(PicsGrid picsGrid) {
@@ -29,6 +42,20 @@ public class SinglePhotoDialog extends Window {
         pane.setHeight100();
         this.setAlwaysShowScrollbars(false);
         pane.setAlwaysShowScrollbars(false);
+        pane.addHoverHandler(new HoverHandler() {
+            @Override
+            public void onHover(HoverEvent hoverEvent) {
+                SC.logWarn("11111");
+            }
+        });
+        addHoverHandler(new HoverHandler() {
+            @Override
+            public void onHover(HoverEvent hoverEvent) {
+                SC.logWarn("2222");
+            }
+        });
+        pane.setShowHoverComponents(true);
+        setShowHoverComponents(true);
 
         addChild(pane);
         hide();
@@ -78,6 +105,12 @@ public class SinglePhotoDialog extends Window {
         });
     }
 
+    @Override
+    public Canvas getHoverComponent() {
+        SC.logWarn("Hover.... " + record);
+        return super.getHoverComponent();
+    }
+
     private void showPhoto(int inc) {
         int nextIndex = picsGrid.getRecordIndex(record) + inc;
         if (nextIndex < 0) { // first one, do nothing.
@@ -116,6 +149,7 @@ public class SinglePhotoDialog extends Window {
         pane.setContents("<img src=\""
                 + ServerConfig.thumbUrl + record.getAttribute("name")
                 + "\" style=\"object-fit:contain;display:block;padding:5px\""
+                + " title=\"" + ImageCell.getHoverString(record, false) + "\""
                 + " width=" + (pane.getWidth() - 10)
                 + " height=" + (pane.getHeight() - 10)
                 + "/>"

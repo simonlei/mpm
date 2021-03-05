@@ -3,12 +3,12 @@ package org.mpm.client;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.smartgwt.client.bean.BeanFactory;
+import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.tile.SimpleTile;
-import com.smartgwt.client.widgets.tile.TileRecord;
 import java.util.Date;
 
 @BeanFactory.Generate
@@ -26,25 +26,27 @@ public class ImageCell extends SimpleTile {
         });
     }
 
-    @Override
-    public Canvas getHoverComponent() {
-        TileRecord record = getRecord();
+    static Label getHoverComponent(Record record) {
+        return new Label(getHoverString(record, true));
+    }
 
+    static String getHoverString(Record record, boolean useBr) {
         String address = record.getAttribute("address");
         DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd");
         Date takenDate = record.getAttributeAsDate("takenDate");
         Long size = record.getAttributeAsLong("size");
+        String breakStr = useBr ? "<br/>" : "\n";
 
-        String hover = "大小：" + sizeFormat(size) + "<br/>"
-                + "宽度：" + record.getAttribute("width") + "px<br/>"
-                + "高度：" + record.getAttribute("height") + "px<br/>"
+        String hover = "大小：" + sizeFormat(size) + breakStr
+                + "宽度：" + record.getAttribute("width") + "px" + breakStr
+                + "高度：" + record.getAttribute("height") + "px" + breakStr
                 // + "描述：" + record.getAttribute("description") + "<br/>"
-                + (address == null ? "" : "地址：" + address + "<br/>")
+                + (address == null ? "" : "地址：" + address + breakStr)
                 + "时间：" + format.format(takenDate);
-        return new Label(hover);
+        return hover;
     }
 
-    private String sizeFormat(Long size) {
+    private static String sizeFormat(Long size) {
         NumberFormat format = NumberFormat.getFormat("0.00");
 
         if (size >= 1024 * 1024) {
@@ -58,5 +60,10 @@ public class ImageCell extends SimpleTile {
                 return size + "B";
             }
         }
+    }
+
+    @Override
+    public Canvas getHoverComponent() {
+        return getHoverComponent(getRecord());
     }
 }
