@@ -70,6 +70,8 @@ public class LeftTabSet extends TabSet {
         Tab datesTab = new Tab("按时间查看");
         datesGrid = new TreeGrid();
         datesGrid.setShowHeader(false);
+        datesGrid.setShowRoot(true);
+        datesGrid.setTreeRootValue("全部");
         DataSource dataSource = DataSource.get("datesTree");
 
         datesGrid.setFields(new TreeGridField("title"));
@@ -82,7 +84,7 @@ public class LeftTabSet extends TabSet {
             criteria = new Criteria();
             if (title.contains("年")) {
                 criteria.addCriteria("theYear", getYearOrMonth(title));
-            } else {
+            } else if (title.contains("月")) {
                 SC.logWarn("Y:" + getYearOrMonth(node.getAttribute("year")) + " M:"
                         + getYearOrMonth(node.getAttribute("month")));
                 criteria.addCriteria("theYear", getYearOrMonth(node.getAttribute("year")));

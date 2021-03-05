@@ -138,6 +138,7 @@ public class ImportPhotoButton extends ToolStripButton {
                     } else {
                         dialog.close();
                         SC.say("导入完成，共导入 " + picsCount + " 张图片");
+                        LeftTabSet.instance.reloadData();
                     }
 
                 });
