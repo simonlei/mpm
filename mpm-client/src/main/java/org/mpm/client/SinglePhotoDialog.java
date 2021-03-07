@@ -77,6 +77,12 @@ public class SinglePhotoDialog extends Window {
                 showPhoto(1);
             }
         });
+        Page.registerKey(KeyNames.SPACE, new PageKeyHandler() {
+            @Override
+            public void execute(String s) {
+                showPhoto(1);
+            }
+        });
         Page.registerKey("I", new PageKeyHandler() {
             @Override
             public void execute(String s) {
@@ -155,13 +161,14 @@ public class SinglePhotoDialog extends Window {
     }
 
     private void setPaneContent() {
-        pane.setContents("<img src=\""
-                + ServerConfig.thumbUrl + record.getAttribute("name")
-                + "\" style=\"object-fit:contain;display:block;padding:5px\""
-                + " title=\"" + ImageCell.getHoverString(record, false) + "\""
-                + (scale ? " width=" + (pane.getWidth() - 10) : "")
-                + (scale ? " height=" + (pane.getHeight() - 10) : "")
-                + "/>"
+        pane.setContents(
+                (scale
+                        ? "<style> img {  max-width: 100%;max-height: 100%; display: block;margin: 0 auto;}</style> "
+                        : "<style> img {  display: block;margin: 0 auto;}</style> ")
+                        + "<img src=\""
+                        + ServerConfig.thumbUrl + record.getAttribute("name") + "\""
+                        + " title=\"" + ImageCell.getHoverString(record, false) + "\""
+                        + "/>"
         );
     }
 }
