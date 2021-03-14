@@ -8,6 +8,7 @@
         <ServerObject ID="pics" className="org.mpm.server.pics.PicsDataSource">
             <visibleMethods>
                 <method name="count"/>
+                <method name="emptyTrash"/>
             </visibleMethods>
         </ServerObject>
         <ServerObject ID="pics" className="org.mpm.server.pics.ProgressDataSource">

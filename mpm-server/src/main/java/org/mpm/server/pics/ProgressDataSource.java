@@ -1,6 +1,7 @@
 package org.mpm.server.pics;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.filesystem.ProgressInterface;
@@ -11,8 +12,10 @@ public class ProgressDataSource {
 
     private static Map<String, ProgressInterface> tasks = new ConcurrentHashMap<>();
 
-    public static void addTask(String taskId, ProgressInterface importer) {
+    public static String addTask(ProgressInterface importer) {
+        String taskId = UUID.randomUUID().toString();
         tasks.put(taskId, importer);
+        return taskId;
     }
 
     public NutMap getProgress(String taskId) {

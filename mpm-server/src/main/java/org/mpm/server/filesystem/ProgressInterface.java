@@ -6,7 +6,22 @@ public interface ProgressInterface {
 
     NutMap getProgress();
 
-    boolean isFinished();
+    default boolean isFinished() {
+        return calcProgress() >= 100;
+    }
 
     NutMap getFinishedProgress();
+
+    int getTotal();
+
+    int getCount();
+
+    default int calcProgress() {
+        if (getTotal() == -1) {
+            return -1; // not start
+        } else if (getTotal() == 0) {
+            return 100;
+        }
+        return getCount() * 100 / getTotal();
+    }
 }

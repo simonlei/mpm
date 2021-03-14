@@ -1,6 +1,5 @@
 package org.mpm.server.filesystem;
 
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.pics.ProgressDataSource;
 import org.nutz.ioc.loader.annotation.IocBean;
@@ -32,10 +31,9 @@ public class PhotoImporterDataSource {
     }
 
     private String importImages(String folder) {
-        String taskId = UUID.randomUUID().toString();
         PhotoImporter importer = Mvcs.getIoc().get(PhotoImporter.class);
-        ProgressDataSource.addTask(taskId, importer);
-        new Thread(importer.init(taskId, folder)).start();
+        String taskId = ProgressDataSource.addTask(importer);
+        new Thread(importer.init(folder)).start();
         return taskId;
     }
 }

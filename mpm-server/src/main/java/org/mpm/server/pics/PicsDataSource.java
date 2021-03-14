@@ -26,6 +26,7 @@ import org.nutz.lang.Streams;
 import org.nutz.lang.util.NutMap;
 import org.nutz.lang.util.Regex;
 import org.nutz.mapl.Mapl;
+import org.nutz.mvc.Mvcs;
 import org.nutz.mvc.adaptor.WhaleAdaptor;
 import org.nutz.mvc.annotation.AdaptBy;
 import org.nutz.mvc.annotation.At;
@@ -147,4 +148,10 @@ public class PicsDataSource {
         return sql.getList(Record.class);
     }
 
+    public String emptyTrash() {
+        TrashEmptyTask emptyTask = Mvcs.getIoc().get(TrashEmptyTask.class);
+        String taskId = ProgressDataSource.addTask(emptyTask);
+        new Thread(emptyTask).start();
+        return taskId;
+    }
 }

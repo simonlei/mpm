@@ -20,7 +20,6 @@ import org.nutz.lang.util.NutMap;
 @Slf4j
 public class PhotoImporter implements Runnable, ProgressInterface {
 
-    String taskId;
     String folder;
     int total = -1;
     int count = 0;
@@ -110,18 +109,14 @@ public class PhotoImporter implements Runnable, ProgressInterface {
         return totalFiles;
     }
 
-    public PhotoImporter init(String taskId, String folder) {
-        this.taskId = taskId;
+    public PhotoImporter init(String folder) {
         this.folder = folder;
         return this;
     }
 
-    public boolean isFinished() {
-        return calcProgress() >= 100;
-    }
-
     @Override
     public NutMap getFinishedProgress() {
+        // ProgressInterface.this.getFinishedProgress().setv();
         return Lang.map("count", 100).setv("total", 100)
                 .setv("picsCount", 100).setv("progress", 100);
     }
@@ -131,12 +126,13 @@ public class PhotoImporter implements Runnable, ProgressInterface {
                 .setv("picsCount", picsCount).setv("progress", calcProgress());
     }
 
-    private int calcProgress() {
-        if (total == -1) {
-            return -1; // not start
-        } else if (total == 0) {
-            return 100;
-        }
-        return count * 100 / total;
+    @Override
+    public int getTotal() {
+        return total;
+    }
+
+    @Override
+    public int getCount() {
+        return count;
     }
 }

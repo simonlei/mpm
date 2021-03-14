@@ -30,7 +30,6 @@ public class ProgressDialog extends Dialog {
         progressbar.setLength(400);
 
         addItem(progressbar);
-        // draw();
 
         new Timer() {
             @Override
