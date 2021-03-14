@@ -40,7 +40,7 @@ public class ImageCell extends SimpleTile {
         String hover = "大小：" + sizeFormat(size) + breakStr
                 + "宽度：" + record.getAttribute("width") + "px" + breakStr
                 + "高度：" + record.getAttribute("height") + "px" + breakStr
-                // + "描述：" + record.getAttribute("description") + "<br/>"
+                + "描述：" + record.getAttribute("description") + breakStr
                 + (address == null ? "" : "地址：" + address + breakStr)
                 + "时间：" + format.format(takenDate);
         return hover;

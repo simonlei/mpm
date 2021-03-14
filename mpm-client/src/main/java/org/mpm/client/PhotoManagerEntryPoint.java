@@ -11,6 +11,7 @@ import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.layout.SplitPane;
 import com.smartgwt.client.widgets.layout.VLayout;
 import java.util.Map;
+import org.mpm.client.header.HeaderPanel;
 
 public final class PhotoManagerEntryPoint implements EntryPoint {
 

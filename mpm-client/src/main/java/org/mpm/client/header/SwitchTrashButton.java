@@ -1,10 +1,12 @@
-package org.mpm.client;
+package org.mpm.client.header;
 
 import com.google.gwt.user.client.Window;
 import com.smartgwt.client.rpc.DMI;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
+import org.mpm.client.PhotoManagerEntryPoint;
+import org.mpm.client.PicsGrid;
 import org.mpm.client.events.PicsChangeEvent;
 import org.mpm.client.events.PicsChangeHandler;
 

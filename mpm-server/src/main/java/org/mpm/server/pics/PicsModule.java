@@ -15,6 +15,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityBlockPicture;
+import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.util.ExplicitPager;
 import org.nutz.dao.Cnd;
@@ -28,6 +29,7 @@ import org.nutz.json.Json;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.mapl.Mapl;
+import org.nutz.trans.Trans;
 
 @IocBean(create = "init")
 @Slf4j
@@ -156,6 +158,24 @@ public class PicsModule {
         String result = response.getContent();
         log.info("qqlbs result:" + result);
         return (String) Mapl.cell(Json.fromJson(result), "result.address");
+    }
+
+    public void realDelete(EntityPhoto photo) {
+        final EntityBlockPicture blackList = new EntityBlockPicture();
+        blackList.setMd5(photo.getMd5());
+        blackList.setSha1(photo.getSha1());
+        blackList.setSize(photo.getSize());
+
+        Trans.exec(() -> {
+            try {
+                cosClient.deleteObject(bucket, photo.getName());
+                dao.insert(blackList);
+                dao.delete(photo);
+                dao.clear(EntityFile.class, Cnd.where("photoId", "=", photo.getId()));
+            } catch (Throwable e) {
+                log.error("Can't real delete photo.", e);
+            }
+        });
     }
 
     public void init() {
