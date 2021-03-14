@@ -18,7 +18,7 @@ import org.nutz.lang.util.NutMap;
 
 @IocBean(singleton = false)
 @Slf4j
-public class PhotoImporter implements Runnable {
+public class PhotoImporter implements Runnable, ProgressInterface {
 
     String taskId;
     String folder;
@@ -118,6 +118,12 @@ public class PhotoImporter implements Runnable {
 
     public boolean isFinished() {
         return calcProgress() >= 100;
+    }
+
+    @Override
+    public NutMap getFinishedProgress() {
+        return Lang.map("count", 100).setv("total", 100)
+                .setv("picsCount", 100).setv("progress", 100);
     }
 
     public NutMap getProgress() {

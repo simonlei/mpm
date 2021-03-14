@@ -10,5 +10,10 @@
                 <method name="count"/>
             </visibleMethods>
         </ServerObject>
+        <ServerObject ID="pics" className="org.mpm.server.pics.ProgressDataSource">
+            <visibleMethods>
+                <method name="getProgress"/>
+            </visibleMethods>
+        </ServerObject>
     </rpcBindings>
 </Application>
