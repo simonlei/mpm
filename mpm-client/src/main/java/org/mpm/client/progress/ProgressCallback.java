@@ -1,4 +1,4 @@
-package org.mpm.client;
+package org.mpm.client.progress;
 
 public interface ProgressCallback {
 

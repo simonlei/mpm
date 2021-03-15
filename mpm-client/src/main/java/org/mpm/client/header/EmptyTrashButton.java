@@ -9,9 +9,9 @@ import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import org.mpm.client.LeftTabSet;
 import org.mpm.client.PhotoManagerEntryPoint;
 import org.mpm.client.PicsGrid;
-import org.mpm.client.ProgressDialog;
 import org.mpm.client.events.PicsChangeEvent;
 import org.mpm.client.events.PicsChangeHandler;
+import org.mpm.client.progress.ProgressDialog;
 
 class EmptyTrashButton extends ToolStripButton implements PicsChangeHandler, ClickHandler {
 

@@ -1,4 +1,4 @@
-package org.mpm.client;
+package org.mpm.client.progress;
 
 import com.google.gwt.user.client.Timer;
 import com.smartgwt.client.rpc.DMI;

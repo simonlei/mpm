@@ -15,7 +15,7 @@ import com.smartgwt.client.widgets.tree.TreeGrid;
 import com.smartgwt.client.widgets.tree.TreeNode;
 import org.mpm.client.LeftTabSet;
 import org.mpm.client.PicsGrid;
-import org.mpm.client.ProgressDialog;
+import org.mpm.client.progress.ProgressDialog;
 import org.mpm.client.util.ClientUtils;
 
 public class ImportPhotoButton extends ToolStripButton {
