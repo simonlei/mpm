@@ -3,26 +3,23 @@ package org.mpm.server.filesystem;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.pics.PicsModule;
+import org.mpm.server.progress.AbstractProgressTask;
 import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Dao;
 import org.nutz.ioc.loader.annotation.Inject;
 import org.nutz.ioc.loader.annotation.IocBean;
-import org.nutz.lang.Lang;
 import org.nutz.lang.util.NutMap;
 
 @IocBean(singleton = false)
 @Slf4j
-public class PhotoImporter implements Runnable, ProgressInterface {
+public class PhotoImporter extends AbstractProgressTask implements Runnable {
 
     String folder;
-    int total = -1;
-    int count = 0;
     int picsCount = 0;
 
     @Inject
@@ -33,7 +30,7 @@ public class PhotoImporter implements Runnable, ProgressInterface {
     @Override
     public void run() {
         File root = new File(folder);
-        total = collectFilesInPath(new File[]{root});
+        setTotal(collectFilesInPath(new File[]{root}));
         EntityFile rootObj = new EntityFile();
         rootObj.setName(root.getName());
         SimpleDateFormat formatter = new SimpleDateFormat("YYYY年MM月dd日");
@@ -45,18 +42,15 @@ public class PhotoImporter implements Runnable, ProgressInterface {
 
     private void scanFilesIn(File dir, EntityFile rootObj, EntityFile parentObj) {
         File[] subFiles = dir.listFiles();
-        Arrays.sort(subFiles, new Comparator<File>() {
-            @Override
-            public int compare(File o1, File o2) {
-                String n1 = o1.getName();
-                String n2 = o2.getName();
-                Long l1 = MyUtils.getPrefixLong(n1);
-                Long l2 = MyUtils.getPrefixLong(n2);
-                if ((l1.equals(-1l) && l2.equals(-1l)) || l1 - l2 == 0) {
-                    return n1.compareTo(n2); // Both don't have prefix number;
-                }
-                return l1.compareTo(l2);
+        Arrays.sort(subFiles, (o1, o2) -> {
+            String n1 = o1.getName();
+            String n2 = o2.getName();
+            Long l1 = MyUtils.getPrefixLong(n1);
+            Long l2 = MyUtils.getPrefixLong(n2);
+            if ((l1.equals(-1l) && l2.equals(-1l)) || l1 - l2 == 0) {
+                return n1.compareTo(n2); // Both don't have prefix number;
             }
+            return l1.compareTo(l2);
         });
         log.info("files after : " + subFiles.length);
         for (File f : subFiles) {
@@ -70,7 +64,7 @@ public class PhotoImporter implements Runnable, ProgressInterface {
                 scanFilesIn(f, rootObj, subObj);
             } else {
                 log.info("Scanning " + f.getAbsolutePath());
-                count++;
+                countInc();
                 try {
                     EntityPhoto saved = picsModule.saveFileInRepository(f, null);
                     if (saved != null) {
@@ -116,23 +110,10 @@ public class PhotoImporter implements Runnable, ProgressInterface {
 
     @Override
     public NutMap getFinishedProgress() {
-        // ProgressInterface.this.getFinishedProgress().setv();
-        return Lang.map("count", 100).setv("total", 100)
-                .setv("picsCount", 100).setv("progress", 100);
+        return super.getFinishedProgress().setv("picsCount", 100);
     }
 
     public NutMap getProgress() {
-        return Lang.map("count", count).setv("total", total)
-                .setv("picsCount", picsCount).setv("progress", calcProgress());
-    }
-
-    @Override
-    public int getTotal() {
-        return total;
-    }
-
-    @Override
-    public int getCount() {
-        return count;
+        return super.getProgress().setv("picsCount", picsCount);
     }
 }

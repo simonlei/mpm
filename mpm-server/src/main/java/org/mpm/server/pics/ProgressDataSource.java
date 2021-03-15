@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
-import org.mpm.server.filesystem.ProgressInterface;
+import org.mpm.server.progress.ProgressInterface;
 import org.nutz.lang.util.NutMap;
 
 @Slf4j

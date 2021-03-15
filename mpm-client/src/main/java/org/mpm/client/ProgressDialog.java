@@ -11,7 +11,8 @@ import java.util.Map;
 
 public class ProgressDialog extends Dialog {
 
-    public ProgressDialog(String title, String taskId, String progressTemplate,
+    public ProgressDialog(String title, String taskId,
+            ProgressCallback progressCallback, String progressTemplate,
             String finishTemplate) {
         super();
         setTitle(title);
@@ -56,7 +57,7 @@ public class ProgressDialog extends Dialog {
                             } else {
                                 close();
                                 SC.say(finishedStr);
-                                LeftTabSet.instance.reloadData();
+                                progressCallback.callback();
                             }
                         }, new Object[]{taskId});
             }

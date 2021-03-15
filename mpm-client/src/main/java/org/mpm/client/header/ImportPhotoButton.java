@@ -13,6 +13,8 @@ import com.smartgwt.client.widgets.grid.events.DataArrivedHandler;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import com.smartgwt.client.widgets.tree.TreeGrid;
 import com.smartgwt.client.widgets.tree.TreeNode;
+import org.mpm.client.LeftTabSet;
+import org.mpm.client.PicsGrid;
 import org.mpm.client.ProgressDialog;
 import org.mpm.client.util.ClientUtils;
 
@@ -83,8 +85,10 @@ public class ImportPhotoButton extends ToolStripButton {
                 RPCManager.sendRequest(req, (rpcResponse, o, rpcRequest) -> {
                     String taskId = rpcResponse.getDataAsString();
                     SC.logWarn("taskid: " + taskId);
-                    new ProgressDialog("正在导入照片...", taskId,
-                            "已扫描 $count$/$total$ 文件，其中照片数 $picsCount$",
+                    new ProgressDialog("正在导入照片...", taskId, () -> {
+                        LeftTabSet.instance.reloadData();
+                        PicsGrid.reloadData();
+                    }, "已扫描 $count$/$total$ 文件，其中照片数 $picsCount$",
                             "导入完成，共导入 $picsCount$ 张图片").show();
                 });
             });

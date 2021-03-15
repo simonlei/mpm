@@ -103,7 +103,8 @@ public class PicsGrid extends TileGrid {
         instance.getResultSet().setSort(HeaderPanel.getSortSpecifier());
         instance.getResultSet().setCriteria(criteria);
 
-        // SC.logWarn("Will fetch: " + instance.getResultSet().willFetchData(criteria));
+        SC.logWarn("Will fetch: " + instance.getResultSet().willFetchData(criteria));
+        instance.invalidateCache();
         instance.fetchData(criteria);
     }
 
