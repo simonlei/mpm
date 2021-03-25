@@ -9,17 +9,12 @@ var cos = new COS({
     xhr.open('GET', '/tmpCredential', true);
 
     xhr.onload = function (e) {
-      console.log("hello..............");
       var credentials;
       try {
-        data = (new Function(
-            'return ' + xhr.responseText))();
+        data = (new Function('return ' + xhr.responseText))();
         credentials = data.credentials;
       } catch (e) {
       }
-      console.log(credentials.tmpSecretId);
-      console.log(credentials.tmpSecretKey);
-      console.log(credentials.sessionToken);
       if (credentials) {
         if (!credentials) {
           return console.error('credentials invalid');
@@ -46,21 +41,32 @@ var cos = new COS({
 
 function uploadFiles(files) {
   var total = files.length;
+  var count = 0;
   for (var i = 0; i < total; i++) {
     file = files[i];
-    cos.putObject({
-      Bucket: bucket,
-      Region: region,
-      Key: 'upload/' + file.name,              /* 必须 */
-      StorageClass: 'STANDARD',
-      Body: file, // 上传文件对象
-      onProgress: function (progressData) {
-        console.log(JSON.stringify(progressData));
-      }
-    }, function (err, data) {
-      console.log(err || data);
-    });
-    isc.notify("uploading..." + file);
+    if (file.type.startsWith("image") || file.type.startsWith("video")) {
+      cos.putObject({
+        Bucket: bucket,
+        Region: region,
+        Key: 'upload/' + file.webkitRelativePath,
+        StorageClass: 'STANDARD',
+        Body: file,
+        onProgress: function (progressData) {
+          if (progressData.percent > 0) {
+            // {"loaded":3453674,"total":3453674,"speed":3067206.04,"percent":1}
+            isc.notify("上传文件 " + file.name + " 进度 " + progressData.percent * 100
+                + "%，速度 " + (progressData.speed / 1024 / 1024).toFixed(2)
+                + "MB", [], 'message', {duration: 0.1});
+          }
+          console.log(JSON.stringify(progressData));
+        }
+      }, function (err, data) {
+        console.log(err || data);
+      });
+      count++;
+    }
+    // callback file
+    // isc.notify("uploading..." + file + " " + file.type, [], 'message',{duration: 1});
   }
-  isc.notify("done..." + total);
+  isc.notify("done..." + count);
 }
