@@ -75,6 +75,11 @@
             <groupId>org.nutz</groupId>
         </dependency>
         <dependency>
+            <groupId>org.nutz</groupId>
+            <artifactId>nutzboot-starter-test-junit4</artifactId>
+            <version>${nutzboot.version}</version>
+        </dependency>
+        <dependency>
             <artifactId>isomorphic-core-rpc</artifactId>
             <groupId>com.isomorphic.smartgwt.eval</groupId>
             <version>${smartgwt.version}</version>

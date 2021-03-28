@@ -66,7 +66,7 @@ public class PhotoImporter extends AbstractProgressTask implements Runnable {
                 log.info("Scanning " + f.getAbsolutePath());
                 countInc();
                 try {
-                    EntityPhoto saved = picsModule.saveFileInRepository(f, null);
+                    EntityPhoto saved = picsModule.saveFileInRepository(f, null, null);
                     if (saved != null) {
                         EntityFile fileObj = new EntityFile();
                         fileObj.setRootId(rootObj.getId());

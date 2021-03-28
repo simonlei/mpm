@@ -20,7 +20,7 @@ public class HeaderPanel extends HLayout {
         toolStrip.addButton(new EmptyTrashButton());
 
         toolStrip.addSeparator();
-        toolStrip.addButton(new ImportPhotoButton());
+        // toolStrip.addButton(new ImportPhotoButton());
         ImportButton formItem = new ImportButton();
 
         toolStrip.addButton(formItem);

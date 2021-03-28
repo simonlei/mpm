@@ -5,10 +5,10 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
 import com.qcloud.cos.COSClient;
-import com.qcloud.cos.model.PutObjectRequest;
-import com.qcloud.cos.model.PutObjectResult;
+import com.qcloud.cos.model.COSObject;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +28,7 @@ import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.json.Json;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
+import org.nutz.lang.Streams;
 import org.nutz.mapl.Mapl;
 import org.nutz.trans.Trans;
 
@@ -55,29 +56,44 @@ public class PicsModule {
                 new ExplicitPager(startRow, endRow - startRow));
     }
 
-    public EntityPhoto saveFileInRepository(File file, String desc) {
+    public EntityPhoto savePhotoInDb(EntityFile parent, String key, String name) {
+        try {
+            COSObject cosObj = cosClient.getObject(bucket, key);
+            String contentType = cosObj.getObjectMetadata().getContentType();
+            if (contentType.contains("video")) {
+                return saveVideo(parent, key, name);
+            }
+            File tmpFile = File.createTempFile(name, "" + Math.random());
+            Streams.writeAndClose(new FileOutputStream(tmpFile), cosObj.getObjectContent());
+            return saveFileInRepository(tmpFile, key, Files.getMajorName(name));
+        } catch (IOException e) {
+            log.error("Can't save file " + key, e);
+        }
+
+        return null;
+    }
+
+    private EntityPhoto saveVideo(EntityFile parent, String key, String name) {
+        // todo: 处理视频
+        return null;
+    }
+
+    public EntityPhoto saveFileInRepository(File file, String key, String name) {
         try {
             final BufferedImage image = ImageIO.read(file);
             if (image == null) {
                 return null; // 不是正确的图片
             }
 
-            String name = file.getName();
-            name = Files.getMajorName(name);
             EntityPhoto samePhoto = sameFileExist(file);
             if (samePhoto != null) {
                 log.info("与图片 " + samePhoto.getId() + " 重复，file " + name + " 被抛弃！");
+                cosClient.deleteObject(bucket, key);
                 return samePhoto;
             }
             EntityBlockPicture blackPhoto = inBlackList(file);
             EntityPhoto photo = new EntityPhoto();
             photo.setSize(file.length());
-            if (desc != null) {
-                photo.setDescription(desc);
-            }
-            if (name != null) {
-                photo.setDescription(file.getParentFile().getName() + "/" + name);
-            }
 
             photo.setMd5(Lang.md5(file));
             photo.setSha1(Lang.sha1(file));
@@ -94,11 +110,16 @@ public class PicsModule {
             photo = dao.insert(photo);
 
             log.info("Photo:" + photo);
+            cosClient.copyObject(bucket, key, bucket, photo.getName());
+            cosClient.deleteObject(bucket, key);
+/*
             PutObjectRequest putObjectRequest =
                     new PutObjectRequest(bucket, photo.getName(), file);
             PutObjectResult putObjectResult = cosClient.putObject(putObjectRequest);
             log.info("Cos put result:" + putObjectResult);
+*/
             // Files.copyFile(file, pool.returnFile(photo.getId(), ".jpg"));
+            file.delete();
             return photo;
         } catch (IOException e) {
             return null;
