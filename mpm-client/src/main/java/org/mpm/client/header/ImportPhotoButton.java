@@ -87,7 +87,7 @@ public class ImportPhotoButton extends ToolStripButton {
                     SC.logWarn("taskid: " + taskId);
                     new ProgressDialog("正在导入照片...", taskId, () -> {
                         LeftTabSet.instance.reloadData();
-                        PicsGrid.reloadData();
+                        PicsGrid.instance.reloadData();
                     }, "已扫描 $count$/$total$ 文件，其中照片数 $picsCount$",
                             "导入完成，共导入 $picsCount$ 张图片").show();
                 });

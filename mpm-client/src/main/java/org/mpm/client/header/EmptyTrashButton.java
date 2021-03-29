@@ -37,7 +37,7 @@ class EmptyTrashButton extends ToolStripButton implements PicsChangeHandler, Cli
                                 String taskId = rpcResponse.getDataAsString();
                                 SC.logWarn("taskid: " + taskId);
                                 new ProgressDialog("正在清空回收站...", taskId, () -> {
-                                    PicsGrid.reloadData();
+                                    PicsGrid.instance.reloadData();
                                     LeftTabSet.instance.reloadData();
                                 },
                                         "已删除 $count$/$total$ 照片",

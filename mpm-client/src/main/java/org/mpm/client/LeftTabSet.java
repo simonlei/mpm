@@ -56,7 +56,7 @@ public class LeftTabSet extends TabSet {
             TreeNode node = nodeClickEvent.getNode();
             criteria = new Criteria();
             criteria.addCriteria("fileId", node.getAttributeAsInt("id"));
-            PicsGrid.reloadData();
+            PicsGrid.instance.reloadData();
             SC.logWarn("reload fileid");
         });
         filesGrid.addDataArrivedHandler((DataArrivedHandler) dataArrivedEvent -> {
@@ -90,7 +90,7 @@ public class LeftTabSet extends TabSet {
                 criteria.addCriteria("theYear", getYearOrMonth(node.getAttribute("year")));
                 criteria.addCriteria("theMonth", getYearOrMonth(node.getAttribute("month")));
             }
-            PicsGrid.reloadData();
+            PicsGrid.instance.reloadData();
             SC.logWarn("Click:" + node.getTitle() + " Criteria " + criteria.getValues());
         });
         datesGrid.addDataArrivedHandler((DataArrivedHandler) dataArrivedEvent -> {

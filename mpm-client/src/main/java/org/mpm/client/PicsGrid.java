@@ -20,7 +20,7 @@ import org.mpm.client.header.HeaderPanel;
 
 public class PicsGrid extends TileGrid {
 
-    static PicsGrid instance;
+    public static PicsGrid instance;
     private boolean trashed = false;
     private SinglePhotoDialog singlePhotoDialog;
     private int lastTxnNum = 0;
@@ -95,7 +95,14 @@ public class PicsGrid extends TileGrid {
         LeftTabSet.instance.reloadData();
     }
 
-    public static void reloadData() {
+    private static DSRequest makeDSRequest(String field, boolean asc) {
+        DSRequest dsRequest = new DSRequest();
+        dsRequest.setSortBy(new SortSpecifier[]{new SortSpecifier(field,
+                asc ? SortDirection.ASCENDING : SortDirection.DESCENDING)});
+        return dsRequest;
+    }
+
+    public void reloadData() {
         Criteria criteria = new Criteria();
         criteria.addCriteria("trashed", instance.trashed);
         criteria.addCriteria(LeftTabSet.getCriteria());
@@ -106,13 +113,6 @@ public class PicsGrid extends TileGrid {
         SC.logWarn("Will fetch: " + instance.getResultSet().willFetchData(criteria));
         instance.invalidateCache();
         instance.fetchData(criteria);
-    }
-
-    private static DSRequest makeDSRequest(String field, boolean asc) {
-        DSRequest dsRequest = new DSRequest();
-        dsRequest.setSortBy(new SortSpecifier[]{new SortSpecifier(field,
-                asc ? SortDirection.ASCENDING : SortDirection.DESCENDING)});
-        return dsRequest;
     }
 
     private void fireChangeEvent(int length) {

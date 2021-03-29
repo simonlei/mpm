@@ -73,12 +73,19 @@ function uploadFiles(files) {
         if (httpRequest.readyState == 4 && httpRequest.status == 200) {//验证请求是否发送成功
           var json = httpRequest.responseText;//获取到服务端返回的数据
           console.log(json);
-          isc.notify(options.Key + '上传' + (err ? '失败' : '完成'));
+          isc.notify(
+              options.Key.split("\/").pop() + '上传' + (err ? '失败' : '完成'));
         }
       };
     },
   }, function (err, data) {
     console.log(err || data);
+    // to refresh
+    isc_LeftTabSet_0.getSGWTInstance().reloadData_0_g$();
+    isc_PicsGrid_0.getSGWTInstance().reloadData_0_g$();
+
+    //                         LeftTabSet.instance.reloadData();
+    //                         PicsGrid.reloadData();
   });
   /*
   var total = files.length;

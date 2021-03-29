@@ -22,7 +22,7 @@ class OrderSelectItem extends SelectItem {
 
         addChangedHandler(changedEvent -> {
             headerPanel.selectedValue = (SortSpecifier) getValue();
-            PicsGrid.reloadData();
+            PicsGrid.instance.reloadData();
         });
     }
 }
