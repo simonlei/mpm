@@ -102,6 +102,14 @@ public class PicsGrid extends TileGrid {
         return dsRequest;
     }
 
+    public static void staticReload() {
+        instance.reloadData();
+    }
+
+    public static native void exportReloadData() /*-{
+      $wnd.realodPicsGrid = $entry(@org.mpm.client.PicsGrid::staticReload());
+    }-*/;
+
     public void reloadData() {
         Criteria criteria = new Criteria();
         criteria.addCriteria("trashed", instance.trashed);

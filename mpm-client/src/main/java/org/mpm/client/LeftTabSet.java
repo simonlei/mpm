@@ -43,6 +43,14 @@ public class LeftTabSet extends TabSet {
         return criteria;
     }
 
+    public static void staticReload() {
+        instance.reloadData();
+    }
+
+    public static native void exportReloadData() /*-{
+      $wnd.realodLeftTab = $entry(@org.mpm.client.LeftTabSet::staticReload());
+    }-*/;
+
     private void addFilesTab() {
         Tab filesTab = new Tab("按图片库查看");
         filesGrid = new TreeGrid();

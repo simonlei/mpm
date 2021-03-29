@@ -81,8 +81,10 @@ function uploadFiles(files) {
   }, function (err, data) {
     console.log(err || data);
     // to refresh
-    isc_LeftTabSet_0.getSGWTInstance().reloadData_0_g$();
-    isc_PicsGrid_0.getSGWTInstance().reloadData_0_g$();
+    realodLeftTab();
+    realodPicsGrid();
+    // isc_LeftTabSet_0.getSGWTInstance().reloadData_0_g$();
+    // isc_PicsGrid_0.getSGWTInstance().reloadData_0_g$();
 
     //                         LeftTabSet.instance.reloadData();
     //                         PicsGrid.reloadData();

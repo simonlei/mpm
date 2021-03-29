@@ -26,7 +26,7 @@ mvn jetty:run -Pdev -pl *-server
 
 先打包
 ```
-mvn package
+mvn package -Dgwt.style=PRETTY -DskipTests
 ```
 
 然后用jetty-runner 运行打包后的war包即可。
@@ -74,3 +74,5 @@ TODO:
 - [x] 上传完成后要刷新当前页面的内容
 - [ ] 支持视频
 - [ ] 可以支持按导入的目录来进行授权让其他人看
+- [ ] 研究一下部署模式，如何方便的设置各类参数
+- [ ] 手机上upload可以选择文件，要考虑如何兼容
