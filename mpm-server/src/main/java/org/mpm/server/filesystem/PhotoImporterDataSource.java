@@ -59,7 +59,7 @@ public class PhotoImporterDataSource {
         return "";
     }
 
-    private EntityFile existOrCreate(EntityFile parent, String path, String name,
+    private synchronized EntityFile existOrCreate(EntityFile parent, String path, String name,
             boolean isFolder) {
         EntityFile file = dao.fetch(EntityFile.class, Cnd.where("path", "=", path));
         if (file != null) {
