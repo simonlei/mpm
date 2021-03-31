@@ -150,9 +150,8 @@ public class PicsModule {
             Metadata metadata = JpegMetadataReader.readMetadata(file);
             ExifSubIFDDirectory directory =
                     metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
-            Date date = directory.getDateOriginal();
-            if (date != null) {
-                photo.setTakenDate(date);
+            if (directory != null && directory.getDateOriginal() != null) {
+                photo.setTakenDate(directory.getDateOriginal());
             }
             GpsDirectory gpsDirectory = metadata.getFirstDirectoryOfType(GpsDirectory.class);
             if (gpsDirectory != null) {
