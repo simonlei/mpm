@@ -33,6 +33,20 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
 
         loadServerConfig();
 
+        SC.askforValue("What's the password?",
+                s -> DMI.call("mpm", "org.mpm.server.metas.ConfigDataSource", "authPassword",
+                        (rpcResponse, o, rpcRequest) -> {
+                            Map map = rpcResponse.getDataAsMap();
+                            SC.logWarn("response is :" + map.get("ok"));
+                            if ("ok".equals(map.get("ok"))) {
+                                createMainContent();
+                            } else {
+                                SC.showPrompt("密码错误，刷新页面重试");
+                            }
+                        }, new Object[]{s}));
+    }
+
+    private void createMainContent() {
         VLayout root = new VLayout();
         root.setWidth100();
         root.setHeight100();

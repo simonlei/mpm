@@ -9,6 +9,7 @@ import org.mpm.server.util.MyUtils;
 import org.nutz.ioc.impl.PropertiesProxy;
 import org.nutz.ioc.loader.annotation.Inject;
 import org.nutz.ioc.loader.annotation.IocBean;
+import org.nutz.lang.Lang;
 import org.nutz.lang.util.NutMap;
 import org.nutz.mvc.annotation.At;
 import org.nutz.mvc.annotation.Ok;
@@ -73,5 +74,13 @@ public class ConfigDataSource {
         String region = conf.get("cos.region");
         result.setv("thumbUrl", String.format("https://%s.cos.%s.myqcloud.com/", bucket, region));
         return result;
+    }
+
+    public NutMap authPassword(String passwd) {
+        PropertiesProxy conf = MyUtils.getByType(PropertiesProxy.class);
+        if (conf.get("password").equals(passwd)) {
+            return Lang.map("ok", "ok");
+        }
+        return new NutMap();
     }
 }

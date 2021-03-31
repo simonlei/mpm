@@ -3,6 +3,7 @@
         <ServerObject ID="meta" className="org.mpm.server.metas.ConfigDataSource">
             <visibleMethods>
                 <method name="fetchConfig"/>
+                <method name="authPassword"/>
             </visibleMethods>
         </ServerObject>
         <ServerObject ID="pics" className="org.mpm.server.pics.PicsDataSource">

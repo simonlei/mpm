@@ -81,7 +81,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <servlets.version>3.1.0</servlets.version>
 
-        <smartgwt.version>12.1-p20210213</smartgwt.version>
+        <smartgwt.version>12.1-p20210321</smartgwt.version>
     </properties>
     <version>1.0-SNAPSHOT</version>
 

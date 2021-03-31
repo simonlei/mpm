@@ -26,6 +26,8 @@ mvn jetty:run -Pdev -pl *-server
 
 先打包
 ```
+mvn package -DskipTests
+或者
 mvn package -Dgwt.style=PRETTY -DskipTests
 ```
 
@@ -76,3 +78,7 @@ TODO:
 - [ ] 可以支持按导入的目录来进行授权让其他人看
 - [ ] 研究一下部署模式，如何方便的设置各类参数
 - [ ] 手机上upload可以选择文件，要考虑如何兼容
+- [x] 身份认证之后才能访问
+- [ ] 用更复杂的用户名/密码来登陆
+- [ ] 使用cookie来记录当前登陆的用户名
+
