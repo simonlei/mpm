@@ -148,36 +148,48 @@ public class PicsModule {
         photo.setTakenDate(new Date(file.lastModified()));
         try {
             Metadata metadata = JpegMetadataReader.readMetadata(file);
-            ExifSubIFDDirectory directory =
-                    metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
-            if (directory != null && directory.getDateOriginal() != null) {
-                photo.setTakenDate(directory.getDateOriginal());
-            }
+            setDate(photo, metadata);
             GpsDirectory gpsDirectory = metadata.getFirstDirectoryOfType(GpsDirectory.class);
             if (gpsDirectory != null) {
                 photo.setLatitude(gpsDirectory.getGeoLocation().getLatitude());
                 photo.setLongitude(gpsDirectory.getGeoLocation().getLongitude());
 
-                String addr = getAddress(photo.getLatitude(), photo.getLongitude());
-                photo.setAddress(addr);
+                photo.setAddress(getAddress(photo.getLatitude(), photo.getLongitude()));
             }
         } catch (Throwable e) {
             log.error("Can't read exif info", e);
         }
     }
 
+    private void setDate(EntityPhoto photo, Metadata metadata) {
+        try {
+            ExifSubIFDDirectory directory =
+                    metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+            if (directory != null && directory.getDateOriginal() != null) {
+                photo.setTakenDate(directory.getDateOriginal());
+            }
+        } catch (Exception e) {
+            log.error("Can't read exif date", e);
+        }
+    }
+
     public String getAddress(double latitude, double longtitude) {
-        String requestStr =
-                "key=" + qqlbsKey + "&location=" + latitude + "," + longtitude;
+        try {
+            String requestStr =
+                    "key=" + qqlbsKey + "&location=" + latitude + "," + longtitude;
 
-        String sig = Lang.md5("/ws/geocoder/v1?" + requestStr + qqlbsToken);
+            String sig = Lang.md5("/ws/geocoder/v1?" + requestStr + qqlbsToken);
 
-        String url = "https://apis.map.qq.com/ws/geocoder/v1?" + requestStr + "&sig=" + sig;
-        log.info("qqlbs url is " + url);
-        Response response = Http.get(url);
-        String result = response.getContent();
-        log.info("qqlbs result:" + result);
-        return (String) Mapl.cell(Json.fromJson(result), "result.address");
+            String url = "https://apis.map.qq.com/ws/geocoder/v1?" + requestStr + "&sig=" + sig;
+            log.info("qqlbs url is " + url);
+            Response response = Http.get(url);
+            String result = response.getContent();
+            log.info("qqlbs result:" + result);
+            return (String) Mapl.cell(Json.fromJson(result), "result.address");
+        } catch (Exception e) {
+            log.error("Can't get lbs address", e);
+            return "";
+        }
     }
 
     public void realDelete(EntityPhoto photo) {
