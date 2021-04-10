@@ -8,6 +8,7 @@ import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.COSObject;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
@@ -57,20 +58,30 @@ public class PicsModule {
     }
 
     public EntityPhoto savePhotoInDb(EntityFile parent, String key, String name) {
+        File tmpFile = null;
         try {
-            COSObject cosObj = cosClient.getObject(bucket, key);
-            String contentType = cosObj.getObjectMetadata().getContentType();
+            tmpFile = File.createTempFile(name, "" + Math.random());
+            String contentType = saveCosFile(key, tmpFile);
             if (contentType.contains("video")) {
                 return saveVideo(parent, key, name);
             }
-            File tmpFile = File.createTempFile(name, "" + Math.random());
-            Streams.writeAndClose(new FileOutputStream(tmpFile), cosObj.getObjectContent());
             return saveFileInRepository(tmpFile, key, Files.getMajorName(name));
         } catch (IOException e) {
             log.error("Can't save file " + key, e);
+        } finally {
+            if (tmpFile != null) {
+                tmpFile.delete();
+            }
         }
 
         return null;
+    }
+
+    public String saveCosFile(String key, File tmpFile) throws FileNotFoundException {
+        COSObject cosObj = cosClient.getObject(bucket, key);
+        String contentType = cosObj.getObjectMetadata().getContentType();
+        Streams.writeAndClose(new FileOutputStream(tmpFile), cosObj.getObjectContent());
+        return contentType;
     }
 
     private EntityPhoto saveVideo(EntityFile parent, String key, String name) {
@@ -119,7 +130,6 @@ public class PicsModule {
             log.info("Cos put result:" + putObjectResult);
 */
             // Files.copyFile(file, pool.returnFile(photo.getId(), ".jpg"));
-            file.delete();
             return photo;
         } catch (IOException e) {
             return null;
@@ -144,7 +154,7 @@ public class PicsModule {
         return existPhoto;
     }
 
-    private void setDateFromExif(File file, EntityPhoto photo) {
+    public void setDateFromExif(File file, EntityPhoto photo) {
         photo.setTakenDate(new Date(file.lastModified()));
         try {
             Metadata metadata = JpegMetadataReader.readMetadata(file);
@@ -175,8 +185,7 @@ public class PicsModule {
 
     public String getAddress(double latitude, double longtitude) {
         try {
-            String requestStr =
-                    "key=" + qqlbsKey + "&location=" + latitude + "," + longtitude;
+            String requestStr = "key=" + qqlbsKey + "&location=" + latitude + "," + longtitude;
 
             String sig = Lang.md5("/ws/geocoder/v1?" + requestStr + qqlbsToken);
 

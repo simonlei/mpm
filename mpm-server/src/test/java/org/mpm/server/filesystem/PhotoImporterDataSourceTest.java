@@ -1,5 +1,11 @@
 package org.mpm.server.filesystem;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,5 +32,39 @@ public class PhotoImporterDataSourceTest extends BaseTest {
         key = photoImporterDataSource
                 .uploadFile("upload/1616940995641_tmpupload/IMG_001.jpg");
         log.info("Key is " + key);
+    }
+
+    @Test
+    public void testRegex() throws Exception {
+        assertTrue(legal("user='simonlei'"));
+        assertTrue(legal("abc=123"));
+        assertTrue(legal("a in (1,2,3)"));
+        assertFalse(legal("a inx (1,2,3)"));
+
+        String[] split = "a, b, c".split(",");
+
+        String[] strings = Stream.of(split).map(String::trim).toArray(String[]::new);
+        Stream.of(strings).forEach(System.out::println);
+    }
+
+    private boolean legal(String c) {
+        Pattern conditionPattern = Pattern.compile(".*(([\\>|\\<|\\=])|(in )).*");
+        Matcher matcher = conditionPattern.matcher(c);
+        return matcher.matches();
+    }
+
+    @Test
+    public void testThread() throws InterruptedException {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                log.info("done");
+            }
+        });
+        t.start();
+        Thread.sleep(1000);
+        log.info(t.getState().toString());
+        t.join();
+        log.info("Join done.");
     }
 }
