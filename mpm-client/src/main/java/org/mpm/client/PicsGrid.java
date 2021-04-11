@@ -75,7 +75,10 @@ public class PicsGrid extends TileGrid {
 
         DetailViewerField imgField = new DetailViewerField("name");
         imgField.setType("image");
-        imgField.setImageURLPrefix("/thumb/");
+        // 直接在客户端拼接thumb地址就好了
+        // imgField.setImageURLPrefix("/thumb/");
+        imgField.setImageURLPrefix(ServerConfig.thumbUrl);
+        imgField.setImageURLSuffix("/thumb");
 
         setFields(imgField);
 

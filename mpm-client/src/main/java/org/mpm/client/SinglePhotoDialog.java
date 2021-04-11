@@ -160,15 +160,78 @@ public class SinglePhotoDialog extends Window {
         show();
     }
 
+    private native void playVideo(String video, String poster) /*-{
+      var player = $wnd.videojs($doc.getElementById('myVideo'), {
+        controls: true, // 是否显示控制条
+        poster: poster, // 视频封面图地址
+        preload: 'auto',
+        autoplay: false,
+        fluid: true, // 自适应宽高
+        language: 'zh-CN', // 设置语言
+        muted: false, // 是否静音
+        inactivityTimeout: false,
+        controlBar: { // 设置控制条组件
+          // 使用children的形式可以控制每一个控件的位置，以及显示与否
+          children: [
+            {name: 'playToggle'}, // 播放按钮
+            {name: 'currentTimeDisplay'}, // 当前已播放时间
+            {name: 'progressControl'}, // 播放进度条
+            {name: 'durationDisplay'}, // 总时间
+            { // 倍数播放
+              name: 'playbackRateMenuButton',
+              'playbackRates': [0.5, 1, 1.5, 2, 2.5]
+            },
+            {
+              name: 'volumePanel', // 音量控制
+              inline: false, // 不使用水平方式
+            },
+            {name: 'FullscreenToggle'} // 全屏
+          ]
+        },
+        sources: [ // 视频源
+          {
+            src: video,
+            type: 'video/mp4',
+            poster: poster
+          }
+        ]
+      }, function () {
+        console.log('视频可以播放了', this);
+      });
+    }-*/;
+
     private void setPaneContent() {
-        pane.setContents(
-                (scale
-                        ? "<style> img {  max-width: 100%;max-height: 100%; display: block;margin: 0 auto;}</style> "
-                        : "<style> img {  display: block;margin: 0 auto;}</style> ")
-                        + "<img src=\""
-                        + ServerConfig.thumbUrl + record.getAttribute("name") + "\""
-                        + " title=\"" + ImageCell.getHoverString(record, false) + "\""
-                        + "/>"
-        );
+        if ("video".equals(record.getAttribute("mediaType"))) {
+            pane.setContents(
+                    "<video id=\"myVideo\" class=\"video-js vjs-big-play-centered vjs-fluid\">\n"
+                            + "  <p class=\"vjs-no-js\">\n"
+                            + "    To view this video please enable JavaScript, and consider upgrading to a\n"
+                            + "    web browser that\n"
+                            + "    <a href=\"https://videojs.com/html5-video-support/\" target=\"_blank\">\n"
+                            + "      supports HTML5 video\n"
+                            + "    </a>\n"
+                            + "  </p>\n"
+                            + "</video>");
+        } else {
+            pane.setContents(
+                    (scale
+                            ? "<style> img {  max-width: 100%;max-height: 100%; display: block;margin: 0 auto;}</style> "
+                            : "<style> img {  display: block;margin: 0 auto;}</style> ")
+                            + "<img src=\""
+                            + ServerConfig.thumbUrl + record.getAttribute("name") + "\""
+                            + " title=\"" + ImageCell.getHoverString(record, false) + "\""
+                            + "/>"
+            );
+        }
+    }
+
+    @Override
+    protected void onDraw() {
+        super.onDraw();
+        if ("video".equals(record.getAttribute("mediaType"))) {
+
+            playVideo(ServerConfig.thumbUrl + "video/" + record.getAttribute("name"),
+                    ServerConfig.thumbUrl + record.getAttribute("name"));
+        }
     }
 }
