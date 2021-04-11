@@ -34,4 +34,5 @@ public class EntityPhoto {
     private Double longitude; // 经度
     private String address; // 定位到的地址
     private Date takenDate; // 拍照时间
+    private Integer mediaType;
 }

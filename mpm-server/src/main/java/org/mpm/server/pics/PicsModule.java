@@ -37,6 +37,8 @@ import org.nutz.trans.Trans;
 @Slf4j
 public class PicsModule {
 
+    private static final Integer PHOTO = 1;
+    private static final Integer VIDEO = 2;
     @Inject
     Dao dao;
     @Inject
@@ -63,10 +65,10 @@ public class PicsModule {
             tmpFile = File.createTempFile(name, "" + Math.random());
             String contentType = saveCosFile(key, tmpFile);
             if (contentType.contains("video")) {
-                return saveVideo(parent, key, name);
+                return saveVideo(tmpFile, key, Files.getMajorName(name));
             }
             return saveFileInRepository(tmpFile, key, Files.getMajorName(name));
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Can't save file " + key, e);
         } finally {
             if (tmpFile != null) {
@@ -84,9 +86,43 @@ public class PicsModule {
         return contentType;
     }
 
-    private EntityPhoto saveVideo(EntityFile parent, String key, String name) {
-        // todo: 处理视频
-        return null;
+    private EntityPhoto saveVideo(File file, String key, String name)
+            throws InterruptedException, IOException {
+        // 去重
+        EntityPhoto samePhoto = sameFileExist(file, key);
+        if (samePhoto != null) {
+            return samePhoto;
+        }
+        EntityPhoto video = createEntityPhotoFrom(file);
+        video.setMediaType(VIDEO);
+        checkInBlacklist(file, video);
+        log.info("Saving video " + video.getId());
+        video = dao.insert(video);
+
+        // check cover generated?
+        String coverKey = key.substring(0, key.lastIndexOf(".")) + "_0.jpg";
+        boolean coverExist = cosClient.doesObjectExist(bucket, coverKey);
+        while (!coverExist) {
+            log.info("Cover " + coverKey + " not generated, waiting...");
+            Thread.sleep(1000);
+            coverExist = cosClient.doesObjectExist(bucket, coverKey);
+        }
+        File coverFile = File.createTempFile(name, "_cover" + Math.random());
+        COSObject coverObj = cosClient.getObject(bucket, coverKey);
+        Streams.writeAndClose(new FileOutputStream(coverFile), coverObj.getObjectContent());
+        final BufferedImage image = ImageIO.read(coverFile);
+        video.setWidth(image.getWidth());
+        video.setHeight(image.getHeight());
+        // TODO: 应该有办法获取到video的拍摄时间吧？
+        video.setTakenDate(new Date());
+        dao.update(video);
+
+        cosClient.copyObject(bucket, key, bucket, "video/" + video.getName());
+        cosClient.copyObject(bucket, coverKey, bucket, video.getName());
+        cosClient.deleteObject(bucket, key);
+        cosClient.deleteObject(bucket, coverKey);
+
+        return video;
     }
 
     public EntityPhoto saveFileInRepository(File file, String key, String name) {
@@ -96,52 +132,55 @@ public class PicsModule {
                 return null; // 不是正确的图片
             }
 
-            EntityPhoto samePhoto = sameFileExist(file);
+            EntityPhoto samePhoto = sameFileExist(file, key);
             if (samePhoto != null) {
-                log.info("与图片 " + samePhoto.getId() + " 重复，file " + name + " 被抛弃！");
-                cosClient.deleteObject(bucket, key);
                 return samePhoto;
             }
-            EntityBlockPicture blackPhoto = inBlackList(file);
-            EntityPhoto photo = new EntityPhoto();
-            photo.setSize(file.length());
-
-            photo.setMd5(Lang.md5(file));
-            photo.setSha1(Lang.sha1(file));
+            EntityPhoto photo = createEntityPhotoFrom(file);
 
             photo.setWidth(image.getWidth());
             photo.setHeight(image.getHeight());
             setDateFromExif(file, photo);
-            if (blackPhoto != null) {
-                log.info("在黑名单里面，转移到回收站！");
-                photo.setTrashed(true);
-                dao.delete(blackPhoto);
-            }
+            checkInBlacklist(file, photo);
             log.info("Saving photo " + photo.getId());
             photo = dao.insert(photo);
 
             log.info("Photo:" + photo);
             cosClient.copyObject(bucket, key, bucket, photo.getName());
             cosClient.deleteObject(bucket, key);
-/*
-            PutObjectRequest putObjectRequest =
-                    new PutObjectRequest(bucket, photo.getName(), file);
-            PutObjectResult putObjectResult = cosClient.putObject(putObjectRequest);
-            log.info("Cos put result:" + putObjectResult);
-*/
-            // Files.copyFile(file, pool.returnFile(photo.getId(), ".jpg"));
             return photo;
         } catch (IOException e) {
             return null;
         }
     }
 
-    private EntityPhoto sameFileExist(File file) {
+    private void checkInBlacklist(File file, EntityPhoto photo) {
+        EntityBlockPicture blackPhoto = inBlackList(file);
+        if (blackPhoto != null) {
+            log.info("在黑名单里面，转移到回收站！");
+            photo.setTrashed(true);
+            dao.delete(blackPhoto);
+        }
+    }
+
+    private EntityPhoto createEntityPhotoFrom(File file) {
+        EntityPhoto photo = new EntityPhoto();
+        photo.setSize(file.length());
+
+        photo.setMd5(Lang.md5(file));
+        photo.setSha1(Lang.sha1(file));
+        return photo;
+    }
+
+    private EntityPhoto sameFileExist(File file, String key) {
         String md5 = Lang.md5(file);
         String sha1 = Lang.sha1(file);
         EntityPhoto existPhoto = dao.fetch(EntityPhoto.class,
                 Cnd.where("md5", "=", md5).and("sha1", "=", sha1).and("size", "=", file.length()));
-
+        if (existPhoto != null) {
+            log.info("与图片 " + existPhoto.getId() + " 重复，file " + key + " 被抛弃！");
+            cosClient.deleteObject(bucket, key);
+        }
         return existPhoto;
     }
 
@@ -155,7 +194,9 @@ public class PicsModule {
     }
 
     public void setDateFromExif(File file, EntityPhoto photo) {
-        photo.setTakenDate(new Date(file.lastModified()));
+        if (photo.getTakenDate() != null) { // 如果已经有就不要重复设置了
+            photo.setTakenDate(new Date(file.lastModified()));
+        }
         try {
             Metadata metadata = JpegMetadataReader.readMetadata(file);
             setDate(photo, metadata);

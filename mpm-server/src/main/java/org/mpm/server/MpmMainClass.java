@@ -1,9 +1,5 @@
 package org.mpm.server;
 
-import org.mpm.server.entity.EntityBlockPicture;
-import org.mpm.server.entity.EntityFile;
-import org.mpm.server.entity.EntityMeta;
-import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.pics.GeoChecker;
 import org.nutz.boot.NbApp;
 import org.nutz.dao.Dao;
@@ -19,11 +15,10 @@ public class MpmMainClass extends NbApp {
     GeoChecker geoCheckTask;
 
     public void init() {
-        dao.create(EntityPhoto.class, false);
-        dao.create(EntityFile.class, false);
-        dao.create(EntityBlockPicture.class, false);
-        dao.create(EntityMeta.class, false);
-
+        // dao.create(EntityPhoto.class, false);
+        // dao.create(EntityFile.class, false);
+        // dao.create(EntityBlockPicture.class, false);
+        // dao.create(EntityMeta.class, false);
         geoCheckTask.startTasks();
     }
 
