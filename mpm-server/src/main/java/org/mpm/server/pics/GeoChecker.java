@@ -72,7 +72,7 @@ public class GeoChecker {
             picsModule.saveCosFile(p.getName(), tmpFile);
             // check taken date and geo
             picsModule.setDateFromExif(tmpFile, p);
-            dao.update(p);
+            dao.updateIgnoreNull(p);
             if (p.getLatitude() != null) {
                 tokens--;
                 log.info("Update photo " + p.getId());

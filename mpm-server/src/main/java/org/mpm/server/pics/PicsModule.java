@@ -177,7 +177,7 @@ public class PicsModule {
             setDateFromExif(file, photo);
             checkInBlacklist(file, photo);
             log.info("Saving photo " + photo.getId());
-            photo = dao.insert(photo);
+            photo = dao.insert(photo, true, false, false);
 
             log.info("Photo:" + photo);
             cosClient.copyObject(bucket, key, bucket, photo.getName());

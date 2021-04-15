@@ -30,8 +30,12 @@ public class PhotoImporterDataSource {
     @AdaptBy(type = WhaleAdaptor.class)
     @At("/uploadFile")
     @Ok("json")
-    public String uploadFile(@Param("key") String key) {
+    public String uploadFile(@Param("key") String key, @Param("data") String data,
+            @Param("err") String err) {
         log.info("Key is " + key);
+        if (Lang.isNotEmpty(err)) {
+            log.info("Error {} when upload {}, with data {} ", err, key, data);
+        }
         // upload/1616851720630_tmpupload/七上1025义工/IMG_002.jpg
         String[] paths = key.split("\\/");
         String path = "/" + paths[1];

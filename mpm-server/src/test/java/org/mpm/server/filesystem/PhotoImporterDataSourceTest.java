@@ -26,11 +26,11 @@ public class PhotoImporterDataSourceTest extends BaseTest {
     @Test
     public void testImportPhoto() {
         String key = photoImporterDataSource
-                .uploadFile("upload/1616940995641_tmpupload/七上1025义工/IMG_004.jpg");
+                .uploadFile("upload/1616940995641_tmpupload/七上1025义工/IMG_004.jpg", "", null);
         // upload/1616940995641_tmpupload/IMG_001.jpg
         log.info("Key is " + key);
         key = photoImporterDataSource
-                .uploadFile("upload/1616940995641_tmpupload/IMG_001.jpg");
+                .uploadFile("upload/1616940995641_tmpupload/IMG_001.jpg", "", null);
         log.info("Key is " + key);
     }
 
