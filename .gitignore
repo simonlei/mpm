@@ -3,3 +3,4 @@ target/
 *.iml
 
 /mpm-server/src/main/resources/application.properties
+logs/
