@@ -35,4 +35,5 @@ public class EntityPhoto {
     private String address; // 定位到的地址
     private Date takenDate; // 拍照时间
     private Integer mediaType;
+    private Double duration; // 视频长度
 }

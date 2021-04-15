@@ -6,6 +6,10 @@ import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.COSObject;
+import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoRequest;
+import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoResponse;
+import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoVideo;
+import com.qcloud.cos.model.ciModel.snapshot.SnapshotRequest;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -97,8 +101,21 @@ public class PicsModule {
         video.setMediaType(VIDEO);
         checkInBlacklist(file, video);
         log.info("Saving video " + video.getId());
-        video = dao.insert(video);
+        video = dao.insert(video, true, false, false);
 
+        // generate poster
+        SnapshotRequest snapshotRequest = new SnapshotRequest();
+        snapshotRequest.setBucketName(bucket);
+        snapshotRequest.getInput().setObject(key);
+        snapshotRequest.getOutput().setBucket(bucket);
+        snapshotRequest.getOutput()
+                .setRegion(cosClient.getClientConfig().getRegion().getRegionName());
+        snapshotRequest.getOutput().setObject(video.getName());
+        snapshotRequest.setMode("keyframe");
+        snapshotRequest.setTime("1");
+        cosClient.generateSnapshot(snapshotRequest);
+
+/*
         // check cover generated?
         String coverKey = key.substring(0, key.lastIndexOf(".")) + "_0.jpg";
         boolean coverExist = cosClient.doesObjectExist(bucket, coverKey);
@@ -107,20 +124,37 @@ public class PicsModule {
             Thread.sleep(1000);
             coverExist = cosClient.doesObjectExist(bucket, coverKey);
         }
+ */
+        // get metadata
+        MediaInfoRequest request = new MediaInfoRequest();
+        request.setBucketName(bucket);
+        request.getInput().setObject(key);
+        MediaInfoResponse response = cosClient.generateMediainfo(request);
+        MediaInfoVideo infoVideo = response.getMediaInfo().getStream().getVideo();
+        String duration = infoVideo.getDuration();
+        video.setWidth(Integer.parseInt(infoVideo.getWidth()));
+        video.setHeight(Integer.parseInt(infoVideo.getHeight()));
+        video.setDuration(Double.parseDouble(duration));
+        // TODO: 应该有办法获取到video的拍摄时间吧？
+        video.setTakenDate(new Date());
+        dao.updateIgnoreNull(video);
+
+
+        /*
         File coverFile = File.createTempFile(name, "_cover" + Math.random());
         COSObject coverObj = cosClient.getObject(bucket, coverKey);
         Streams.writeAndClose(new FileOutputStream(coverFile), coverObj.getObjectContent());
         final BufferedImage image = ImageIO.read(coverFile);
         video.setWidth(image.getWidth());
         video.setHeight(image.getHeight());
-        // TODO: 应该有办法获取到video的拍摄时间吧？
-        video.setTakenDate(new Date());
-        dao.update(video);
 
+         */
+
+        // String coverKey = video.getName();
         cosClient.copyObject(bucket, key, bucket, "video/" + video.getName());
-        cosClient.copyObject(bucket, coverKey, bucket, video.getName());
+        // cosClient.copyObject(bucket, coverKey, bucket, video.getName());
         cosClient.deleteObject(bucket, key);
-        cosClient.deleteObject(bucket, coverKey);
+        // cosClient.deleteObject(bucket, coverKey);
 
         return video;
     }
