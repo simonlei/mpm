@@ -90,8 +90,7 @@ public class PicsModule {
         return contentType;
     }
 
-    private EntityPhoto saveVideo(File file, String key, String name)
-            throws InterruptedException, IOException {
+    private EntityPhoto saveVideo(File file, String key, String name) {
         // 去重
         EntityPhoto samePhoto = sameFileExist(file, key);
         if (samePhoto != null) {
@@ -105,6 +104,8 @@ public class PicsModule {
 
         generatePoster(key, video);
         getVideoMetadata(key, video);
+        // TODO: 应该有办法获取到video的拍摄时间吧？
+        video.setTakenDate(new Date());
         dao.updateIgnoreNull(video);
 
         cosClient.copyObject(bucket, key, bucket, "video/" + video.getName());
@@ -125,8 +126,6 @@ public class PicsModule {
             video.setWidth(Integer.parseInt(infoVideo.getWidth()));
             video.setHeight(Integer.parseInt(infoVideo.getHeight()));
             video.setDuration(Double.parseDouble(duration));
-            // TODO: 应该有办法获取到video的拍摄时间吧？
-            video.setTakenDate(new Date());
         } catch (Exception e) {
             log.error("Can't get metadata of " + key + " id " + video.getId(), e);
         }
@@ -175,6 +174,7 @@ public class PicsModule {
             cosClient.deleteObject(bucket, key);
             return photo;
         } catch (IOException e) {
+            log.error("Can't read file " + key, e);
             return null;
         }
     }
@@ -219,7 +219,7 @@ public class PicsModule {
     }
 
     public void setDateFromExif(File file, EntityPhoto photo) {
-        if (photo.getTakenDate() != null) { // 如果已经有就不要重复设置了
+        if (photo.getTakenDate() == null) { // 如果已经有就不要重复设置了
             photo.setTakenDate(new Date(file.lastModified()));
         }
         try {
