@@ -15,6 +15,8 @@ import java.util.Date;
 @BeanFactory.Generate
 public class ImageCell extends SimpleTile {
 
+    private Label durationLabel;
+
     public ImageCell() {
         super();
         setOverflow(Overflow.HIDDEN);
@@ -73,16 +75,16 @@ public class ImageCell extends SimpleTile {
             String duration = record.getAttribute("duration");
             if (duration != null) {
                 double v = Double.parseDouble(duration);
-                Label durationLabel = new Label(NumberFormat.getFormat("#.00s").format(v));
+                durationLabel = new Label(NumberFormat.getFormat("#.00s").format(v));
                 durationLabel.setIcon("start.png");
                 durationLabel.setHeight(10);
                 durationLabel.setWidth(30);
                 durationLabel.setBackgroundColor("white");
                 addChild(durationLabel);
             }
+        } else if (durationLabel != null) {
+            removeChild(durationLabel);
         }
-
-
     }
 
     @Override
