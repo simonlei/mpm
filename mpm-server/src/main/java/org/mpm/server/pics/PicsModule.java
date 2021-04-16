@@ -103,60 +103,51 @@ public class PicsModule {
         log.info("Saving video " + video.getId());
         video = dao.insert(video, true, false, false);
 
-        // generate poster
-        SnapshotRequest snapshotRequest = new SnapshotRequest();
-        snapshotRequest.setBucketName(bucket);
-        snapshotRequest.getInput().setObject(key);
-        snapshotRequest.getOutput().setBucket(bucket);
-        snapshotRequest.getOutput()
-                .setRegion(cosClient.getClientConfig().getRegion().getRegionName());
-        snapshotRequest.getOutput().setObject(video.getName());
-        snapshotRequest.setMode("keyframe");
-        snapshotRequest.setTime("1");
-        cosClient.generateSnapshot(snapshotRequest);
-
-/*
-        // check cover generated?
-        String coverKey = key.substring(0, key.lastIndexOf(".")) + "_0.jpg";
-        boolean coverExist = cosClient.doesObjectExist(bucket, coverKey);
-        while (!coverExist) {
-            log.info("Cover " + coverKey + " not generated, waiting...");
-            Thread.sleep(1000);
-            coverExist = cosClient.doesObjectExist(bucket, coverKey);
-        }
- */
-        // get metadata
-        MediaInfoRequest request = new MediaInfoRequest();
-        request.setBucketName(bucket);
-        request.getInput().setObject(key);
-        MediaInfoResponse response = cosClient.generateMediainfo(request);
-        MediaInfoVideo infoVideo = response.getMediaInfo().getStream().getVideo();
-        String duration = infoVideo.getDuration();
-        video.setWidth(Integer.parseInt(infoVideo.getWidth()));
-        video.setHeight(Integer.parseInt(infoVideo.getHeight()));
-        video.setDuration(Double.parseDouble(duration));
-        // TODO: 应该有办法获取到video的拍摄时间吧？
-        video.setTakenDate(new Date());
+        generatePoster(key, video);
+        getVideoMetadata(key, video);
         dao.updateIgnoreNull(video);
 
-
-        /*
-        File coverFile = File.createTempFile(name, "_cover" + Math.random());
-        COSObject coverObj = cosClient.getObject(bucket, coverKey);
-        Streams.writeAndClose(new FileOutputStream(coverFile), coverObj.getObjectContent());
-        final BufferedImage image = ImageIO.read(coverFile);
-        video.setWidth(image.getWidth());
-        video.setHeight(image.getHeight());
-
-         */
-
-        // String coverKey = video.getName();
         cosClient.copyObject(bucket, key, bucket, "video/" + video.getName());
-        // cosClient.copyObject(bucket, coverKey, bucket, video.getName());
         cosClient.deleteObject(bucket, key);
-        // cosClient.deleteObject(bucket, coverKey);
 
         return video;
+    }
+
+    private void getVideoMetadata(String key, EntityPhoto video) {
+        try {
+            // get metadata
+            MediaInfoRequest request = new MediaInfoRequest();
+            request.setBucketName(bucket);
+            request.getInput().setObject(key);
+            MediaInfoResponse response = cosClient.generateMediainfo(request);
+            MediaInfoVideo infoVideo = response.getMediaInfo().getStream().getVideo();
+            String duration = infoVideo.getDuration();
+            video.setWidth(Integer.parseInt(infoVideo.getWidth()));
+            video.setHeight(Integer.parseInt(infoVideo.getHeight()));
+            video.setDuration(Double.parseDouble(duration));
+            // TODO: 应该有办法获取到video的拍摄时间吧？
+            video.setTakenDate(new Date());
+        } catch (Exception e) {
+            log.error("Can't get metadata of " + key + " id " + video.getId(), e);
+        }
+    }
+
+    private void generatePoster(String key, EntityPhoto video) {
+        try {
+            // generate poster
+            SnapshotRequest snapshotRequest = new SnapshotRequest();
+            snapshotRequest.setBucketName(bucket);
+            snapshotRequest.getInput().setObject(key);
+            snapshotRequest.getOutput().setBucket(bucket);
+            snapshotRequest.getOutput()
+                    .setRegion(cosClient.getClientConfig().getRegion().getRegionName());
+            snapshotRequest.getOutput().setObject(video.getName());
+            snapshotRequest.setMode("keyframe");
+            snapshotRequest.setTime("1");
+            cosClient.generateSnapshot(snapshotRequest);
+        } catch (Exception e) {
+            log.error("Can't generate poster " + key + " id " + video.getId(), e);
+        }
     }
 
     public EntityPhoto saveFileInRepository(File file, String key, String name) {
