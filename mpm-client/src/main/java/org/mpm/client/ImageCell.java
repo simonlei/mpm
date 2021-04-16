@@ -83,6 +83,7 @@ public class ImageCell extends SimpleTile {
                 addChild(durationLabel);
             }
         } else if (durationLabel != null) {
+            durationLabel.setVisible(false);
             removeChild(durationLabel);
         }
     }

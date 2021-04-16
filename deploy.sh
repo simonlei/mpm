@@ -16,3 +16,4 @@ cp ~/config/application.properties webapps/ROOT/WEB-INF/classes/
 # start jetty
 nohup java -Djetty.http.port=27277 -DSTOP.PORT=27077 -DSTOP.KEY=stop123 -jar start.jar  > nohup.log &
 rm -rf ROOT_bak
+
