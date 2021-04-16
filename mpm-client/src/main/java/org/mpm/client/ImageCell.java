@@ -9,6 +9,7 @@ import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.tile.SimpleTile;
+import com.smartgwt.client.widgets.tile.TileRecord;
 import java.util.Date;
 
 @BeanFactory.Generate
@@ -60,6 +61,28 @@ public class ImageCell extends SimpleTile {
                 return size + "B";
             }
         }
+    }
+
+    @Override
+    protected void onDraw() {
+        super.onDraw();
+        TileRecord record = getRecord();
+        // SC.logWarn("Draw... " + record.getAttribute("name"));
+
+        if ("video".equals(record.getAttribute("mediaType"))) {
+            String duration = record.getAttribute("duration");
+            if (duration != null) {
+                double v = Double.parseDouble(duration);
+                Label durationLabel = new Label(NumberFormat.getFormat("#.00s").format(v));
+                durationLabel.setIcon("start.png");
+                durationLabel.setHeight(10);
+                durationLabel.setWidth(30);
+                durationLabel.setBackgroundColor("white");
+                addChild(durationLabel);
+            }
+        }
+
+
     }
 
     @Override

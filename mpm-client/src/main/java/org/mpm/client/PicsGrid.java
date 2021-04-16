@@ -1,6 +1,5 @@
 package org.mpm.client;
 
-import com.google.gwt.core.client.GWT;
 import com.smartgwt.client.bean.BeanFactory;
 import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.DSRequest;
@@ -50,7 +49,6 @@ public class PicsGrid extends TileGrid {
             singlePhotoDialog.setPhoto(recordDoubleClickEvent.getRecord());
         });
 
-        GWT.create(ImageCellMetaFactory.class);
         addDataArrivedHandler(dataArrivedEvent -> {
             fireChangeEvent(getResultSet().getLength());
         });

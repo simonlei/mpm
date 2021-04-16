@@ -1,6 +1,7 @@
 package org.mpm.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.smartgwt.client.core.KeyIdentifier;
@@ -11,6 +12,7 @@ import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.layout.SplitPane;
 import com.smartgwt.client.widgets.layout.VLayout;
 import java.util.Map;
+import org.mpm.client.PicsGrid.ImageCellMetaFactory;
 import org.mpm.client.header.HeaderPanel;
 
 public final class PhotoManagerEntryPoint implements EntryPoint {
@@ -20,6 +22,7 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
     public void onModuleLoad() {
         LeftTabSet.exportReloadData();
         PicsGrid.exportReloadData();
+        GWT.create(ImageCellMetaFactory.class);
 
         KeyIdentifier debugKey = new KeyIdentifier();
         debugKey.setCtrlKey(true);
