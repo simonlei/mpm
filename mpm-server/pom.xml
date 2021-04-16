@@ -37,11 +37,6 @@
             <version>1.18.12</version>
         </dependency>
         <dependency>
-            <artifactId>cos_api</artifactId>
-            <groupId>com.qcloud</groupId>
-            <version>5.6.34</version>
-        </dependency>
-        <dependency>
             <groupId>com.qcloud</groupId>
             <artifactId>cos_api</artifactId>
             <version>5.6.34</version>
