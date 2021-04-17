@@ -4,14 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.pics.PicsModule;
-import org.mpm.server.pics.ProgressDataSource;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.ioc.loader.annotation.Inject;
 import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.lang.Lang;
-import org.nutz.lang.Strings;
-import org.nutz.mvc.Mvcs;
 import org.nutz.mvc.adaptor.WhaleAdaptor;
 import org.nutz.mvc.annotation.AdaptBy;
 import org.nutz.mvc.annotation.At;
@@ -27,6 +24,7 @@ public class PhotoImporterDataSource {
     @Inject
     PicsModule picsModule;
 
+    // used in client
     @AdaptBy(type = WhaleAdaptor.class)
     @At("/uploadFile")
     @Ok("json")
@@ -75,25 +73,5 @@ public class PhotoImporterDataSource {
                 .build();
         dao.insert(file, true, false, false);
         return file;
-    }
-
-    @AdaptBy(type = WhaleAdaptor.class)
-    @At("/fileSystem/importImages")
-    @Ok("raw")
-    public String importImagesApi(@Param("folder") String folder) {
-        // String folder = (String) map.get("folder");
-        if (Strings.isBlank(folder)) {
-            throw Lang.makeThrow("No folder selected");
-        }
-
-        log.info("Folder: " + folder);
-        return importImages(folder);
-    }
-
-    private String importImages(String folder) {
-        PhotoImporter importer = Mvcs.getIoc().get(PhotoImporter.class);
-        String taskId = ProgressDataSource.addTask(importer);
-        new Thread(importer.init(folder)).start();
-        return taskId;
     }
 }

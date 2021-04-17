@@ -18,6 +18,7 @@ public class ProgressDataSource {
         return taskId;
     }
 
+    // used in client
     public NutMap getProgress(String taskId) {
         log.info("taskId " + taskId);
         ProgressInterface importer = tasks.get(taskId);

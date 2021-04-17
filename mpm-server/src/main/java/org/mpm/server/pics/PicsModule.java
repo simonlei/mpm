@@ -16,13 +16,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 import javax.imageio.ImageIO;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityBlockPicture;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityPhoto;
-import org.mpm.server.util.ExplicitPager;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.http.Http;
@@ -56,11 +54,6 @@ public class PicsModule {
 
     public int count(boolean trashed) {
         return dao.count(EntityPhoto.class, Cnd.where("trashed", "=", trashed));
-    }
-
-    public List<EntityPhoto> query(int startRow, int endRow, boolean trashed) {
-        return dao.query(EntityPhoto.class, Cnd.where("trashed", "=", trashed),
-                new ExplicitPager(startRow, endRow - startRow));
     }
 
     public EntityPhoto savePhotoInDb(EntityFile parent, String key, String name) {

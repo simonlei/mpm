@@ -15,9 +15,6 @@
             <whereClause>$defaultWhereClause #if ($criteria.fileId) AND id in ( select f.photoId from t_files f where f.parentId=$criteria.fileId or f.rootId=$criteria.fileId) #end</whereClause>
         </operationBinding>
         <operationBinding operationType="remove" canSyncCache="true">
-            <!--
-            <ServerObject className="org.mpm.server.pics.PicsDataSource" methodName="swapPics"/>
-            -->
             <customSQL>
                 UPDATE $defaultTableClause SET trashed = !trashed WHERE $defaultWhereClause
             </customSQL>

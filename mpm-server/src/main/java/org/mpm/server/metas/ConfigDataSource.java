@@ -21,6 +21,7 @@ public class ConfigDataSource {
     @Inject
     PropertiesProxy conf;
 
+    // used in client
     @At("/tmpCredential")
     @Ok("raw")
     public String getTmpCredential() throws IOException {
@@ -55,6 +56,7 @@ public class ConfigDataSource {
         return credential.toString();
     }
 
+    // used in client
     @At("/config")
     @Ok("raw")
     public String getConfigJs() {
@@ -66,6 +68,7 @@ public class ConfigDataSource {
         return s;
     }
 
+    // used in client
     public NutMap fetchConfig() {
         NutMap result = new NutMap();
 
@@ -76,6 +79,7 @@ public class ConfigDataSource {
         return result;
     }
 
+    // used in client
     public NutMap authPassword(String passwd) {
         PropertiesProxy conf = MyUtils.getByType(PropertiesProxy.class);
         if (conf.get("password").equals(passwd)) {
