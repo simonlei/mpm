@@ -5,7 +5,6 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.smartgwt.client.bean.BeanFactory;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Overflow;
-import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.tile.SimpleTile;
@@ -24,13 +23,6 @@ public class ImageCell extends SimpleTile {
         setShowHoverComponents(true);
         setHoverWidth(300);
         setHoverAutoFitWidth(true);
-        addKeyPressHandler(keyPressEvent -> {
-            SC.logWarn(keyPressEvent.getKeyName());
-        });
-    }
-
-    static Label getHoverComponent(Record record) {
-        return new Label(getHoverString(record, true));
     }
 
     static String getHoverString(Record record, boolean useBr) {
@@ -66,30 +58,32 @@ public class ImageCell extends SimpleTile {
     }
 
     @Override
-    protected void onDraw() {
-        super.onDraw();
+    public String getInnerHTML() {
         TileRecord record = getRecord();
-        // SC.logWarn("Draw... " + record.getAttribute("name"));
+        // SC.logWarn("getInnerHTML......" + record.getAttribute("name")+ " " + record.getAttribute("mediaType"));
 
         if ("video".equals(record.getAttribute("mediaType"))) {
             String duration = record.getAttribute("duration");
             if (duration != null) {
                 double v = Double.parseDouble(duration);
-                durationLabel = new Label(NumberFormat.getFormat("#.00s").format(v));
+                if (durationLabel == null) {
+                    durationLabel = new Label(NumberFormat.getFormat("#.00s").format(v));
+                    addChild(durationLabel);
+                }
+                durationLabel.setVisible(true);
                 durationLabel.setIcon("start.png");
                 durationLabel.setHeight(10);
                 durationLabel.setWidth(30);
                 durationLabel.setBackgroundColor("white");
-                addChild(durationLabel);
             }
         } else if (durationLabel != null) {
             durationLabel.setVisible(false);
-            removeChild(durationLabel);
         }
+        return super.getInnerHTML();
     }
 
     @Override
     public Canvas getHoverComponent() {
-        return getHoverComponent(getRecord());
+        return new Label(getHoverString(getRecord(), true));
     }
 }
