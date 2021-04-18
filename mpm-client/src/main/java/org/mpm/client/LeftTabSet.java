@@ -14,6 +14,7 @@ public class LeftTabSet extends TabSet {
 
     public static LeftTabSet instance;
     String lastSelectedTitle = null;
+    TreeNode lastSelectedNode = null;
     boolean filesTabInited = false;
     private TreeGrid datesGrid;
     private TreeGrid filesGrid;
@@ -78,8 +79,6 @@ public class LeftTabSet extends TabSet {
         Tab datesTab = new Tab("按时间查看");
         datesGrid = new TreeGrid();
         datesGrid.setShowHeader(false);
-        datesGrid.setShowRoot(true);
-        datesGrid.setTreeRootValue("全部");
         DataSource dataSource = DataSource.get("datesTree");
 
         datesGrid.setFields(new TreeGridField("title"));
@@ -88,15 +87,13 @@ public class LeftTabSet extends TabSet {
         datesGrid.setLoadDataOnDemand(false);
         datesGrid.addNodeClickHandler(nodeClickEvent -> {
             TreeNode node = nodeClickEvent.getNode();
-            String title = node.getTitle();
+            lastSelectedNode = node;
             criteria = new Criteria();
-            if (title.contains("年")) {
-                criteria.addCriteria("theYear", getYearOrMonth(title));
-            } else if (title.contains("月")) {
-                SC.logWarn("Y:" + getYearOrMonth(node.getAttribute("year")) + " M:"
-                        + getYearOrMonth(node.getAttribute("month")));
-                criteria.addCriteria("theYear", getYearOrMonth(node.getAttribute("year")));
-                criteria.addCriteria("theMonth", getYearOrMonth(node.getAttribute("month")));
+            if (node.getAttribute("year") != null) {
+                criteria.addCriteria("theYear", node.getAttribute("year"));
+            }
+            if (node.getAttribute("month") != null) {
+                criteria.addCriteria("theMonth", node.getAttribute("month"));
             }
             PicsGrid.instance.reloadData();
             SC.logWarn("Click:" + node.getTitle() + " Criteria " + criteria.getValues());
@@ -112,22 +109,17 @@ public class LeftTabSet extends TabSet {
     }
 
     private void selectLastRecord(TreeGrid grid) {
-        if (lastSelectedTitle != null) {
-            lastSelectedTitle = lastSelectedTitle.replaceAll("\\(.*\\)", "");
-            SC.logWarn("lastSelectedRecord is:" + lastSelectedTitle);
+        if (lastSelectedNode != null) {
             TreeNode[] allNodes = grid.getTree().getAllNodes();
 
             for (int i = 0; i < allNodes.length; i++) {
-                String title = allNodes[i].getAttribute(selectedTab == 0 ? "title" : "name");
-                SC.logWarn("Title " + i + " " + title);
-                if (title.startsWith(lastSelectedTitle)) {
-                    SC.logWarn("Select " + i + " " + title);
+                String id = allNodes[i].getAttribute(selectedTab == 0 ? "id" : "name");
+                if (id.equals(lastSelectedNode.getAttribute("id"))) {
                     grid.selectRecord(allNodes[i]);
                     return;
                 }
             }
         }
-
     }
 
     private boolean notEmpty(String str) {
