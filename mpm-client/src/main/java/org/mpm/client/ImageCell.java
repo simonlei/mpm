@@ -26,6 +26,9 @@ public class ImageCell extends SimpleTile {
     }
 
     static String getHoverString(Record record, boolean useBr) {
+        if (record == null) {
+            return "";
+        }
         String address = record.getAttribute("address");
         DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd");
         Date takenDate = record.getAttributeAsDate("takenDate");
@@ -60,6 +63,9 @@ public class ImageCell extends SimpleTile {
     @Override
     public String getInnerHTML() {
         TileRecord record = getRecord();
+        if (record == null) {
+            return "";
+        }
         // SC.logWarn("getInnerHTML......" + record.getAttribute("name")+ " " + record.getAttribute("mediaType"));
 
         if ("video".equals(record.getAttribute("mediaType"))) {

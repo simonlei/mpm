@@ -97,6 +97,7 @@ public class LeftTabSet extends TabSet {
             }
             PicsGrid.instance.reloadData();
             SC.logWarn("Click:" + node.getTitle() + " Criteria " + criteria.getValues());
+            datesGrid.openFolder(node);
         });
         datesGrid.addDataArrivedHandler((DataArrivedHandler) dataArrivedEvent -> {
             selectLastRecord(datesGrid);
@@ -116,9 +117,13 @@ public class LeftTabSet extends TabSet {
                 String id = allNodes[i].getAttribute(selectedTab == 0 ? "id" : "name");
                 if (id.equals(lastSelectedNode.getAttribute("id"))) {
                     grid.selectRecord(allNodes[i]);
+                    datesGrid.openFolder(allNodes[i]);
                     return;
                 }
             }
+        } else {
+            datesGrid.selectRecord(0);
+            datesGrid.openFolder(datesGrid.getRecord(0));
         }
     }
 
