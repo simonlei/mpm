@@ -58,7 +58,7 @@ public class LeftTabSet extends TabSet {
         filesGrid.setShowHeader(false);
         filesGrid.setShowRoot(false);
         DataSource dataSource = DataSource.get("filesTree");
-        filesGrid.setFields(new TreeGridField("name"));
+        filesGrid.setFields(new TreeGridField("title"));
         filesGrid.setDataSource(dataSource);
         filesGrid.setAutoFetchData(false);
         filesGrid.addNodeClickHandler(nodeClickEvent -> {
@@ -125,14 +125,6 @@ public class LeftTabSet extends TabSet {
             datesGrid.selectRecord(0);
             datesGrid.openFolder(datesGrid.getRecord(0));
         }
-    }
-
-    private boolean notEmpty(String str) {
-        return !(str == null || str.trim().length() == 0);
-    }
-
-    private String getYearOrMonth(String title) {
-        return title.substring(0, title.length() - 1);
     }
 
     /**
