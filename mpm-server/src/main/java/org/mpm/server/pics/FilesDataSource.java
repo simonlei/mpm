@@ -24,7 +24,9 @@ public class FilesDataSource {
                 + " left join t_photos p  on fp.photoId=p.id"
                 + " where f.isFolder=true and"
                 + (parentId == null ? " f.parentId is null " : " f.parentId=@parentId")
-                + " and p.trashed=@trashed group by f.id");
+                + " and p.trashed=@trashed group by f.id"
+                + " order by "
+                + (parentId == null ? " f.id" : " f.name"));
         s.setParam("trashed", trashed).setParam("parentId", parentId)
                 .setCallback(Sqls.callback.records());
         Dao dao = MyUtils.getByType(Dao.class);

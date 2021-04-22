@@ -68,13 +68,11 @@ function uploadFiles(files) {
         realodLeftTab();
         realodPicsGrid();
       }
-      // log error file
-
-      var httpRequest = new XMLHttpRequest();//第一步：创建需要的对象
-      httpRequest.open('POST', '/uploadFile', true); //第二步：打开连接/***发送json格式文件必须设置请求头 ；如下 - */
-      httpRequest.setRequestHeader("Content-type", "application/json");//设置请求头 注：post方式必须设置请求头（在建立连接后设置请求头）var obj = { name: 'zhansgan', age: 18 };
+      var httpRequest = new XMLHttpRequest();
+      httpRequest.open('POST', '/uploadFile', true);
+      httpRequest.setRequestHeader("Content-type", "application/json");
       httpRequest.send(
-          JSON.stringify({key: options.Key, err: err, data: data}));//发送请求 将json写入send中
+          JSON.stringify({key: options.Key, err: err, data: data}));
       /**
        * 获取数据后的处理程序
        */
@@ -89,51 +87,5 @@ function uploadFiles(files) {
     },
   }, function (err, data) {
     console.log(err || data);
-    // to refresh
-    // isc_LeftTabSet_0.getSGWTInstance().reloadData_0_g$();
-    // isc_PicsGrid_0.getSGWTInstance().reloadData_0_g$();
-
-    //                         LeftTabSet.instance.reloadData();
-    //                         PicsGrid.reloadData();
   });
-  /*
-  var total = files.length;
-  var count = 0;
-  var finished = 0;
-  for (var i = 0; i < total; i++) {
-    file = files[i];
-    if (file.type.startsWith("image") || file.type.startsWith("video")) {
-      count++;
-      cos.putObject({
-        Bucket: bucket,
-        Region: region,
-        Key: 'upload/' + file.webkitRelativePath,
-        StorageClass: 'STANDARD',
-        Body: file,
-        onProgress: function (progressData) {
-          if (progressData.percent > 0) {
-            // {"loaded":3453674,"total":3453674,"speed":3067206.04,"percent":1}
-            isc.notify("上传文件 " + file.name + " 进度 " +
-                (progressData.percent * 100).toFixed(2)
-                + "%，速度 " + (progressData.speed / 1024 / 1024).toFixed(2)
-                + "MB"); // , [], 'message', {duration: 0.1});
-          }
-          if (progressData.percent == 1) {
-            finished++;
-            if (finished == count) {
-              isc.notify("done..." + count);
-            }
-          }
-          console.log(JSON.stringify(progressData));
-        }
-      }, function (err, data) {
-
-        console.log(err || data);
-      });
-    }
-    // callback file
-    // isc.notify("uploading..." + file + " " + file.type, [], 'message',{duration: 1});
-
-}   */
-
 }
