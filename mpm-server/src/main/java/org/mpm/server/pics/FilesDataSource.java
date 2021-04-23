@@ -2,6 +2,7 @@ package org.mpm.server.pics;
 
 import com.isomorphic.datasource.DSRequest;
 import com.isomorphic.datasource.DSResponse;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Dao;
@@ -31,7 +32,14 @@ public class FilesDataSource {
                 .setCallback(Sqls.callback.records());
         Dao dao = MyUtils.getByType(Dao.class);
         dao.execute(s);
-        resp.setData(s.getList(Record.class));
+        List<Record> list = s.getList(Record.class);
+        if (parentId == null) {
+            for (Record r : list) {
+                r.set("parentId", -1);
+            }
+            list.add(0, new Record().set("title", "全部").set("id", -1));
+        }
+        resp.setData(list);
         return resp;
     }
 }

@@ -13,7 +13,6 @@ import com.smartgwt.client.widgets.tree.TreeNode;
 public class LeftTabSet extends TabSet {
 
     public static LeftTabSet instance;
-    String lastSelectedTitle = null;
     TreeNode lastSelectedNode = null;
     boolean filesTabInited = false;
     private TreeGrid datesGrid;
@@ -29,7 +28,7 @@ public class LeftTabSet extends TabSet {
             int oldSelected = selectedTab;
             selectedTab = tabSelectedEvent.getTabNum();
             if (oldSelected != selectedTab) {
-                lastSelectedTitle = null;
+                lastSelectedNode = null;
                 reloadData();
             }
         });
@@ -63,10 +62,12 @@ public class LeftTabSet extends TabSet {
         filesGrid.setAutoFetchData(false);
         filesGrid.addNodeClickHandler(nodeClickEvent -> {
             TreeNode node = nodeClickEvent.getNode();
+            lastSelectedNode = node;
             criteria = new Criteria();
             criteria.addCriteria("fileId", node.getAttributeAsInt("id"));
             PicsGrid.instance.reloadData();
             SC.logWarn("reload fileid");
+            filesGrid.openFolder(node);
         });
         filesGrid.addDataArrivedHandler((DataArrivedHandler) dataArrivedEvent -> {
             selectLastRecord(filesGrid);
@@ -114,16 +115,16 @@ public class LeftTabSet extends TabSet {
             TreeNode[] allNodes = grid.getTree().getAllNodes();
 
             for (int i = 0; i < allNodes.length; i++) {
-                String id = allNodes[i].getAttribute(selectedTab == 0 ? "id" : "name");
+                String id = allNodes[i].getAttribute("id");
                 if (id.equals(lastSelectedNode.getAttribute("id"))) {
                     grid.selectRecord(allNodes[i]);
-                    datesGrid.openFolder(allNodes[i]);
+                    grid.openFolder(allNodes[i]);
                     return;
                 }
             }
         } else {
-            datesGrid.selectRecord(0);
-            datesGrid.openFolder(datesGrid.getRecord(0));
+            grid.selectRecord(0);
+            grid.openFolder(grid.getRecord(0));
         }
     }
 
@@ -135,12 +136,7 @@ public class LeftTabSet extends TabSet {
         criteria.addCriteria("trashed", PicsGrid.isTrashed());
         SC.logWarn("Selected tab: " + selectedTab);
         TreeGrid grid = selectedTab == 0 ? datesGrid : filesGrid;
-        TreeNode selectedRecord = grid.getSelectedRecord();
-        SC.logWarn("Selected Record: " + selectedRecord);
-        lastSelectedTitle = selectedRecord == null ? null
-                : selectedRecord.getAttribute(selectedTab == 0 ? "title" : "name");
 
-        SC.logWarn("Selected Record Title: " + lastSelectedTitle);
         grid.setCriteria(criteria);
         if (grid == filesGrid && !filesTabInited) {
             filesTabInited = true;
