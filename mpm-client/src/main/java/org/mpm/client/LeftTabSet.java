@@ -64,7 +64,7 @@ public class LeftTabSet extends TabSet {
             TreeNode node = nodeClickEvent.getNode();
             lastSelectedNode = node;
             criteria = new Criteria();
-            criteria.addCriteria("fileId", node.getAttributeAsInt("id"));
+            criteria.addCriteria("filePath", node.getAttributeAsInt("path"));
             PicsGrid.instance.reloadData();
             SC.logWarn("reload fileid");
             filesGrid.openFolder(node);

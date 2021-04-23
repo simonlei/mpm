@@ -3,21 +3,12 @@
     schemaBean="org.mpm.server.entity.EntityPhoto"
     tableName="t_photos"
     autoDeriveSchema="true"
-    serverType="sql">
+    serverType="generic">
     <fields>
         <field name="id" primaryKey="true"/>
         <field name="trashed" sqlStorageStrategy="number"/>
         <field name="theYear" customSelectExpression="year(takenDate)"/>
         <field name="theMonth" customSelectExpression="month(takenDate)"/>
     </fields>
-    <operationBindings>
-        <operationBinding operationType="fetch">
-            <whereClause>$defaultWhereClause #if ($criteria.fileId) AND id in ( select f.photoId from t_files f where f.parentId=$criteria.fileId or f.rootId=$criteria.fileId) #end</whereClause>
-        </operationBinding>
-        <operationBinding operationType="remove" canSyncCache="true">
-            <customSQL>
-                UPDATE $defaultTableClause SET trashed = !trashed WHERE $defaultWhereClause
-            </customSQL>
-        </operationBinding>
-    </operationBindings>
+    <serverObject lookStyle="new" className="org.mpm.server.pics.PicsDataSource"/>
 </DataSource>

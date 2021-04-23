@@ -9,5 +9,5 @@
         <field name="month" type="integer"/>
         <field name="photoCount" type="integer"/>
     </fields>
-    <serverObject lookStyle="new" className="org.mpm.server.pics.PicsDataSource"/>
+    <serverObject lookStyle="new" className="org.mpm.server.pics.PicsDateSource"/>
 </DataSource>

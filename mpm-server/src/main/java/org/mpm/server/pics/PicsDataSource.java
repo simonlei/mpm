@@ -2,17 +2,17 @@ package org.mpm.server.pics;
 
 import com.isomorphic.datasource.DSRequest;
 import com.isomorphic.datasource.DSResponse;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.mpm.server.entity.EntityPhoto;
+import org.mpm.server.util.ExplicitPager;
 import org.mpm.server.util.MyUtils;
+import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.dao.Sqls;
-import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Sql;
+import org.nutz.dao.util.cri.SimpleCriteria;
 import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.lang.Lang;
-import org.nutz.lang.util.NutMap;
 import org.nutz.mvc.Mvcs;
 
 @IocBean
@@ -24,63 +24,55 @@ public class PicsDataSource {
         return MyUtils.getByType(PicsModule.class).count(trashed);
     }
 
-    // used in datasource
-    public DSResponse fetch(DSRequest req) {
-        DSResponse resp = new DSResponse();
-        Dao dao = MyUtils.getByType(Dao.class);
-        List<Record> photoDates = getPhotoDates(dao, (Boolean) req.getCriteria().get("trashed"));
-        NutMap lastYear = null;
-        int yearCount = 0;
-        List<NutMap> result = new ArrayList<>();
-        result.add(Lang.map("id", "全部").setv("title", "全部"));
-        for (Record r : photoDates) {
-            if (lastYear == null) {
-                lastYear = makeNewYear(result, r);
-            }
-            if (!Lang.equals(r.get("year"), lastYear.get("year"))) {
-                lastYear.setv("title", lastYear.get("year") + "年(" + yearCount + ")");
-                yearCount = 0;
-                lastYear = makeNewYear(result, r);
-            }
-            NutMap month = Lang.map("id", lastYear.getInt("year") * 100 + r.getInt("month"))
-                    .setv("parentId", lastYear.get("year"))
-                    .setv("year", lastYear.get("year"))
-                    .setv("month", r.get("month"))
-                    .setv("photoCount", r.get("photoCount"))
-                    .setv("title", r.get("month") + "月(" + r.get("photoCount") + ")");
-            yearCount += r.getInt("photoCount", 0);
-            result.add(month);
-        }
-        if (lastYear != null) {
-            lastYear.setv("title", lastYear.get("year") + "(" + yearCount + ")");
-        }
-        resp.setData(result);
-        return resp;
-    }
-
-    private NutMap makeNewYear(List<NutMap> result, Record r) {
-        NutMap lastYear = Lang.map("id", r.get("year")).setv("year", r.get("year"))
-                .setv("parentId", "全部");
-        result.add(lastYear);
-        return lastYear;
-    }
-
-    private List<Record> getPhotoDates(Dao dao, Boolean trashed) {
-        // photo dates...include years and months
-        Sql sql = Sqls.create("select year(takenDate) year, month(takenDate) month,"
-                + " count(*) photoCount "
-                + " from t_photos where trashed = " + trashed
-                + " group by year, month order by year desc, month desc");
-        sql.setCallback(Sqls.callback.records());
-        dao.execute(sql);
-        return sql.getList(Record.class);
-    }
-
     // used in client
     public String emptyTrash() {
         TrashEmptyTask emptyTask = Mvcs.getIoc().get(TrashEmptyTask.class);
         String taskId = ProgressDataSource.addTask(emptyTask);
         new Thread(emptyTask).start();
         return taskId;
+    }
+
+    // used in datasource
+    public DSResponse remove(DSRequest req) {
+        DSResponse resp = new DSResponse();
+        Long id = (Long) req.getCriteria().get("id");
+        if (id != null) {
+            Dao dao = MyUtils.getByType(Dao.class);
+            Sql sql = Sqls.create("update t_photos set trashed = !trashed where id = @id");
+            sql.setParam("id", id);
+            dao.execute(sql);
+            resp.setData(Lang.list(Lang.map("id", id)));
+            resp.setAffectedRows(1);
+        }
+        log.info("remove : {}", req.getCriteria());
+        return resp;
+    }
+
+    public DSResponse fetch(DSRequest req) {
+        DSResponse resp = new DSResponse();
+        Dao dao = MyUtils.getByType(Dao.class);
+        Boolean trashed = (Boolean) req.getCriteria().get("trashed");
+        String theYear = (String) req.getCriteria().get("theYear");
+        String theMonth = (String) req.getCriteria().get("theMonth");
+        String filePath = (String) req.getCriteria().get("filePath");
+        int start = (int) req.getStartRow();
+        int end = (int) req.getEndRow();
+        if (filePath != null) {
+            String joinSql = "inner join t_files on t_photos.id = t_files.photoId ";
+            SimpleCriteria cnd = new SimpleCriteria(joinSql);
+            cnd.where().and("t_files.path", "like", filePath + "%")
+                    .and("trashed", "=", trashed);
+            resp.setTotalRows(dao.count(EntityPhoto.class, cnd));
+            cnd.setPager(new ExplicitPager(start, end - start));
+            resp.setData(dao.query(EntityPhoto.class, cnd));
+        } else {
+            Cnd cnd = Cnd.where("trashed", "=", trashed);
+            cnd = theYear == null ? cnd : cnd.and("year(takenDate)", "=", theYear);
+            cnd = theMonth == null ? cnd : cnd.and("month(takenDate)", "=", theMonth);
+            resp.setTotalRows(dao.count(EntityPhoto.class, cnd));
+            cnd.limit(new ExplicitPager(start, end - start));
+            resp.setData(dao.query(EntityPhoto.class, cnd));
+        }
+        return resp;
     }
 }
