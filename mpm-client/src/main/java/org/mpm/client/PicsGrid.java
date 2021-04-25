@@ -4,7 +4,9 @@ import com.smartgwt.client.bean.BeanFactory;
 import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.data.Record;
 import com.smartgwt.client.data.SortSpecifier;
+import com.smartgwt.client.rpc.RPCManager;
 import com.smartgwt.client.types.KeyNames;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.SortDirection;
@@ -14,6 +16,7 @@ import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.tile.TileGrid;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
+import java.util.Map;
 import org.mpm.client.events.PicsChangeEvent;
 import org.mpm.client.header.HeaderPanel;
 
@@ -110,6 +113,18 @@ public class PicsGrid extends TileGrid {
     public static native void exportReloadData() /*-{
       $wnd.realodPicsGrid = $entry(@org.mpm.client.PicsGrid::staticReload());
     }-*/;
+
+    public void updateSelectedPhotos(Map values) {
+        Record[] selection = getSelection();
+        RPCManager.startQueue();
+        for (Record r : selection) {
+            for (Object k : values.keySet()) {
+                r.setAttribute((String) k, values.get(k));
+            }
+            getDataSource().updateData(r);
+        }
+        RPCManager.sendQueue(rpcResponses -> reloadData());
+    }
 
     public void reloadData() {
         Criteria criteria = new Criteria();

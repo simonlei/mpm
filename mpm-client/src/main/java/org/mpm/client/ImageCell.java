@@ -5,11 +5,15 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.smartgwt.client.bean.BeanFactory;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Overflow;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.menu.Menu;
+import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.tile.SimpleTile;
 import com.smartgwt.client.widgets.tile.TileRecord;
 import java.util.Date;
+import java.util.HashMap;
 
 @BeanFactory.Generate
 public class ImageCell extends SimpleTile {
@@ -23,6 +27,16 @@ public class ImageCell extends SimpleTile {
         setShowHoverComponents(true);
         setHoverWidth(300);
         setHoverAutoFitWidth(true);
+        Menu contextMenu = new Menu();
+        MenuItem modifyDate = new MenuItem("修改时间");
+        modifyDate.addClickHandler(menuItemClickEvent -> SC.askforValue("请输入日期 yyyy-MM-dd", s -> {
+            PicsGrid grid = (PicsGrid) getTileGrid();
+            HashMap values = new HashMap();
+            values.put("takenDate", s);
+            grid.updateSelectedPhotos(values);
+        }));
+        contextMenu.addItem(modifyDate);
+        setContextMenu(contextMenu);
     }
 
     static String getHoverString(Record record, boolean useBr) {

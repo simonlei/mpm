@@ -9,6 +9,7 @@ import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.dao.Sqls;
+import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Sql;
 import org.nutz.dao.util.cri.SimpleCriteria;
 import org.nutz.ioc.loader.annotation.IocBean;
@@ -33,6 +34,19 @@ public class PicsDataSource {
     }
 
     // used in datasource
+    public DSResponse update(DSRequest req) {
+        DSResponse resp = new DSResponse();
+        Dao dao = MyUtils.getByType(Dao.class);
+        Record record = new Record();
+        record.putAll(req.getValues());
+
+        int affectedRows = dao.updateIgnoreNull(dao.getEntity(EntityPhoto.class).getObject(record));
+        resp.setData(record);
+        resp.setAffectedRows(affectedRows);
+        return resp;
+    }
+
+    // used in datasource
     public DSResponse remove(DSRequest req) {
         DSResponse resp = new DSResponse();
         Long id = (Long) req.getCriteria().get("id");
@@ -48,6 +62,7 @@ public class PicsDataSource {
         return resp;
     }
 
+    // used in datasource
     public DSResponse fetch(DSRequest req) {
         DSResponse resp = new DSResponse();
         Dao dao = MyUtils.getByType(Dao.class);
