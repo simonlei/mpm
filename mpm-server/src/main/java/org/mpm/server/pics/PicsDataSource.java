@@ -2,6 +2,7 @@ package org.mpm.server.pics;
 
 import com.isomorphic.datasource.DSRequest;
 import com.isomorphic.datasource.DSResponse;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.util.ExplicitPager;
@@ -38,12 +39,30 @@ public class PicsDataSource {
         DSResponse resp = new DSResponse();
         Dao dao = MyUtils.getByType(Dao.class);
         Record record = new Record();
-        record.putAll(req.getValues());
+        Map values = req.getValues();
+        record.putAll(values);
 
+        if (values.get("longitude") != null || values.get("latitude") != null) {
+            setAddress(req, record);
+            // photo.setAddress(getAddress(photo.getLatitude(), photo.getLongitude()));
+        }
         int affectedRows = dao.updateIgnoreNull(dao.getEntity(EntityPhoto.class).getObject(record));
         resp.setData(record);
         resp.setAffectedRows(affectedRows);
         return resp;
+    }
+
+    private void setAddress(DSRequest req, Record record) {
+        try {
+            PicsModule picsModule = MyUtils.getByType(PicsModule.class);
+            record.set("address", picsModule.getAddress(
+                    (Double) req.getValues().get("latitude"),
+                    (Double) req.getValues().get("longitude")));
+            //Double.parseDouble((String) req.getValues().get("latitude")),
+            //Double.parseDouble((String) req.getValues().get("longitude"))));
+        } catch (Exception e) {
+            log.error("Can't set address", e);
+        }
     }
 
     // used in datasource
