@@ -8,20 +8,24 @@ import org.mpm.client.PicsGrid;
 
 class OrderSelectItem extends SelectItem {
 
-    public OrderSelectItem(HeaderPanel headerPanel) {
+    public OrderSelectItem() {
         setWidth(90);
         setShowTitle(false);
         LinkedHashMap<SortSpecifier, String> valueMap = new LinkedHashMap<>();
-        headerPanel.selectedValue = new SortSpecifier("id", SortDirection.DESCENDING);
-        valueMap.put(headerPanel.selectedValue, "ID逆序");
+        SortSpecifier selectedValue = new SortSpecifier("id", SortDirection.DESCENDING);
+        valueMap.put(selectedValue, "ID逆序");
         valueMap.put(new SortSpecifier("id", SortDirection.ASCENDING), "ID顺序");
         valueMap.put(new SortSpecifier("takenDate", SortDirection.DESCENDING), "时间逆序");
         valueMap.put(new SortSpecifier("takenDate", SortDirection.ASCENDING), "时间顺序");
         setValueMap(valueMap);
-        setDefaultValue(headerPanel.selectedValue);
+        setDefaultValue(selectedValue);
 
         addChangedHandler(changedEvent -> {
-            headerPanel.selectedValue = (SortSpecifier) getValue();
+            SortSpecifier value = (SortSpecifier) getValue();
+
+            PicsGrid.instance.sortByProperty(value.getField(),
+                    value.getSortDirection() == SortDirection.ASCENDING);
+            // SC.logWarn("Selected value : " + value.getField() + " : " + value.getSortDirection().getValue());
             PicsGrid.instance.reloadData();
         });
     }

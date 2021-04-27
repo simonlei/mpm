@@ -18,7 +18,6 @@ import com.smartgwt.client.widgets.tile.TileGrid;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import java.util.Map;
 import org.mpm.client.events.PicsChangeEvent;
-import org.mpm.client.header.HeaderPanel;
 
 public class PicsGrid extends TileGrid {
 
@@ -131,10 +130,8 @@ public class PicsGrid extends TileGrid {
         criteria.addCriteria("trashed", instance.trashed);
         criteria.addCriteria(LeftTabSet.getCriteria());
 
-        instance.getResultSet().setSort(HeaderPanel.getSortSpecifier());
-        instance.getResultSet().setCriteria(criteria);
-
         SC.logWarn("Will fetch: " + instance.getResultSet().willFetchData(criteria));
+
         instance.invalidateCache();
         instance.fetchData(criteria);
     }

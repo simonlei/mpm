@@ -58,8 +58,6 @@ public class PicsDataSource {
             record.set("address", picsModule.getAddress(
                     (Double) req.getValues().get("latitude"),
                     (Double) req.getValues().get("longitude")));
-            //Double.parseDouble((String) req.getValues().get("latitude")),
-            //Double.parseDouble((String) req.getValues().get("longitude"))));
         } catch (Exception e) {
             log.error("Can't set address", e);
         }
@@ -91,6 +89,11 @@ public class PicsDataSource {
         String filePath = (String) req.getCriteria().get("filePath");
         int start = (int) req.getStartRow();
         int end = (int) req.getEndRow();
+        String sortedBy = req.getSortBy();
+        sortedBy = sortedBy == null ? "id" : sortedBy;
+        boolean desc = sortedBy.startsWith("-");
+        sortedBy = desc ? sortedBy.substring(1) : sortedBy;
+
         if (filePath != null) {
             String joinSql = "inner join t_files on t_photos.id = t_files.photoId ";
             SimpleCriteria cnd = new SimpleCriteria(joinSql);
@@ -98,6 +101,7 @@ public class PicsDataSource {
                     .and("trashed", "=", trashed);
             resp.setTotalRows(dao.count(EntityPhoto.class, cnd));
             cnd.setPager(new ExplicitPager(start, end - start));
+            cnd.orderBy(sortedBy, desc ? "desc" : "asc");
             resp.setData(dao.query(EntityPhoto.class, cnd));
         } else {
             Cnd cnd = Cnd.where("trashed", "=", trashed);
@@ -105,6 +109,7 @@ public class PicsDataSource {
             cnd = theMonth == null ? cnd : cnd.and("month(takenDate)", "=", theMonth);
             resp.setTotalRows(dao.count(EntityPhoto.class, cnd));
             cnd.limit(new ExplicitPager(start, end - start));
+            cnd.orderBy(sortedBy, desc ? "desc" : "asc");
             resp.setData(dao.query(EntityPhoto.class, cnd));
         }
         return resp;

@@ -1,19 +1,17 @@
 package org.mpm.client.header;
 
-import com.smartgwt.client.data.SortSpecifier;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 
 public class HeaderPanel extends HLayout {
 
     static HeaderPanel instance;
-    SortSpecifier selectedValue;
 
     public HeaderPanel() {
         super();
         instance = this;
         ToolStrip toolStrip = new ToolStrip();
-        OrderSelectItem orderSelectItem = new OrderSelectItem(this);
+        OrderSelectItem orderSelectItem = new OrderSelectItem();
 
         toolStrip.addFormItem(orderSelectItem);
         toolStrip.addButton(new SwitchTrashButton());
@@ -26,9 +24,4 @@ public class HeaderPanel extends HLayout {
         toolStrip.addButton(formItem);
         addMember(toolStrip);
     }
-
-    public static SortSpecifier getSortSpecifier() {
-        return instance.selectedValue;
-    }
-
 }
