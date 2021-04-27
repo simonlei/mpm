@@ -112,6 +112,8 @@ public class PicsDataSource {
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
             resp.setData(dao.query(EntityPhoto.class, cnd));
         }
+        resp.setStartRow(start);
+        resp.setEndRow(end);
         return resp;
     }
 }
