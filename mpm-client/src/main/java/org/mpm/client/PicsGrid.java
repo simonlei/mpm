@@ -118,7 +118,16 @@ public class PicsGrid extends TileGrid {
         RPCManager.startQueue();
         for (Record r : selection) {
             for (Object k : values.keySet()) {
-                r.setAttribute((String) k, values.get(k));
+                if ("rotate".equals(k)) {
+                    Integer rotate = (Integer) values.get(k);
+                    if (rotate.equals(0)) {
+                        r.setAttribute("rotate", 0);
+                    } else {
+                        r.setAttribute("rotate", r.getAttributeAsInt("rotate") + rotate);
+                    }
+                } else {
+                    r.setAttribute((String) k, values.get(k));
+                }
             }
             getDataSource().updateData(r);
         }

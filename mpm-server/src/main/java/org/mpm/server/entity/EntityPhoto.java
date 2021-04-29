@@ -36,4 +36,5 @@ public class EntityPhoto {
     private Date takenDate; // 拍照时间
     private Integer mediaType;
     private Double duration; // 视频长度
+    private Integer rotate; // 旋转
 }

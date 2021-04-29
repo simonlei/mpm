@@ -14,6 +14,7 @@ import com.smartgwt.client.widgets.tile.SimpleTile;
 import com.smartgwt.client.widgets.tile.TileRecord;
 import java.util.Date;
 import java.util.HashMap;
+import org.mpm.client.actions.RotateMenuItem;
 
 @BeanFactory.Generate
 public class ImageCell extends SimpleTile {
@@ -30,6 +31,7 @@ public class ImageCell extends SimpleTile {
         Menu contextMenu = new Menu();
         addModifyDateMenu(contextMenu);
         addModifyGisMenu(contextMenu);
+        addRotateMenu(contextMenu);
         setContextMenu(contextMenu);
     }
 
@@ -66,6 +68,18 @@ public class ImageCell extends SimpleTile {
                 return size + "B";
             }
         }
+    }
+
+    private void addRotateMenu(Menu contextMenu) {
+        MenuItem rotateMenuItem = new MenuItem("旋转");
+
+        Menu rotateMenu = new Menu();
+        rotateMenu.addItem(new RotateMenuItem("左旋90度", -90));
+        rotateMenu.addItem(new RotateMenuItem("右旋90度", 90));
+        rotateMenu.addItem(new RotateMenuItem("旋转180度", 180));
+        rotateMenu.addItem(new RotateMenuItem("重置", 0));
+        rotateMenuItem.setSubmenu(rotateMenu);
+        contextMenu.addItem(rotateMenuItem);
     }
 
     private void addModifyGisMenu(Menu contextMenu) {
@@ -116,7 +130,13 @@ public class ImageCell extends SimpleTile {
         } else if (durationLabel != null) {
             durationLabel.setVisible(false);
         }
-        return super.getInnerHTML();
+        String innerHTML = super.getInnerHTML();
+        Integer rotate = record.getAttributeAsInt("rotate");
+        if (rotate.equals(0)) {
+            return innerHTML;
+        }
+
+        return innerHTML.replace("img src", "img style='transform:rotate(" + rotate + "deg);' src");
     }
 
     @Override
