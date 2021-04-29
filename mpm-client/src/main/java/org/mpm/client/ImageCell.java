@@ -70,7 +70,7 @@ public class ImageCell extends SimpleTile {
         }
     }
 
-    private void addRotateMenu(Menu contextMenu) {
+    static void addRotateMenu(Menu contextMenu) {
         MenuItem rotateMenuItem = new MenuItem("旋转");
 
         Menu rotateMenu = new Menu();
@@ -135,7 +135,6 @@ public class ImageCell extends SimpleTile {
         if (rotate.equals(0)) {
             return innerHTML;
         }
-
         return innerHTML.replace("img src", "img style='transform:rotate(" + rotate + "deg);' src");
     }
 

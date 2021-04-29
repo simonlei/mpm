@@ -113,6 +113,10 @@ public class PicsGrid extends TileGrid {
       $wnd.realodPicsGrid = $entry(@org.mpm.client.PicsGrid::staticReload());
     }-*/;
 
+    public SinglePhotoDialog getSinglePhotoDialog() {
+        return singlePhotoDialog;
+    }
+
     public void updateSelectedPhotos(Map values) {
         Record[] selection = getSelection();
         RPCManager.startQueue();
@@ -123,7 +127,8 @@ public class PicsGrid extends TileGrid {
                     if (rotate.equals(0)) {
                         r.setAttribute("rotate", 0);
                     } else {
-                        r.setAttribute("rotate", r.getAttributeAsInt("rotate") + rotate);
+                        r.setAttribute("rotate",
+                                Utils.getDegree(r.getAttributeAsInt("rotate") + rotate));
                     }
                 } else {
                     r.setAttribute((String) k, values.get(k));

@@ -7,6 +7,7 @@ import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.HTMLPane;
 import com.smartgwt.client.widgets.Window;
+import com.smartgwt.client.widgets.menu.Menu;
 import org.mpm.client.events.PicsChangeEvent;
 
 
@@ -30,6 +31,9 @@ public class SinglePhotoDialog extends Window {
         pane.setHeight100();
         this.setAlwaysShowScrollbars(false);
         pane.setAlwaysShowScrollbars(false);
+        Menu menu = new Menu();
+        ImageCell.addRotateMenu(menu);
+        pane.setContextMenu(menu);
 
         addChild(pane);
         hide();
@@ -126,7 +130,7 @@ public class SinglePhotoDialog extends Window {
         if (nextIndex > totalCount - 1) { // last one, do nothing.
             return;
         }
-        setPhoto(picsGrid.getTileRecord(picsGrid.getTile(nextIndex)));
+        setPhoto(picsGrid.getResultSet().get(nextIndex));
     }
 
     public boolean isShow() {
@@ -143,10 +147,10 @@ public class SinglePhotoDialog extends Window {
     }
 
     public void setPhoto(Record record) {
-        if (this.record != null
-                && record.getAttribute("name").equals(this.record.getAttribute("name"))) {
-            return;
-        }
+//        if (this.record != null
+//                && record.getAttribute("name").equals(this.record.getAttribute("name"))) {
+//            return;
+//        }
         this.record = record;
         picsGrid.deselectAllRecords();
         picsGrid.selectRecord(record);
@@ -186,15 +190,34 @@ public class SinglePhotoDialog extends Window {
                     + "  </p>\n"
                     + "</video>");
         } else {
+            int rotate = record.getAttributeAsInt("rotate");
             pane.setContents(
                     (scale
-                            ? "<style> img {  max-width: 100%;max-height: 100%; display: block;margin: 0 auto;}</style> "
-                            : "<style> img {  display: block;margin: 0 auto;}</style> ")
+                            ?
+                            "<style> img {  max-width: 100%;max-height: 100%; display: block;margin: 0 auto; transform: rotate("
+                                    + rotate + "deg);}</style> "
+                            : "<style> img {  display: block;margin: 0 auto;transform: rotate("
+                                    + rotate + "deg);}</style> ")
                             + "<img src=\""
                             + ServerConfig.thumbUrl + record.getAttribute("name") + "\""
                             + " title=\"" + ImageCell.getHoverString(record, false) + "\""
                             + "/>"
             );
         }
+    }
+
+    public void rotateCurrentRecord(int rotate) {
+        if (record == null) {
+            return;
+        }
+        if (rotate == 0) {
+            record.setAttribute("rotate", 0);
+        } else {
+            record.setAttribute("rotate",
+                    Utils.getDegree(record.getAttributeAsInt("rotate") + rotate));
+        }
+        PicsGrid.instance.getDataSource().updateData(record);
+        setPaneContent();
+        pane.redraw();
     }
 }
