@@ -2,13 +2,17 @@ package org.mpm.client;
 
 import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.rpc.DMI;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.grid.events.DataArrivedHandler;
+import com.smartgwt.client.widgets.menu.Menu;
+import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
 import com.smartgwt.client.widgets.tree.TreeGrid;
 import com.smartgwt.client.widgets.tree.TreeGridField;
 import com.smartgwt.client.widgets.tree.TreeNode;
+import java.util.HashMap;
 
 public class LeftTabSet extends TabSet {
 
@@ -60,15 +64,12 @@ public class LeftTabSet extends TabSet {
         filesGrid.setFields(new TreeGridField("title"));
         filesGrid.setDataSource(dataSource);
         filesGrid.setAutoFetchData(false);
-        filesGrid.addNodeClickHandler(nodeClickEvent -> {
-            TreeNode node = nodeClickEvent.getNode();
-            lastSelectedNode = node;
-            criteria = new Criteria();
-            criteria.addCriteria("filePath", node.getAttributeAsInt("path"));
-            PicsGrid.instance.reloadData();
-            SC.logWarn("reload fileid");
-            filesGrid.openFolder(node);
-        });
+        Menu menu = new Menu();
+        addBatchSetDateMenu(menu);
+        filesGrid.setContextMenu(menu);
+        filesGrid.addNodeContextClickHandler(
+                nodeContextClickEvent -> filesGridClick(nodeContextClickEvent.getNode()));
+        filesGrid.addNodeClickHandler(nodeClickEvent -> filesGridClick(nodeClickEvent.getNode()));
         filesGrid.addDataArrivedHandler((DataArrivedHandler) dataArrivedEvent -> {
             selectLastRecord(filesGrid);
         });
@@ -76,9 +77,22 @@ public class LeftTabSet extends TabSet {
         addTab(filesTab);
     }
 
+    private void filesGridClick(TreeNode node) {
+        lastSelectedNode = node;
+        criteria = new Criteria();
+        criteria.addCriteria("filePath", node.getAttributeAsInt("path"));
+        PicsGrid.instance.reloadData();
+        SC.logWarn("reload fileid");
+        filesGrid.openFolder(node);
+    }
+
     private void addDatesTab() {
         Tab datesTab = new Tab("按时间查看");
         datesGrid = new TreeGrid();
+        //datesGrid.menu
+        Menu menu = new Menu();
+        addBatchSetDateMenu(menu);
+        datesGrid.setContextMenu(menu);
         datesGrid.setShowHeader(false);
         DataSource dataSource = DataSource.get("datesTree");
 
@@ -86,28 +100,48 @@ public class LeftTabSet extends TabSet {
         datesGrid.setDataSource(dataSource);
         datesGrid.setAutoFetchData(false);
         datesGrid.setLoadDataOnDemand(false);
-        datesGrid.addNodeClickHandler(nodeClickEvent -> {
-            TreeNode node = nodeClickEvent.getNode();
-            lastSelectedNode = node;
-            criteria = new Criteria();
-            if (node.getAttribute("year") != null) {
-                criteria.addCriteria("theYear", node.getAttribute("year"));
-            }
-            if (node.getAttribute("month") != null) {
-                criteria.addCriteria("theMonth", node.getAttribute("month"));
-            }
-            PicsGrid.instance.reloadData();
-            SC.logWarn("Click:" + node.getTitle() + " Criteria " + criteria.getValues());
-            datesGrid.openFolder(node);
-        });
-        datesGrid.addDataArrivedHandler((DataArrivedHandler) dataArrivedEvent -> {
-            selectLastRecord(datesGrid);
-        });
+        datesGrid.addNodeContextClickHandler(
+                nodeContextClickEvent -> datesGridClick(nodeContextClickEvent.getNode()));
+        datesGrid.addNodeClickHandler(nodeClickEvent -> datesGridClick(nodeClickEvent.getNode()));
+        datesGrid.addDataArrivedHandler(
+                (DataArrivedHandler) dataArrivedEvent -> selectLastRecord(datesGrid));
         datesTab.setPane(datesGrid);
         addTab(datesTab);
         Criteria criteria = new Criteria();
         criteria.addCriteria("trashed", false);
         datesGrid.fetchData(criteria);
+    }
+
+    private void datesGridClick(TreeNode node) {
+        lastSelectedNode = node;
+        criteria = new Criteria();
+        if (node.getAttribute("year") != null) {
+            criteria.addCriteria("theYear", node.getAttribute("year"));
+        }
+        if (node.getAttribute("month") != null) {
+            criteria.addCriteria("theMonth", node.getAttribute("month"));
+        }
+        PicsGrid.instance.reloadData();
+        SC.logWarn("Click:" + node.getTitle() + " Criteria " + criteria.getValues());
+        datesGrid.openFolder(node);
+    }
+
+    private void addBatchSetDateMenu(Menu menu) {
+        MenuItem dateItem = new MenuItem("批量设置时间");
+        dateItem.addClickHandler(menuItemClickEvent -> {
+            SC.askforValue("请输入日期 yyyy-MM-dd", s -> {
+                if (s != null && s.trim().length() > 0) {
+                    HashMap values = new HashMap();
+                    values.put("takenDate", s);
+                    DMI.call("mpm", "org.mpm.server.pics.PicsDataSource", "batchUpdatePics",
+                            (rpcResponse, o, rpcRequest) -> {
+                                reloadData();
+                                PicsGrid.instance.reloadData();
+                            }, new Object[]{PicsGrid.isTrashed(), criteria.getValues(), values});
+                }
+            });
+        });
+        menu.addItem(dateItem);
     }
 
     private void selectLastRecord(TreeGrid grid) {

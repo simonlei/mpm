@@ -10,6 +10,7 @@
             <visibleMethods>
                 <method name="count"/>
                 <method name="emptyTrash"/>
+                <method name="batchUpdatePics"/>
             </visibleMethods>
         </ServerObject>
         <ServerObject ID="pics" className="org.mpm.server.pics.ProgressDataSource">

@@ -3,10 +3,12 @@ package org.mpm.server.pics;
 import com.isomorphic.datasource.DSRequest;
 import com.isomorphic.datasource.DSResponse;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.util.ExplicitPager;
 import org.mpm.server.util.MyUtils;
+import org.nutz.dao.Chain;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.dao.Sqls;
@@ -20,6 +22,31 @@ import org.nutz.mvc.Mvcs;
 @IocBean
 @Slf4j
 public class PicsDataSource {
+
+    // used in client
+    public void batchUpdatePics(boolean trashed, Map criteria, Map values) {
+        Dao dao = MyUtils.getByType(Dao.class);
+        String theYear = (String) criteria.get("theYear");
+        String theMonth = (String) criteria.get("theMonth");
+        String filePath = (String) criteria.get("filePath");
+
+        if (filePath != null) {
+            String s = "update t_photos inner join t_files on t_photos.id=t_files.photoId SET ";
+            s += values.keySet().stream().map(k -> k + "=@" + k).collect(Collectors.joining(","));
+            s += " where trashed=@trashed and t_files.path like @filePath";
+            Sql sql = Sqls.create(s);
+            for (Object k : values.keySet()) {
+                sql.setParam((String) k, values.get(k));
+            }
+            sql.setParam("trashed", trashed).setParam("filePath", filePath + "%");
+            dao.execute(sql);
+        } else {
+            Cnd cnd = Cnd.where("trashed", "=", trashed);
+            cnd = theYear == null ? cnd : cnd.and("year(takenDate)", "=", theYear);
+            cnd = theMonth == null ? cnd : cnd.and("month(takenDate)", "=", theMonth);
+            dao.update(EntityPhoto.class, Chain.from(values), cnd);
+        }
+    }
 
     // used in client
     public int count(boolean trashed) {
@@ -102,7 +129,7 @@ public class PicsDataSource {
             resp.setTotalRows(dao.count(EntityPhoto.class, cnd));
             cnd.setPager(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
-            resp.setData(dao.query(EntityPhoto.class, cnd));
+            resp.setData(dao.query("t_photos", cnd, null, "t_photos.*"));
         } else {
             Cnd cnd = Cnd.where("trashed", "=", trashed);
             cnd = theYear == null ? cnd : cnd.and("year(takenDate)", "=", theYear);
