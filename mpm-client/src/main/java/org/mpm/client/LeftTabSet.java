@@ -67,6 +67,7 @@ public class LeftTabSet extends TabSet {
         Menu menu = new Menu();
         addBatchSetDateMenu(menu);
         addBatchSetGisMenu(menu);
+        addTrashAllMenu(menu);
         filesGrid.setContextMenu(menu);
         filesGrid.addNodeContextClickHandler(
                 nodeContextClickEvent -> filesGridClick(nodeContextClickEvent.getNode()));
@@ -78,9 +79,25 @@ public class LeftTabSet extends TabSet {
         addTab(filesTab);
     }
 
+    private void addTrashAllMenu(Menu menu) {
+        MenuItem trashItem = new MenuItem("删除目录下照片");
+        trashItem.setDynamicTitleFunction(
+                (canvas, menu1, menuItem) -> PicsGrid.isTrashed() ? "恢复目录下照片" : "删除目录下照片");
+        trashItem.addClickHandler(hanler -> {
+            SC.confirm(PicsGrid.isTrashed() ? "确定恢复照片？" : "确定删除照片？", aBoolean -> {
+                if (Boolean.TRUE == aBoolean) {
+                    HashMap values = new HashMap();
+                    values.put("trashed", !PicsGrid.isTrashed());
+                    batchUpdateValues(values);
+                }
+            });
+        });
+        menu.addItem(trashItem);
+    }
+
     private void addBatchSetGisMenu(Menu menu) {
-        MenuItem dateItem = new MenuItem("批量修改位置信息");
-        dateItem.addClickHandler(menuItemClickEvent -> {
+        MenuItem gisItem = new MenuItem("批量修改位置信息");
+        gisItem.addClickHandler(menuItemClickEvent -> {
             SC.askforValue("请输入Gis信息， 经度,纬度", s -> {
                 if (s != null && s.trim().length() > 0) {
                     HashMap values = new HashMap();
@@ -91,7 +108,7 @@ public class LeftTabSet extends TabSet {
                 }
             });
         });
-        menu.addItem(dateItem);
+        menu.addItem(gisItem);
     }
 
     private void batchUpdateValues(HashMap values) {
@@ -118,6 +135,7 @@ public class LeftTabSet extends TabSet {
         Menu menu = new Menu();
         addBatchSetDateMenu(menu);
         addBatchSetGisMenu(menu);
+        addTrashAllMenu(menu);
         datesGrid.setContextMenu(menu);
         datesGrid.setShowHeader(false);
         DataSource dataSource = DataSource.get("datesTree");

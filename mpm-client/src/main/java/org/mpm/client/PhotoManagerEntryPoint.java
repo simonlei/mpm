@@ -76,8 +76,8 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
         contentPane.setHeight100();
         contentPane.setShowListToolStrip(false);
 
-        contentPane.setNavigationPane(new LeftTabSet());
         contentPane.setListPane(new PicsGrid());
+        contentPane.setNavigationPane(new LeftTabSet());
         return contentPane;
     }
 
