@@ -39,12 +39,12 @@ public class PicsDataSource {
         if (filePath != null) {
             String s = "update t_photos inner join t_files on t_photos.id=t_files.photoId SET ";
             s += values.keySet().stream().map(k -> k + "=@" + k).collect(Collectors.joining(","));
-            s += " where trashed=@trashed and t_files.path like @filePath";
+            s += " where trashed=@isTrashed and t_files.path like @filePath";
             Sql sql = Sqls.create(s);
             for (Object k : values.keySet()) {
                 sql.setParam((String) k, values.get(k));
             }
-            sql.setParam("trashed", trashed).setParam("filePath", filePath + "%");
+            sql.setParam("isTrashed", trashed).setParam("filePath", filePath + "%");
             dao.execute(sql);
         } else {
             Cnd cnd = Cnd.where("trashed", "=", trashed);
