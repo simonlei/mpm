@@ -29,6 +29,12 @@ public class PicsDataSource {
         String theYear = (String) criteria.get("theYear");
         String theMonth = (String) criteria.get("theMonth");
         String filePath = (String) criteria.get("filePath");
+        if (values.get("longitude") != null || values.get("latitude") != null) {
+            String address = getAddress(values);
+            if (address != null) {
+                values.put("address", address);
+            }
+        }
 
         if (filePath != null) {
             String s = "update t_photos inner join t_files on t_photos.id=t_files.photoId SET ";
@@ -70,8 +76,10 @@ public class PicsDataSource {
         record.putAll(values);
 
         if (values.get("longitude") != null || values.get("latitude") != null) {
-            setAddress(req, record);
-            // photo.setAddress(getAddress(photo.getLatitude(), photo.getLongitude()));
+            String address = getAddress(values);
+            if (address != null) {
+                record.set("address", address);
+            }
         }
         int affectedRows = dao.updateIgnoreNull(dao.getEntity(EntityPhoto.class).getObject(record));
         resp.setData(record);
@@ -79,15 +87,15 @@ public class PicsDataSource {
         return resp;
     }
 
-    private void setAddress(DSRequest req, Record record) {
+    private String getAddress(Map values) {
         try {
             PicsModule picsModule = MyUtils.getByType(PicsModule.class);
-            record.set("address", picsModule.getAddress(
-                    (Double) req.getValues().get("latitude"),
-                    (Double) req.getValues().get("longitude")));
+            return picsModule.getAddress(Double.parseDouble("" + values.get("latitude")),
+                    Double.parseDouble("" + values.get("longitude")));
         } catch (Exception e) {
             log.error("Can't set address", e);
         }
+        return null;
     }
 
     // used in datasource

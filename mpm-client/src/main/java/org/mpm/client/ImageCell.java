@@ -101,11 +101,13 @@ public class ImageCell extends SimpleTile {
         MenuItem modifyGis = new MenuItem("修改位置信息");
         modifyGis.addClickHandler(
                 menuItemClickEvent -> SC.askforValue("请输入Gis信息， 经度,纬度", s -> {
-                    HashMap values = new HashMap();
-                    String[] strs = s.split(",");
-                    values.put("longitude", strs[0]);
-                    values.put("latitude", strs[1]);
-                    ((PicsGrid) getTileGrid()).updateSelectedPhotos(values);
+                    if (s != null && s.trim().length() > 0) {
+                        HashMap values = new HashMap();
+                        String[] strs = s.split(",");
+                        values.put("longitude", strs[0]);
+                        values.put("latitude", strs[1]);
+                        ((PicsGrid) getTileGrid()).updateSelectedPhotos(values);
+                    }
                 }));
         contextMenu.addItem(modifyGis);
     }
@@ -113,9 +115,11 @@ public class ImageCell extends SimpleTile {
     private void addModifyDateMenu(Menu contextMenu) {
         MenuItem modifyDate = new MenuItem("修改时间");
         modifyDate.addClickHandler(menuItemClickEvent -> SC.askforValue("请输入日期 yyyy-MM-dd", s -> {
-            HashMap values = new HashMap();
-            values.put("takenDate", s);
-            ((PicsGrid) getTileGrid()).updateSelectedPhotos(values);
+            if (s != null && s.trim().length() > 0) {
+                HashMap values = new HashMap();
+                values.put("takenDate", s);
+                ((PicsGrid) getTileGrid()).updateSelectedPhotos(values);
+            }
         }));
         contextMenu.addItem(modifyDate);
     }

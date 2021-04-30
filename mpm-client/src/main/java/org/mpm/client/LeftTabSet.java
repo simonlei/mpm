@@ -66,6 +66,7 @@ public class LeftTabSet extends TabSet {
         filesGrid.setAutoFetchData(false);
         Menu menu = new Menu();
         addBatchSetDateMenu(menu);
+        addBatchSetGisMenu(menu);
         filesGrid.setContextMenu(menu);
         filesGrid.addNodeContextClickHandler(
                 nodeContextClickEvent -> filesGridClick(nodeContextClickEvent.getNode()));
@@ -75,6 +76,30 @@ public class LeftTabSet extends TabSet {
         });
         filesTab.setPane(filesGrid);
         addTab(filesTab);
+    }
+
+    private void addBatchSetGisMenu(Menu menu) {
+        MenuItem dateItem = new MenuItem("批量修改位置信息");
+        dateItem.addClickHandler(menuItemClickEvent -> {
+            SC.askforValue("请输入Gis信息， 经度,纬度", s -> {
+                if (s != null && s.trim().length() > 0) {
+                    HashMap values = new HashMap();
+                    String[] strs = s.split(",");
+                    values.put("longitude", strs[0]);
+                    values.put("latitude", strs[1]);
+                    batchUpdateValues(values);
+                }
+            });
+        });
+        menu.addItem(dateItem);
+    }
+
+    private void batchUpdateValues(HashMap values) {
+        DMI.call("mpm", "org.mpm.server.pics.PicsDataSource", "batchUpdatePics",
+                (rpcResponse, o, rpcRequest) -> {
+                    reloadData();
+                    PicsGrid.instance.reloadData();
+                }, new Object[]{PicsGrid.isTrashed(), criteria.getValues(), values});
     }
 
     private void filesGridClick(TreeNode node) {
@@ -92,6 +117,7 @@ public class LeftTabSet extends TabSet {
         //datesGrid.menu
         Menu menu = new Menu();
         addBatchSetDateMenu(menu);
+        addBatchSetGisMenu(menu);
         datesGrid.setContextMenu(menu);
         datesGrid.setShowHeader(false);
         DataSource dataSource = DataSource.get("datesTree");
@@ -133,11 +159,7 @@ public class LeftTabSet extends TabSet {
                 if (s != null && s.trim().length() > 0) {
                     HashMap values = new HashMap();
                     values.put("takenDate", s);
-                    DMI.call("mpm", "org.mpm.server.pics.PicsDataSource", "batchUpdatePics",
-                            (rpcResponse, o, rpcRequest) -> {
-                                reloadData();
-                                PicsGrid.instance.reloadData();
-                            }, new Object[]{PicsGrid.isTrashed(), criteria.getValues(), values});
+                    batchUpdateValues(values);
                 }
             });
         });
