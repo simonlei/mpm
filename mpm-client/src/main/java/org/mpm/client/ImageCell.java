@@ -30,6 +30,7 @@ public class ImageCell extends SimpleTile {
         setHoverAutoFitWidth(true);
         Menu contextMenu = new Menu();
         addModifyDateMenu(contextMenu);
+        addCopyGisMenu(contextMenu);
         addModifyGisMenu(contextMenu);
         addRotateMenu(contextMenu);
         setContextMenu(contextMenu);
@@ -80,6 +81,20 @@ public class ImageCell extends SimpleTile {
         rotateMenu.addItem(new RotateMenuItem("重置", 0));
         rotateMenuItem.setSubmenu(rotateMenu);
         contextMenu.addItem(rotateMenuItem);
+    }
+
+    private static native void copyToClipBoard(final String text) /*-{
+      $wnd.navigator.clipboard.writeText(text);
+    }-*/;
+
+    private void addCopyGisMenu(Menu contextMenu) {
+        MenuItem copyGis = new MenuItem("拷贝GIS信息");
+        copyGis.addClickHandler(menuItemClickEvent -> {
+            String gis = getRecord().getAttributeAsString("longitude") + ","
+                    + getRecord().getAttributeAsString("latitude");
+            copyToClipBoard(gis);
+        });
+        contextMenu.addItem(copyGis);
     }
 
     private void addModifyGisMenu(Menu contextMenu) {
