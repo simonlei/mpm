@@ -39,8 +39,8 @@ import org.nutz.trans.Trans;
 @Slf4j
 public class PicsModule {
 
-    private static final Integer PHOTO = 1;
-    private static final Integer VIDEO = 2;
+    private static final String PHOTO = "photo";
+    private static final String VIDEO = "video";
     @Inject
     Dao dao;
     @Inject
