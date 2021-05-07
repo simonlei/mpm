@@ -60,14 +60,10 @@ function uploadFiles(files) {
     onProgress: function (info) {
       var percent = parseInt(info.percent * 10000) / 100;
       var speed = parseInt(info.speed / 1024 / 1024 * 100) / 100;
-      isc.notify('进度：' + percent + '%; 速度：' + speed + 'Mb/s;');
+      console.log('进度：' + percent + '%; 速度：' + speed + 'Mb/s;');
+      //isc.notify('进度：' + percent + '%; 速度：' + speed + 'Mb/s;');
     },
     onFileFinish: function (err, data, options) {
-      count++;
-      if (count == files.length) {
-        realodLeftTab();
-        realodPicsGrid();
-      }
       var httpRequest = new XMLHttpRequest();
       httpRequest.open('POST', '/uploadFile', true);
       httpRequest.setRequestHeader("Content-type", "application/json");
@@ -82,6 +78,12 @@ function uploadFiles(files) {
           console.log(json);
           isc.notify(
               options.Key.split("\/").pop() + '上传' + (err ? '失败' : '完成'));
+          count++;
+          if (count == files.length) {
+            realodLeftTab();
+            realodPicsGrid();
+            isc.say("上传完成，共 " + count + " 张照片");
+          }
         }
       };
     },
