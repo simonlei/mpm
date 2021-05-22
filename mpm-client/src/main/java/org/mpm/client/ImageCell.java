@@ -160,7 +160,7 @@ public class ImageCell extends SimpleTile {
                 durationLabel.setVisible(true);
                 durationLabel.setIcon("start.png");
                 durationLabel.setHeight(10);
-                durationLabel.setWidth(30);
+                durationLabel.setWidth(50);
                 durationLabel.setBackgroundColor("white");
             }
         } else if (durationLabel != null) {
@@ -168,7 +168,7 @@ public class ImageCell extends SimpleTile {
         }
         String innerHTML = super.getInnerHTML();
         Integer rotate = record.getAttributeAsInt("rotate");
-        if (rotate.equals(0)) {
+        if (rotate == null || rotate.equals(0)) {
             return innerHTML;
         }
         return innerHTML.replace("img src", "img style='transform:rotate(" + rotate + "deg);' src");
