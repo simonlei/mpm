@@ -67,6 +67,7 @@ public class LeftTabSet extends TabSet {
         Menu menu = new Menu();
         addBatchSetDateMenu(menu);
         addBatchSetGisMenu(menu);
+        addBatchSetDescMenu(menu);
         addTrashAllMenu(menu);
         filesGrid.setContextMenu(menu);
         filesGrid.addNodeContextClickHandler(
@@ -135,6 +136,7 @@ public class LeftTabSet extends TabSet {
         Menu menu = new Menu();
         addBatchSetDateMenu(menu);
         addBatchSetGisMenu(menu);
+        addBatchSetDescMenu(menu);
         addTrashAllMenu(menu);
         datesGrid.setContextMenu(menu);
         datesGrid.setShowHeader(false);
@@ -154,6 +156,20 @@ public class LeftTabSet extends TabSet {
         Criteria criteria = new Criteria();
         criteria.addCriteria("trashed", false);
         datesGrid.fetchData(criteria);
+    }
+
+    private void addBatchSetDescMenu(Menu menu) {
+        MenuItem dateItem = new MenuItem("批量设置描述信息");
+        dateItem.addClickHandler(menuItemClickEvent -> {
+            SC.askforValue("请输入描述信息", s -> {
+                if (s != null && s.trim().length() > 0) {
+                    HashMap values = new HashMap();
+                    values.put("description", s);
+                    batchUpdateValues(values);
+                }
+            });
+        });
+        menu.addItem(dateItem);
     }
 
     private void datesGridClick(TreeNode node) {

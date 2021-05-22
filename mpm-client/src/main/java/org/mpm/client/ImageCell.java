@@ -7,6 +7,7 @@ import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
+import com.smartgwt.client.widgets.Dialog;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
@@ -32,6 +33,7 @@ public class ImageCell extends SimpleTile {
         addModifyDateMenu(contextMenu);
         addCopyGisMenu(contextMenu);
         addModifyGisMenu(contextMenu);
+        addModifyDescMenu(contextMenu);
         addRotateMenu(contextMenu);
         setContextMenu(contextMenu);
     }
@@ -86,6 +88,21 @@ public class ImageCell extends SimpleTile {
     private static native void copyToClipBoard(final String text) /*-{
       $wnd.navigator.clipboard.writeText(text);
     }-*/;
+
+    private void addModifyDescMenu(Menu contextMenu) {
+        MenuItem modifyDescItem = new MenuItem("修改描述信息");
+        modifyDescItem.addClickHandler(
+                menuItemClickEvent -> SC.askforValue("修改描述信息", "请输入描述信息",
+                        getRecord().getAttribute("description"),
+                        s -> {
+                            if (s != null && s.trim().length() > 0) {
+                                HashMap values = new HashMap();
+                                values.put("description", s);
+                                ((PicsGrid) getTileGrid()).updateSelectedPhotos(values);
+                            }
+                        }, new Dialog()));
+        contextMenu.addItem(modifyDescItem);
+    }
 
     private void addCopyGisMenu(Menu contextMenu) {
         MenuItem copyGis = new MenuItem("拷贝GIS信息");
