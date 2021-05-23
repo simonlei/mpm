@@ -5,6 +5,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.smartgwt.client.bean.BeanFactory;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Overflow;
+import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Dialog;
@@ -40,9 +41,17 @@ public class ImageCell extends SimpleTile {
         addModifyDescMenu(contextMenu);
         addRotateMenu(contextMenu);
         setContextMenu(contextMenu);
+
+        icons.setHeight(24);
         icons.addMember(starButton);
         icons.addMember(durationLabel);
         addChild(icons);
+        durationLabel.setIcon("start.png");
+        durationLabel.setHeight(24);
+        durationLabel.setLayoutAlign(VerticalAlignment.CENTER);
+        durationLabel.setWidth(50);
+        durationLabel.setBackgroundColor("white");
+        durationLabel.setVisible(false);
         starButton.setShowButtonTitle(false);
         starButton.setWidth(24);
         starButton.addClickHandler(clickEvent -> {
@@ -167,12 +176,7 @@ public class ImageCell extends SimpleTile {
             String duration = record.getAttribute("duration");
             if (duration != null) {
                 double v = Double.parseDouble(duration);
-                durationLabel.setTitle(NumberFormat.getFormat("#.00s").format(v));
-                durationLabel.setVisible(true);
-                durationLabel.setIcon("start.png");
-                durationLabel.setHeight(16);
-                durationLabel.setWidth(50);
-                durationLabel.setBackgroundColor("white");
+                durationLabel.setContents(NumberFormat.getFormat("#.00s").format(v));
                 durationLabel.setVisible(true);
             } else {
                 durationLabel.setVisible(false);
