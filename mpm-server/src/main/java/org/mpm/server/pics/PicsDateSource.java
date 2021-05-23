@@ -22,7 +22,9 @@ public class PicsDateSource {
     public DSResponse fetch(DSRequest req) {
         DSResponse resp = new DSResponse();
         Dao dao = MyUtils.getByType(Dao.class);
-        List<Record> photoDates = getPhotoDates(dao, (Boolean) req.getCriteria().get("trashed"));
+        Boolean trashed = (Boolean) req.getCriteria().get("trashed");
+        Boolean star = (Boolean) req.getCriteria().get("star");
+        List<Record> photoDates = getPhotoDates(dao, trashed, star);
         NutMap lastYear = null;
         int yearCount = 0;
         List<NutMap> result = new ArrayList<>();
@@ -59,11 +61,12 @@ public class PicsDateSource {
         return lastYear;
     }
 
-    private List<Record> getPhotoDates(Dao dao, Boolean trashed) {
+    private List<Record> getPhotoDates(Dao dao, Boolean trashed, Boolean star) {
         // photo dates...include years and months
         Sql sql = Sqls.create("select year(takenDate) year, month(takenDate) month,"
                 + " count(*) photoCount "
                 + " from t_photos where trashed = " + trashed
+                + (star == null ? "" : " and star = " + star)
                 + " group by year, month order by year desc, month desc");
         sql.setCallback(Sqls.callback.records());
         dao.execute(sql);

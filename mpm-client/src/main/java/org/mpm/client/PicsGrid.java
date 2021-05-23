@@ -89,12 +89,7 @@ public class PicsGrid extends TileGrid {
         fetchData(criteria, null, makeDSRequest("id", false));
     }
 
-    public static boolean isTrashed() {
-        return instance.trashed;
-    }
-
-    public static void setTrashed(boolean trashed) {
-        instance.trashed = trashed;
+    public static void reloadLeftAndPics() {
         instance.reloadData();
         LeftTabSet.instance.reloadData();
     }

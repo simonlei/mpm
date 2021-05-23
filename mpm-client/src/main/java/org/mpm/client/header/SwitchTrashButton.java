@@ -12,7 +12,7 @@ import org.mpm.client.events.PicsChangeHandler;
 
 public class SwitchTrashButton extends ToolStripButton implements PicsChangeHandler, ClickHandler {
 
-    private boolean trashed;
+    private boolean trashed = false;
 
     public SwitchTrashButton() {
         super("回收站(0)");
@@ -26,16 +26,16 @@ public class SwitchTrashButton extends ToolStripButton implements PicsChangeHand
         // set text for self.
         DMI.call("mpm", "org.mpm.server.pics.PicsDataSource", "count",
                 (rpcResponse, o, rpcRequest) ->
-                        setTitle(PicsGrid.isTrashed()
+                        setTitle(trashed
                                 ? "正常照片(" + rpcResponse.getDataAsString() + ")"
                                 : "回收站(" + rpcResponse.getDataAsString() + ")")
-                , new Object[]{!PicsGrid.isTrashed()});
+                , new Object[]{!trashed});
     }
 
     @Override
     public void onClick(ClickEvent clickEvent) {
-        trashed = !PicsGrid.isTrashed();
-        PicsGrid.setTrashed(trashed);
+        trashed = !trashed;
+        PicsGrid.reloadLeftAndPics();
     }
 
     public boolean isTrashed() {

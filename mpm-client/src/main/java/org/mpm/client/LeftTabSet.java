@@ -13,6 +13,7 @@ import com.smartgwt.client.widgets.tree.TreeGrid;
 import com.smartgwt.client.widgets.tree.TreeGridField;
 import com.smartgwt.client.widgets.tree.TreeNode;
 import java.util.HashMap;
+import org.mpm.client.header.HeaderPanel;
 
 public class LeftTabSet extends TabSet {
 
@@ -83,12 +84,12 @@ public class LeftTabSet extends TabSet {
     private void addTrashAllMenu(Menu menu) {
         MenuItem trashItem = new MenuItem("删除目录下照片");
         trashItem.setDynamicTitleFunction(
-                (canvas, menu1, menuItem) -> PicsGrid.isTrashed() ? "恢复目录下照片" : "删除目录下照片");
+                (canvas, menu1, menuItem) -> HeaderPanel.isTrashed() ? "恢复目录下照片" : "删除目录下照片");
         trashItem.addClickHandler(hanler -> {
-            SC.confirm(PicsGrid.isTrashed() ? "确定恢复照片？" : "确定删除照片？", aBoolean -> {
+            SC.confirm(HeaderPanel.isTrashed() ? "确定恢复照片？" : "确定删除照片？", aBoolean -> {
                 if (Boolean.TRUE == aBoolean) {
                     HashMap values = new HashMap();
-                    values.put("trashed", !PicsGrid.isTrashed());
+                    values.put("trashed", !HeaderPanel.isTrashed());
                     batchUpdateValues(values);
                 }
             });
@@ -117,7 +118,7 @@ public class LeftTabSet extends TabSet {
                 (rpcResponse, o, rpcRequest) -> {
                     reloadData();
                     PicsGrid.instance.reloadData();
-                }, new Object[]{PicsGrid.isTrashed(), criteria.getValues(), values});
+                }, new Object[]{HeaderPanel.isTrashed(), criteria.getValues(), values});
     }
 
     private void filesGridClick(TreeNode node) {
@@ -223,7 +224,7 @@ public class LeftTabSet extends TabSet {
      */
     public void reloadData() {
         Criteria criteria = new Criteria();
-        criteria.addCriteria("trashed", PicsGrid.isTrashed());
+        criteria.addCriteria(HeaderPanel.getCriteria());
         SC.logWarn("Selected tab: " + selectedTab);
         TreeGrid grid = selectedTab == 0 ? datesGrid : filesGrid;
 

@@ -35,6 +35,10 @@ public class HeaderPanel extends HLayout {
         return instance._getCriteria();
     }
 
+    public static boolean isTrashed() {
+        return instance.switchTrashButton.isTrashed();
+    }
+
     private Criteria _getCriteria() {
         Criteria criteria = new Criteria();
         criteria.addCriteria("trashed", instance.switchTrashButton.isTrashed());

@@ -10,7 +10,7 @@ public class SwitchStarButton extends ToolStripButton {
     public SwitchStarButton() {
         super("只看star");
         setActionType(SelectionType.CHECKBOX);
-        addClickHandler(clickEvent -> PicsGrid.staticReload());
+        addClickHandler(clickEvent -> PicsGrid.reloadLeftAndPics());
     }
 
     public Criteria getCriteria() {
