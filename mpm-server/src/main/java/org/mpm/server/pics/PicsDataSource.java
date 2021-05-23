@@ -119,6 +119,7 @@ public class PicsDataSource {
         DSResponse resp = new DSResponse();
         Dao dao = MyUtils.getByType(Dao.class);
         Boolean trashed = (Boolean) req.getCriteria().get("trashed");
+        Boolean star = (Boolean) req.getCriteria().get("star");
         String theYear = (String) req.getCriteria().get("theYear");
         String theMonth = (String) req.getCriteria().get("theMonth");
         String filePath = (String) req.getCriteria().get("filePath");
@@ -134,6 +135,8 @@ public class PicsDataSource {
             SimpleCriteria cnd = new SimpleCriteria(joinSql);
             cnd.where().and("t_files.path", "like", filePath + "%")
                     .and("trashed", "=", trashed);
+
+            addStarCriteria(star, cnd);
             resp.setTotalRows(dao.count(EntityPhoto.class, cnd));
             cnd.setPager(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
@@ -142,6 +145,8 @@ public class PicsDataSource {
             Cnd cnd = Cnd.where("trashed", "=", trashed);
             cnd = theYear == null ? cnd : cnd.and("year(takenDate)", "=", theYear);
             cnd = theMonth == null ? cnd : cnd.and("month(takenDate)", "=", theMonth);
+            addStarCriteria(star, cnd.getCri());
+
             resp.setTotalRows(dao.count(EntityPhoto.class, cnd));
             cnd.limit(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
@@ -150,5 +155,11 @@ public class PicsDataSource {
         resp.setStartRow(start);
         resp.setEndRow(end);
         return resp;
+    }
+
+    private void addStarCriteria(Boolean star, SimpleCriteria cnd) {
+        if (star != null) {
+            cnd.where().and("star", "=", star);
+        }
     }
 }

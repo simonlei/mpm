@@ -12,6 +12,8 @@ import org.mpm.client.events.PicsChangeHandler;
 
 public class SwitchTrashButton extends ToolStripButton implements PicsChangeHandler, ClickHandler {
 
+    private boolean trashed;
+
     public SwitchTrashButton() {
         super("回收站(0)");
         PhotoManagerEntryPoint.eventBus.addHandler(PicsChangeEvent.type, this);
@@ -32,6 +34,11 @@ public class SwitchTrashButton extends ToolStripButton implements PicsChangeHand
 
     @Override
     public void onClick(ClickEvent clickEvent) {
-        PicsGrid.setTrashed(!PicsGrid.isTrashed());
+        trashed = !PicsGrid.isTrashed();
+        PicsGrid.setTrashed(trashed);
+    }
+
+    public boolean isTrashed() {
+        return trashed;
     }
 }

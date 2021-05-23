@@ -5,7 +5,6 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.smartgwt.client.bean.BeanFactory;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Overflow;
-import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Dialog;
@@ -47,9 +46,7 @@ public class ImageCell extends SimpleTile {
         icons.addMember(durationLabel);
         addChild(icons);
         durationLabel.setIcon("start.png");
-        durationLabel.setHeight(24);
-        durationLabel.setLayoutAlign(VerticalAlignment.CENTER);
-        durationLabel.setWidth(50);
+        durationLabel.setAutoFit(true);
         durationLabel.setBackgroundColor("white");
         durationLabel.setVisible(false);
         starButton.setShowButtonTitle(false);
