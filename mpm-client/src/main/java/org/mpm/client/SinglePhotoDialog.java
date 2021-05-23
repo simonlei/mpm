@@ -6,8 +6,10 @@ import com.smartgwt.client.util.Page;
 import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.HTMLPane;
+import com.smartgwt.client.widgets.IconButton;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.menu.Menu;
+import java.util.HashMap;
 import org.mpm.client.events.PicsChangeEvent;
 
 
@@ -15,6 +17,7 @@ public class SinglePhotoDialog extends Window {
 
     PicsGrid picsGrid;
     Record record;
+    IconButton starButton;
     HTMLPane pane = new HTMLPane();
     private boolean show = false;
     private boolean scale = true;
@@ -34,6 +37,17 @@ public class SinglePhotoDialog extends Window {
         Menu menu = new Menu();
         ImageCell.addRotateMenu(menu);
         pane.setContextMenu(menu);
+
+        starButton = new IconButton();
+        starButton.setShowButtonTitle(false);
+        starButton.setZIndex(1000000);
+        // starButton.setIcon(record.getAttributeAsBoolean("star") ? "star.png" : "notstar.png");
+
+        starButton.addClickHandler(clickEvent -> {
+            swapStar();
+        });
+
+        addChild(starButton);
 
         addChild(pane);
         hide();
@@ -94,6 +108,12 @@ public class SinglePhotoDialog extends Window {
                 setPaneContent();
             }
         });
+        Page.registerKey("S", new PageKeyHandler() {
+            @Override
+            public void execute(String s) {
+                swapStar();
+            }
+        });
         Page.registerKey("J", new PageKeyHandler() {
             @Override
             public void execute(String s) {
@@ -119,6 +139,14 @@ public class SinglePhotoDialog extends Window {
             }
         });
 
+    }
+
+    private void swapStar() {
+        HashMap values = new HashMap();
+        boolean newValue = !record.getAttributeAsBoolean("star");
+        values.put("star", newValue);
+        picsGrid.updateSelectedPhotos(values);
+        starButton.setIcon(newValue ? "star.png" : "notstar.png");
     }
 
     private void showPhoto(int inc) {
@@ -160,6 +188,8 @@ public class SinglePhotoDialog extends Window {
         setPaneContent();
 
         pane.redraw();
+        starButton.setIcon(record.getAttributeAsBoolean("star") ? "star.png" : "notstar.png");
+
         show = true;
         show();
     }
@@ -192,13 +222,12 @@ public class SinglePhotoDialog extends Window {
         } else {
             int rotate = record.getAttributeAsInt("rotate");
             pane.setContents(
-                    (scale
-                            ?
-                            "<style> img {  max-width: 100%;max-height: 100%; display: block;margin: 0 auto; transform: rotate("
-                                    + rotate + "deg);}</style> "
-                            : "<style> img {  display: block;margin: 0 auto;transform: rotate("
-                                    + rotate + "deg);}</style> ")
-                            + "<img src=\""
+                    "<img style=\""
+                            + (scale
+                            ? "max-width: 100%;max-height: 100%; display: block;margin: 0 auto; transform: rotate("
+                            + rotate + "deg);"
+                            : "display: block;margin: 0 auto;transform: rotate(" + rotate + "deg);")
+                            + "\" src=\""
                             + ServerConfig.thumbUrl + record.getAttribute("name") + "\""
                             + " title=\"" + ImageCell.getHoverString(record, false) + "\""
                             + "/>"

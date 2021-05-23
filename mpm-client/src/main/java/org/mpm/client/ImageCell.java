@@ -8,7 +8,9 @@ import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.Dialog;
+import com.smartgwt.client.widgets.IconButton;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.tile.SimpleTile;
@@ -20,7 +22,9 @@ import org.mpm.client.actions.RotateMenuItem;
 @BeanFactory.Generate
 public class ImageCell extends SimpleTile {
 
-    private Label durationLabel;
+    IconButton starButton = new IconButton();
+    HLayout icons = new HLayout();
+    Label durationLabel = new Label();
 
     public ImageCell() {
         super();
@@ -36,6 +40,16 @@ public class ImageCell extends SimpleTile {
         addModifyDescMenu(contextMenu);
         addRotateMenu(contextMenu);
         setContextMenu(contextMenu);
+        icons.addMember(starButton);
+        icons.addMember(durationLabel);
+        addChild(icons);
+        starButton.setShowButtonTitle(false);
+        starButton.setWidth(24);
+        starButton.addClickHandler(clickEvent -> {
+            HashMap values = new HashMap();
+            values.put("star", !getRecord().getAttributeAsBoolean("star"));
+            ((PicsGrid) getTileGrid()).updateSelectedPhotos(values);
+        });
     }
 
     static String getHoverString(Record record, boolean useBr) {
@@ -147,24 +161,22 @@ public class ImageCell extends SimpleTile {
         if (record == null) {
             return "";
         }
-        // SC.logWarn("getInnerHTML......" + record.getAttribute("name")+ " " + record.getAttribute("mediaType"));
+        starButton.setIcon(record.getAttributeAsBoolean("star") ? "star.png" : "notstar.png");
 
         if ("video".equals(record.getAttribute("mediaType"))) {
             String duration = record.getAttribute("duration");
             if (duration != null) {
                 double v = Double.parseDouble(duration);
-                if (durationLabel == null) {
-                    durationLabel = new Label(NumberFormat.getFormat("#.00s").format(v));
-                    addChild(durationLabel);
-                }
+                durationLabel.setTitle(NumberFormat.getFormat("#.00s").format(v));
                 durationLabel.setVisible(true);
                 durationLabel.setIcon("start.png");
-                durationLabel.setHeight(10);
+                durationLabel.setHeight(16);
                 durationLabel.setWidth(50);
                 durationLabel.setBackgroundColor("white");
+                durationLabel.setVisible(true);
+            } else {
+                durationLabel.setVisible(false);
             }
-        } else if (durationLabel != null) {
-            durationLabel.setVisible(false);
         }
         String innerHTML = super.getInnerHTML();
         Integer rotate = record.getAttributeAsInt("rotate");
