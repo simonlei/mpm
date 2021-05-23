@@ -2,14 +2,11 @@ package org.mpm.client;
 
 import com.smartgwt.client.bean.BeanFactory;
 import com.smartgwt.client.data.Criteria;
-import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.Record;
-import com.smartgwt.client.data.SortSpecifier;
 import com.smartgwt.client.rpc.RPCManager;
 import com.smartgwt.client.types.KeyNames;
 import com.smartgwt.client.types.SelectionStyle;
-import com.smartgwt.client.types.SortDirection;
 import com.smartgwt.client.types.TextMatchStyle;
 import com.smartgwt.client.util.Page;
 import com.smartgwt.client.util.PageKeyHandler;
@@ -23,7 +20,6 @@ import org.mpm.client.header.HeaderPanel;
 public class PicsGrid extends TileGrid {
 
     public static PicsGrid instance;
-    private boolean trashed = false;
     private SinglePhotoDialog singlePhotoDialog;
     private int lastTxnNum = 0;
 
@@ -86,7 +82,8 @@ public class PicsGrid extends TileGrid {
         Criteria criteria = new Criteria();
         criteria.addCriteria("trashed", false);
         // 默认按id逆序
-        fetchData(criteria, null, makeDSRequest("id", false));
+        sortByProperty("id", false);
+        fetchData(criteria);
     }
 
     public static void reloadLeftAndPics() {
@@ -94,19 +91,8 @@ public class PicsGrid extends TileGrid {
         LeftTabSet.instance.reloadData();
     }
 
-    private static DSRequest makeDSRequest(String field, boolean asc) {
-        DSRequest dsRequest = new DSRequest();
-        dsRequest.setSortBy(new SortSpecifier[]{new SortSpecifier(field,
-                asc ? SortDirection.ASCENDING : SortDirection.DESCENDING)});
-        return dsRequest;
-    }
-
-    public static void staticReload() {
-        instance.reloadData();
-    }
-
     public static native void exportReloadData() /*-{
-      $wnd.realodPicsGrid = $entry(@org.mpm.client.PicsGrid::staticReload());
+      $wnd.realodPicsGrid = $entry(@org.mpm.client.PicsGrid::reloadLeftAndPics());
     }-*/;
 
     public SinglePhotoDialog getSinglePhotoDialog() {
