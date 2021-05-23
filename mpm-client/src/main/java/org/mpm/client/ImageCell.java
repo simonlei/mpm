@@ -171,6 +171,7 @@ public class ImageCell extends SimpleTile {
             return "";
         }
         starButton.setIcon(record.getAttributeAsBoolean("star") ? "star.png" : "notstar.png");
+        durationLabel.setVisible(false);
 
         if ("video".equals(record.getAttribute("mediaType"))) {
             String duration = record.getAttribute("duration");
@@ -178,8 +179,6 @@ public class ImageCell extends SimpleTile {
                 double v = Double.parseDouble(duration);
                 durationLabel.setContents(NumberFormat.getFormat("#.00s").format(v));
                 durationLabel.setVisible(true);
-            } else {
-                durationLabel.setVisible(false);
             }
         }
         String innerHTML = super.getInnerHTML();
