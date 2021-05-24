@@ -25,11 +25,7 @@ public class EntityFile {
     @Column
     private String path;
     @Column
-    private String description;
-    @Column
     private Boolean isFolder;
-    @Column
-    private Long rootId;
     @Column
     private Long parentId;
     @Column

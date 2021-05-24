@@ -18,7 +18,7 @@ public class BaseTest {
 
     @After
     public void tearDown() throws Exception {
-        // Trans.rollback();
-        Trans.commit();
+        Trans.rollback();
+        // Trans.commit();
     }
 }

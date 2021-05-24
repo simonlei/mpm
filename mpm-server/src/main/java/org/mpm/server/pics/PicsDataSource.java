@@ -137,10 +137,11 @@ public class PicsDataSource {
                     .and("trashed", "=", trashed);
 
             addStarCriteria(star, cnd);
-            resp.setTotalRows(dao.count(EntityPhoto.class, cnd));
+            Record count = dao.fetch("t_photos", cnd, "count(distinct t_photos.id) as c");
+            resp.setTotalRows(count.getLong("c"));
             cnd.setPager(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
-            resp.setData(dao.query("t_photos", cnd, null, "t_photos.*"));
+            resp.setData(dao.query("t_photos", cnd, null, "distinct t_photos.*"));
         } else {
             Cnd cnd = Cnd.where("trashed", "=", trashed);
             cnd = theYear == null ? cnd : cnd.and("year(takenDate)", "=", theYear);

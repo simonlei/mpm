@@ -3,7 +3,10 @@ package org.mpm.client;
 import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.rpc.DMI;
+import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.events.DropCompleteEvent;
+import com.smartgwt.client.widgets.events.DropCompleteHandler;
 import com.smartgwt.client.widgets.grid.events.DataArrivedHandler;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
@@ -61,6 +64,16 @@ public class LeftTabSet extends TabSet {
         filesGrid = new TreeGrid();
         filesGrid.setShowHeader(false);
         filesGrid.setShowRoot(false);
+        filesGrid.setSelectionType(SelectionStyle.SINGLE);
+        filesGrid.setCanAcceptDroppedRecords(true);
+        filesGrid.addDropCompleteHandler(new DropCompleteHandler() {
+            @Override
+            public void onDropComplete(DropCompleteEvent dropCompleteEvent) {
+                SC.logWarn("Drop finished");
+                reloadData();
+            }
+        });
+
         DataSource dataSource = DataSource.get("filesTree");
         filesGrid.setFields(new TreeGridField("title"));
         filesGrid.setDataSource(dataSource);

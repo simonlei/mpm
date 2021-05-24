@@ -39,7 +39,6 @@ public class PhotoImporterDataSource {
         String path = "/" + paths[1];
         // name: 1616851720630_tmpupload 去掉前面的 1616851720630_
         EntityFile parent = existOrCreate(null, path, paths[1].substring(14), true);
-        parent.setRootId(parent.getId());
         // skip upload, 1616851720630_tmpupload and last one
         if (paths.length > 2) {
             for (int i = 2; i < paths.length - 1; i++) {
@@ -69,7 +68,6 @@ public class PhotoImporterDataSource {
         }
         file = EntityFile.builder().path(path).name(name).isFolder(isFolder)
                 .parentId(parent == null ? null : parent.getId())
-                .rootId(parent == null ? null : parent.getRootId())
                 .build();
         dao.insert(file, true, false, false);
         return file;
