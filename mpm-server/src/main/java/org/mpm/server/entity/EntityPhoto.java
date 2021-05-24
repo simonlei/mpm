@@ -37,4 +37,5 @@ public class EntityPhoto {
     private String mediaType; // photo, video
     private Double duration; // 视频长度
     private Integer rotate; // 旋转
+    private String tags; // 标签
 }

@@ -41,7 +41,6 @@ public class SinglePhotoDialog extends Window {
         starButton = new IconButton();
         starButton.setShowButtonTitle(false);
         starButton.setZIndex(1000000);
-        // starButton.setIcon(record.getAttributeAsBoolean("star") ? "star.png" : "notstar.png");
 
         starButton.addClickHandler(clickEvent -> {
             swapStar();
