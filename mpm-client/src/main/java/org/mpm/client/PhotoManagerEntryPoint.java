@@ -20,7 +20,6 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
     public static EventBus eventBus = new SimpleEventBus();
 
     public void onModuleLoad() {
-        LeftTabSet.exportReloadData();
         PicsGrid.exportReloadData();
         GWT.create(ImageCellMetaFactory.class);
 

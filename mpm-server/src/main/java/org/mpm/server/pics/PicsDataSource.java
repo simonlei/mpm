@@ -129,7 +129,9 @@ public class PicsDataSource {
         sortedBy = sortedBy == null ? "id" : sortedBy;
         boolean desc = sortedBy.startsWith("-");
         sortedBy = desc ? sortedBy.substring(1) : sortedBy;
+        long count = 0;
 
+        // TODO: 要重构
         if (filePath != null) {
             String joinSql = "inner join t_files on t_photos.id = t_files.photoId ";
             SimpleCriteria cnd = new SimpleCriteria(joinSql);
@@ -137,8 +139,8 @@ public class PicsDataSource {
                     .and("trashed", "=", trashed);
 
             addStarCriteria(star, cnd);
-            Record count = dao.fetch("t_photos", cnd, "count(distinct t_photos.id) as c");
-            resp.setTotalRows(count.getLong("c"));
+            count = dao.fetch("t_photos", cnd, "count(distinct t_photos.id) as c").getLong("c");
+            resp.setTotalRows(count);
             cnd.setPager(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
             resp.setData(dao.query("t_photos", cnd, null, "distinct t_photos.*"));
@@ -148,13 +150,14 @@ public class PicsDataSource {
             cnd = theMonth == null ? cnd : cnd.and("month(takenDate)", "=", theMonth);
             addStarCriteria(star, cnd.getCri());
 
-            resp.setTotalRows(dao.count(EntityPhoto.class, cnd));
+            count = dao.count(EntityPhoto.class, cnd);
+            resp.setTotalRows(count);
             cnd.limit(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
             resp.setData(dao.query(EntityPhoto.class, cnd));
         }
         resp.setStartRow(start);
-        resp.setEndRow(end);
+        resp.setEndRow(start + count);
         return resp;
     }
 

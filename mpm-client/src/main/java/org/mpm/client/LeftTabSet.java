@@ -5,8 +5,8 @@ import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.rpc.DMI;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.util.SC;
-import com.smartgwt.client.widgets.events.DropCompleteEvent;
-import com.smartgwt.client.widgets.events.DropCompleteHandler;
+import com.smartgwt.client.widgets.events.DropEvent;
+import com.smartgwt.client.widgets.events.DropHandler;
 import com.smartgwt.client.widgets.grid.events.DataArrivedHandler;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
@@ -51,14 +51,6 @@ public class LeftTabSet extends TabSet {
         return criteria;
     }
 
-    public static void staticReload() {
-        instance.reloadData();
-    }
-
-    public static native void exportReloadData() /*-{
-      $wnd.realodLeftTab = $entry(@org.mpm.client.LeftTabSet::staticReload());
-    }-*/;
-
     private void addFilesTab() {
         Tab filesTab = new Tab("按图片库查看");
         filesGrid = new TreeGrid();
@@ -66,13 +58,13 @@ public class LeftTabSet extends TabSet {
         filesGrid.setShowRoot(false);
         filesGrid.setSelectionType(SelectionStyle.SINGLE);
         filesGrid.setCanAcceptDroppedRecords(true);
-        filesGrid.addDropCompleteHandler(new DropCompleteHandler() {
+        filesGrid.addDropHandler(new DropHandler() {
             @Override
-            public void onDropComplete(DropCompleteEvent dropCompleteEvent) {
-                SC.logWarn("Drop finished");
-                reloadData();
+            public void onDrop(DropEvent dropEvent) {
+                SC.logWarn("Dropping...");
             }
         });
+        filesGrid.addDropCompleteHandler(dropCompleteEvent -> reloadData());
 
         DataSource dataSource = DataSource.get("filesTree");
         filesGrid.setFields(new TreeGridField("title"));

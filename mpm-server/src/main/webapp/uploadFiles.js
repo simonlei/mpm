@@ -80,7 +80,6 @@ function uploadFiles(files) {
               options.Key.split("\/").pop() + '上传' + (err ? '失败' : '完成'));
           count++;
           if (count == files.length) {
-            realodLeftTab();
             realodPicsGrid();
             isc.say("上传完成，共 " + count + " 张照片");
           }
