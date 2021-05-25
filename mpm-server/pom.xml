@@ -47,37 +47,10 @@
             <version>3.0.8</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.nutz/nutzboot-servlet3 -->
-        <dependency>
-            <artifactId>nutzboot-servlet3</artifactId>
-            <groupId>org.nutz</groupId>
-            <version>2.4.1.v20201014</version>
-        </dependency>
-        <dependency>
-            <artifactId>slf4j-log4j12</artifactId>
-            <groupId>org.slf4j</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>nutzboot-starter-nutz-mvc</artifactId>
-            <groupId>org.nutz</groupId>
-        </dependency>
         <dependency>
             <artifactId>mysql-connector-java</artifactId>
             <groupId>mysql</groupId>
             <version>8.0.20</version>
-        </dependency>
-        <dependency>
-            <artifactId>nutzboot-starter-jdbc</artifactId>
-            <groupId>org.nutz</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>nutzboot-starter-nutz-dao</artifactId>
-            <groupId>org.nutz</groupId>
-        </dependency>
-        <dependency>
-            <groupId>org.nutz</groupId>
-            <artifactId>nutzboot-starter-test-junit4</artifactId>
-            <version>${nutzboot.version}</version>
         </dependency>
         <dependency>
             <artifactId>isomorphic-core-rpc</artifactId>
@@ -103,6 +76,33 @@
         </dependency>
 
         <dependency>
+            <groupId>org.nutz</groupId>
+            <artifactId>nutz</artifactId>
+            <version>1.r.68.v20191031</version>
+        </dependency>
+        <dependency>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <version>2.3.1.RELEASE</version>
+        </dependency>
+        <dependency>
+            <artifactId>spring-web</artifactId>
+            <groupId>org.springframework</groupId>
+            <version>5.2.7.RELEASE</version>
+        </dependency>
+        <dependency>
+            <artifactId>spring-webmvc</artifactId>
+            <groupId>org.springframework</groupId>
+            <version>5.2.7.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jetty</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- to delete -->
+        <dependency>
             <artifactId>junit-jupiter-api</artifactId>
             <groupId>org.junit.jupiter</groupId>
             <scope>test</scope>
@@ -124,23 +124,15 @@
             <groupId>org.junit.jupiter</groupId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <artifactId>nutzboot-starter-test</artifactId>
-            <groupId>org.nutz</groupId>
-            <scope>test</scope>
-            <version>${nutzboot.version}</version>
-        </dependency>
 
     </dependencies>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <artifactId>nutzboot-parent</artifactId>
-                <groupId>org.nutz</groupId>
-                <scope>import</scope>
-                <type>pom</type>
-                <version>${nutzboot.version}</version>
+                <artifactId>spring-boot-starter-parent</artifactId>
+                <groupId>org.springframework.boot</groupId>
+                <version>2.3.1.RELEASE</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -205,9 +197,4 @@
             <id>dev</id>
         </profile>
     </profiles>
-
-    <properties>
-        <nutzboot.version>2.4.1.v20201014</nutzboot.version>
-    </properties>
-
 </project>

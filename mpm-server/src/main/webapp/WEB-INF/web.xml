@@ -4,6 +4,7 @@
     xmlns="http://java.sun.com/xml/ns/javaee"
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
+<!--
     <context-param>
         <param-name>nutzboot.mainClass</param-name>
         <param-value>org.mpm.server.MpmMainClass</param-value>
@@ -12,6 +13,7 @@
         <param-name>nutzboot.mainPackage</param-name>
         <param-value>org.mpm.server</param-value>
     </context-param>
+    -->
     <!-- 
         Dynamic Compression, as documented at 
         https://www.smartclient.com/smartgwtee-latest/server/javadoc/com/isomorphic/servlet/CompressionFilter.html
@@ -37,10 +39,11 @@
     <listener>
         <listener-class>com.isomorphic.base.InitListener</listener-class>
     </listener>
+    <!--
     <listener>
         <listener-class>org.nutz.boot.starter.servlet3.NbServletContextListener</listener-class>
     </listener>
-
+-->
 
     <!-- 
         Handles built-in SmartClient datasource operations, as documented at

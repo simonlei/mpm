@@ -9,17 +9,15 @@ import static org.junit.Assert.assertTrue;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mpm.server.BaseTest;
 import org.mpm.server.entity.EntityFile;
-import org.nutz.boot.test.junit4.NbJUnit4Runner;
 import org.nutz.dao.Dao;
 import org.nutz.ioc.loader.annotation.Inject;
 import org.nutz.ioc.loader.annotation.IocBean;
 
 @Slf4j
 @IocBean
-@RunWith(NbJUnit4Runner.class)
+// @RunWith(NbJUnit4Runner.class)
 public class FilesDataSourceTest extends BaseTest {
 
     @Inject

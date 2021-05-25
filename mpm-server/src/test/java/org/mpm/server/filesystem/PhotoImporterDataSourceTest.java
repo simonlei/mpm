@@ -8,16 +8,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mpm.server.BaseTest;
-import org.nutz.boot.test.junit4.NbJUnit4Runner;
 import org.nutz.ioc.loader.annotation.Inject;
 import org.nutz.ioc.loader.annotation.IocBean;
 
 
 @Slf4j
 @IocBean
-@RunWith(NbJUnit4Runner.class)
+//@RunWith(NbJUnit4Runner.class)
 public class PhotoImporterDataSourceTest extends BaseTest {
 
     @Inject

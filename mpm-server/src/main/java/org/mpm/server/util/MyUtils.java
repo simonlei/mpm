@@ -1,6 +1,5 @@
 package org.mpm.server.util;
 
-import org.nutz.boot.AppContext;
 import org.nutz.ioc.Ioc;
 
 public class MyUtils {
@@ -21,10 +20,12 @@ public class MyUtils {
     }
 
     public static Ioc getIoc() {
-        return AppContext.getDefault().getIoc();
+        return null;
+        //return AppContext.getDefault().getIoc();
     }
 
     public static <T> T getByType(Class<T> clz) {
-        return AppContext.getDefault().getIoc().getByType(clz);
+        return null;
+        //return AppContext.getDefault().getIoc().getByType(clz);
     }
 }

@@ -1,13 +1,14 @@
 package org.mpm.server;
 
 import org.mpm.server.pics.GeoChecker;
-import org.nutz.boot.NbApp;
 import org.nutz.dao.Dao;
 import org.nutz.ioc.loader.annotation.Inject;
 import org.nutz.ioc.loader.annotation.IocBean;
 
+
 @IocBean(create = "init", depose = "depose")
-public class MpmMainClass extends NbApp {
+//public class MpmMainClass extends NbApp {
+public class MpmMainClass {
 
     @Inject
     Dao dao;

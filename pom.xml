@@ -84,5 +84,11 @@
         <smartgwt.version>12.1-p20210321</smartgwt.version>
     </properties>
     <version>1.0-SNAPSHOT</version>
+    <parent>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <relativePath/>
+        <version>2.3.1.RELEASE</version> <!-- lookup parent from repository -->
+    </parent>
 
 </project>

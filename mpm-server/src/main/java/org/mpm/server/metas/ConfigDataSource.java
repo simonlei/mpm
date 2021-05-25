@@ -8,18 +8,24 @@ import org.json.JSONObject;
 import org.mpm.server.util.MyUtils;
 import org.nutz.ioc.impl.PropertiesProxy;
 import org.nutz.ioc.loader.annotation.Inject;
-import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.lang.Lang;
 import org.nutz.lang.util.NutMap;
 import org.nutz.mvc.annotation.At;
 import org.nutz.mvc.annotation.Ok;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@IocBean
+@RestController
 @Slf4j
 public class ConfigDataSource {
 
     @Inject
     PropertiesProxy conf;
+    @Value("${cos.bucket}")
+    String bucket;
+    @Value("${cos.region}")
+    String region;
 
     // used in client
     @At("/tmpCredential")
@@ -57,12 +63,8 @@ public class ConfigDataSource {
     }
 
     // used in client
-    @At("/config")
-    @Ok("raw")
+    @GetMapping("/config")
     public String getConfigJs() {
-        PropertiesProxy conf = MyUtils.getByType(PropertiesProxy.class);
-        String bucket = conf.get("cos.bucket");
-        String region = conf.get("cos.region");
         String s = "var bucket=\"" + bucket + "\"; \nvar region=\"" + region + "\";\n";
         log.info("Config is:" + s);
         return s;
