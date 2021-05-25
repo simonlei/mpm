@@ -3,6 +3,7 @@ package org.mpm.server.pics;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import lombok.extern.slf4j.Slf4j;
@@ -72,5 +73,10 @@ public class FilesDataSourceTest extends BaseTest {
         assertEquals("/root/newParent/child", dao.fetch(EntityFile.class, nodeChild.getId()).getPath());
         assertEquals(newParent.getId(), dao.fetch(EntityFile.class, nodeChild2.getId()).getParentId());
         assertEquals("/root/newParent/child2", dao.fetch(EntityFile.class, nodeChild2.getId()).getPath());
+    }
+
+    @Test
+    public void testMergeToRoot() {
+        assertThrows(Exception.class, () -> filesDataSource.mergeTo(node, null));
     }
 }

@@ -5,8 +5,6 @@ import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.rpc.DMI;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.util.SC;
-import com.smartgwt.client.widgets.events.DropEvent;
-import com.smartgwt.client.widgets.events.DropHandler;
 import com.smartgwt.client.widgets.grid.events.DataArrivedHandler;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
@@ -53,15 +51,17 @@ public class LeftTabSet extends TabSet {
 
     private void addFilesTab() {
         Tab filesTab = new Tab("按图片库查看");
-        filesGrid = new TreeGrid();
+        filesGrid = new TreeGrid() {
+
+        };
         filesGrid.setShowHeader(false);
         filesGrid.setShowRoot(false);
         filesGrid.setSelectionType(SelectionStyle.SINGLE);
         filesGrid.setCanAcceptDroppedRecords(true);
-        filesGrid.addDropHandler(new DropHandler() {
-            @Override
-            public void onDrop(DropEvent dropEvent) {
-                SC.logWarn("Dropping...");
+        filesGrid.addFolderDropHandler(folderDropEvent -> {
+            TreeNode[] nodes = folderDropEvent.getNodes();
+            for (TreeNode node : nodes) {
+                node.setAttribute("merge", folderDropEvent.isAltKeyDown());
             }
         });
         filesGrid.addDropCompleteHandler(dropCompleteEvent -> reloadData());

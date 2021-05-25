@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityFile;
+import org.mpm.server.util.BusiException;
 import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
@@ -59,17 +60,19 @@ public class FilesDataSource {
         Record record = new Record();
         Map values = req.getValues();
         record.putAll(values);
-        String title = (String) values.get("title");
         int affectedRows = dao.updateIgnoreNull(dao.getEntity(EntityFile.class).getObject(record));
 
         if (values.get("parentId") != null) {
-            resetParentTo(dao.fetch(EntityFile.class, (Long) values.get("id")),
-                    dao.fetch(EntityFile.class, (Long) values.get("parentId")));
+            EntityFile node = dao.fetch(EntityFile.class, (Long) values.get("id"));
+            EntityFile newParent = dao.fetch(EntityFile.class, (Long) values.get("parentId"));
+            if ((Boolean) values.get("merge")) {
+                mergeTo(node, newParent);
+            } else {
+                resetParentTo(node, newParent);
+            }
         }
 
-        Record newData = dao.fetch("t_files", Cnd.where("id", "=", values.get("id")));
-        newData.put("title", title);
-        resp.setData(newData);
+        resp.setData(dao.fetch("t_files", Cnd.where("id", "=", values.get("id"))));
         resp.setAffectedRows(affectedRows);
         return resp;
     }
@@ -96,6 +99,9 @@ public class FilesDataSource {
      * Used by dmi
      */
     public void mergeTo(EntityFile node, EntityFile newParent) {
+        if (newParent == null) {
+            throw new BusiException("不能合并到root下");
+        }
         log.info("New parent id {}", newParent.getId());
         Dao dao = MyUtils.getByType(Dao.class);
         List<EntityFile> children = dao.query(EntityFile.class, Cnd.where("parentId", "=", node.getId()));
