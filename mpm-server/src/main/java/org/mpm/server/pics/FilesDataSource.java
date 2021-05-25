@@ -78,9 +78,10 @@ public class FilesDataSource {
         if (newParent == null) {
             newParent = EntityFile.builder().path("/" + Math.random()).build();
         }
+        log.info("Child {} parent id {}", child.getId(), newParent.getId());
         child.setParentId(newParent.getId());
         String newPath = newParent.getPath() + "/" + child.getName();
-        log.info("New path {}", newPath);
+        log.info("New path {} {}", newPath, child.getParentId());
         child.setPath(newPath);
         Dao dao = MyUtils.getByType(Dao.class);
         dao.updateIgnoreNull(child);
@@ -88,5 +89,19 @@ public class FilesDataSource {
         for (EntityFile subChild : children) {
             resetParentTo(subChild, child);
         }
+    }
+
+    /**
+     * 将node 下的所有目录和文件都转移到 newParent 目录下，并删除node
+     * Used by dmi
+     */
+    public void mergeTo(EntityFile node, EntityFile newParent) {
+        log.info("New parent id {}", newParent.getId());
+        Dao dao = MyUtils.getByType(Dao.class);
+        List<EntityFile> children = dao.query(EntityFile.class, Cnd.where("parentId", "=", node.getId()));
+        for (EntityFile child : children) {
+            resetParentTo(child, newParent);
+        }
+        dao.delete(node);
     }
 }
