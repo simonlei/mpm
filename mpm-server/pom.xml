@@ -31,6 +31,12 @@
             <version>${servlets.version}</version>
         </dependency>
         <dependency>
+            <artifactId>jsp-api</artifactId>
+            <groupId>javax.servlet.jsp</groupId>
+            <scope>provided</scope>
+            <version>2.2</version>
+        </dependency>
+        <dependency>
             <artifactId>lombok</artifactId>
             <groupId>org.projectlombok</groupId>
             <scope>provided</scope>
@@ -84,6 +90,13 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <groupId>org.springframework.boot</groupId>
             <version>2.3.1.RELEASE</version>
+            <exclusions>
+                <!-- Exclude the Tomcat dependency -->
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <artifactId>spring-web</artifactId>
@@ -100,6 +113,17 @@
             <artifactId>spring-boot-starter-jetty</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.isomorphic.smartgwt.eval</groupId>
+            <artifactId>isomorphic-spring</artifactId>
+            <version>${smartgwt.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>druid</artifactId>
+            <groupId>com.alibaba</groupId>
+            <version>1.1.22</version>
+        </dependency>
+
 
         <!-- to delete -->
         <dependency>

@@ -5,6 +5,8 @@ import com.isomorphic.servlet.DataSourceLoader;
 import com.isomorphic.servlet.IDACall;
 import javax.servlet.ServletContextListener;
 import lombok.extern.slf4j.Slf4j;
+import org.nutz.dao.Dao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -23,7 +25,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Slf4j
 public class MpmApplication extends SpringBootServletInitializer {
 
+    @Autowired
+    Dao dao;
+
     public static void main(String[] args) {
+        //ISCInit.go();
         SpringApplication.run(MpmApplication.class, args);
     }
 

@@ -1,7 +1,5 @@
 package org.mpm.server.util;
 
-import org.nutz.ioc.Ioc;
-
 public class MyUtils {
 
     public static Long getPrefixLong(String s) {
@@ -17,15 +15,5 @@ public class MyUtils {
             return -1l;
         }
         return Long.parseLong(prefix);
-    }
-
-    public static Ioc getIoc() {
-        return null;
-        //return AppContext.getDefault().getIoc();
-    }
-
-    public static <T> T getByType(Class<T> clz) {
-        return null;
-        //return AppContext.getDefault().getIoc().getByType(clz);
     }
 }

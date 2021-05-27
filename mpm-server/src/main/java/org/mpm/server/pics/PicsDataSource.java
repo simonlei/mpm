@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.util.ExplicitPager;
-import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Chain;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
@@ -15,17 +14,23 @@ import org.nutz.dao.Sqls;
 import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Sql;
 import org.nutz.dao.util.cri.SimpleCriteria;
-import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.lang.Lang;
 import org.nutz.mvc.Mvcs;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-@IocBean
+@Component
 @Slf4j
 public class PicsDataSource {
 
+    @Autowired
+    Dao dao;
+
+    @Autowired
+    PicsModule picsModule;
+
     // used in client
     public void batchUpdatePics(boolean trashed, Map criteria, Map values) {
-        Dao dao = MyUtils.getByType(Dao.class);
         String theYear = (String) criteria.get("theYear");
         String theMonth = (String) criteria.get("theMonth");
         String filePath = (String) criteria.get("filePath");
@@ -56,7 +61,7 @@ public class PicsDataSource {
 
     // used in client
     public int count(boolean trashed) {
-        return MyUtils.getByType(PicsModule.class).count(trashed);
+        return picsModule.count(trashed);
     }
 
     // used in client
@@ -70,7 +75,6 @@ public class PicsDataSource {
     // used in datasource
     public DSResponse update(DSRequest req) {
         DSResponse resp = new DSResponse();
-        Dao dao = MyUtils.getByType(Dao.class);
         Record record = new Record();
         Map values = req.getValues();
         record.putAll(values);
@@ -89,7 +93,6 @@ public class PicsDataSource {
 
     private String getAddress(Map values) {
         try {
-            PicsModule picsModule = MyUtils.getByType(PicsModule.class);
             return picsModule.getAddress(Double.parseDouble("" + values.get("latitude")),
                     Double.parseDouble("" + values.get("longitude")));
         } catch (Exception e) {
@@ -103,7 +106,6 @@ public class PicsDataSource {
         DSResponse resp = new DSResponse();
         Long id = (Long) req.getCriteria().get("id");
         if (id != null) {
-            Dao dao = MyUtils.getByType(Dao.class);
             Sql sql = Sqls.create("update t_photos set trashed = !trashed where id = @id");
             sql.setParam("id", id);
             dao.execute(sql);
@@ -116,21 +118,26 @@ public class PicsDataSource {
 
     // used in datasource
     public DSResponse fetch(DSRequest req) {
+        int i = 0;
+        log.info("Done {}", i++);
         DSResponse resp = new DSResponse();
-        Dao dao = MyUtils.getByType(Dao.class);
+        log.info("Done {}", i++);
         Boolean trashed = (Boolean) req.getCriteria().get("trashed");
+
         Boolean star = (Boolean) req.getCriteria().get("star");
         String theYear = (String) req.getCriteria().get("theYear");
         String theMonth = (String) req.getCriteria().get("theMonth");
         String filePath = (String) req.getCriteria().get("filePath");
+        log.info("Done {}", i++);
         int start = (int) req.getStartRow();
         int end = (int) req.getEndRow();
+        log.info("Done {}", i++);
         String sortedBy = req.getSortBy();
         sortedBy = sortedBy == null ? "id" : sortedBy;
         boolean desc = sortedBy.startsWith("-");
         sortedBy = desc ? sortedBy.substring(1) : sortedBy;
         long count = 0;
-
+        log.info("Done {}", i++);
         // TODO: 要重构
         if (filePath != null) {
             String joinSql = "inner join t_files on t_photos.id = t_files.photoId ";
@@ -145,7 +152,9 @@ public class PicsDataSource {
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
             resp.setData(dao.query("t_photos", cnd, null, "distinct t_photos.*"));
         } else {
+            log.info("Done {}", i++);
             Cnd cnd = Cnd.where("trashed", "=", trashed);
+            log.info("Done - {}", i++);
             cnd = theYear == null ? cnd : cnd.and("year(takenDate)", "=", theYear);
             cnd = theMonth == null ? cnd : cnd.and("month(takenDate)", "=", theMonth);
             addStarCriteria(star, cnd.getCri());

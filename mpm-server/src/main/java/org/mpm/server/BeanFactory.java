@@ -1,40 +1,54 @@
 package org.mpm.server;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.ClientConfig;
 import com.qcloud.cos.auth.BasicCOSCredentials;
 import com.qcloud.cos.auth.COSCredentials;
 import com.qcloud.cos.region.Region;
 import lombok.extern.slf4j.Slf4j;
-import org.nutz.ioc.impl.PropertiesProxy;
-import org.nutz.ioc.loader.annotation.Inject;
-import org.nutz.ioc.loader.annotation.IocBean;
+import org.nutz.dao.Dao;
+import org.nutz.dao.impl.NutDao;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@IocBean(create = "init")
+@Configuration
 @Slf4j
 public class BeanFactory {
 
-    @Inject
-    PropertiesProxy conf;
-
+    @Value("${cos.bucket}")
+    String bucket;
+    @Value("${cos.region}")
+    String region;
+    @Value("${cos.secretId}")
     String secretId;
+    @Value("${cos.secretKey}")
     String secretKey;
-    String regionStr;
 
-    @IocBean
+    @Value("${jdbc.url}")
+    String dbUrl;
+    @Value("${jdbc.username}")
+    String dbUsername;
+    @Value("${jdbc.password}")
+    String dbPassword;
+
+    @Bean
     public COSClient getCosClient() {
         log.info("cosClient config:" + secretId + ":" + secretKey);
         COSCredentials cred = new BasicCOSCredentials(secretId, secretKey);
-        Region region = new Region(regionStr);
-        ClientConfig clientConfig = new ClientConfig(region);
+        ClientConfig clientConfig = new ClientConfig(new Region(region));
         COSClient cosClient = new COSClient(cred, clientConfig);
         return cosClient;
     }
 
-    public void init() {
-        log.info("Setups : " + conf);
-        this.secretId = conf.get("cos.secretId");
-        this.secretKey = conf.get("cos.secretKey");
-        this.regionStr = conf.get("cos.region");
+    @Bean
+    public Dao getDao() {
+        DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl(dbUrl);
+        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        dataSource.setUsername(dbUsername);
+        dataSource.setPassword(dbPassword);
+        return new NutDao(dataSource);
     }
 }

@@ -5,13 +5,13 @@ import java.io.IOException;
 import java.util.TreeMap;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.mpm.server.util.MyUtils;
-import org.nutz.ioc.impl.PropertiesProxy;
-import org.nutz.ioc.loader.annotation.Inject;
+import org.mpm.server.entity.EntityFile;
+import org.nutz.dao.Dao;
 import org.nutz.lang.Lang;
 import org.nutz.lang.util.NutMap;
 import org.nutz.mvc.annotation.At;
 import org.nutz.mvc.annotation.Ok;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,12 +20,19 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class ConfigDataSource {
 
-    @Inject
-    PropertiesProxy conf;
     @Value("${cos.bucket}")
     String bucket;
     @Value("${cos.region}")
     String region;
+    @Value("${cos.secretId}")
+    String secretId;
+    @Value("${cos.secretKey}")
+    String secretKey;
+    @Value("${password}")
+    String password;
+
+    @Autowired
+    Dao dao;
 
     // used in client
     @At("/tmpCredential")
@@ -50,10 +57,10 @@ public class ConfigDataSource {
                 //取消分块上传操作
                 "name/cos:AbortMultipartUpload"
         };
-        config.put("SecretId", conf.get("cos.secretId"));
-        config.put("SecretKey", conf.get("cos.secretKey"));
-        config.put("bucket", conf.get("cos.bucket"));
-        config.put("region", conf.get("cos.region"));
+        config.put("SecretId", secretId);
+        config.put("SecretKey", secretKey);
+        config.put("bucket", bucket);
+        config.put("region", region);
         config.put("durationSeconds", 7200);
         config.put("allowPrefix", "upload/*");
         config.put("allowActions", allowActions);
@@ -65,6 +72,8 @@ public class ConfigDataSource {
     // used in client
     @GetMapping("/config")
     public String getConfigJs() {
+        log.info("Dao is {}", dao);
+        log.info("Config {}", dao.fetch(EntityFile.class, 1));
         String s = "var bucket=\"" + bucket + "\"; \nvar region=\"" + region + "\";\n";
         log.info("Config is:" + s);
         return s;
@@ -73,18 +82,13 @@ public class ConfigDataSource {
     // used in client
     public NutMap fetchConfig() {
         NutMap result = new NutMap();
-
-        PropertiesProxy conf = MyUtils.getByType(PropertiesProxy.class);
-        String bucket = conf.get("cos.bucket");
-        String region = conf.get("cos.region");
         result.setv("thumbUrl", String.format("https://%s.cos.%s.myqcloud.com/", bucket, region));
         return result;
     }
 
     // used in client
     public NutMap authPassword(String passwd) {
-        PropertiesProxy conf = MyUtils.getByType(PropertiesProxy.class);
-        if (conf.get("password").equals(passwd)) {
+        if (password.equals(passwd)) {
             return Lang.map("ok", "ok");
         }
         return new NutMap();

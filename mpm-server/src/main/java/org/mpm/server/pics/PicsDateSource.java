@@ -5,26 +5,28 @@ import com.isomorphic.datasource.DSResponse;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Dao;
 import org.nutz.dao.Sqls;
 import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Sql;
-import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.lang.Lang;
 import org.nutz.lang.util.NutMap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-@IocBean
+@Component
 @Slf4j
 public class PicsDateSource {
+
+    @Autowired
+    Dao dao;
 
     // used in datasource
     public DSResponse fetch(DSRequest req) {
         DSResponse resp = new DSResponse();
-        Dao dao = MyUtils.getByType(Dao.class);
         Boolean trashed = (Boolean) req.getCriteria().get("trashed");
         Boolean star = (Boolean) req.getCriteria().get("star");
-        List<Record> photoDates = getPhotoDates(dao, trashed, star);
+        List<Record> photoDates = getPhotoDates(trashed, star);
         NutMap lastYear = null;
         int yearCount = 0;
         List<NutMap> result = new ArrayList<>();
@@ -61,7 +63,7 @@ public class PicsDateSource {
         return lastYear;
     }
 
-    private List<Record> getPhotoDates(Dao dao, Boolean trashed, Boolean star) {
+    private List<Record> getPhotoDates(Boolean trashed, Boolean star) {
         // photo dates...include years and months
         Sql sql = Sqls.create("select year(takenDate) year, month(takenDate) month,"
                 + " count(*) photoCount "

@@ -10,5 +10,5 @@
         <field name="theYear" customSelectExpression="year(takenDate)"/>
         <field name="theMonth" customSelectExpression="month(takenDate)"/>
     </fields>
-    <serverObject lookStyle="new" className="org.mpm.server.pics.PicsDataSource"/>
+    <serverObject lookupStyle="spring" bean="picsDataSource"/>
 </DataSource>

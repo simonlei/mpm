@@ -7,17 +7,20 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.util.BusiException;
-import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.dao.Sqls;
 import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Sql;
-import org.nutz.ioc.loader.annotation.IocBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-@IocBean
+@Component
 @Slf4j
 public class FilesDataSource {
+
+    @Autowired
+    Dao dao;
 
     // used in datasource
     public DSResponse fetch(DSRequest req) {
@@ -40,7 +43,6 @@ public class FilesDataSource {
             s.setParam("star", star);
         }
         s.setCallback(Sqls.callback.records());
-        Dao dao = MyUtils.getByType(Dao.class);
         dao.execute(s);
         List<Record> list = s.getList(Record.class);
         if (parentId == null) {
@@ -56,7 +58,6 @@ public class FilesDataSource {
     // used in datasource
     public DSResponse update(DSRequest req) {
         DSResponse resp = new DSResponse();
-        Dao dao = MyUtils.getByType(Dao.class);
         Record record = new Record();
         Map values = req.getValues();
         record.putAll(values);
@@ -86,7 +87,6 @@ public class FilesDataSource {
         String newPath = newParent.getPath() + "/" + child.getName();
         log.info("New path {} {}", newPath, child.getParentId());
         child.setPath(newPath);
-        Dao dao = MyUtils.getByType(Dao.class);
         dao.updateIgnoreNull(child);
         List<EntityFile> children = dao.query(EntityFile.class, Cnd.where("parentId", "=", child.getId()));
         for (EntityFile subChild : children) {
@@ -103,7 +103,6 @@ public class FilesDataSource {
             throw new BusiException("不能合并到root下");
         }
         log.info("New parent id {}", newParent.getId());
-        Dao dao = MyUtils.getByType(Dao.class);
         List<EntityFile> children = dao.query(EntityFile.class, Cnd.where("parentId", "=", node.getId()));
         for (EntityFile child : children) {
             resetParentTo(child, newParent);

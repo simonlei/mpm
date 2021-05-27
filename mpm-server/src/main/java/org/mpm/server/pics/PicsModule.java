@@ -25,31 +25,32 @@ import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.http.Http;
 import org.nutz.http.Response;
-import org.nutz.ioc.impl.PropertiesProxy;
-import org.nutz.ioc.loader.annotation.Inject;
-import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.json.Json;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.mapl.Mapl;
 import org.nutz.trans.Trans;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-@IocBean(create = "init")
+@Component
 @Slf4j
 public class PicsModule {
 
     private static final String PHOTO = "photo";
     private static final String VIDEO = "video";
-    @Inject
+    @Autowired
     Dao dao;
-    @Inject
+    @Autowired
     COSClient cosClient;
-    @Inject
-    PropertiesProxy conf;
 
+    @Value("${qqlbsKey}")
     String qqlbsKey;
+    @Value("${qqlbsToken}")
     String qqlbsToken;
+    @Value("${cos.bucket}")
     String bucket;
 
     public int count(boolean trashed) {
@@ -276,11 +277,5 @@ public class PicsModule {
                 log.error("Can't real delete photo.", e);
             }
         });
-    }
-
-    public void init() {
-        qqlbsKey = conf.get("qqlbsKey");
-        qqlbsToken = conf.get("qqlbsToken");
-        bucket = conf.get("cos.bucket");
     }
 }

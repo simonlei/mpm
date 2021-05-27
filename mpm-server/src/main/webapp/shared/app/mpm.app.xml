@@ -1,19 +1,19 @@
 <Application>
     <rpcBindings>
-        <ServerObject ID="meta" className="org.mpm.server.metas.ConfigDataSource">
+        <ServerObject ID="meta" lookupStyle="spring" className="org.mpm.server.metas.ConfigDataSource" bean="configDataSource">
             <visibleMethods>
                 <method name="fetchConfig"/>
                 <method name="authPassword"/>
             </visibleMethods>
         </ServerObject>
-        <ServerObject ID="pics" className="org.mpm.server.pics.PicsDataSource">
+        <ServerObject ID="pics" lookupStyle="spring" className="org.mpm.server.pics.PicsDataSource" bean="picsDataSource">
             <visibleMethods>
                 <method name="count"/>
                 <method name="emptyTrash"/>
                 <method name="batchUpdatePics"/>
             </visibleMethods>
         </ServerObject>
-        <ServerObject ID="pics" className="org.mpm.server.pics.ProgressDataSource">
+        <ServerObject ID="pics" lookupStyle="spring" className="org.mpm.server.pics.ProgressDataSource" bean="progressDataSource">
             <visibleMethods>
                 <method name="getProgress"/>
             </visibleMethods>

@@ -9,5 +9,5 @@
         <field name="parentId" type="integer" foreignKey="filesTree.id"/>
         <field name="title"/>
     </fields>
-    <serverObject lookStyle="new" className="org.mpm.server.pics.FilesDataSource"/>
+    <serverObject lookupStyle="spring" bean="filesDataSource"/>
 </DataSource>
