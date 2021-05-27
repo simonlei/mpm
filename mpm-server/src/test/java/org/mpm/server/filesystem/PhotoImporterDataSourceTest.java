@@ -3,14 +3,19 @@ package org.mpm.server.filesystem;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.FileNotFoundException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 import org.mpm.server.BaseTest;
+import org.mpm.server.pics.PicsModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 
 @SpringBootTest
@@ -20,8 +25,13 @@ public class PhotoImporterDataSourceTest extends BaseTest {
     @Autowired
     PhotoImporterDataSource photoImporterDataSource;
 
+    @MockBean
+    PicsModule picsModule;
+
     @Test
-    public void testImportPhoto() {
+    public void testImportPhoto() throws FileNotFoundException {
+        Mockito.when(picsModule.saveCosFile(Mockito.any(), Mockito.any()))
+                .thenAnswer((Answer<String>) invocation -> "image/jpeg");
         String key = photoImporterDataSource
                 .uploadFile("upload/1616940995641_tmpupload/七上1025义工/IMG_004.jpg", "", null);
         // upload/1616940995641_tmpupload/IMG_001.jpg

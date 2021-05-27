@@ -40,20 +40,21 @@ public class MpmApplication extends SpringBootServletInitializer {
 
     @Bean
     public ServletListenerRegistrationBean<ServletContextListener> customListenerBean() {
-        ServletListenerRegistrationBean<ServletContextListener> bean = new ServletListenerRegistrationBean();
+        ServletListenerRegistrationBean<ServletContextListener> bean = new ServletListenerRegistrationBean<>();
         bean.setListener(new InitListener());
         return bean;
     }
 
     @Bean
     public ServletRegistrationBean customServletBean() {
-        ServletRegistrationBean bean = new ServletRegistrationBean(new IDACall(), "/app/sc/IDACall/*");
+        ServletRegistrationBean bean = new ServletRegistrationBean<>(new IDACall(), "/app/sc/IDACall/*");
         return bean;
     }
 
     @Bean
     public ServletRegistrationBean customServletBean2() {
-        ServletRegistrationBean bean = new ServletRegistrationBean(new DataSourceLoader(), "/app/sc/DataSourceLoader");
+        ServletRegistrationBean bean = new ServletRegistrationBean<>(
+                new DataSourceLoader(), "/app/sc/DataSourceLoader");
         return bean;
     }
 }

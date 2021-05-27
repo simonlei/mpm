@@ -135,8 +135,8 @@
                     <artifactId>android-json</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                    <groupId>org.junit.vintage</groupId>
                 </exclusion>
             </exclusions>
             <scope>test</scope>
