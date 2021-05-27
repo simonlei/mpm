@@ -1,24 +1,23 @@
 package org.mpm.server.filesystem;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mpm.server.BaseTest;
-import org.nutz.ioc.loader.annotation.Inject;
-import org.nutz.ioc.loader.annotation.IocBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 
+@SpringBootTest
 @Slf4j
-@IocBean
-//@RunWith(NbJUnit4Runner.class)
 public class PhotoImporterDataSourceTest extends BaseTest {
 
-    @Inject
+    @Autowired
     PhotoImporterDataSource photoImporterDataSource;
 
     @Test

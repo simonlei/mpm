@@ -1,25 +1,20 @@
 package org.mpm.server;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.nutz.trans.Trans;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest
 public class BaseTest {
 
-    /*
-        public static NbApp createNbApp() {
-            return new MpmMainClass();
-        }
-
-    */
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         Trans.begin();
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         Trans.rollback();
-        // Trans.commit();
     }
 }

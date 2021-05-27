@@ -127,25 +127,18 @@
 
         <!-- to delete -->
         <dependency>
-            <artifactId>junit-jupiter-api</artifactId>
-            <groupId>org.junit.jupiter</groupId>
-            <scope>test</scope>
-            <version>5.7.0</version>
-        </dependency>
-        <dependency>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <groupId>org.junit.jupiter</groupId>
-            <scope>test</scope>
-            <version>5.7.0</version>
-        </dependency>
-        <dependency>
-            <artifactId>junit-jupiter-params</artifactId>
-            <groupId>org.junit.jupiter</groupId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <artifactId>junit-jupiter-migrationsupport</artifactId>
-            <groupId>org.junit.jupiter</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin.external.google</groupId>
+                    <artifactId>android-json</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>test</scope>
         </dependency>
 

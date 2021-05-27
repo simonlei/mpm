@@ -1,10 +1,12 @@
 package org.mpm.server.pics;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mpm.server.BaseTest;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest
 public class PicsModuleTest extends BaseTest {
 
     @Test

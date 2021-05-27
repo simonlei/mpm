@@ -1,35 +1,34 @@
 package org.mpm.server.pics;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mpm.server.BaseTest;
 import org.mpm.server.entity.EntityFile;
 import org.nutz.dao.Dao;
-import org.nutz.ioc.loader.annotation.Inject;
-import org.nutz.ioc.loader.annotation.IocBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest
 @Slf4j
-@IocBean
-// @RunWith(NbJUnit4Runner.class)
 public class FilesDataSourceTest extends BaseTest {
 
-    @Inject
+    @Autowired
     Dao dao;
-    @Inject
+    @Autowired
     FilesDataSource filesDataSource;
     private EntityFile newParent;
     private EntityFile node;
     private EntityFile nodeChild;
     private EntityFile nodeChild2;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         super.setup();
         newParent = dao.insert(EntityFile.builder().name("newParent").path("/root/newParent").build());
