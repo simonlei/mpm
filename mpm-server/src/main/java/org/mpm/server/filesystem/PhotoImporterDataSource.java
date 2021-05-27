@@ -6,28 +6,23 @@ import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.pics.PicsModule;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
-import org.nutz.ioc.loader.annotation.Inject;
-import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.lang.Lang;
-import org.nutz.mvc.adaptor.WhaleAdaptor;
-import org.nutz.mvc.annotation.AdaptBy;
-import org.nutz.mvc.annotation.At;
-import org.nutz.mvc.annotation.Ok;
 import org.nutz.mvc.annotation.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@IocBean
+@RestController
 @Slf4j
 public class PhotoImporterDataSource {
 
-    @Inject
+    @Autowired
     Dao dao;
-    @Inject
+    @Autowired
     PicsModule picsModule;
 
     // used in client
-    @AdaptBy(type = WhaleAdaptor.class)
-    @At("/uploadFile")
-    @Ok("json")
+    @PostMapping("/uploadFile")
     public String uploadFile(@Param("key") String key, @Param("data") String data,
             @Param("err") String err) {
         log.info("Key is " + key);

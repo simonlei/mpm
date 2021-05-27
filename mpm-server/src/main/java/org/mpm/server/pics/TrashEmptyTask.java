@@ -6,9 +6,9 @@ import org.mpm.server.progress.AbstractProgressTask;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.ioc.loader.annotation.Inject;
-import org.nutz.ioc.loader.annotation.IocBean;
+import org.springframework.stereotype.Component;
 
-@IocBean(singleton = false)
+@Component
 public class TrashEmptyTask extends AbstractProgressTask implements Runnable {
 
     @Inject
