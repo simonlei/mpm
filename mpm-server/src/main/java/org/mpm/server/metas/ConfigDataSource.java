@@ -9,8 +9,6 @@ import org.mpm.server.entity.EntityFile;
 import org.nutz.dao.Dao;
 import org.nutz.lang.Lang;
 import org.nutz.lang.util.NutMap;
-import org.nutz.mvc.annotation.At;
-import org.nutz.mvc.annotation.Ok;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,8 +33,7 @@ public class ConfigDataSource {
     Dao dao;
 
     // used in client
-    @At("/tmpCredential")
-    @Ok("raw")
+    @GetMapping("/tmpCredential")
     public String getTmpCredential() throws IOException {
         TreeMap<String, Object> config = new TreeMap<>();
         String[] allowActions = new String[]{
