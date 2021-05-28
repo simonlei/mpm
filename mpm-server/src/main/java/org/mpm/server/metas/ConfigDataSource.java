@@ -3,6 +3,7 @@ package org.mpm.server.metas;
 import com.tencent.cloud.CosStsClient;
 import java.io.IOException;
 import java.util.TreeMap;
+import javax.servlet.ServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.mpm.server.entity.EntityFile;
@@ -68,8 +69,9 @@ public class ConfigDataSource {
 
     // used in client
     @GetMapping("/config")
-    public String getConfigJs() {
+    public String getConfigJs(ServletRequest request) {
         log.info("Dao is {}", dao);
+        log.info("Real path is {}", request.getServletContext().getRealPath("/"));
         log.info("Config {}", dao.fetch(EntityFile.class, 1));
         String s = "var bucket=\"" + bucket + "\"; \nvar region=\"" + region + "\";\n";
         log.info("Config is:" + s);
