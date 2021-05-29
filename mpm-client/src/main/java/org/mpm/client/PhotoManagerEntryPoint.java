@@ -23,7 +23,9 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
         KeyHandlers.initDebugKey();
 
         loadServerConfig();
+    }
 
+    private void askForPassword() {
         SC.askforValue("What's the password?",
                 s -> DMI.call("mpm", "org.mpm.server.metas.ConfigDataSource", "authPassword",
                         (rpcResponse, o, rpcRequest) -> {
@@ -55,7 +57,17 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
                     Map map = rpcResponse.getDataAsMap();
                     SC.logWarn("thumbUrl is :" + map.get("thumbUrl"));
                     ServerConfig.thumbUrl = (String) map.get("thumbUrl");
+                    ServerConfig.isDev = (String) map.get("isDev");
+                    initPage();
                 }, null);
+    }
+
+    private void initPage() {
+        if ("true".equals(ServerConfig.isDev)) {
+            createMainContent();
+        } else {
+            askForPassword();
+        }
     }
 
     private SplitPane createContentPane() {

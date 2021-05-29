@@ -29,7 +29,8 @@ public class ConfigDataSource {
     String secretKey;
     @Value("${password}")
     String password;
-
+    @Value("${isDev}")
+    String isDev;
     @Autowired
     Dao dao;
 
@@ -82,6 +83,7 @@ public class ConfigDataSource {
     public NutMap fetchConfig() {
         NutMap result = new NutMap();
         result.setv("thumbUrl", String.format("https://%s.cos.%s.myqcloud.com/", bucket, region));
+        result.setv("isDev", isDev);
         return result;
     }
 
