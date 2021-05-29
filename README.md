@@ -141,7 +141,7 @@ mvn package -Dgwt.style=PRETTY -DskipTests
 - [x] 数据库密码去掉
 - [ ] 全屏页增加 rotate快捷键
 - [x] bug: 全屏状态下旋转后，顺序变了
-- [ ] 将快捷键统一管理起来
+- [x] 将快捷键统一管理起来
 - [ ] 可以增加tag，给照片打tag
 - [ ] 可以按tag 进行过滤
 - [ ] 支持地图

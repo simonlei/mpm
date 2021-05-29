@@ -5,11 +5,8 @@ import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.rpc.RPCManager;
-import com.smartgwt.client.types.KeyNames;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.TextMatchStyle;
-import com.smartgwt.client.util.Page;
-import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.tile.TileGrid;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
@@ -27,23 +24,6 @@ public class PicsGrid extends TileGrid {
         super();
         instance = this;
         singlePhotoDialog = new SinglePhotoDialog(this);
-        Page.registerKey("D", new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                int count = getSelection().length;
-                if (!singlePhotoDialog.isShow() && count > 0) {
-                    SC.logWarn("Delete tile...");
-                    removeSelectedData();
-                    // fireChangeEvent(getResultSet().getLength() - count);
-                }
-            }
-        });
-        Page.registerKey(KeyNames.ENTER, new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                singlePhotoDialog.setPhoto(instance.getSelectedRecord());
-            }
-        });
         addRecordDoubleClickHandler(recordDoubleClickEvent -> {
             singlePhotoDialog.setPhoto(recordDoubleClickEvent.getRecord());
         });

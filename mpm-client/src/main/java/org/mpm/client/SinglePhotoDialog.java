@@ -2,7 +2,6 @@ package org.mpm.client;
 
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.KeyNames;
-import com.smartgwt.client.util.Page;
 import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.HTMLPane;
@@ -50,94 +49,6 @@ public class SinglePhotoDialog extends Window {
 
         addChild(pane);
         hide();
-        Page.registerKey("D", new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                if (record != null) {
-                    int index = picsGrid.getRecordIndex(record);
-                    SC.logWarn("Delete current..." + index);
-                    int totalCount = picsGrid.getResultSet().getLength();
-                    Record nextRecord;
-                    if (totalCount == 1) { // only one, exit
-                        nextRecord = null;
-                    } else if (index == totalCount - 1) { // last one, get prev one
-                        nextRecord = picsGrid.getTileRecord(picsGrid.getTile(index - 1));
-                    } else { // get next one
-                        nextRecord = picsGrid.getTileRecord(picsGrid.getTile(index + 1));
-                    }
-                    // picsGrid.deselectAllRecords();
-                    picsGrid.removeData(record);
-                    PhotoManagerEntryPoint.eventBus.fireEvent(new PicsChangeEvent(totalCount - 1));
-                    if (nextRecord == null) {
-                        hideMe();
-                    } else {
-                        setPhoto(nextRecord);
-                    }
-                }
-            }
-        });
-        Page.registerKey(KeyNames.ESC, new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                hideMe();
-            }
-        });
-        Page.registerKey(KeyNames.ARROW_LEFT, new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                showPhoto(-1);
-            }
-        });
-        Page.registerKey(KeyNames.ARROW_RIGHT, new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                showPhoto(1);
-            }
-        });
-        Page.registerKey(KeyNames.SPACE, new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                showPhoto(1);
-            }
-        });
-        Page.registerKey("I", new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                scale = !scale;
-                setPaneContent();
-            }
-        });
-        Page.registerKey("S", new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                swapStar();
-            }
-        });
-        Page.registerKey("J", new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                pane.scrollByPercent(0, 50);
-            }
-        });
-        Page.registerKey("K", new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                pane.scrollByPercent(0, -50);
-            }
-        });
-        Page.registerKey("L", new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                pane.scrollByPercent(50, 0);
-            }
-        });
-        Page.registerKey("H", new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                pane.scrollByPercent(-50, 0);
-            }
-        });
-
     }
 
     private void swapStar() {
@@ -148,7 +59,7 @@ public class SinglePhotoDialog extends Window {
         starButton.setIcon(newValue ? "star.png" : "notstar.png");
     }
 
-    private void showPhoto(int inc) {
+    void showPhoto(int inc) {
         int nextIndex = picsGrid.getRecordIndex(record) + inc;
         if (nextIndex < 0) { // first one, do nothing.
             return;
@@ -164,7 +75,7 @@ public class SinglePhotoDialog extends Window {
         return show;
     }
 
-    private void hideMe() {
+    void hideMe() {
         if (record != null) {
             picsGrid.selectRecord(record);
         }
@@ -247,5 +158,70 @@ public class SinglePhotoDialog extends Window {
         PicsGrid.instance.getDataSource().updateData(record);
         setPaneContent();
         pane.redraw();
+    }
+
+    public void deleteCurrentPhoto() {
+        if (record != null) {
+            int index = picsGrid.getRecordIndex(record);
+            SC.logWarn("Delete current..." + index);
+            int totalCount = picsGrid.getResultSet().getLength();
+            Record nextRecord;
+            if (totalCount == 1) { // only one, exit
+                nextRecord = null;
+            } else if (index == totalCount - 1) { // last one, get prev one
+                nextRecord = picsGrid.getTileRecord(picsGrid.getTile(index - 1));
+            } else { // get next one
+                nextRecord = picsGrid.getTileRecord(picsGrid.getTile(index + 1));
+            }
+            picsGrid.removeData(record);
+            PhotoManagerEntryPoint.eventBus.fireEvent(new PicsChangeEvent(totalCount - 1));
+            if (nextRecord == null) {
+                hideMe();
+            } else {
+                setPhoto(nextRecord);
+            }
+        }
+    }
+
+    class SinglePageKeyHandler extends PageKeyHandler {
+
+        @Override
+        public void execute(String s) {
+            if (!isShow() || record == null) {
+                return;
+            }
+            switch (s) {
+                case KeyNames.ESC:
+                    hideMe();
+                    break;
+                case KeyNames.ARROW_LEFT:
+                    showPhoto(-1);
+                    break;
+                case KeyNames.ARROW_RIGHT:
+                case KeyNames.SPACE:
+                    showPhoto(1);
+                    break;
+                case "I":
+                    scale = !scale;
+                    setPaneContent();
+                    break;
+                case "S":
+                    swapStar();
+                    break;
+                case "J":
+                    pane.scrollByPercent(0, 50);
+                    break;
+                case "K":
+                    pane.scrollByPercent(0, -50);
+                    break;
+                case "L":
+                    pane.scrollByPercent(50, 0);
+                    break;
+                case "H":
+                    pane.scrollByPercent(-50, 0);
+                    break;
+
+            }
+        }
     }
 }

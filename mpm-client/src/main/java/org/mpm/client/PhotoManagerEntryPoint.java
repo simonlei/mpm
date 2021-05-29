@@ -4,10 +4,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
-import com.smartgwt.client.core.KeyIdentifier;
 import com.smartgwt.client.rpc.DMI;
-import com.smartgwt.client.util.Page;
-import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.layout.SplitPane;
 import com.smartgwt.client.widgets.layout.VLayout;
@@ -23,25 +20,10 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
         PicsGrid.exportReloadData();
         GWT.create(ImageCellMetaFactory.class);
 
-        KeyIdentifier debugKey = new KeyIdentifier();
-        debugKey.setCtrlKey(true);
-        debugKey.setKeyName("E");
-
-        Page.registerKey(debugKey, new PageKeyHandler() {
-            public void execute(String keyName) {
-                SC.showConsole();
-            }
-        });
+        KeyHandlers.initDebugKey();
 
         loadServerConfig();
 
-/*        Notify.configureDefaultSettings(new NotifySettings().setDuration(100)
-                        //.setMultiMessageMode(MultiMessageMode.STACK)
-                        .setMaxStackSize(10)
-                //.setMaxStackDismissMode(MaxStackDismissMode.OLDEST)
-                //.setAppearMethod(NotifyTransition.INSTANT));
-        );
-*/
         SC.askforValue("What's the password?",
                 s -> DMI.call("mpm", "org.mpm.server.metas.ConfigDataSource", "authPassword",
                         (rpcResponse, o, rpcRequest) -> {
@@ -82,8 +64,11 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
         contentPane.setHeight100();
         contentPane.setShowListToolStrip(false);
 
-        contentPane.setListPane(new PicsGrid());
+        PicsGrid picsGrid = new PicsGrid();
+        contentPane.setListPane(picsGrid);
         contentPane.setNavigationPane(new LeftTabSet());
+
+        KeyHandlers.initKeys(picsGrid);
         return contentPane;
     }
 
