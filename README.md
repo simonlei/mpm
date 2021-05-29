@@ -139,7 +139,7 @@ mvn package -Dgwt.style=PRETTY -DskipTests
 ### v1.0.4
 
 - [x] 数据库密码去掉
-- [ ] 全屏页增加 rotate快捷键
+- [x] 增加 rotate快捷键
 - [x] bug: 全屏状态下旋转后，顺序变了
 - [x] 将快捷键统一管理起来
 - [ ] 可以增加tag，给照片打tag
