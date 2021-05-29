@@ -6,7 +6,7 @@ My Photo Manager，个人相册管理
 
 ## 软件架构
 
-后端使用 nutzboot
+后端使用 springboot
 
 前端使用 smartgwt
 
@@ -23,6 +23,8 @@ mvn gwt:codeserver -am -pl *-client
 ```
 mvn jetty:run -Pdev -pl *-server
 ```
+
+或者开发者可以在IDEA里面启动springboot的方式运行后台
 
 然后访问 localhost:8080 即可
 

@@ -11,3 +11,4 @@ cos.bucket=
 qqlbsKey=
 qqlbsToken=
 password=
+isDev=false
