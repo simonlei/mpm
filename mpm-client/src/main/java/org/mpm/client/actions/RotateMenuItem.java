@@ -16,7 +16,7 @@ public class RotateMenuItem extends MenuItem {
             } else {
                 HashMap values = new HashMap();
                 values.put("rotate", degree);
-                PicsGrid.instance.updateSelectedPhotos(values);
+                PicsGrid.instance.updateSelectedPhotos(values, false);
             }
         });
     }

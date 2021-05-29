@@ -54,7 +54,7 @@ public class ImageCell extends SimpleTile {
         starButton.addClickHandler(clickEvent -> {
             HashMap values = new HashMap();
             values.put("star", !getRecord().getAttributeAsBoolean("star"));
-            ((PicsGrid) getTileGrid()).updateSelectedPhotos(values);
+            ((PicsGrid) getTileGrid()).updateSelectedPhotos(values, false);
         });
     }
 
@@ -118,7 +118,7 @@ public class ImageCell extends SimpleTile {
                             if (s != null && s.trim().length() > 0) {
                                 HashMap values = new HashMap();
                                 values.put("description", s);
-                                ((PicsGrid) getTileGrid()).updateSelectedPhotos(values);
+                                ((PicsGrid) getTileGrid()).updateSelectedPhotos(values, false);
                             }
                         }, new Dialog()));
         contextMenu.addItem(modifyDescItem);
@@ -143,7 +143,7 @@ public class ImageCell extends SimpleTile {
                         String[] strs = s.split(",");
                         values.put("longitude", strs[0]);
                         values.put("latitude", strs[1]);
-                        ((PicsGrid) getTileGrid()).updateSelectedPhotos(values);
+                        ((PicsGrid) getTileGrid()).updateSelectedPhotos(values, false);
                     }
                 }));
         contextMenu.addItem(modifyGis);
@@ -155,7 +155,7 @@ public class ImageCell extends SimpleTile {
             if (s != null && s.trim().length() > 0) {
                 HashMap values = new HashMap();
                 values.put("takenDate", s);
-                ((PicsGrid) getTileGrid()).updateSelectedPhotos(values);
+                ((PicsGrid) getTileGrid()).updateSelectedPhotos(values, true);
             }
         }));
         contextMenu.addItem(modifyDate);

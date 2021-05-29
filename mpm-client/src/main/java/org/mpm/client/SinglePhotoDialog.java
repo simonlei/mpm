@@ -144,7 +144,7 @@ public class SinglePhotoDialog extends Window {
         HashMap values = new HashMap();
         boolean newValue = !record.getAttributeAsBoolean("star");
         values.put("star", newValue);
-        picsGrid.updateSelectedPhotos(values);
+        picsGrid.updateSelectedPhotos(values, false);
         starButton.setIcon(newValue ? "star.png" : "notstar.png");
     }
 

@@ -99,7 +99,7 @@ public class PicsGrid extends TileGrid {
         return singlePhotoDialog;
     }
 
-    public void updateSelectedPhotos(Map values) {
+    public void updateSelectedPhotos(Map values, boolean needReload) {
         Record[] selection = getSelection();
         RPCManager.startQueue();
         for (Record r : selection) {
@@ -118,7 +118,11 @@ public class PicsGrid extends TileGrid {
             }
             getDataSource().updateData(r);
         }
-        RPCManager.sendQueue(rpcResponses -> reloadData());
+        RPCManager.sendQueue(rpcResponses -> {
+            if (needReload) {
+                reloadData();
+            }
+        });
     }
 
     public void reloadData() {
