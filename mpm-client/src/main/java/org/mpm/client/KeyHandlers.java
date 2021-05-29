@@ -5,6 +5,7 @@ import com.smartgwt.client.types.KeyNames;
 import com.smartgwt.client.util.Page;
 import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
+import org.mpm.client.PicsGrid.GridKeyHandler;
 import org.mpm.client.SinglePhotoDialog.SinglePageKeyHandler;
 
 public class KeyHandlers {
@@ -23,8 +24,11 @@ public class KeyHandlers {
 
     public static void initKeys(PicsGrid picsGrid) {
         SinglePhotoDialog singlePhotoDialog = picsGrid.getSinglePhotoDialog();
-        setEnterKey(picsGrid, singlePhotoDialog);
-        setDeleteKey(picsGrid, singlePhotoDialog);
+
+        GridKeyHandler gridKeyHandler = picsGrid.new GridKeyHandler();
+        Page.registerKey(KeyNames.ENTER, gridKeyHandler);
+        Page.registerKey("D", gridKeyHandler);
+        Page.registerKey("R", gridKeyHandler);
 
         SinglePageKeyHandler pageKeyHandler = singlePhotoDialog.new SinglePageKeyHandler();
         Page.registerKey(KeyNames.ESC, pageKeyHandler);
@@ -37,29 +41,7 @@ public class KeyHandlers {
         Page.registerKey("K", pageKeyHandler);
         Page.registerKey("L", pageKeyHandler);
         Page.registerKey("H", pageKeyHandler);
-    }
-
-    private static void setEnterKey(PicsGrid picsGrid, SinglePhotoDialog singlePhotoDialog) {
-        Page.registerKey(KeyNames.ENTER, new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                if (!singlePhotoDialog.isShow()) {
-                    singlePhotoDialog.setPhoto(picsGrid.getSelectedRecord());
-                }
-            }
-        });
-    }
-
-    private static void setDeleteKey(PicsGrid picsGrid, SinglePhotoDialog singlePhotoDialog) {
-        Page.registerKey("D", new PageKeyHandler() {
-            @Override
-            public void execute(String s) {
-                if (singlePhotoDialog.isShow()) {
-                    singlePhotoDialog.deleteCurrentPhoto();
-                } else {
-                    picsGrid.removeSelectedData();
-                }
-            }
-        });
+        Page.registerKey("D", pageKeyHandler);
+        Page.registerKey("R", pageKeyHandler);
     }
 }

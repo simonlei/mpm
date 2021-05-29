@@ -5,11 +5,14 @@ import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.rpc.RPCManager;
+import com.smartgwt.client.types.KeyNames;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.TextMatchStyle;
+import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.tile.TileGrid;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
+import java.util.HashMap;
 import java.util.Map;
 import org.mpm.client.events.PicsChangeEvent;
 import org.mpm.client.header.HeaderPanel;
@@ -120,9 +123,35 @@ public class PicsGrid extends TileGrid {
         PhotoManagerEntryPoint.eventBus.fireEvent(new PicsChangeEvent(length));
     }
 
+    public void rotateSelectedPhotos(int degree) {
+        HashMap values = new HashMap();
+        values.put("rotate", degree);
+        updateSelectedPhotos(values, false);
+    }
+
     public interface ImageCellMetaFactory extends BeanFactory.MetaFactory {
 
         BeanFactory<ImageCell> getImageCellFactory();
     }
 
+    class GridKeyHandler extends PageKeyHandler {
+
+        @Override
+        public void execute(String keyName) {
+            if (singlePhotoDialog.isShow()) {
+                return;
+            }
+            switch (keyName) {
+                case KeyNames.ENTER:
+                    singlePhotoDialog.setPhoto(getSelectedRecord());
+                    break;
+                case "D":
+                    removeSelectedData();
+                    break;
+                case "R":
+                    rotateSelectedPhotos(90);
+                    break;
+            }
+        }
+    }
 }

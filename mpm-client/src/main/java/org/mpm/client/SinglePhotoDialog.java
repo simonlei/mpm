@@ -220,7 +220,12 @@ public class SinglePhotoDialog extends Window {
                 case "H":
                     pane.scrollByPercent(-50, 0);
                     break;
-
+                case "D":
+                    deleteCurrentPhoto();
+                    break;
+                case "R":
+                    rotateCurrentRecord(90);
+                    break;
             }
         }
     }

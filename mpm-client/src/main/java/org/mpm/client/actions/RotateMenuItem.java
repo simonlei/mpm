@@ -1,7 +1,6 @@
 package org.mpm.client.actions;
 
 import com.smartgwt.client.widgets.menu.MenuItem;
-import java.util.HashMap;
 import org.mpm.client.PicsGrid;
 import org.mpm.client.SinglePhotoDialog;
 
@@ -14,9 +13,7 @@ public class RotateMenuItem extends MenuItem {
             if (photoDialog.isShow()) {
                 photoDialog.rotateCurrentRecord(degree);
             } else {
-                HashMap values = new HashMap();
-                values.put("rotate", degree);
-                PicsGrid.instance.updateSelectedPhotos(values, false);
+                PicsGrid.instance.rotateSelectedPhotos(degree);
             }
         });
     }
