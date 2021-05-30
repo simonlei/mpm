@@ -178,12 +178,16 @@ public class ImageCell extends SimpleTile {
                 durationLabel.setVisible(true);
             }
         }
+        return super.getInnerHTML();
+        /*
         String innerHTML = super.getInnerHTML();
         Integer rotate = record.getAttributeAsInt("rotate");
         if (rotate == null || rotate.equals(0)) {
             return innerHTML;
         }
         return innerHTML.replace("img src", "img style='transform:rotate(" + rotate + "deg);' src");
+
+         */
     }
 
     @Override

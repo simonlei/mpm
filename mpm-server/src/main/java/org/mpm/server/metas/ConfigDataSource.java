@@ -4,15 +4,21 @@ import com.tencent.cloud.CosStsClient;
 import java.io.IOException;
 import java.util.TreeMap;
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.mpm.server.entity.EntityFile;
+import org.mpm.server.entity.EntityPhoto;
 import org.nutz.dao.Dao;
 import org.nutz.lang.Lang;
 import org.nutz.lang.util.NutMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -79,10 +85,25 @@ public class ConfigDataSource {
         return s;
     }
 
+    @GetMapping("/thumb/{name}")
+    public @ResponseBody
+    ResponseEntity<String> thumbUrl(HttpServletResponse response, @PathVariable("name") String name)
+            throws IOException {
+        EntityPhoto photo = dao.fetch(EntityPhoto.class, name);
+        if (photo == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        String thumbUrl = String.format("https://%s.cos.%s.myqcloud.com/%s/thumb", bucket, region, name);
+        int rotate = (360 + photo.getRotate()) % 360;
+        response.sendRedirect(thumbUrl + rotate);
+        return null;
+    }
+
     // used in client
     public NutMap fetchConfig() {
         NutMap result = new NutMap();
-        result.setv("thumbUrl", String.format("https://%s.cos.%s.myqcloud.com/", bucket, region));
+        result.setv("baseUrl", String.format("https://%s.cos.%s.myqcloud.com/", bucket, region));
+        result.setv("thumbUrl", "/thumb/");
         result.setv("isDev", isDev);
         return result;
     }

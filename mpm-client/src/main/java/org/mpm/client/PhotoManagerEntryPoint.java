@@ -57,6 +57,7 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
                     Map map = rpcResponse.getDataAsMap();
                     SC.logWarn("thumbUrl is :" + map.get("thumbUrl"));
                     ServerConfig.thumbUrl = (String) map.get("thumbUrl");
+                    ServerConfig.baseUrl = (String) map.get("baseUrl");
                     ServerConfig.isDev = (String) map.get("isDev");
                     initPage();
                 }, null);

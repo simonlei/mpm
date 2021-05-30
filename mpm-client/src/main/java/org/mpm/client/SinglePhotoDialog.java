@@ -106,13 +106,13 @@ public class SinglePhotoDialog extends Window {
 
     private void setPaneContent() {
         if ("video".equals(record.getAttribute("mediaType"))) {
-            String videoUrl = ServerConfig.thumbUrl + "video/" + record.getAttribute("name");
+            String videoUrl = ServerConfig.baseUrl + "video/" + record.getAttribute("name");
             pane.setContents("<video\n"
                     + "    id=\"my-player\"\n"
                     + "    class=\"video-js vjs-big-play-centered vjs-fill\""
                     + "    controls\n"
                     + "    preload=\"auto\"\n"
-                    + "    poster=\"" + ServerConfig.thumbUrl + record.getAttribute("name")
+                    + "    poster=\"" + ServerConfig.baseUrl + record.getAttribute("name")
                     + "\"\n"
                     + "    data-setup='{}'>\n"
                     + "  <source src=\"" + videoUrl
@@ -138,7 +138,7 @@ public class SinglePhotoDialog extends Window {
                             + rotate + "deg);"
                             : "display: block;margin: 0 auto;transform: rotate(" + rotate + "deg);")
                             + "\" src=\""
-                            + ServerConfig.thumbUrl + record.getAttribute("name") + "\""
+                            + ServerConfig.baseUrl + record.getAttribute("name") + "\""
                             + " title=\"" + ImageCell.getHoverString(record, false) + "\""
                             + "/>"
             );

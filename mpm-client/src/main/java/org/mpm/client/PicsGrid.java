@@ -58,7 +58,7 @@ public class PicsGrid extends TileGrid {
         // 直接在客户端拼接thumb地址就好了
         // imgField.setImageURLPrefix("/thumb/");
         imgField.setImageURLPrefix(ServerConfig.thumbUrl);
-        imgField.setImageURLSuffix("/thumb");
+        // imgField.setImageURLSuffix("/thumb");
 
         setFields(imgField);
 
