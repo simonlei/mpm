@@ -2,6 +2,7 @@ package org.mpm.server.pics;
 
 import com.isomorphic.datasource.DSRequest;
 import com.isomorphic.datasource.DSResponse;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -86,7 +87,7 @@ public class PicsDataSource {
             }
         }
         int affectedRows = dao.updateIgnoreNull(dao.getEntity(EntityPhoto.class).getObject(record));
-        resp.setData(record);
+        resp.setData(addThumbField(Lang.list(record)));
         resp.setAffectedRows(affectedRows);
         return resp;
     }
@@ -145,7 +146,8 @@ public class PicsDataSource {
             resp.setTotalRows(count);
             cnd.setPager(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
-            resp.setData(dao.query("t_photos", cnd, null, "distinct t_photos.*"));
+            // ...
+            resp.setData(addThumbField(dao.query("t_photos", cnd, null, "distinct t_photos.*")));
         } else {
             Cnd cnd = Cnd.where("trashed", "=", trashed);
             cnd = theYear == null ? cnd : cnd.and("year(takenDate)", "=", theYear);
@@ -156,11 +158,24 @@ public class PicsDataSource {
             resp.setTotalRows(count);
             cnd.limit(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
-            resp.setData(dao.query(EntityPhoto.class, cnd));
+            // ...
+            resp.setData(addThumbField(dao.query("t_photos", cnd)));
         }
         resp.setStartRow(start);
         resp.setEndRow(start + count);
         return resp;
+    }
+
+    private List<Record> addThumbField(List<Record> photos) {
+        for (Record r : photos) {
+            r.put("thumb", getThumbUrl(r.getString("name"), r.getInt("rotate")));
+        }
+        return photos;
+    }
+
+    private String getThumbUrl(String name, int rotate) {
+        rotate = (360 + rotate) % 360;
+        return name + "/thumb" + rotate;
     }
 
     private void addStarCriteria(Boolean star, SimpleCriteria cnd) {

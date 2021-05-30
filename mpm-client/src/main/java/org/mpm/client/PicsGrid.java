@@ -53,11 +53,11 @@ public class PicsGrid extends TileGrid {
         setTileConstructor(ImageCell.class.getName());
         setSelectionType(SelectionStyle.MULTIPLE);
 
-        DetailViewerField imgField = new DetailViewerField("name");
+        DetailViewerField imgField = new DetailViewerField("thumb");
         imgField.setType("image");
         // 直接在客户端拼接thumb地址就好了
         // imgField.setImageURLPrefix("/thumb/");
-        imgField.setImageURLPrefix(ServerConfig.thumbUrl);
+        imgField.setImageURLPrefix(ServerConfig.baseUrl);
         // imgField.setImageURLSuffix("/thumb");
 
         setFields(imgField);
