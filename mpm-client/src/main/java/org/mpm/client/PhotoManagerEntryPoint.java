@@ -82,6 +82,7 @@ public final class PhotoManagerEntryPoint implements EntryPoint {
         contentPane.setNavigationPane(new LeftTabSet());
 
         KeyHandlers.initKeys(picsGrid);
+        picsGrid.focus();
         return contentPane;
     }
 

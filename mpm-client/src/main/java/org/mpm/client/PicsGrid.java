@@ -9,6 +9,7 @@ import com.smartgwt.client.types.DSOperationType;
 import com.smartgwt.client.types.KeyNames;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.TextMatchStyle;
+import com.smartgwt.client.util.Offline;
 import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.tile.TileGrid;
@@ -32,9 +33,11 @@ public class PicsGrid extends TileGrid {
         addRecordDoubleClickHandler(recordDoubleClickEvent -> {
             singlePhotoDialog.setPhoto(recordDoubleClickEvent.getRecord());
         });
+        lastSelectedIndex = Utils.getInt(Offline.get("lastSelectedIndex"), 0);
         addSelectionChangedHandler(selectionChangedEvent -> {
             SC.logWarn("Selection changed " + selectionChangedEvent.getState());
             lastSelectedIndex = getResultSet().indexOf(selectionChangedEvent.getRecord());
+            Offline.put("lastSelectedIndex", lastSelectedIndex);
         });
 
         addDataArrivedHandler(dataArrivedEvent -> {

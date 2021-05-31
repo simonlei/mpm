@@ -14,4 +14,15 @@ public class Utils {
         }
         return rotate;
     }
+
+    public static int getInt(Object obj, int defaultValue) {
+        if (obj == null) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt("" + obj);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
 }
