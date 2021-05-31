@@ -23,6 +23,7 @@ public class PicsGrid extends TileGrid {
     public static PicsGrid instance;
     private SinglePhotoDialog singlePhotoDialog;
     private int lastTxnNum = 0;
+    private int lastSelectedIndex = 0;
 
     public PicsGrid() {
         super();
@@ -31,9 +32,14 @@ public class PicsGrid extends TileGrid {
         addRecordDoubleClickHandler(recordDoubleClickEvent -> {
             singlePhotoDialog.setPhoto(recordDoubleClickEvent.getRecord());
         });
+        addSelectionChangedHandler(selectionChangedEvent -> {
+            SC.logWarn("Selection changed " + selectionChangedEvent.getState());
+            lastSelectedIndex = getResultSet().indexOf(selectionChangedEvent.getRecord());
+        });
 
         addDataArrivedHandler(dataArrivedEvent -> {
-//            fireChangeEvent(getResultSet().getLength());
+            fireChangeEvent(getResultSet().getLength());
+            setLastSelected();
         });
 
         setAutoFetchTextMatchStyle(TextMatchStyle.EXACT);
@@ -46,6 +52,7 @@ public class PicsGrid extends TileGrid {
                 fireChangeEvent(getResultSet().getLength());
                 LeftTabSet.instance.reloadData();
             }
+            setLastSelected();
         });
         setDataSource(dataSource);
         setAutoFetchData(false);
@@ -80,6 +87,14 @@ public class PicsGrid extends TileGrid {
       $wnd.realodPicsGrid = $entry(@org.mpm.client.PicsGrid::reloadLeftAndPics());
     }-*/;
 
+    private void setLastSelected() {
+        if (lastSelectedIndex < 0 || lastSelectedIndex >= getResultSet().getLength()) {
+            return;
+        }
+        selectRecord(lastSelectedIndex);
+        focus();
+    }
+
     public SinglePhotoDialog getSinglePhotoDialog() {
         return singlePhotoDialog;
     }
@@ -107,6 +122,7 @@ public class PicsGrid extends TileGrid {
             if (needReload) {
                 reloadData();
             }
+            setLastSelected();
         });
     }
 
