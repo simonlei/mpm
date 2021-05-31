@@ -133,7 +133,7 @@ public class PicsDataSource {
         sortedBy = sortedBy == null ? "id" : sortedBy;
         boolean desc = sortedBy.startsWith("-");
         sortedBy = desc ? sortedBy.substring(1) : sortedBy;
-        long count;
+        List<Record> photos;
 
         // TODO: 要重构
         if (filePath != null) {
@@ -143,27 +143,27 @@ public class PicsDataSource {
                     .and("trashed", "=", trashed);
 
             addStarCriteria(star, cnd);
-            count = dao.fetch("t_photos", cnd, "count(distinct t_photos.id) as c").getLong("c");
-            resp.setTotalRows(count);
+
+            resp.setTotalRows(dao.fetch("t_photos", cnd, "count(distinct t_photos.id) as c").getLong("c"));
             cnd.setPager(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
             // ...
-            resp.setData(addThumbField(dao.query("t_photos", cnd, null, "distinct t_photos.*")));
+            photos = dao.query("t_photos", cnd, null, "distinct t_photos.*");
         } else {
             Cnd cnd = Cnd.where("trashed", "=", trashed);
             cnd = theYear == null ? cnd : cnd.and("year(takenDate)", "=", theYear);
             cnd = theMonth == null ? cnd : cnd.and("month(takenDate)", "=", theMonth);
             addStarCriteria(star, cnd.getCri());
 
-            count = dao.count(EntityPhoto.class, cnd);
-            resp.setTotalRows(count);
+            resp.setTotalRows(dao.count(EntityPhoto.class, cnd));
             cnd.limit(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
             // ...
-            resp.setData(addThumbField(dao.query("t_photos", cnd)));
+            photos = dao.query("t_photos", cnd);
         }
+        resp.setData(addThumbField(photos));
         resp.setStartRow(start);
-        resp.setEndRow(start + count);
+        resp.setEndRow(start + photos.size());
         return resp;
     }
 
