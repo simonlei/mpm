@@ -5,6 +5,7 @@ import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.rpc.RPCManager;
+import com.smartgwt.client.types.DSOperationType;
 import com.smartgwt.client.types.KeyNames;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.TextMatchStyle;
@@ -32,14 +33,15 @@ public class PicsGrid extends TileGrid {
         });
 
         addDataArrivedHandler(dataArrivedEvent -> {
-            fireChangeEvent(getResultSet().getLength());
+//            fireChangeEvent(getResultSet().getLength());
         });
 
         setAutoFetchTextMatchStyle(TextMatchStyle.EXACT);
         DataSource dataSource = DataSource.get("pics");
         dataSource.addDataChangedHandler(dataChangedEvent -> {
+            DSOperationType operationType = dataChangedEvent.getDsRequest().getOperationType();
             int txnNum = dataChangedEvent.getDsResponse().getTransactionNum();
-            if (txnNum > lastTxnNum) {
+            if (DSOperationType.REMOVE.equals(operationType) && txnNum > lastTxnNum) {
                 lastTxnNum = txnNum;
                 fireChangeEvent(getResultSet().getLength());
                 LeftTabSet.instance.reloadData();
@@ -113,10 +115,10 @@ public class PicsGrid extends TileGrid {
         criteria.addCriteria(HeaderPanel.getCriteria());
         criteria.addCriteria(LeftTabSet.getCriteria());
 
-        SC.logWarn("Will fetch: " + instance.getResultSet().willFetchData(criteria));
+        SC.logWarn("Will fetch: " + getResultSet().willFetchData(criteria));
 
-        instance.invalidateCache();
-        instance.fetchData(criteria);
+        invalidateCache();
+        fetchData(criteria);
     }
 
     private void fireChangeEvent(int length) {

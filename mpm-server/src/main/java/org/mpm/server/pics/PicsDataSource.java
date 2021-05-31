@@ -2,6 +2,7 @@ package org.mpm.server.pics;
 
 import com.isomorphic.datasource.DSRequest;
 import com.isomorphic.datasource.DSResponse;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -169,6 +170,9 @@ public class PicsDataSource {
     private List<Record> addThumbField(List<Record> photos) {
         for (Record r : photos) {
             r.put("thumb", getThumbUrl(r.getString("name"), r.getInt("rotate")));
+            LocalDateTime takenDate = r.getTimestamp("takenDate").toLocalDateTime();
+            r.put("theYear", takenDate.getYear());
+            r.put("theMonth", takenDate.getMonthValue());
         }
         return photos;
     }

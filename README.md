@@ -152,6 +152,7 @@ mvn package -Dgwt.style=PRETTY -DskipTests
 - [ ] 跳转到对应的图片位置
 - [x] thumb 可以根据rotate来进生成
 - [x] bug: thumb 有缓存，需要刷新
+- [x] bug: 有条件的时候更新图片会导致从当前结果列表里面消失
 
 ### v1.0.5
 
