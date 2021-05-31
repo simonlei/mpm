@@ -7,21 +7,21 @@ import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import org.mpm.client.PhotoManagerEntryPoint;
 import org.mpm.client.PicsGrid;
-import org.mpm.client.events.PicsChangeEvent;
-import org.mpm.client.events.PicsChangeHandler;
+import org.mpm.client.events.PicsCountChangeEvent;
+import org.mpm.client.events.PicsCountChangeHandler;
 
-public class SwitchTrashButton extends ToolStripButton implements PicsChangeHandler, ClickHandler {
+public class SwitchTrashButton extends ToolStripButton implements PicsCountChangeHandler, ClickHandler {
 
     private boolean trashed = false;
 
     public SwitchTrashButton() {
         super("回收站(0)");
-        PhotoManagerEntryPoint.eventBus.addHandler(PicsChangeEvent.type, this);
+        PhotoManagerEntryPoint.eventBus.addHandler(PicsCountChangeEvent.type, this);
         addClickHandler(this);
     }
 
     @Override
-    public void onDataChanged(PicsChangeEvent evt) {
+    public void onDataChanged(PicsCountChangeEvent evt) {
         Window.setTitle("My photos manager - " + evt.getCount() + " 张");
         // set text for self.
         DMI.call("mpm", "org.mpm.server.pics.PicsDataSource", "count",

@@ -10,6 +10,7 @@ class OrderSelectItem extends SelectItem {
 
     public OrderSelectItem() {
         setWidth(90);
+        this.setAttribute("editorType", "SelectItem");
         setShowTitle(false);
         LinkedHashMap<SortSpecifier, String> valueMap = new LinkedHashMap<>();
         SortSpecifier selectedValue = new SortSpecifier("id", SortDirection.DESCENDING);

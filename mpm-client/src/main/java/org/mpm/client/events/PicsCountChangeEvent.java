@@ -3,12 +3,12 @@ package org.mpm.client.events;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.smartgwt.client.event.AbstractSmartEvent;
 
-public class PicsChangeEvent extends AbstractSmartEvent<PicsChangeHandler> {
+public class PicsCountChangeEvent extends AbstractSmartEvent<PicsCountChangeHandler> {
 
-    public static Type<PicsChangeHandler> type = new Type<PicsChangeHandler>();
+    public static Type<PicsCountChangeHandler> type = new Type<PicsCountChangeHandler>();
     int count;
 
-    public PicsChangeEvent(int count) {
+    public PicsCountChangeEvent(int count) {
         super(JavaScriptObject.createObject());
         this.count = count;
     }
@@ -18,12 +18,12 @@ public class PicsChangeEvent extends AbstractSmartEvent<PicsChangeHandler> {
     }
 
     @Override
-    public Type<PicsChangeHandler> getAssociatedType() {
+    public Type<PicsCountChangeHandler> getAssociatedType() {
         return type;
     }
 
     @Override
-    protected void dispatch(PicsChangeHandler handler) {
+    protected void dispatch(PicsCountChangeHandler handler) {
         handler.onDataChanged(this);
     }
 

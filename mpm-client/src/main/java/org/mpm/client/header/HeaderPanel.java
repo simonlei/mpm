@@ -3,6 +3,8 @@ package org.mpm.client.header;
 import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
+import com.smartgwt.client.widgets.toolbar.ToolStripButton;
+import org.mpm.client.PicsGrid;
 
 public class HeaderPanel extends HLayout {
 
@@ -14,6 +16,19 @@ public class HeaderPanel extends HLayout {
         super();
         instance = this;
         ToolStrip toolStrip = new ToolStrip();
+
+        SelectedIndexTextItem selectedIndexItem = new SelectedIndexTextItem();
+        selectedIndexItem.setWidth(10);
+        ToolStripButton jumpButton = new ToolStripButton("跳转");
+        jumpButton.addClickHandler(clickEvent -> {
+            PicsGrid.instance.deselectAllRecords();
+            PicsGrid.instance.selectRecord(selectedIndexItem.getValueAsInteger() - 1);
+            PicsGrid.instance.scrollTo();
+        });
+        toolStrip.addFormItem(selectedIndexItem);
+        toolStrip.addButton(jumpButton);
+        toolStrip.addSeparator();
+
         OrderSelectItem orderSelectItem = new OrderSelectItem();
 
         toolStrip.addFormItem(orderSelectItem);

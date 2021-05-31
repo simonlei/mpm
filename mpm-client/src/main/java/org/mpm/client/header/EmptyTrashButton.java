@@ -8,20 +8,20 @@ import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 import org.mpm.client.LeftTabSet;
 import org.mpm.client.PhotoManagerEntryPoint;
 import org.mpm.client.PicsGrid;
-import org.mpm.client.events.PicsChangeEvent;
-import org.mpm.client.events.PicsChangeHandler;
+import org.mpm.client.events.PicsCountChangeEvent;
+import org.mpm.client.events.PicsCountChangeHandler;
 import org.mpm.client.progress.ProgressDialog;
 
-class EmptyTrashButton extends ToolStripButton implements PicsChangeHandler, ClickHandler {
+class EmptyTrashButton extends ToolStripButton implements PicsCountChangeHandler, ClickHandler {
 
     public EmptyTrashButton() {
         super("清空回收站");
-        PhotoManagerEntryPoint.eventBus.addHandler(PicsChangeEvent.type, this);
+        PhotoManagerEntryPoint.eventBus.addHandler(PicsCountChangeEvent.type, this);
         addClickHandler(this);
     }
 
     @Override
-    public void onDataChanged(PicsChangeEvent var1) {
+    public void onDataChanged(PicsCountChangeEvent var1) {
         setVisible(HeaderPanel.isTrashed());
     }
 

@@ -9,7 +9,7 @@ import com.smartgwt.client.widgets.IconButton;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.menu.Menu;
 import java.util.HashMap;
-import org.mpm.client.events.PicsChangeEvent;
+import org.mpm.client.events.PicsCountChangeEvent;
 
 
 public class SinglePhotoDialog extends Window {
@@ -174,7 +174,7 @@ public class SinglePhotoDialog extends Window {
                 nextRecord = picsGrid.getTileRecord(picsGrid.getTile(index + 1));
             }
             picsGrid.removeData(record);
-            PhotoManagerEntryPoint.eventBus.fireEvent(new PicsChangeEvent(totalCount - 1));
+            PhotoManagerEntryPoint.eventBus.fireEvent(new PicsCountChangeEvent(totalCount - 1));
             if (nextRecord == null) {
                 hideMe();
             } else {

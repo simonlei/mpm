@@ -16,7 +16,8 @@ import com.smartgwt.client.widgets.tile.TileGrid;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 import java.util.HashMap;
 import java.util.Map;
-import org.mpm.client.events.PicsChangeEvent;
+import org.mpm.client.events.PicsCountChangeEvent;
+import org.mpm.client.events.PicsIndexChangeEvent;
 import org.mpm.client.header.HeaderPanel;
 
 public class PicsGrid extends TileGrid {
@@ -35,9 +36,11 @@ public class PicsGrid extends TileGrid {
         });
         lastSelectedIndex = Utils.getInt(Offline.get("lastSelectedIndex"), 0);
         addSelectionChangedHandler(selectionChangedEvent -> {
-            SC.logWarn("Selection changed " + selectionChangedEvent.getState());
-            lastSelectedIndex = getResultSet().indexOf(selectionChangedEvent.getRecord());
-            Offline.put("lastSelectedIndex", lastSelectedIndex);
+            if (selectionChangedEvent.getState()) {
+                lastSelectedIndex = getResultSet().indexOf(selectionChangedEvent.getRecord());
+                Offline.put("lastSelectedIndex", lastSelectedIndex);
+                PhotoManagerEntryPoint.eventBus.fireEvent(new PicsIndexChangeEvent(lastSelectedIndex));
+            }
         });
 
         addDataArrivedHandler(dataArrivedEvent -> {
@@ -141,7 +144,7 @@ public class PicsGrid extends TileGrid {
     }
 
     private void fireChangeEvent(int length) {
-        PhotoManagerEntryPoint.eventBus.fireEvent(new PicsChangeEvent(length));
+        PhotoManagerEntryPoint.eventBus.fireEvent(new PicsCountChangeEvent(length));
     }
 
     public void rotateSelectedPhotos(int degree) {
