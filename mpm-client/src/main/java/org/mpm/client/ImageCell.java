@@ -109,6 +109,13 @@ public class ImageCell extends SimpleTile {
       $wnd.navigator.clipboard.writeText(text);
     }-*/;
 
+    @Override
+    public String getBaseStyle() {
+        String baseStyle = super.getBaseStyle();
+        SC.logWarn("Base style " + baseStyle);
+        return baseStyle;
+    }
+
     private void addModifyDescMenu(Menu contextMenu) {
         MenuItem modifyDescItem = new MenuItem("修改描述信息");
         modifyDescItem.addClickHandler(

@@ -21,9 +21,7 @@ public class HeaderPanel extends HLayout {
         selectedIndexItem.setWidth(10);
         ToolStripButton jumpButton = new ToolStripButton("跳转");
         jumpButton.addClickHandler(clickEvent -> {
-            PicsGrid.instance.deselectAllRecords();
-            PicsGrid.instance.selectRecord(selectedIndexItem.getValueAsInteger() - 1);
-            PicsGrid.instance.scrollTo();
+            PicsGrid.instance.selectAndScrollToRecord(selectedIndexItem.getValueAsInteger() - 1);
         });
         toolStrip.addFormItem(selectedIndexItem);
         toolStrip.addButton(jumpButton);

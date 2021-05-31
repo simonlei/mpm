@@ -70,11 +70,7 @@ public class PicsGrid extends TileGrid {
 
         DetailViewerField imgField = new DetailViewerField("thumb");
         imgField.setType("image");
-        // 直接在客户端拼接thumb地址就好了
-        // imgField.setImageURLPrefix("/thumb/");
         imgField.setImageURLPrefix(ServerConfig.baseUrl);
-        // imgField.setImageURLSuffix("/thumb");
-
         setFields(imgField);
 
         Criteria criteria = new Criteria();
@@ -151,6 +147,15 @@ public class PicsGrid extends TileGrid {
         HashMap values = new HashMap();
         values.put("rotate", degree);
         updateSelectedPhotos(values, false);
+    }
+
+    public void selectAndScrollToRecord(int index) {
+        deselectAllRecords();
+        selectRecord(index);
+        int perLine = getTilesPerLine();
+        int row = index / perLine;
+        int height = row * getTileHeight();
+        scrollTo(0, height);
     }
 
     public interface ImageCellMetaFactory extends BeanFactory.MetaFactory {

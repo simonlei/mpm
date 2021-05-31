@@ -1,1 +1,4 @@
-/** Add css rules here for your application. */
+.simpleTileSelected,
+.simpleTileSelectedOver {
+  border: 1px solid #f00f00 !important;
+}
