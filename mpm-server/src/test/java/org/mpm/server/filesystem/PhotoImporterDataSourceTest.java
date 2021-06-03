@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.mpm.server.BaseTest;
+import org.mpm.server.filesystem.PhotoImporterDataSource.UploadFileSchema;
 import org.mpm.server.pics.PicsModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,12 +33,14 @@ public class PhotoImporterDataSourceTest extends BaseTest {
     public void testImportPhoto() throws FileNotFoundException {
         Mockito.when(picsModule.saveCosFile(Mockito.any(), Mockito.any()))
                 .thenAnswer((Answer<String>) invocation -> "image/jpeg");
-        String key = photoImporterDataSource
-                .uploadFile("upload/1616940995641_tmpupload/七上1025义工/IMG_004.jpg", "", null);
+        String key = photoImporterDataSource.uploadFile(
+                UploadFileSchema.builder().key("upload/1616940995641_tmpupload/七上1025义工/IMG_004.jpg")
+                        .data("").err(null).build());
         // upload/1616940995641_tmpupload/IMG_001.jpg
         log.info("Key is " + key);
-        key = photoImporterDataSource
-                .uploadFile("upload/1616940995641_tmpupload/IMG_001.jpg", "", null);
+        key = photoImporterDataSource.uploadFile(
+                UploadFileSchema.builder().key("upload/1616940995641_tmpupload/IMG_001.jpg")
+                        .data("").err(null).build());
         log.info("Key is " + key);
     }
 

@@ -1,5 +1,7 @@
 package org.mpm.server.filesystem;
 
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityPhoto;
@@ -7,9 +9,9 @@ import org.mpm.server.pics.PicsModule;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.lang.Lang;
-import org.nutz.mvc.annotation.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -23,11 +25,11 @@ public class PhotoImporterDataSource {
 
     // used in client
     @PostMapping("/uploadFile")
-    public String uploadFile(@Param("key") String key, @Param("data") String data,
-            @Param("err") String err) {
+    public String uploadFile(@RequestBody UploadFileSchema upload) {
+        String key = upload.key;
         log.info("Key is " + key);
-        if (Lang.isNotEmpty(err)) {
-            log.info("Error {} when upload {}, with data {} ", err, key, data);
+        if (Lang.isNotEmpty(upload.err)) {
+            log.info("Error {} when upload {}, with data {} ", upload.err, key, upload.data);
         }
         // upload/1616851720630_tmpupload/七上1025义工/IMG_002.jpg
         String[] paths = key.split("\\/");
@@ -66,5 +68,14 @@ public class PhotoImporterDataSource {
                 .build();
         dao.insert(file, true, false, false);
         return file;
+    }
+
+    @Data
+    @Builder
+    static class UploadFileSchema {
+
+        String key;
+        String err;
+        Object data;
     }
 }
