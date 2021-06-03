@@ -1,7 +1,9 @@
 package org.mpm.server.filesystem;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityPhoto;
@@ -72,6 +74,8 @@ public class PhotoImporterDataSource {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     static class UploadFileSchema {
 
         String key;
