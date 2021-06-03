@@ -220,7 +220,7 @@ public class PicsModule {
             Metadata metadata = JpegMetadataReader.readMetadata(file);
             setDate(photo, metadata);
             GpsDirectory gpsDirectory = metadata.getFirstDirectoryOfType(GpsDirectory.class);
-            if (gpsDirectory != null) {
+            if (gpsDirectory != null && gpsDirectory.getGeoLocation() != null) {
                 photo.setLatitude(gpsDirectory.getGeoLocation().getLatitude());
                 photo.setLongitude(gpsDirectory.getGeoLocation().getLongitude());
 

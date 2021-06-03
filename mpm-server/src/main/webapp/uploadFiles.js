@@ -1,4 +1,4 @@
-var protocol = location.protocol === 'https:' ? 'https:' : 'http:';
+﻿var protocol = location.protocol === 'https:' ? 'https:' : 'http:';
 var prefix = protocol + '//' + bucket + '.cos.' + region + '.myqcloud.com/';
 
 // 初始化实例
@@ -76,7 +76,7 @@ function uploadFiles(files) {
         if (httpRequest.readyState == 4 && httpRequest.status == 200) {//验证请求是否发送成功
           var json = httpRequest.responseText;//获取到服务端返回的数据
           console.log(json);
-          isc.notify(
+          isc.notify("第 " + count + "/" + files.length + "个文件" +
               options.Key.split("\/").pop() + '上传' + (err ? '失败' : '完成'));
           count++;
           if (count == files.length) {
