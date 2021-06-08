@@ -9,6 +9,7 @@ import com.smartgwt.client.types.DSOperationType;
 import com.smartgwt.client.types.KeyNames;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.TextMatchStyle;
+import com.smartgwt.client.util.EventHandler;
 import com.smartgwt.client.util.Offline;
 import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
@@ -30,10 +31,6 @@ public class PicsGrid extends TileGrid {
     public PicsGrid() {
         super();
         instance = this;
-        singlePhotoDialog = new SinglePhotoDialog(this);
-        addRecordDoubleClickHandler(recordDoubleClickEvent -> {
-            singlePhotoDialog.setPhoto(recordDoubleClickEvent.getRecord());
-        });
         lastSelectedIndex = Utils.getInt(Offline.get("lastSelectedIndex"), 0);
         addSelectionChangedHandler(selectionChangedEvent -> {
             if (selectionChangedEvent.getState()) {
@@ -68,6 +65,11 @@ public class PicsGrid extends TileGrid {
         setTileConstructor(ImageCell.class.getName());
         setSelectionType(SelectionStyle.MULTIPLE);
 
+        singlePhotoDialog = new SinglePhotoDialog(this);
+        addRecordDoubleClickHandler(recordDoubleClickEvent -> {
+            singlePhotoDialog.setPhoto(recordDoubleClickEvent.getRecord());
+        });
+
         DetailViewerField imgField = new DetailViewerField("thumb");
         imgField.setType("image");
         imgField.setImageURLPrefix(ServerConfig.baseUrl);
@@ -94,7 +96,9 @@ public class PicsGrid extends TileGrid {
             return;
         }
         selectRecord(lastSelectedIndex);
-        focus();
+        if (!singlePhotoDialog.isShow()) {
+            focus();
+        }
     }
 
     public SinglePhotoDialog getSinglePhotoDialog() {
@@ -167,7 +171,8 @@ public class PicsGrid extends TileGrid {
 
         @Override
         public void execute(String keyName) {
-            if (singlePhotoDialog.isShow()) {
+            if (singlePhotoDialog.isShow() || EventHandler.ctrlKeyDown()
+                    || EventHandler.altKeyDown() || EventHandler.shiftKeyDown()) {
                 return;
             }
             switch (keyName) {

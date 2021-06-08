@@ -2,11 +2,21 @@ package org.mpm.client;
 
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.KeyNames;
+import com.smartgwt.client.types.ReadOnlyDisplayAppearance;
+import com.smartgwt.client.util.EventHandler;
 import com.smartgwt.client.util.PageKeyHandler;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.HTMLPane;
 import com.smartgwt.client.widgets.IconButton;
 import com.smartgwt.client.widgets.Window;
+import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.DateItem;
+import com.smartgwt.client.widgets.form.fields.IntegerItem;
+import com.smartgwt.client.widgets.form.fields.SubmitItem;
+import com.smartgwt.client.widgets.form.fields.TextAreaItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.layout.SplitPane;
+import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.menu.Menu;
 import java.util.HashMap;
 import org.mpm.client.events.PicsCountChangeEvent;
@@ -18,6 +28,7 @@ public class SinglePhotoDialog extends Window {
     Record record;
     IconButton starButton;
     HTMLPane pane = new HTMLPane();
+    DynamicForm propertiesPane = new DynamicForm();
     private boolean show = false;
     private boolean scale = true;
 
@@ -45,10 +56,49 @@ public class SinglePhotoDialog extends Window {
             swapStar();
         });
 
-        addChild(starButton);
+        SplitPane contentPane = new SplitPane();
+        contentPane.setWidth100();
+        contentPane.setHeight100();
+        contentPane.setShowListToolStrip(false);
 
-        addChild(pane);
+        contentPane.setNavigationPane(pane);
+        contentPane.setNavigationPaneWidth("90%");
+
+        VLayout detailPane = new VLayout();
+        initPropertiesPane(picsGrid);
+
+        detailPane.addMember(propertiesPane);
+        contentPane.setDetailPane(detailPane);
+        contentPane.setShowDetailToolStrip(false);
+
+        addChild(starButton);
+        addChild(contentPane);
         hide();
+    }
+
+    private void initPropertiesPane(PicsGrid picsGrid) {
+        propertiesPane.setIsGroup(true);
+        propertiesPane.setGroupTitle("属性");
+        propertiesPane.setNumCols(1);
+        propertiesPane.setDataSource(picsGrid.getDataSource());
+        DateItem takenDateItem = new DateItem("takenDate");
+        takenDateItem.setTitle("时间");
+        TextItem addressItem = new TextItem("address");
+        addressItem.setTitle("地点");
+        TextAreaItem descItem = new TextAreaItem("description");
+        descItem.setTitle("描述");
+        IntegerItem heightItem = new IntegerItem("height");
+        heightItem.setTitle("高");
+        heightItem.setCanEdit(false);
+        heightItem.setReadOnlyDisplay(ReadOnlyDisplayAppearance.STATIC);
+        IntegerItem widthItem = new IntegerItem("width");
+        widthItem.setTitle("宽");
+        widthItem.setCanEdit(false);
+        widthItem.setReadOnlyDisplay(ReadOnlyDisplayAppearance.STATIC);
+
+        SubmitItem submitItem = new SubmitItem("保存");
+
+        propertiesPane.setFields(takenDateItem, addressItem, descItem, heightItem, widthItem, submitItem);
     }
 
     private void swapStar() {
@@ -99,6 +149,8 @@ public class SinglePhotoDialog extends Window {
 
         pane.redraw();
         starButton.setIcon(record.getAttributeAsBoolean("star") ? "star.png" : "notstar.png");
+        propertiesPane.reset();
+        propertiesPane.editRecord(record);
 
         show = true;
         show();
@@ -143,6 +195,7 @@ public class SinglePhotoDialog extends Window {
                             + "/>"
             );
         }
+        propertiesPane.editRecord(record);
     }
 
     public void rotateCurrentRecord(int rotate) {
@@ -187,7 +240,8 @@ public class SinglePhotoDialog extends Window {
 
         @Override
         public void execute(String s) {
-            if (!isShow() || record == null) {
+            if (!isShow() || record == null || EventHandler.ctrlKeyDown()
+                    || EventHandler.altKeyDown() || EventHandler.shiftKeyDown()) {
                 return;
             }
             switch (s) {
