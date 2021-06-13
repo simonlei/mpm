@@ -97,6 +97,7 @@ public class SinglePhotoDialog extends Window {
         widthItem.setReadOnlyDisplay(ReadOnlyDisplayAppearance.STATIC);
 
         SubmitItem submitItem = new SubmitItem("保存");
+        submitItem.setTitle("保存");
 
         propertiesPane.setFields(takenDateItem, addressItem, descItem, heightItem, widthItem, submitItem);
     }
@@ -135,10 +136,6 @@ public class SinglePhotoDialog extends Window {
     }
 
     public void setPhoto(Record record) {
-//        if (this.record != null
-//                && record.getAttribute("name").equals(this.record.getAttribute("name"))) {
-//            return;
-//        }
         this.record = record;
         picsGrid.deselectAllRecords();
         picsGrid.selectRecord(record);
@@ -149,8 +146,6 @@ public class SinglePhotoDialog extends Window {
 
         pane.redraw();
         starButton.setIcon(record.getAttributeAsBoolean("star") ? "star.png" : "notstar.png");
-        propertiesPane.reset();
-        propertiesPane.editRecord(record);
 
         show = true;
         show();
@@ -198,17 +193,11 @@ public class SinglePhotoDialog extends Window {
         propertiesPane.editRecord(record);
     }
 
-    public void rotateCurrentRecord(int rotate) {
+    public void rotateCurrentRecord(int degree) {
         if (record == null) {
             return;
         }
-        if (rotate == 0) {
-            record.setAttribute("rotate", 0);
-        } else {
-            record.setAttribute("rotate",
-                    Utils.getDegree(record.getAttributeAsInt("rotate") + rotate));
-        }
-        PicsGrid.instance.getDataSource().updateData(record);
+        picsGrid.rotateSelectedPhotos(degree);
         setPaneContent();
         pane.redraw();
     }

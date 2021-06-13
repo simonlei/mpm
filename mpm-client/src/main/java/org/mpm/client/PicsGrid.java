@@ -98,6 +98,8 @@ public class PicsGrid extends TileGrid {
         selectRecord(lastSelectedIndex);
         if (!singlePhotoDialog.isShow()) {
             focus();
+        } else {
+            singlePhotoDialog.setPhoto(getResultSet().get(lastSelectedIndex));
         }
     }
 
