@@ -99,6 +99,7 @@ public class ConfigDataSource {
 */
 
     // used in client
+    @GetMapping("/api/getConfig")
     public NutMap fetchConfig() {
         NutMap result = new NutMap();
         result.setv("baseUrl", String.format("https://%s.cos.%s.myqcloud.com/", bucket, region));
