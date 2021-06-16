@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import 'homepage.dart';
@@ -16,9 +17,29 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       routes: {
-        '/': (context) => SignInScreen(),
+        '/': (context) => JumpWidget(),
         '/home': (context) => MyHomePage(title: 'My Photo Manager')
       },
     );
+  }
+}
+
+class JumpWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      future: getConfig(),
+      builder: (context, AsyncSnapshot<String> snapshot) {
+        if (snapshot.hasData && snapshot.data == 'true') {
+          return MyHomePage(title: 'My Photo Manager');
+        }
+        return SignInScreen();
+      },
+    );
+  }
+
+  Future<String> getConfig() async {
+    var response = await Dio().get('http://127.0.0.1:8080/api/getConfig');
+    return response.data['isDev'];
   }
 }
