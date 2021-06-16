@@ -13,6 +13,8 @@ import org.nutz.lang.util.NutMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -78,7 +80,6 @@ public class ConfigDataSource {
         log.info("Config is:" + s);
         return s;
     }
-
 /*
     @GetMapping("/thumb/{name}")
     public @ResponseBody
@@ -107,7 +108,8 @@ public class ConfigDataSource {
     }
 
     // used in client
-    public NutMap authPassword(String passwd) {
+    @PostMapping("/api/authPassword")
+    public NutMap authPassword(@RequestBody String passwd) {
         if (password.equals(passwd)) {
             return Lang.map("ok", "ok");
         }

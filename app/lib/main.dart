@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -53,30 +54,51 @@ class SignInForm extends StatefulWidget {
 }
 
 class _SignUpFormState extends State<SignInForm> {
-  final _firstNameTextController = TextEditingController();
+  final _passwordController = TextEditingController();
+  late String? _validatedMsg;
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return Form(
+        key: _formKey,
         child: Column(
-      children: [
-        Text('请输入密码'),
-        Padding(
-          padding: EdgeInsets.all(8.0),
-          child: TextFormField(
-            obscureText: true,
-            controller: _firstNameTextController,
-            decoration: InputDecoration(hintText: '密码'),
-          ),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pushNamed('/home');
-          },
-          child: Text('确定'),
-        ),
-      ],
-    ));
+          children: [
+            Text('请输入密码'),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: TextFormField(
+                obscureText: true,
+                controller: _passwordController,
+                decoration: InputDecoration(hintText: '密码'),
+                validator: (value) {
+                  return _validatedMsg;
+                },
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                await validatePassword();
+                if (_formKey.currentState!.validate()) {
+                  Navigator.of(context).pushNamed('/home');
+                }
+              },
+              child: Text('确定'),
+            ),
+          ],
+        ));
+  }
+
+  Future<void> validatePassword() async {
+    var value = _passwordController.value.text;
+    if (value == null || value.isEmpty)
+      _validatedMsg = '请输入密码';
+    else {
+      var response = await Dio()
+          .post('http://127.0.0.1:8080/api/authPassword', data: value);
+      _validatedMsg = 'ok' == response.data['ok'] ? null : '密码不对，请重新输入';
+    }
   }
 }
 
