@@ -25,31 +25,10 @@ class SignInForm extends StatefulWidget {
 class _SignUpFormState extends State<SignInForm> {
   final _passwordController = TextEditingController();
   late String? _validatedMsg;
-
-//  late String? _isDev;
-
   final _formKey = GlobalKey<FormState>();
 
-/*
-  @override
-  void initState() {
-    super.initState();
-    getData();
-  }
-
-  getData() async {
-    var response = await Dio().get('http://127.0.0.1:8080/api/getConfig');
-    _isDev = response.data['isDev'];
-    print(_isDev);
-  }
-*/
   @override
   Widget build(BuildContext context) {
-/*
-    if (_isDev == 'true') {
-      Navigator.of(context).pushNamed('/home');
-    }
- */
     return Form(
         key: _formKey,
         child: Column(
