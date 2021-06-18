@@ -18,9 +18,10 @@ import org.nutz.dao.sql.Sql;
 import org.nutz.dao.util.cri.SimpleCriteria;
 import org.nutz.lang.Lang;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Component
+@RestController
 @Slf4j
 public class PicsDataSource {
 
@@ -116,6 +117,19 @@ public class PicsDataSource {
         }
         log.info("remove : {}", req.getCriteria());
         return resp;
+    }
+
+    @PostMapping("/api/getPics")
+    public Map getPics() {
+        log.info("Getting pics");
+        DSRequest req = new DSRequest();
+        req.setCriteria(Lang.map("trashed", false));
+        req.setStartRow(0);
+        req.setEndRow(75);
+        DSResponse resp = fetch(req);
+
+        return Lang.map("totalRows", resp.getTotalRows()).setv("startRow", resp.getStartRow())
+                .setv("endRow", resp.getEndRow()).setv("data", resp.getData());
     }
 
     // used in datasource

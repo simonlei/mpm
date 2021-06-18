@@ -1,3 +1,4 @@
+import 'package:app/config.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +40,8 @@ class JumpWidget extends StatelessWidget {
   }
 
   Future<String> getConfig() async {
-    var response = await Dio().get('http://127.0.0.1:8080/api/getConfig');
+    var response = await Dio().get(Config.toUrl('/api/getConfig'));
+    Config.setImageBase(response.data['baseUrl']);
     return response.data['isDev'];
   }
 }
