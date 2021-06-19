@@ -1,9 +1,8 @@
 import 'package:app/config.dart';
+import 'package:app/image_tile.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 class PicsGrid extends StatefulWidget {
   @override
@@ -26,12 +25,15 @@ class _PicsGridState extends State<PicsGrid> {
         print(snapshot.error);
         if (snapshot.hasData) {
           List<PicImage> data = snapshot.data!;
-          return StaggeredGridView.countBuilder(
-              crossAxisCount: 4,
-              itemCount: data.length,
-              itemBuilder: (context, index) =>
-                  _ImageTile(index, data.elementAt(index)),
-              staggeredTileBuilder: (index) => const StaggeredTile.fit(2));
+          return StaggeredGridView.extentBuilder(
+            maxCrossAxisExtent: 200,
+            crossAxisSpacing: 3,
+            mainAxisSpacing: 3,
+            itemCount: data.length,
+            itemBuilder: (context, index) =>
+                ImageTile(index, data.elementAt(index)),
+            staggeredTileBuilder: (index) => const StaggeredTile.extent(1, 150),
+          );
         } else if (snapshot.hasError)
           return Text('Error:${snapshot.error}');
         else
@@ -39,30 +41,6 @@ class _PicsGridState extends State<PicsGrid> {
       },
     );
   }
-}
-
-class _ImageTile extends StatelessWidget {
-  const _ImageTile(this.index, this.image);
-
-  final int index;
-  final PicImage image;
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeInImage.memoryNetwork(
-      placeholder: kTransparentImage,
-      image: Config.imageUrl(image.thumb),
-    );
-    Text('yes${image.width}${image.height}');
-  }
-}
-
-class PicImage {
-  const PicImage(this.width, this.height, this.thumb);
-
-  final int width;
-  final int height;
-  final String thumb;
 }
 
 Future<List<PicImage>> _loadImages() async {
