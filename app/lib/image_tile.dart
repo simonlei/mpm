@@ -14,43 +14,49 @@ class ImageTile extends StatefulWidget {
   State<StatefulWidget> createState() {
     return _ImageTileState();
   }
+
+  Future<PicImage?> getCurrentImage() {
+    return picsModel.getImage(index);
+  }
 }
 
 class _ImageTileState extends State<ImageTile> {
-  static const UnSelectBorder = Color(0xFF000000);
-  static const SelectedBorder = Color(0xFFFF0000);
-
   @override
   Widget build(BuildContext context) {
-    var image = widget.picsModel.getImage(widget.index);
-    return GestureDetector(
-      onTap: () {
-        var set = Set<int>();
-        set.add(widget.index);
-        widget.onSelect(set);
-      },
-      onDoubleTap: () {
-        // open details
-      },
-      child: Container(
-        decoration: BoxDecoration(
-            border: Border(
-          top: BorderSide(width: 1.0, color: _getColor()),
-          left: BorderSide(width: 1.0, color: _getColor()),
-          right: BorderSide(width: 1.0, color: _getColor()),
-          bottom: BorderSide(width: 1.0, color: _getColor()),
-        )),
-        child: FadeInImage.memoryNetwork(
-          width: image.width,
-          height: image.height,
-          placeholder: kTransparentImage,
-          image: Config.imageUrl(image.thumb),
-        ),
-      ),
-    );
+    return FutureBuilder<PicImage?>(
+        future: widget.getCurrentImage(),
+        builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
+          if (snapshot.hasData) {
+            return GestureDetector(
+              onTap: () {
+                var set = Set<int>();
+                // RawKeyboard.instance.
+                // RawKeyDownEvent().isControlPressed()
+                set.add(widget.index);
+                widget.onSelect(set);
+              },
+              onDoubleTap: () {
+                // open details
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    border: Border.all(color: _getColor(), width: 2)),
+                child: FadeInImage.memoryNetwork(
+                  width: snapshot.data?.width ?? 200,
+                  height: snapshot.data?.height ?? 150,
+                  placeholder: kTransparentImage,
+                  image: Config.imageUrl(snapshot.data?.thumb ?? ""),
+                ),
+              ),
+            );
+          } else if (snapshot.hasError)
+            return Text('Error:${snapshot.error}');
+          else
+            return CircularProgressIndicator();
+        });
   }
 
   Color _getColor() => widget.picsModel.isSelected(widget.index) == true
-      ? SelectedBorder
-      : UnSelectBorder;
+      ? Colors.amber
+      : Colors.grey;
 }

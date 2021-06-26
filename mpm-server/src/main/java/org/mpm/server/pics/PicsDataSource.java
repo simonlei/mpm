@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.util.ExplicitPager;
@@ -19,6 +20,7 @@ import org.nutz.dao.util.cri.SimpleCriteria;
 import org.nutz.lang.Lang;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -120,12 +122,12 @@ public class PicsDataSource {
     }
 
     @PostMapping("/api/getPics")
-    public Map getPics() {
+    public Map getPics(@RequestBody GetPicsRequest request) {
         log.info("Getting pics");
         DSRequest req = new DSRequest();
         req.setCriteria(Lang.map("trashed", false));
-        req.setStartRow(0);
-        req.setEndRow(75);
+        req.setStartRow(request.getStart());
+        req.setEndRow(request.getStart() + request.getSize());
         DSResponse resp = fetch(req);
 
         return Lang.map("totalRows", resp.getTotalRows()).setv("startRow", resp.getStartRow())
@@ -200,5 +202,12 @@ public class PicsDataSource {
         if (star != null) {
             cnd.where().and("star", "=", star);
         }
+    }
+
+    @Data
+    static class GetPicsRequest {
+
+        int start;
+        int size;
     }
 }

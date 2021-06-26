@@ -21,14 +21,11 @@ class _PicsGridState extends State<PicsGrid> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<PicImage>>(
-      future: _picsModel.loadImages(),
-      builder: (BuildContext context, AsyncSnapshot<List<PicImage>> snapshot) {
-        print('Has data:');
-        print(snapshot.data);
-        print(snapshot.error);
+    return FutureBuilder<List<PicImage?>>(
+      future: _picsModel.loadImages(0, 75),
+      builder: (BuildContext context, AsyncSnapshot<List<PicImage?>> snapshot) {
         if (snapshot.hasData) {
-          List<PicImage> data = snapshot.data!;
+          List<PicImage?> data = snapshot.data!;
           return StaggeredGridView.extentBuilder(
             maxCrossAxisExtent: 200,
             crossAxisSpacing: 5,

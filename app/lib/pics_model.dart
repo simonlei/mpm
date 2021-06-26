@@ -1,21 +1,29 @@
 import 'package:app/config.dart';
 import 'package:dio/dio.dart';
+import 'package:logger/logger.dart';
+import 'package:mutex/mutex.dart';
 
 class PicsModel {
-  late List<PicImage> _pics;
+  List<PicImage?> _pics = <PicImage>[];
+  bool _init = false;
 
-  Future<List<PicImage>> loadImages() async {
-    var resp = await Dio().post(Config.toUrl('/api/getPics'));
-    PicImage emptyOne = PicImage(200, 150, '');
-    List<PicImage> images = List.filled(resp.data['totalRows'], emptyOne);
+  Future<List<PicImage?>> loadImages(int start, int size) async {
+    // if (_pics != null) return _pics!;
+    Logger().i("load image from server...$start");
+    var resp = await Dio().post(Config.toUrl('/api/getPics'),
+        data: {'start': start, 'size': size});
+    // _pics.length(resp.data['totalRows']);
+    if (!_init) {
+      _pics = List.filled(resp.data['totalRows'], null);
+      _init = true;
+    }
     List data = resp.data['data'];
     for (int i = 0; i < data.length; i++) {
       var element = data.elementAt(i);
-      images[i] =
+      _pics[start + i] =
           PicImage(element['width'], element['height'], element['thumb']);
     }
-    _pics = images;
-    return images;
+    return _pics;
   }
 
   Set<int> _selectedSet = Set();
@@ -29,8 +37,19 @@ class PicsModel {
     return _selectedSet.contains(index);
   }
 
-  PicImage getImage(int index) {
-    return _pics[index];
+  var _lock = Mutex();
+
+  Future<PicImage?> getImage(int index) async {
+    await _lock.acquire();
+    try {
+      if (_pics[index] == null) {
+        Logger().i('image is null, load it');
+        await loadImages(index, 75);
+      }
+      return _pics[index];
+    } finally {
+      _lock.release();
+    }
   }
 }
 
