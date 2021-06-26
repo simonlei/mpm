@@ -42,7 +42,7 @@ class PicsModel {
   Future<PicImage?> getImage(int index) async {
     await _lock.acquire();
     try {
-      if (_pics[index] == null) {
+      if (!_init || _pics[index] == null) {
         Logger().i('image is null, load it');
         await loadImages(index, 75);
       }
@@ -50,6 +50,10 @@ class PicsModel {
     } finally {
       _lock.release();
     }
+  }
+
+  int getTotalImages() {
+    return _pics.length;
   }
 }
 

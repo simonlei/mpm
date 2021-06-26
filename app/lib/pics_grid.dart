@@ -21,16 +21,15 @@ class _PicsGridState extends State<PicsGrid> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<PicImage?>>(
-      future: _picsModel.loadImages(0, 75),
-      builder: (BuildContext context, AsyncSnapshot<List<PicImage?>> snapshot) {
+    return FutureBuilder<PicImage?>(
+      future: _picsModel.getImage(0),
+      builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
         if (snapshot.hasData) {
-          List<PicImage?> data = snapshot.data!;
           return StaggeredGridView.extentBuilder(
             maxCrossAxisExtent: 200,
             crossAxisSpacing: 5,
             mainAxisSpacing: 3,
-            itemCount: data.length,
+            itemCount: _picsModel.getTotalImages(),
             itemBuilder: (context, index) =>
                 ImageTile(index, _picsModel, _selectImage),
             staggeredTileBuilder: (index) => const StaggeredTile.extent(1, 150),
