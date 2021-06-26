@@ -1,9 +1,9 @@
 import 'package:app/config.dart';
+import 'package:app/detail_page.dart';
+import 'package:app/homepage.dart';
+import 'package:app/signin.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-
-import 'homepage.dart';
-import 'signin.dart';
 
 void main() {
   runApp(MyApp());
@@ -19,7 +19,8 @@ class MyApp extends StatelessWidget {
       ),
       routes: {
         '/': (context) => JumpWidget(),
-        '/home': (context) => MyHomePage(title: 'My Photo Manager')
+        '/home': (context) => MyHomePage(title: 'My Photo Manager'),
+        '/detail': (context) => DetailPage(),
       },
     );
   }

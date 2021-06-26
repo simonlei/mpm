@@ -2,6 +2,7 @@ import 'package:app/config.dart';
 import 'package:app/pics_model.dart';
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
+import 'package:tuple/tuple.dart';
 
 class ImageTile extends StatefulWidget {
   ImageTile(this.index, this.picsModel, this.onSelect);
@@ -27,6 +28,7 @@ class _ImageTileState extends State<ImageTile> {
         future: widget.getCurrentImage(),
         builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
           if (snapshot.hasData) {
+            PicImage image = snapshot.data!;
             return GestureDetector(
               onTap: () {
                 var set = Set<int>();
@@ -37,15 +39,17 @@ class _ImageTileState extends State<ImageTile> {
               },
               onDoubleTap: () {
                 // open details
+                Navigator.of(context).pushNamed('/detail',
+                    arguments: Tuple2(widget.picsModel, widget.index));
               },
               child: Container(
                 decoration: BoxDecoration(
                     border: Border.all(color: _getColor(), width: 2)),
                 child: FadeInImage.memoryNetwork(
-                  width: snapshot.data?.width ?? 200,
-                  height: snapshot.data?.height ?? 150,
+                  width: image.width,
+                  height: image.height,
                   placeholder: kTransparentImage,
-                  image: Config.imageUrl(snapshot.data?.thumb ?? ""),
+                  image: Config.imageUrl(image.thumb),
                 ),
               ),
             );

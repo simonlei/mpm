@@ -20,8 +20,8 @@ class PicsModel {
     List data = resp.data['data'];
     for (int i = 0; i < data.length; i++) {
       var element = data.elementAt(i);
-      _pics[start + i] =
-          PicImage(element['width'], element['height'], element['thumb']);
+      _pics[start + i] = PicImage(element['width'], element['height'],
+          element['thumb'], element['name']);
     }
     return _pics;
   }
@@ -58,9 +58,10 @@ class PicsModel {
 }
 
 class PicImage {
-  const PicImage(this.width, this.height, this.thumb);
+  const PicImage(this.width, this.height, this.thumb, this.name);
 
   final double width;
   final double height;
   final String thumb;
+  final String name;
 }
