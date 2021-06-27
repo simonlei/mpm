@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
+import 'package:transparent_image/transparent_image.dart';
 import 'package:tuple/tuple.dart';
 
 class DetailPage extends StatefulWidget {
@@ -33,10 +34,12 @@ class _DetailPageState extends State<DetailPage> {
       shortcuts: {
         LogicalKeySet(LogicalKeyboardKey.arrowLeft): NextPageIntent(-1),
         LogicalKeySet(LogicalKeyboardKey.arrowRight): NextPageIntent(1),
+        LogicalKeySet(LogicalKeyboardKey.escape): EscapeIntent(),
       },
       child: Actions(
         actions: {
           NextPageIntent: NextPageAction(this),
+          EscapeIntent: EscapeAction(this),
         },
         child: Focus(
           autofocus: true,
@@ -45,9 +48,10 @@ class _DetailPageState extends State<DetailPage> {
             builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
               if (snapshot.hasData) {
                 return Center(
-                  child: Image(
-                      image:
-                          NetworkImage(Config.imageUrl(snapshot.data!.name))),
+                  child: FadeInImage.memoryNetwork(
+                      fit: BoxFit.fitHeight,
+                      placeholder: kTransparentImage,
+                      image: Config.imageUrl(snapshot.data!.name)),
                 );
               } else if (snapshot.hasError)
                 return Text('Error:${snapshot.error}');
@@ -66,6 +70,20 @@ class _DetailPageState extends State<DetailPage> {
     });
   }
 }
+
+class EscapeAction extends Action<EscapeIntent> {
+  EscapeAction(this._detailPageState);
+
+  _DetailPageState _detailPageState;
+
+  @override
+  Object? invoke(covariant EscapeIntent intent) {
+    //
+    Navigator.pop(_detailPageState.context);
+  }
+}
+
+class EscapeIntent extends Intent {}
 
 class NextPageIntent extends Intent {
   const NextPageIntent(this.next);
