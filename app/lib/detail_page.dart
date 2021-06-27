@@ -7,9 +7,13 @@ import 'package:logger/logger.dart';
 import 'package:tuple/tuple.dart';
 
 class DetailPage extends StatefulWidget {
+  const DetailPage(this.arguments);
+
+  final Tuple2 arguments;
+
   @override
   State<StatefulWidget> createState() {
-    return _DetailPageState();
+    return _DetailPageState(arguments);
   }
 }
 
@@ -17,12 +21,13 @@ class _DetailPageState extends State<DetailPage> {
   late PicsModel _picsModel;
   late int _index;
 
+  _DetailPageState(Tuple2 arguments) {
+    _picsModel = arguments.item1;
+    _index = arguments.item2;
+  }
+
   @override
   Widget build(BuildContext context) {
-    Tuple2 params = ModalRoute.of(context)!.settings.arguments as Tuple2;
-    _picsModel = params.item1;
-    _index = params.item2;
-
     Logger().i('params is $_index');
     return Shortcuts(
       shortcuts: {
@@ -31,7 +36,7 @@ class _DetailPageState extends State<DetailPage> {
       },
       child: Actions(
         actions: {
-          NextPageIntent: NextPageAction(),
+          NextPageIntent: NextPageAction(this),
         },
         child: Focus(
           autofocus: true,
@@ -54,6 +59,12 @@ class _DetailPageState extends State<DetailPage> {
       ),
     );
   }
+
+  void showNext(int next) {
+    setState(() {
+      _index += next;
+    });
+  }
 }
 
 class NextPageIntent extends Intent {
@@ -63,8 +74,13 @@ class NextPageIntent extends Intent {
 }
 
 class NextPageAction extends Action<NextPageIntent> {
+  NextPageAction(this._detailPageState);
+
+  _DetailPageState _detailPageState;
+
   @override
   Object? invoke(covariant NextPageIntent intent) {
     Logger().i("intent: ${intent.next}");
+    _detailPageState.showNext(intent.next);
   }
 }

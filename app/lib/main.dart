@@ -1,9 +1,11 @@
 import 'package:app/config.dart';
-import 'package:app/detail_page.dart';
 import 'package:app/homepage.dart';
 import 'package:app/signin.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:tuple/tuple.dart';
+
+import 'detail_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -17,10 +19,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      routes: {
-        '/': (context) => JumpWidget(),
-        '/home': (context) => MyHomePage(title: 'My Photo Manager'),
-        '/detail': (context) => DetailPage(),
+      onGenerateRoute: (RouteSettings settings) {
+        var routes = <String, WidgetBuilder>{
+          '/': (context) => JumpWidget(),
+          '/home': (context) => MyHomePage(title: 'My Photo Manager'),
+          '/detail': (context) => DetailPage(settings.arguments as Tuple2),
+        };
+        WidgetBuilder builder = routes[settings.name]!;
+        return MaterialPageRoute(builder: (ctx) => builder(ctx));
       },
     );
   }
