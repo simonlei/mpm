@@ -1,4 +1,5 @@
 import 'package:app/config.dart';
+import 'package:app/event_bus.dart';
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:mutex/mutex.dart';
@@ -15,6 +16,7 @@ class PicsModel {
     // _pics.length(resp.data['totalRows']);
     if (!_init) {
       _pics = List.filled(resp.data['totalRows'], null);
+      bus.emit("countChange", resp.data['totalRows']);
       _init = true;
     }
     List data = resp.data['data'];

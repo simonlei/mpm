@@ -1,8 +1,11 @@
 import 'package:app/config.dart';
+import 'package:app/event_bus.dart';
 import 'package:app/homepage.dart';
 import 'package:app/signin.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:logger/logger.dart';
 import 'package:tuple/tuple.dart';
 
 import 'detail_page.dart';
@@ -14,6 +17,14 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    bus.on("countChange", (arg) {
+      Logger().i("change $arg");
+      SystemChrome.setApplicationSwitcherDescription(
+          ApplicationSwitcherDescription(
+        label: 'My Photo Manager($arg)',
+        primaryColor: Theme.of(context).primaryColor.value,
+      ));
+    });
     return MaterialApp(
       title: 'MPM',
       theme: ThemeData(

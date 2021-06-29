@@ -1,16 +1,111 @@
 # app
 
-My Photo Manager
+My Photo Manager client side.
 
-## Getting Started
+## 版本
 
-This project is a starting point for a Flutter application.
+用 flutter 把前端功能重新实现一遍
 
-A few resources to get you started if this is your first Flutter project:
+### v1.0.0
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+- [x] 展示照片计数
+- [ ] 上下左右键选择照片
+- [ ] 按Ctrl/Shift 多选照片
+- [ ] 删除图片后更新计数
+- [ ] 支持批量删除图片
+- [x] 双击/回车放大图片
+- [x] 图片展示时支持上一张、下一张等操作
+- [ ] 图片展示时可以删除
+- [ ] 当前图片删除后，自动加载下一张
+- [ ] if it's last one, get prev one.
+- [ ] 如果所有图片都删除了，退出大图片
+- [x] esc 退出大图片
+- [ ] 展示每次导入的左边树
+- [ ] 把物理删除变成逻辑删除
+- [ ] 修复获取总数的问题
+- [ ] 左边日期树数量按是否删除过滤
+- [ ] 左边日期树选中后过滤图片
+- [ ] 左边目录树选中后过滤图片
+- [ ] 目录树层级貌似还不太对，需要优化
+- [x] 导入时，有相同图片不要直接抛弃，而是建立关联
+- [ ] 图片默认按id倒序展示
+- [ ] 可以选择图片排序的方式
+- [ ] 支持清空回收站
+- [ ] 导入完成后刷新页面
+- [ ] 左侧树支持"全部"
+- [ ] 支持放大/缩小图片
+- [ ] 支持在放大的情况下用 HJKL 来移动图片
+- [ ] 详情时展示图片信息
+- [ ] 列表时展示图片信息
+- [ ] 物理删除图片时，相关的File都要一起删除
+- [ ] Progress 可以做成统一的
+- [ ] 尝试一下使用浏览器上传文件夹的功能
+- [ ] 上传到cos的，要支持按目录结构上传
+- [ ] 上传到cos时，过滤非照片和视频的文件
+- [ ] 上传到cos之后，刷数据库
+- [ ] 上传的时候要控制一下，避免重复创建
+- [ ] 上传完成后要刷新当前页面的内容
+- [x] 身份认证之后才能访问
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### v1.0.1
+
+- [ ] 支持视频上传
+- [ ] 支持视频展示
+- [ ] 部署脚本和文档
+- [ ] 日志输出到文件
+- [ ] 视频直接用万象API来截图，不需要配置cos上的流程，也不需要循环等待
+- [ ] 记录视频时长
+- [ ] cos上传出错之后，上报到后台并记录
+- [ ] tile中的视频加上一个视频的标记
+- [ ] tile中的视频加上一个视频的时长
+- [ ] bug: 如果takenDate是null，那么就用当天的日期
+- [ ] bug: cos 版本和 万象版本不一致导致video不正常
+- [ ] bug: tile会复用，要删掉不必要的视频标签
+
+### v1.0.2
+
+- [ ] 重构代码，删除不必要的代码
+- [ ] 支持删除某个目录下的所有照片
+- [ ] 年份后面也展示照片数
+- [ ] 文件目录后面也展示照片数
+- [ ] 按目录展示，子目录下的照片也展示出来
+- [ ] 照片排序也要按新的datasource来支持
+- [ ] 支持修改图片的日期
+- [ ] 支持拷贝图片的gis信息
+- [ ] 支持修改图片的gis信息
+- [ ] 图片gis信息被修改之后，要重新调用一下address接口
+- [ ] 支持按目录修改图片的日期
+- [ ] 支持按目录修改图片的gis信息
+- [ ] 支持照片的旋转
+- [ ] 全屏状态下也支持旋转
+- [ ] bug: mediaType error
+
+### v1.0.3
+
+- [ ] 上传文件的时候，左侧的提醒消退的太慢了
+- [ ] 支持修改描述信息
+- [ ] 加上star标记
+- [ ] 可以只查看star的照片
+- [ ] 左边的树也可以跟着 只看star变化
+- [ ] 重构，去掉不必要的静态变量
+- [ ] 可以移动文件夹到另一个文件夹下
+- [ ] 可以合并照片到另一个文件夹下
+- [ ] 还是切换成springboot吧，nutzboot 还是有点小众
+
+### v1.0.4
+
+- [ ] 数据库密码去掉
+- [ ] 增加 rotate快捷键
+- [ ] bug: 全屏状态下旋转后，顺序变了
+- [ ] 将快捷键统一管理起来
+- [ ] 开发环境下不需要密码
+- [ ] 可以增加tag，给照片打tag
+- [ ] 可以按tag 进行过滤
+- [ ] 支持地图
+- [ ] 记住上一次看图片的位置
+- [ ] 跳转到对应的图片位置
+- [ ] 滚动到对应的图片
+- [ ] 如果未翻页，则翻页过去之后在滚动到对应图片
+- [ ] thumb 可以根据rotate来进生成
+- [ ] bug: thumb 有缓存，需要刷新
+- [ ] bug: 有条件的时候更新图片会导致从当前结果列表里面消失
