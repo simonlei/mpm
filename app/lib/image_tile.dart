@@ -1,13 +1,13 @@
 import 'package:app/config.dart';
 import 'package:app/pics_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:tuple/tuple.dart';
 
 class ImageTile extends StatefulWidget {
-  ImageTile(this.index, this.picsModel, this.onSelect);
+  ImageTile(this.index, this.picsModel);
 
-  final ValueChanged<Set<int>> onSelect;
   final int index;
   final PicsModel picsModel;
 
@@ -31,26 +31,34 @@ class _ImageTileState extends State<ImageTile> {
             PicImage image = snapshot.data!;
             return GestureDetector(
               onTap: () {
-                var set = Set<int>();
-                // RawKeyboard.instance.
-                // RawKeyDownEvent().isControlPressed()
-                set.add(widget.index);
-                widget.onSelect(set);
+                Provider.of<PicsModel>(context, listen: false)
+                    .select(widget.index);
+                // widget.picsModel.select(widget.index);
               },
               onDoubleTap: () {
                 // open details
                 Navigator.of(context).pushNamed('/detail',
                     arguments: Tuple2(widget.picsModel, widget.index));
               },
-              child: Container(
-                decoration: BoxDecoration(
-                    border: Border.all(color: _getColor(), width: 2)),
-                child: FadeInImage.memoryNetwork(
-                  width: image.width,
-                  height: image.height,
-                  placeholder: kTransparentImage,
-                  image: Config.imageUrl(image.thumb),
-                ),
+              child: Selector<PicsModel, bool>(
+                selector: (context, selected) =>
+                    widget.picsModel.isSelected(widget.index),
+                shouldRebuild: (preSelected, nextSelected) =>
+                    preSelected != nextSelected,
+                builder: (context, selected, child) {
+                  return Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            color: selected ? Colors.blue : Colors.grey,
+                            width: 2)),
+                    child: FadeInImage.memoryNetwork(
+                      width: image.width,
+                      height: image.height,
+                      placeholder: kTransparentImage,
+                      image: Config.imageUrl(image.thumb),
+                    ),
+                  );
+                },
               ),
             );
           } else if (snapshot.hasError)
@@ -59,8 +67,4 @@ class _ImageTileState extends State<ImageTile> {
             return CircularProgressIndicator();
         });
   }
-
-  Color _getColor() => widget.picsModel.isSelected(widget.index) == true
-      ? Colors.amber
-      : Colors.grey;
 }

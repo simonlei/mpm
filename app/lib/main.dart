@@ -1,23 +1,30 @@
 import 'package:app/config.dart';
 import 'package:app/event_bus.dart';
 import 'package:app/homepage.dart';
+import 'package:app/pics_model.dart';
 import 'package:app/signin.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 import 'detail_page.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => PicsModel()),
+    ],
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    bus.on("countChange", (arg) {
+    BUS.on("countChange", (arg) {
       Logger().i("change $arg");
       SystemChrome.setApplicationSwitcherDescription(
           ApplicationSwitcherDescription(
@@ -26,7 +33,7 @@ class MyApp extends StatelessWidget {
       ));
     });
     return MaterialApp(
-      title: 'MPM',
+      title: 'My Photo Manager',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

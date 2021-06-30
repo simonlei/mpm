@@ -3,6 +3,7 @@ import 'package:app/pics_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 
 class PicsGrid extends StatefulWidget {
   @override
@@ -12,16 +13,10 @@ class PicsGrid extends StatefulWidget {
 }
 
 class _PicsGridState extends State<PicsGrid> {
-  PicsModel _picsModel = PicsModel();
-
-  void _selectImage(Set<int> index) {
-    setState(() {
-      _picsModel.select(index);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    PicsModel _picsModel = Provider.of<PicsModel>(context, listen: false);
+
     return Focus(
       autofocus: true,
       onKey: onKey,
@@ -34,8 +29,7 @@ class _PicsGridState extends State<PicsGrid> {
               crossAxisSpacing: 5,
               mainAxisSpacing: 3,
               itemCount: _picsModel.getTotalImages(),
-              itemBuilder: (context, index) =>
-                  ImageTile(index, _picsModel, _selectImage),
+              itemBuilder: (context, index) => ImageTile(index, _picsModel),
               staggeredTileBuilder: (index) =>
                   const StaggeredTile.extent(1, 150),
             );
@@ -49,6 +43,9 @@ class _PicsGridState extends State<PicsGrid> {
   }
 
   onKey(FocusNode node, RawKeyEvent event) {
+    PicsModel _picsModel = Provider.of<PicsModel>(context, listen: false);
+    _picsModel.ctrlDown = event.isControlPressed;
+    _picsModel.shiftDown = event.isShiftPressed;
     Logger().i("ctrl key down ${event.isControlPressed} ");
     return true;
   }
