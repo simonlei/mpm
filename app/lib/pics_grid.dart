@@ -16,21 +16,13 @@ class PicsGrid extends StatefulWidget {
 class _PicsGridState extends State<PicsGrid> {
   @override
   Widget build(BuildContext context) {
-    PicsModel _picsModel = Provider.of<PicsModel>(context, listen: false);
-
     return Focus(
       autofocus: true,
       onKey: onKey,
-      child: FutureBuilder<PicImage?>(
-        future: _picsModel.getImage(0),
-        builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
-          if (snapshot.hasData) {
-            _gridView = buildStaggeredGridView(_picsModel);
-            return _gridView;
-          } else if (snapshot.hasError)
-            return Text('Error:${snapshot.error}');
-          else
-            return CircularProgressIndicator();
+      child: Consumer<PicsModel>(
+        builder: (context, picsModel, child) {
+          _gridView = buildStaggeredGridView(picsModel);
+          return _gridView;
         },
       ),
     );
@@ -67,6 +59,8 @@ class _PicsGridState extends State<PicsGrid> {
     } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
       Navigator.of(context).pushNamed('/detail',
           arguments: Tuple2(_picsModel, _picsModel.getSelectedIndex()));
+    } else if (event.isKeyPressed(LogicalKeyboardKey.keyD)) {
+      _picsModel.trashSelected();
     }
     return true;
   }

@@ -6,6 +6,8 @@ class SelectModel with ChangeNotifier {
   Set<int> _selectedSet = Set();
   int lastIndex = -1;
 
+  Set<int> get selected => Set.unmodifiable(_selectedSet);
+
   void select(bool metaDown, bool shiftDown, int index) {
     if (!metaDown && !shiftDown) {}
     if (shiftDown && lastIndex > 0) {

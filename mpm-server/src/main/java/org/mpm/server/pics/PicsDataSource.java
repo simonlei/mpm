@@ -15,6 +15,7 @@ import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.dao.Sqls;
 import org.nutz.dao.entity.Record;
+import org.nutz.dao.sql.Criteria;
 import org.nutz.dao.sql.Sql;
 import org.nutz.dao.util.cri.SimpleCriteria;
 import org.nutz.lang.Lang;
@@ -104,6 +105,13 @@ public class PicsDataSource {
             log.error("Can't set address", e);
         }
         return null;
+    }
+
+    @PostMapping("/api/trashPhotos")
+    public int trashPhotos(@RequestBody List<String> names) {
+        Criteria cri = Cnd.cri();
+        cri.where().andInStrList("name", names);
+        return dao.update(EntityPhoto.class, Chain.makeSpecial("trashed", " !trashed"), cri);
     }
 
     // used in datasource

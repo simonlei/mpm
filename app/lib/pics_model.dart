@@ -13,7 +13,9 @@ class PicsModel with ChangeNotifier {
   bool shiftDown = false;
   SelectModel _selectModel;
 
-  PicsModel(this._selectModel);
+  PicsModel(this._selectModel) {
+    loadImages(0, 75);
+  }
 
   Future<List<PicImage?>> loadImages(int start, int size) async {
     Logger().i("load image from server...$start");
@@ -31,6 +33,7 @@ class PicsModel with ChangeNotifier {
       _pics[start + i] = PicImage(element['width'], element['height'],
           element['thumb'], element['name']);
     }
+    notifyListeners();
     return _pics;
   }
 
@@ -67,6 +70,25 @@ class PicsModel with ChangeNotifier {
 
   int getSelectedIndex() {
     return _selectModel.lastIndex;
+  }
+
+  Future<void> trashSelected() async {
+    var resp = await Dio().post(Config.toUrl("/api/trashPhotos"),
+        data: _selectModel.selected.map((e) => _pics[e]!.name).toList());
+    Logger().i("Result is $resp");
+    if (resp.statusCode == 200 && resp.data == _selectModel.selected.length) {
+/*
+      var list = _selectModel.selected.toList();
+      list.sort();
+      list.reversed.forEach((element) {
+        _pics.removeAt(element);
+      });
+*/
+      _init = false;
+      notifyListeners();
+    } else {
+      Logger().e("Result is $resp");
+    }
   }
 }
 
