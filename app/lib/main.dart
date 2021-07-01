@@ -2,6 +2,7 @@ import 'package:app/config.dart';
 import 'package:app/event_bus.dart';
 import 'package:app/homepage.dart';
 import 'package:app/pics_model.dart';
+import 'package:app/select_model.dart';
 import 'package:app/signin.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +14,11 @@ import 'package:tuple/tuple.dart';
 import 'detail_page.dart';
 
 void main() {
+  var selectModel = SelectModel();
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => PicsModel()),
+      ChangeNotifierProvider(create: (_) => selectModel),
+      ChangeNotifierProvider(create: (_) => PicsModel(selectModel)),
     ],
     child: MyApp(),
   ));

@@ -9,6 +9,7 @@ My Photo Manager client side.
 ### v1.0.0
 
 - [x] 展示照片计数
+- [x] 支持按住shift/meta的时候进行多选
 - [ ] 上下左右键选择照片
 - [ ] 按Ctrl/Shift 多选照片
 - [ ] 删除图片后更新计数

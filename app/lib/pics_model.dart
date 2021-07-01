@@ -1,5 +1,6 @@
 import 'package:app/config.dart';
 import 'package:app/event_bus.dart';
+import 'package:app/select_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -8,8 +9,11 @@ import 'package:mutex/mutex.dart';
 class PicsModel with ChangeNotifier {
   List<PicImage?> _pics = <PicImage>[];
   bool _init = false;
-  bool ctrlDown = false;
+  bool metaDown = false;
   bool shiftDown = false;
+  SelectModel _selectModel;
+
+  PicsModel(this._selectModel);
 
   Future<List<PicImage?>> loadImages(int start, int size) async {
     // if (_pics != null) return _pics!;
@@ -31,27 +35,8 @@ class PicsModel with ChangeNotifier {
     return _pics;
   }
 
-  Set<int> _selectedSet = Set();
-
   void select(int index) {
-    _selectedSet.forEach((element) {
-      _pics[element]!.selected = false;
-    });
-    _selectedSet.clear();
-    _pics[index]!.selected = true;
-    _selectedSet.add(index);
-    notifyListeners();
-    /*
-    set.forEach((element) {
-      _pics[element]!.selected = true;
-    });
-    _selectedSet.addAll(set);
-
-     */
-  }
-
-  bool isSelected(int index) {
-    return _selectedSet.contains(index);
+    _selectModel.select(metaDown, shiftDown, index);
   }
 
   var _lock = Mutex();
@@ -81,5 +66,4 @@ class PicImage {
   final double height;
   final String thumb;
   final String name;
-  bool selected = false;
 }

@@ -44,7 +44,7 @@ class _PicsGridState extends State<PicsGrid> {
 
   onKey(FocusNode node, RawKeyEvent event) {
     PicsModel _picsModel = Provider.of<PicsModel>(context, listen: false);
-    _picsModel.ctrlDown = event.isControlPressed;
+    _picsModel.metaDown = event.isMetaPressed;
     _picsModel.shiftDown = event.isShiftPressed;
     Logger().i("ctrl key down ${event.isControlPressed} ");
     return true;

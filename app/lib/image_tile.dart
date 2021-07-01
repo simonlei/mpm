@@ -1,5 +1,6 @@
 import 'package:app/config.dart';
 import 'package:app/pics_model.dart';
+import 'package:app/select_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -40,9 +41,9 @@ class _ImageTileState extends State<ImageTile> {
                 Navigator.of(context).pushNamed('/detail',
                     arguments: Tuple2(widget.picsModel, widget.index));
               },
-              child: Selector<PicsModel, bool>(
-                selector: (context, selected) =>
-                    widget.picsModel.isSelected(widget.index),
+              child: Selector<SelectModel, bool>(
+                selector: (context, selectModel) =>
+                    selectModel.isSelected(widget.index),
                 shouldRebuild: (preSelected, nextSelected) =>
                     preSelected != nextSelected,
                 builder: (context, selected, child) {
