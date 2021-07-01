@@ -1,8 +1,8 @@
 import 'package:app/image_tile.dart';
 import 'package:app/pics_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 class PicsGrid extends StatefulWidget {
@@ -24,15 +24,8 @@ class _PicsGridState extends State<PicsGrid> {
         future: _picsModel.getImage(0),
         builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
           if (snapshot.hasData) {
-            return StaggeredGridView.extentBuilder(
-              maxCrossAxisExtent: 200,
-              crossAxisSpacing: 5,
-              mainAxisSpacing: 3,
-              itemCount: _picsModel.getTotalImages(),
-              itemBuilder: (context, index) => ImageTile(index, _picsModel),
-              staggeredTileBuilder: (index) =>
-                  const StaggeredTile.extent(1, 150),
-            );
+            _gridView = buildStaggeredGridView(_picsModel);
+            return _gridView;
           } else if (snapshot.hasError)
             return Text('Error:${snapshot.error}');
           else
@@ -42,11 +35,38 @@ class _PicsGridState extends State<PicsGrid> {
     );
   }
 
+  late StaggeredGridView _gridView;
+
+  StaggeredGridView buildStaggeredGridView(PicsModel _picsModel) {
+    return StaggeredGridView.extentBuilder(
+      maxCrossAxisExtent: 200,
+      crossAxisSpacing: 5,
+      mainAxisSpacing: 3,
+      itemCount: _picsModel.getTotalImages(),
+      itemBuilder: (context, index) => ImageTile(index, _picsModel),
+      staggeredTileBuilder: (index) => const StaggeredTile.extent(1, 150),
+    );
+  }
+
   onKey(FocusNode node, RawKeyEvent event) {
     PicsModel _picsModel = Provider.of<PicsModel>(context, listen: false);
     _picsModel.metaDown = event.isMetaPressed;
     _picsModel.shiftDown = event.isShiftPressed;
-    Logger().i("ctrl key down ${event.isControlPressed} ");
+
+    double crossAxisExtent = MediaQuery.of(context).size.width;
+    int crossAxisCount = ((crossAxisExtent + 5) / (200 + 5)).ceil();
+    if (event.isKeyPressed(LogicalKeyboardKey.arrowLeft)) {
+      _picsModel.selectNext(-1);
+    }
+    if (event.isKeyPressed(LogicalKeyboardKey.arrowRight)) {
+      _picsModel.selectNext(1);
+    }
+    if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
+      _picsModel.selectNext(-crossAxisCount);
+    }
+    if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+      _picsModel.selectNext(crossAxisCount);
+    }
     return true;
   }
 }

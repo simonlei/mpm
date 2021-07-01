@@ -39,6 +39,14 @@ class PicsModel with ChangeNotifier {
     _selectModel.select(metaDown, shiftDown, index);
   }
 
+  void selectNext(int delta) {
+    int nextIndex = _selectModel.lastIndex + delta;
+    if (nextIndex > _pics.length - 1) nextIndex = _selectModel.lastIndex;
+    if (nextIndex < 0) nextIndex = _selectModel.lastIndex;
+
+    _selectModel.select(metaDown, shiftDown, nextIndex);
+  }
+
   var _lock = Mutex();
 
   Future<PicImage?> getImage(int index) async {

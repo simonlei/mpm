@@ -4,21 +4,21 @@ import 'package:flutter/material.dart';
 
 class SelectModel with ChangeNotifier {
   Set<int> _selectedSet = Set();
-  int _lastIndex = -1;
+  int lastIndex = -1;
 
   void select(bool metaDown, bool shiftDown, int index) {
     if (!metaDown && !shiftDown) {}
-    if (shiftDown && _lastIndex > 0) {
-      for (int i = min(_lastIndex, index); i <= max(_lastIndex, index); i++) {
+    if (shiftDown && lastIndex > 0) {
+      for (int i = min(lastIndex, index); i <= max(lastIndex, index); i++) {
         _selectedSet.add(i);
       }
-      _lastIndex = index;
+      lastIndex = index;
     } else if (metaDown) {
-      _lastIndex = index;
+      lastIndex = index;
       _selectedSet.add(index);
     } else {
       _selectedSet.clear();
-      _lastIndex = index;
+      lastIndex = index;
       _selectedSet.add(index);
     }
     notifyListeners();
@@ -27,4 +27,6 @@ class SelectModel with ChangeNotifier {
   bool isSelected(int index) {
     return _selectedSet.contains(index);
   }
+
+  void selectNext(bool metaDown, bool shiftDown, int delta) {}
 }
