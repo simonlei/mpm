@@ -16,7 +16,6 @@ class PicsModel with ChangeNotifier {
   PicsModel(this._selectModel);
 
   Future<List<PicImage?>> loadImages(int start, int size) async {
-    // if (_pics != null) return _pics!;
     Logger().i("load image from server...$start");
     var resp = await Dio().post(Config.toUrl('/api/getPics'),
         data: {'start': start, 'size': size});
@@ -64,6 +63,10 @@ class PicsModel with ChangeNotifier {
 
   int getTotalImages() {
     return _pics.length;
+  }
+
+  int getSelectedIndex() {
+    return _selectModel.lastIndex;
   }
 }
 

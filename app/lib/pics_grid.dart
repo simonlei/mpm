@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
+import 'package:tuple/tuple.dart';
 
 class PicsGrid extends StatefulWidget {
   @override
@@ -57,15 +58,15 @@ class _PicsGridState extends State<PicsGrid> {
     int crossAxisCount = ((crossAxisExtent + 5) / (200 + 5)).ceil();
     if (event.isKeyPressed(LogicalKeyboardKey.arrowLeft)) {
       _picsModel.selectNext(-1);
-    }
-    if (event.isKeyPressed(LogicalKeyboardKey.arrowRight)) {
+    } else if (event.isKeyPressed(LogicalKeyboardKey.arrowRight)) {
       _picsModel.selectNext(1);
-    }
-    if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
+    } else if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
       _picsModel.selectNext(-crossAxisCount);
-    }
-    if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+    } else if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
       _picsModel.selectNext(crossAxisCount);
+    } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+      Navigator.of(context).pushNamed('/detail',
+          arguments: Tuple2(_picsModel, _picsModel.getSelectedIndex()));
     }
     return true;
   }

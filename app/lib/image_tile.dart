@@ -36,11 +36,7 @@ class _ImageTileState extends State<ImageTile> {
                     .select(widget.index);
                 // widget.picsModel.select(widget.index);
               },
-              onDoubleTap: () {
-                // open details
-                Navigator.of(context).pushNamed('/detail',
-                    arguments: Tuple2(widget.picsModel, widget.index));
-              },
+              onDoubleTap: () => openDetailPage(context),
               child: Selector<SelectModel, bool>(
                 selector: (context, selectModel) =>
                     selectModel.isSelected(widget.index),
@@ -67,5 +63,10 @@ class _ImageTileState extends State<ImageTile> {
           else
             return CircularProgressIndicator();
         });
+  }
+
+  void openDetailPage(BuildContext context) {
+    Navigator.of(context).pushNamed('/detail',
+        arguments: Tuple2(widget.picsModel, widget.index));
   }
 }
