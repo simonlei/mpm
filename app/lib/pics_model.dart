@@ -44,6 +44,7 @@ class PicsModel with ChangeNotifier {
   void selectNext(int delta) {
     int nextIndex = _selectModel.lastIndex + delta;
     if (nextIndex > _pics.length - 1) nextIndex = _selectModel.lastIndex;
+    if (nextIndex > _pics.length - 1) nextIndex = _pics.length - 1;
     if (nextIndex < 0) nextIndex = _selectModel.lastIndex;
 
     _selectModel.select(metaDown, shiftDown, nextIndex);

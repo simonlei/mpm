@@ -20,8 +20,8 @@ My Photo Manager client side.
 - [ ] ~~有provider就没必要用bus了~~
 - [x] 图片展示时可以删除
 - [x] 当前图片删除后，自动加载下一张
-- [ ] if it's last one, get prev one.
-- [ ] 如果所有图片都删除了，退出大图片
+- [x] if it's last one, get prev one.
+- [x] 如果所有图片都删除了，退出大图片
 - [x] esc 退出大图片
 - [ ] 展示每次导入的左边树
 - [ ] 把物理删除变成逻辑删除

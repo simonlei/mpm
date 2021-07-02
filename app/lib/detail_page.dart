@@ -69,6 +69,10 @@ class _DetailPageState extends State<DetailPage> {
   void showNext(int next) {
     setState(() {
       _index += next;
+      if (_index > _picsModel.getTotalImages() - 1)
+        _index = _picsModel.getTotalImages() - 1;
+      if (_index < 0) _index = 0;
+      if (_picsModel.getTotalImages() == 0) Navigator.pop(context);
     });
   }
 }
@@ -80,7 +84,7 @@ class DeleteAction extends Action<DeleteIntent> {
 
   @override
   Future<Object?> invoke(covariant DeleteIntent intent) async {
-    Logger().d("delete ...");
+    // Logger().d("delete ...");
     await _detailPageState._picsModel.trashSelected();
     _detailPageState._picsModel.selectNext(0);
     _detailPageState.showNext(0);
