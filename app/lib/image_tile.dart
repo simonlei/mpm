@@ -64,6 +64,7 @@ class _ImageTileState extends State<ImageTile> {
   }
 
   void openDetailPage(BuildContext context) {
+    widget.picsModel.select(widget.index);
     Navigator.of(context).pushNamed('/detail',
         arguments: Tuple2(widget.picsModel, widget.index));
   }

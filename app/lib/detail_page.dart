@@ -35,11 +35,13 @@ class _DetailPageState extends State<DetailPage> {
         LogicalKeySet(LogicalKeyboardKey.arrowLeft): NextPageIntent(-1),
         LogicalKeySet(LogicalKeyboardKey.arrowRight): NextPageIntent(1),
         LogicalKeySet(LogicalKeyboardKey.escape): EscapeIntent(),
+        LogicalKeySet(LogicalKeyboardKey.keyD): DeleteIntent(),
       },
       child: Actions(
         actions: {
           NextPageIntent: NextPageAction(this),
           EscapeIntent: EscapeAction(this),
+          DeleteIntent: DeleteAction(this),
         },
         child: Focus(
           autofocus: true,
@@ -71,6 +73,22 @@ class _DetailPageState extends State<DetailPage> {
   }
 }
 
+class DeleteAction extends Action<DeleteIntent> {
+  DeleteAction(this._detailPageState);
+
+  _DetailPageState _detailPageState;
+
+  @override
+  Future<Object?> invoke(covariant DeleteIntent intent) async {
+    Logger().d("delete ...");
+    await _detailPageState._picsModel.trashSelected();
+    _detailPageState._picsModel.selectNext(0);
+    _detailPageState.showNext(0);
+  }
+}
+
+class DeleteIntent extends Intent {}
+
 class EscapeAction extends Action<EscapeIntent> {
   EscapeAction(this._detailPageState);
 
@@ -78,7 +96,6 @@ class EscapeAction extends Action<EscapeIntent> {
 
   @override
   Object? invoke(covariant EscapeIntent intent) {
-    //
     Navigator.pop(_detailPageState.context);
   }
 }
