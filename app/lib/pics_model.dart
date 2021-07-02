@@ -77,14 +77,13 @@ class PicsModel with ChangeNotifier {
         data: _selectModel.selected.map((e) => _pics[e]!.name).toList());
     Logger().i("Result is $resp");
     if (resp.statusCode == 200 && resp.data == _selectModel.selected.length) {
-/*
       var list = _selectModel.selected.toList();
       list.sort();
       list.reversed.forEach((element) {
-        _pics.removeAt(element);
+        _pics = List.from(_pics)..removeAt(element);
       });
-*/
-      _init = false;
+      selectNext(0);
+      BUS.emit("countChange", _pics.length);
       notifyListeners();
     } else {
       Logger().e("Result is $resp");

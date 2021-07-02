@@ -32,9 +32,7 @@ class _ImageTileState extends State<ImageTile> {
             PicImage image = snapshot.data!;
             return GestureDetector(
               onTap: () {
-                Provider.of<PicsModel>(context, listen: false)
-                    .select(widget.index);
-                // widget.picsModel.select(widget.index);
+                widget.picsModel.select(widget.index);
               },
               onDoubleTap: () => openDetailPage(context),
               child: Selector<SelectModel, bool>(

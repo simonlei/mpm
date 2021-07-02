@@ -29,6 +29,4 @@ class SelectModel with ChangeNotifier {
   bool isSelected(int index) {
     return _selectedSet.contains(index);
   }
-
-  void selectNext(bool metaDown, bool shiftDown, int delta) {}
 }

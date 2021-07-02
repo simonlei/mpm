@@ -14,6 +14,8 @@ class PicsGrid extends StatefulWidget {
 }
 
 class _PicsGridState extends State<PicsGrid> {
+  late PicsModel _picsModel;
+
   @override
   Widget build(BuildContext context) {
     return Focus(
@@ -21,6 +23,7 @@ class _PicsGridState extends State<PicsGrid> {
       onKey: onKey,
       child: Consumer<PicsModel>(
         builder: (context, picsModel, child) {
+          _picsModel = picsModel;
           _gridView = buildStaggeredGridView(picsModel);
           return _gridView;
         },
@@ -42,7 +45,7 @@ class _PicsGridState extends State<PicsGrid> {
   }
 
   onKey(FocusNode node, RawKeyEvent event) {
-    PicsModel _picsModel = Provider.of<PicsModel>(context, listen: false);
+    // PicsModel _picsModel = Provider.of<PicsModel>(context, listen: false);
     _picsModel.metaDown = event.isMetaPressed;
     _picsModel.shiftDown = event.isShiftPressed;
 
