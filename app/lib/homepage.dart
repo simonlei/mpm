@@ -1,3 +1,4 @@
+import 'package:app/headers/UploadSelector.dart';
 import 'package:app/pics_grid.dart';
 import 'package:flutter/material.dart';
 
@@ -14,16 +15,15 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            // text 跳转 |
-            // order
-            // 回收站
-            // 过滤条件 （只看star）|
-            // 导入
-            Text(widget.title),
-          ],
-        ),
+        title: Text('xxxxx'),
+        actions: [
+          // text 跳转 |
+          // order
+          // 回收站
+          // 过滤条件 （只看star）|
+          // 导入
+          UploadSelector(),
+        ],
         toolbarHeight: 25,
       ),
       body: PicsGrid(),
