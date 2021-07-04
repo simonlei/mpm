@@ -5,8 +5,13 @@ class UploadSelector extends Row {
   UploadSelector()
       : super(
           children: [
+            Text(
+              'upload...',
+            ),
+/*
             HtmlWidget(
                 '<input width=200px type="file" webkitdirectory directory>hahah</input>'),
+*/
           ],
           /*
             child: createInput(),
