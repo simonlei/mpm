@@ -1,6 +1,8 @@
 @JS()
 library cos.js;
 
+import 'dart:html';
+
 import 'package:js/js.dart';
 
 @JS()
@@ -10,7 +12,43 @@ class COS {
   external factory COS(
       {void Function(dynamic options, dynamic callback) getAuthorization});
 */
-  external COS(dynamic options);
+  external COS(CosInitParam params);
 
-  external void uploadFiles(dynamic params, Function callback);
+  external void uploadFiles(UploadFilesParams params, Function callback);
+}
+
+@JS()
+@anonymous
+class CosInitParam {
+  external Function get onProgress;
+
+  external factory CosInitParam({Function getAuthorization});
+}
+
+@JS()
+@anonymous
+class UploadFilesParams {
+  external List<CosFile> get files;
+
+  external Function get onProgress;
+
+  external Function get onFileFinish;
+
+  external factory UploadFilesParams(
+      {List<CosFile> files, Function onProgress, Function onFileFinish});
+}
+
+@JS()
+@anonymous
+class CosFile {
+  external String get Key;
+
+  external String get Bucket;
+
+  external String get Region;
+
+  external File get Body;
+
+  external factory CosFile(
+      {String Region, String Bucket, String Key, File Body});
 }

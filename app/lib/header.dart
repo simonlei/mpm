@@ -1,7 +1,4 @@
-import 'package:app/tecent_cos.dart';
 import 'package:flutter/material.dart';
-import 'package:js/js.dart';
-import 'package:logger/logger.dart';
 
 class Header extends Row {
   Header()
@@ -9,6 +6,7 @@ class Header extends Row {
           TextButton(
             child: Text('Upload'),
             onPressed: () {
+              /*
               COS cos = new COS({
                 'getAuthorization': allowInterop((options, callback) {
                   Logger().i("Options $options, callback $callback");
@@ -17,7 +15,9 @@ class Header extends Row {
               });
               Logger().i("Cos is $cos");
               Logger().i("Cos is ${cos.uploadFiles}");
-              cos.uploadFiles({}, allowInterop(() {}));
+
+               */
+              // cos.uploadFiles({}, allowInterop(() {}));
             },
           )
         ]);
