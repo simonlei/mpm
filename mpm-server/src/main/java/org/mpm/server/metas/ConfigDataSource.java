@@ -104,6 +104,8 @@ public class ConfigDataSource {
         NutMap result = new NutMap();
         result.setv("baseUrl", String.format("https://%s.cos.%s.myqcloud.com/", bucket, region));
         result.setv("thumbUrl", "/thumb/");
+        result.setv("bucket", bucket);
+        result.setv("region", region);
         result.setv("isDev", isDev);
         return result;
     }

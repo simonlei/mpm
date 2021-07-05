@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:html' as html;
 
+import 'package:app/config.dart';
 import 'package:app/tecent_cos.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:js/js.dart';
 import 'package:logger/logger.dart';
 
@@ -55,15 +57,26 @@ class UploadSelector extends TextButton {
       Logger().i('childNodes ${input.childNodes}');
       Logger().i('input ${input.files}');
 
-      COS cos = new COS(
-          CosInitParam(getAuthorization: allowInterop((options, callback) {
-        Logger().i("Options $options, callback $callback");
-        callback('获取签名出错');
+      COS cos = new COS(CosInitParam(
+          getAuthorization: allowInterop((options, callback) async {
+        var resp = await Dio().get(Config.toUrl("/tmpCredential"));
+        if (resp.statusCode == 200) {
+          var data = json.decode(resp.data);
+          var credentials = data['credentials'];
+          Logger().i('Resp $credentials');
+          callback(AuthData(
+            TmpSecretId: credentials['tmpSecretId'],
+            TmpSecretKey: credentials['tmpSecretKey'],
+            XCosSecurityToken: credentials['sessionToken'],
+            StartTime: data['startTime'],
+            ExpiredTime: data['expiredTime'],
+          ));
+        } else {
+          Logger().e('Can not get authorization: $resp.data');
+          callback('获取签名出错');
+        }
       })));
       Logger().i("Cos is $cos");
-      Logger().i("Cos is ${cos.uploadFiles}");
-      var bucket = 'photosdev-1251477527';
-      var region = 'ap-guangzhou';
       var cosFiles = <CosFile>[];
       var id = DateTime.now().millisecondsSinceEpoch;
       var files = input.files;
@@ -71,8 +84,8 @@ class UploadSelector extends TextButton {
         var file = files[i];
         if (file.type.startsWith("image") || file.type.startsWith("video")) {
           cosFiles.add(CosFile(
-            Bucket: bucket,
-            Region: region,
+            Bucket: Config.bucket,
+            Region: Config.region,
             Key: 'upload/${id}_${file.relativePath!}',
             Body: file,
           ));
@@ -92,26 +105,6 @@ class UploadSelector extends TextButton {
           ), allowInterop((err, data) {
         Logger().i('callback err $err, data $data');
       }));
-
-/*
-      final files = input.files;
-      var fileItem = UploadFileItem(files[0]);
-      setState(() {
-        _files.add(fileItem);
-      });
-*/
     });
-  }
-
-  static Widget createInput() {
-/*
-    var input = html.Element.html(
-        '<input type="file" webkitdirectory directory/>',
-        validator: html.NodeValidatorBuilder()
-          ..allowElement('input', attributes: ['webkitdirectory', 'directory'])
-          ..allowHtml5());
-
-     */
-    return HtmlWidget('<input type="file" webkitdirectory directory/>');
   }
 }

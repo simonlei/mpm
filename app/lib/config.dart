@@ -18,4 +18,7 @@ class Config {
   static void setImageBase(base) {
     imageBase = base;
   }
+
+  static String region = '';
+  static String bucket = '';
 }

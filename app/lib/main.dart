@@ -70,6 +70,8 @@ class JumpWidget extends StatelessWidget {
   Future<String> getConfig() async {
     var response = await Dio().get(Config.toUrl('/api/getConfig'));
     Config.setImageBase(response.data['baseUrl']);
+    Config.region = response.data['region'];
+    Config.bucket = response.data['bucket'];
     return response.data['isDev'];
   }
 }

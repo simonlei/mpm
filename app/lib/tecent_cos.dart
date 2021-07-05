@@ -27,6 +27,27 @@ class CosInitParam {
 
 @JS()
 @anonymous
+class AuthData {
+  external String get TmpSecretId;
+
+  external String get TmpSecretKey;
+
+  external String get XCosSecurityToken;
+
+  external int get StartTime;
+
+  external int get ExpiredTime;
+
+  external factory AuthData(
+      {String TmpSecretId,
+      String TmpSecretKey,
+      String XCosSecurityToken,
+      int StartTime,
+      int ExpiredTime});
+}
+
+@JS()
+@anonymous
 class UploadFilesParams {
   external List<CosFile> get files;
 
