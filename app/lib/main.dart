@@ -36,6 +36,7 @@ class MyApp extends StatelessWidget {
       ));
     });
     return OKToast(
+      position: ToastPosition.bottom,
       child: MaterialApp(
         title: 'My Photo Manager',
         theme: ThemeData(

@@ -6,14 +6,12 @@ import com.qcloud.cos.ClientConfig;
 import com.qcloud.cos.auth.BasicCOSCredentials;
 import com.qcloud.cos.auth.COSCredentials;
 import com.qcloud.cos.region.Region;
-import javax.naming.NamingException;
 import lombok.extern.slf4j.Slf4j;
 import org.nutz.dao.Dao;
 import org.nutz.dao.impl.NutDao;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jndi.JndiTemplate;
 
 @Configuration
 @Slf4j
@@ -51,6 +49,7 @@ public class BeanFactory {
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
         dataSource.setUsername(dbUsername);
         dataSource.setPassword(dbPassword);
+        /*
         JndiTemplate jndiTemplate = new JndiTemplate();
         try {
             jndiTemplate.lookup("mpmdb");
@@ -60,7 +59,7 @@ public class BeanFactory {
             } catch (NamingException namingException) {
                 namingException.printStackTrace();
             }
-        }
+        }*/
         return new NutDao(dataSource);
     }
 }
