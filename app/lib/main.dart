@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
@@ -29,26 +30,27 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     BUS.on("countChange", (arg) {
       Logger().i("change $arg");
-      SystemChrome.setApplicationSwitcherDescription(
-          ApplicationSwitcherDescription(
+      SystemChrome.setApplicationSwitcherDescription(ApplicationSwitcherDescription(
         label: 'My Photo Manager($arg)',
         primaryColor: Theme.of(context).primaryColor.value,
       ));
     });
-    return MaterialApp(
-      title: 'My Photo Manager',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return OKToast(
+      child: MaterialApp(
+        title: 'My Photo Manager',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        onGenerateRoute: (RouteSettings settings) {
+          var routes = <String, WidgetBuilder>{
+            '/': (context) => JumpWidget(),
+            '/home': (context) => MyHomePage(title: 'My Photo Manager'),
+            '/detail': (context) => DetailPage(settings.arguments as Tuple2),
+          };
+          WidgetBuilder builder = routes[settings.name]!;
+          return MaterialPageRoute(builder: (ctx) => builder(ctx));
+        },
       ),
-      onGenerateRoute: (RouteSettings settings) {
-        var routes = <String, WidgetBuilder>{
-          '/': (context) => JumpWidget(),
-          '/home': (context) => MyHomePage(title: 'My Photo Manager'),
-          '/detail': (context) => DetailPage(settings.arguments as Tuple2),
-        };
-        WidgetBuilder builder = routes[settings.name]!;
-        return MaterialPageRoute(builder: (ctx) => builder(ctx));
-      },
     );
   }
 }
