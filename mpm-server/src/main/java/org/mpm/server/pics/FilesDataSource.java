@@ -1,7 +1,5 @@
 package org.mpm.server.pics;
 
-import com.isomorphic.datasource.DSRequest;
-import com.isomorphic.datasource.DSResponse;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +19,7 @@ public class FilesDataSource {
 
     @Autowired
     Dao dao;
-
+/*
     // used in datasource
     public DSResponse fetch(DSRequest req) {
         DSResponse resp = new DSResponse();
@@ -55,6 +53,7 @@ public class FilesDataSource {
         return resp;
     }
 
+
     // used in datasource
     public DSResponse update(DSRequest req) {
         DSResponse resp = new DSResponse();
@@ -77,6 +76,7 @@ public class FilesDataSource {
         resp.setAffectedRows(affectedRows);
         return resp;
     }
+*/
 
     public void resetParentTo(EntityFile child, EntityFile newParent) {
         if (newParent == null) {

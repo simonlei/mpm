@@ -1,8 +1,5 @@
 package org.mpm.server;
 
-import com.isomorphic.base.InitListener;
-import com.isomorphic.servlet.DataSourceLoader;
-import com.isomorphic.servlet.IDACall;
 import javax.servlet.ServletContextListener;
 import lombok.extern.slf4j.Slf4j;
 import org.nutz.dao.Dao;
@@ -37,7 +34,7 @@ public class MpmApplication extends SpringBootServletInitializer {
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(MpmApplication.class);
     }
-
+/*
     @Bean
     public ServletListenerRegistrationBean<ServletContextListener> customListenerBean() {
         ServletListenerRegistrationBean<ServletContextListener> bean = new ServletListenerRegistrationBean<>();
@@ -57,4 +54,6 @@ public class MpmApplication extends SpringBootServletInitializer {
                 new DataSourceLoader(), "/app/sc/DataSourceLoader");
         return bean;
     }
+
+ */
 }

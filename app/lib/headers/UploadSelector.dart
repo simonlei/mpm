@@ -63,7 +63,7 @@ class UploadSelector extends TextButton {
         if (resp.statusCode == 200) {
           var data = json.decode(resp.data);
           var credentials = data['credentials'];
-          Logger().i('Resp $credentials');
+          // Logger().i('Resp $credentials');
           callback(AuthData(
             TmpSecretId: credentials['tmpSecretId'],
             TmpSecretKey: credentials['tmpSecretKey'],
@@ -92,14 +92,34 @@ class UploadSelector extends TextButton {
         }
       }
       Logger().i("Cosfiles: $cosFiles");
+      var count = 0;
 
       cos.uploadFiles(
           UploadFilesParams(
             files: cosFiles,
+            SliceSize: 1024*1024,
             onProgress: allowInterop((info) {
-              Logger().i('progress $info');
+              var percent = info.percent * 10000 / 100;
+              var speed = info.speed / 1024 / 1024 * 100 / 100;
+              Logger().i('进度：' + percent + '%; 速度：' + speed + 'Mb/s;');
             }),
-            onFileFinish: allowInterop((err, data, options) {
+            onFileFinish: allowInterop((err, data, options) async {
+              var key = Map<String, dynamic>.from(jsonDecode(stringify(options)))['Key'];
+              var resp = await Dio().post(Config.toUrl("/uploadFile"), data: {
+                'key': key,
+                'data': stringify(options),
+                'err':err,
+              });
+              if ( resp.statusCode == 200) {
+                Logger().i(resp.data);
+                Logger().i("第 $count/${files.length}个文件 ${key.split("\/").last} 上传${err !=null? '失败' : '完成'}");
+                count++;
+                if (count == files.length) {
+                  // realodPicsGrid();
+                  Logger().i("上传完成，共 $count 张照片");
+                }
+
+              }
               Logger().i('File finish err $err, data $data');
             }),
           ), allowInterop((err, data) {

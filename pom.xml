@@ -9,18 +9,6 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <artifactId>isc-maven-plugin</artifactId>
-                    <dependencies>
-                        <dependency>
-                            <artifactId>isomorphic-m2pluginextras</artifactId>
-                            <groupId>com.isomorphic.extras</groupId>
-                            <version>${smartgwt.version}</version>
-                        </dependency>
-                    </dependencies>
-                    <groupId>com.isomorphic</groupId>
-                    <version>1.4.4</version>
-                </plugin>
-                <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <!-- Do not upgrade past 3.1 to avoid triggering https://issues.apache.org/jira/browse/MSOURCES-95 -->
                     <configuration>
@@ -28,17 +16,6 @@
                         <target>1.8</target>
                     </configuration>
                     <version>3.1</version>
-                </plugin>
-                <plugin>
-                    <artifactId>gwt-maven-plugin</artifactId>
-                    <configuration>
-                        <failOnError>true</failOnError>
-                        <skipModule>true</skipModule>
-                        <sourceLevel>1.8</sourceLevel>
-                    </configuration>
-                    <extensions>true</extensions>
-                    <groupId>net.ltgt.gwt.maven</groupId>
-                    <version>1.0.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
@@ -55,22 +32,10 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        <plugins>
-            <plugin>
-                <artifactId>gwt-maven-plugin</artifactId>
-                <configuration>
-                    <launcherDir>${project.build.directory}/gwt/launcherDir</launcherDir>
-                    <skipModule>true</skipModule>
-                </configuration>
-                <groupId>net.ltgt.gwt.maven</groupId>
-                <inherited>false</inherited>
-            </plugin>
-        </plugins>
     </build>
     <groupId>org.mpm</groupId>
     <modelVersion>4.0.0</modelVersion>
     <modules>
-        <module>mpm-client</module>
         <module>mpm-server</module>
     </modules>
 

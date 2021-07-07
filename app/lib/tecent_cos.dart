@@ -5,6 +5,9 @@ import 'dart:html';
 
 import 'package:js/js.dart';
 
+@JS('JSON.stringify')
+external String stringify(Object obj);
+
 @JS()
 class COS {
   // external COS({getAuthorization: Function});
@@ -50,13 +53,14 @@ class AuthData {
 @anonymous
 class UploadFilesParams {
   external List<CosFile> get files;
+  external int get SliceSize;
 
   external Function get onProgress;
 
   external Function get onFileFinish;
 
   external factory UploadFilesParams(
-      {List<CosFile> files, Function onProgress, Function onFileFinish});
+      {List<CosFile> files, int SliceSize, Function onProgress, Function onFileFinish});
 }
 
 @JS()

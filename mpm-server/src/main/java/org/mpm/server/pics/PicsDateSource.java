@@ -1,7 +1,5 @@
 package org.mpm.server.pics;
 
-import com.isomorphic.datasource.DSRequest;
-import com.isomorphic.datasource.DSResponse;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +19,7 @@ public class PicsDateSource {
     @Autowired
     Dao dao;
 
+    /*
     // used in datasource
     public DSResponse fetch(DSRequest req) {
         DSResponse resp = new DSResponse();
@@ -55,7 +54,7 @@ public class PicsDateSource {
         resp.setData(result);
         return resp;
     }
-
+*/
     private NutMap makeNewYear(List<NutMap> result, Record r) {
         NutMap lastYear = Lang.map("id", r.get("year")).setv("year", r.get("year"))
                 .setv("parentId", "全部");

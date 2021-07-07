@@ -4,20 +4,6 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <artifactId>mpm-server</artifactId>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>isc-maven-plugin</artifactId>
-                <configuration>
-                    <dataSourcesDir>WEB-INF/ds/classic-models</dataSourcesDir>
-                    <smartclientRuntimeDir>
-                        ${project.parent.build.directory}/gwt/launcherDir/app/sc
-                    </smartclientRuntimeDir>
-                </configuration>
-                <groupId>com.isomorphic</groupId>
-            </plugin>
-        </plugins>
-    </build>
     <dependencies>
         <dependency>
             <artifactId>gwt-servlet</artifactId>
@@ -58,22 +44,6 @@
             <groupId>mysql</groupId>
             <version>8.0.20</version>
         </dependency>
-        <dependency>
-            <artifactId>isomorphic-core-rpc</artifactId>
-            <groupId>com.isomorphic.smartgwt.eval</groupId>
-            <version>${smartgwt.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>isomorphic-tools</artifactId>
-            <groupId>com.isomorphic.smartgwt.eval</groupId>
-            <version>${smartgwt.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>isomorphic-sql</artifactId>
-            <groupId>com.isomorphic.smartgwt.eval</groupId>
-            <version>${smartgwt.version}</version>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/com.drewnoakes/metadata-extractor -->
         <dependency>
             <artifactId>metadata-extractor</artifactId>
@@ -90,13 +60,6 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <groupId>org.springframework.boot</groupId>
             <version>2.3.1.RELEASE</version>
-            <exclusions>
-                <!-- Exclude the Tomcat dependency -->
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <artifactId>spring-web</artifactId>
@@ -107,16 +70,6 @@
             <artifactId>spring-webmvc</artifactId>
             <groupId>org.springframework</groupId>
             <version>5.2.7.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jetty</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.isomorphic.smartgwt.eval</groupId>
-            <artifactId>isomorphic-spring</artifactId>
-            <version>${smartgwt.version}</version>
         </dependency>
         <dependency>
             <artifactId>druid</artifactId>
@@ -162,56 +115,4 @@
         <groupId>org.mpm</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
-    <profiles>
-        <profile>
-            <!-- XXX: We want to exclude foo-client from 'env-dev' profile, Maven forces us to make a 'env-prod' profile -->
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <artifactId>mpm-client</artifactId>
-                    <groupId>${project.groupId}</groupId>
-                    <scope>runtime</scope>
-                    <type>war</type>
-                    <version>${project.version}</version>
-                </dependency>
-            </dependencies>
-            <id>prod</id>
-        </profile>
-        <profile>
-            <activation>
-                <property>
-                    <name>env</name>
-                    <value>dev</value>
-                </property>
-            </activation>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <artifactId>jetty-maven-plugin</artifactId>
-                            <configuration>
-                                <webApp>
-                                    <baseResource
-                                        implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-                                        <resourcesAsCSV>
-                                            ${project.basedir}/src/main/webapp,${project.parent.build.directory}/gwt/launcherDir/
-                                        </resourcesAsCSV>
-                                    </baseResource>
-                                    <jettyEnvXml>${project.basedir}/src/etc/jetty/jetty-env.xml
-                                    </jettyEnvXml>
-                                </webApp>
-                            </configuration>
-                            <groupId>org.eclipse.jetty</groupId>
-                            <version>9.4.31.v20200723</version>
-                        </plugin>
-                    </plugins>
-
-                </pluginManagement>
-            </build>
-            <id>dev</id>
-        </profile>
-    </profiles>
 </project>

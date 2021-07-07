@@ -1,7 +1,5 @@
 package org.mpm.server.pics;
 
-import com.isomorphic.datasource.DSRequest;
-import com.isomorphic.datasource.DSResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +34,7 @@ public class PicsDataSource {
     @Autowired
     TrashEmptyTask emptyTask;
 
+    /*
     // used in client
     public void batchUpdatePics(boolean trashed, Map criteria, Map values) {
         String theYear = (String) criteria.get("theYear");
@@ -65,6 +64,7 @@ public class PicsDataSource {
             dao.update(EntityPhoto.class, Chain.from(values), cnd);
         }
     }
+     */
 
     // used in client
     public int count(boolean trashed) {
@@ -78,6 +78,7 @@ public class PicsDataSource {
         return taskId;
     }
 
+    /*
     // used in datasource
     public DSResponse update(DSRequest req) {
         DSResponse resp = new DSResponse();
@@ -96,7 +97,7 @@ public class PicsDataSource {
         resp.setAffectedRows(affectedRows);
         return resp;
     }
-
+*/
     private String getAddress(Map values) {
         try {
             return picsModule.getAddress(Double.parseDouble("" + values.get("latitude")),
@@ -113,7 +114,7 @@ public class PicsDataSource {
         cri.where().andInStrList("name", names);
         return dao.update(EntityPhoto.class, Chain.makeSpecial("trashed", " !trashed"), cri);
     }
-
+/*
     // used in datasource
     public DSResponse remove(DSRequest req) {
         DSResponse resp = new DSResponse();
@@ -128,37 +129,25 @@ public class PicsDataSource {
         log.info("remove : {}", req.getCriteria());
         return resp;
     }
-
+*/
     @PostMapping("/api/getPics")
-    public Map getPics(@RequestBody GetPicsRequest request) {
+    public Map getPics(@RequestBody GetPicsRequest req) {
         log.info("Getting pics");
-        DSRequest req = new DSRequest();
-        req.setCriteria(Lang.map("trashed", false));
-        req.setStartRow(request.getStart());
-        req.setEndRow(request.getStart() + request.getSize());
-        DSResponse resp = fetch(req);
+        Boolean trashed = false;
 
-        return Lang.map("totalRows", resp.getTotalRows()).setv("startRow", resp.getStartRow())
-                .setv("endRow", resp.getEndRow()).setv("data", resp.getData());
-    }
-
-    // used in datasource
-    public DSResponse fetch(DSRequest req) {
-        DSResponse resp = new DSResponse();
-        Boolean trashed = (Boolean) req.getCriteria().get("trashed");
-
-        Boolean star = (Boolean) req.getCriteria().get("star");
-        String theYear = (String) req.getCriteria().get("theYear");
-        String theMonth = (String) req.getCriteria().get("theMonth");
-        String filePath = (String) req.getCriteria().get("filePath");
-        int start = (int) req.getStartRow();
-        int end = (int) req.getEndRow();
-        String sortedBy = req.getSortBy();
+        Boolean star = null;
+        String theYear = null;
+        String theMonth = null;
+        String filePath = null;
+        int start = req.getStart();
+        int end = req.getStart() + req.getSize();
+        String sortedBy = null;
         sortedBy = sortedBy == null ? "id" : sortedBy;
         boolean desc = sortedBy.startsWith("-");
         sortedBy = desc ? sortedBy.substring(1) : sortedBy;
         List<Record> photos;
 
+        int totalRows;
         // TODO: 要重构
         if (filePath != null) {
             String joinSql = "inner join t_files on t_photos.id = t_files.photoId ";
@@ -168,7 +157,7 @@ public class PicsDataSource {
 
             addStarCriteria(star, cnd);
 
-            resp.setTotalRows(dao.fetch("t_photos", cnd, "count(distinct t_photos.id) as c").getLong("c"));
+            totalRows = (int) dao.fetch("t_photos", cnd, "count(distinct t_photos.id) as c").getLong("c");
             cnd.setPager(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
             // ...
@@ -179,16 +168,15 @@ public class PicsDataSource {
             cnd = theMonth == null ? cnd : cnd.and("month(takenDate)", "=", theMonth);
             addStarCriteria(star, cnd.getCri());
 
-            resp.setTotalRows(dao.count(EntityPhoto.class, cnd));
+            totalRows = dao.count(EntityPhoto.class, cnd);
             cnd.limit(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
             // ...
             photos = dao.query("t_photos", cnd);
         }
-        resp.setData(addThumbField(photos));
-        resp.setStartRow(start);
-        resp.setEndRow(start + photos.size());
-        return resp;
+
+        return Lang.map("totalRows", totalRows).setv("startRow", start)
+                .setv("endRow", start + photos.size()).setv("data", addThumbField(photos));
     }
 
     private List<Record> addThumbField(List<Record> photos) {
