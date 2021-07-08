@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:html' as html;
 
 import 'package:app/config.dart';
+import 'package:app/event_bus.dart';
 import 'package:app/tecent_cos.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -99,6 +100,7 @@ class _UploadSelectorState extends State<UploadSelector> {
                 count++;
                 if (count == files.length) {
                   // realodPicsGrid();
+                  BUS.emit('picsConditionChanged');
                   showToast("上传完成，共 $count 张照片");
                 }
               }

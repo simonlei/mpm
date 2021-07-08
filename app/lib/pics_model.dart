@@ -15,12 +15,15 @@ class PicsModel with ChangeNotifier {
 
   PicsModel(this._selectModel) {
     loadImages(0, 75);
+    BUS.on('picsConditionChanged', (arg) {
+      _init = false;
+      notifyListeners();
+    });
   }
 
   Future<List<PicImage?>> loadImages(int start, int size) async {
     Logger().i("load image from server...$start");
-    var resp = await Dio().post(Config.toUrl('/api/getPics'),
-        data: {'start': start, 'size': size});
+    var resp = await Dio().post(Config.toUrl('/api/getPics'), data: {'start': start, 'size': size});
     // _pics.length(resp.data['totalRows']);
     if (!_init) {
       _pics = List.filled(resp.data['totalRows'], null);
@@ -30,8 +33,7 @@ class PicsModel with ChangeNotifier {
     List data = resp.data['data'];
     for (int i = 0; i < data.length; i++) {
       var element = data.elementAt(i);
-      _pics[start + i] = PicImage(element['width'], element['height'],
-          element['thumb'], element['name']);
+      _pics[start + i] = PicImage(element['width'], element['height'], element['thumb'], element['name']);
     }
     notifyListeners();
     return _pics;
@@ -74,8 +76,8 @@ class PicsModel with ChangeNotifier {
   }
 
   Future<void> trashSelected() async {
-    var resp = await Dio().post(Config.toUrl("/api/trashPhotos"),
-        data: _selectModel.selected.map((e) => _pics[e]!.name).toList());
+    var resp = await Dio()
+        .post(Config.toUrl("/api/trashPhotos"), data: _selectModel.selected.map((e) => _pics[e]!.name).toList());
     Logger().i("Result is $resp");
     if (resp.statusCode == 200 && resp.data == _selectModel.selected.length) {
       var list = _selectModel.selected.toList();

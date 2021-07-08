@@ -23,7 +23,7 @@ My Photo Manager client side.
 - [x] if it's last one, get prev one.
 - [x] 如果所有图片都删除了，退出大图片
 - [x] esc 退出大图片
-- [ ] 导入图片到cos
+- [x] 导入图片到cos
 - [ ] 展示每次导入的左边树
 - [ ] 左边日期树数量按是否删除过滤
 - [ ] 左边日期树选中后过滤图片
