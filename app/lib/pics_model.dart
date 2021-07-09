@@ -27,7 +27,7 @@ class PicsModel with ChangeNotifier {
     var resp = await Dio().post(Config.toUrl('/api/getPics'), data: Conditions.makeCondition(start, size));
     if (!_init) {
       _pics = List.filled(resp.data['totalRows'], null);
-      BUS.emit("countChange", resp.data['totalRows']);
+      BUS.emit(EventBus.CountChange, resp.data['totalRows']);
       _init = true;
     }
     List data = resp.data['data'];
@@ -86,7 +86,7 @@ class PicsModel with ChangeNotifier {
         _pics = List.from(_pics)..removeAt(element);
       });
       selectNext(0);
-      BUS.emit("countChange", _pics.length);
+      BUS.emit(EventBus.CountChange, _pics.length);
       notifyListeners();
     } else {
       Logger().e("Result is $resp");

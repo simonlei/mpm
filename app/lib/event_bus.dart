@@ -4,6 +4,8 @@ typedef void EventCallback(arg);
 class EventBus {
   static String ConditionsChanged = 'picsConditionChanged';
 
+  static String CountChange = 'countChange';
+
   //私有构造函数
   EventBus._internal();
 

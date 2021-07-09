@@ -28,7 +28,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    BUS.on("countChange", (arg) {
+    BUS.on(EventBus.CountChange, (arg) {
       Logger().i("change $arg");
       SystemChrome.setApplicationSwitcherDescription(ApplicationSwitcherDescription(
         label: 'My Photo Manager($arg)',

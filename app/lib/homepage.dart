@@ -1,3 +1,4 @@
+import 'package:app/event_bus.dart';
 import 'package:app/headers/trash_box_switcher.dart';
 import 'package:app/headers/upload_selector.dart';
 import 'package:app/pics_grid.dart';
@@ -12,11 +13,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  var appTitle = 'My Photo Manager';
+
   @override
   Widget build(BuildContext context) {
+    BUS.on(EventBus.CountChange, (args) {
+      appTitle = 'My Photo Manager($args)';
+      setState(() {});
+    });
     return Scaffold(
       appBar: AppBar(
-        title: Text('xxxxx'),
+        title: Text(appTitle),
+        centerTitle: true,
         actions: [
           // text 跳转 |
           // order

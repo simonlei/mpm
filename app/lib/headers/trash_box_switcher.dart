@@ -14,22 +14,24 @@ class TrashBoxSwitcher extends StatefulWidget {
 class _TrashBoxSwitcherState extends State<TrashBoxSwitcher> {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: loadTitle(),
-      builder: (context, snapshot) {
-        return TextButton(
-          onPressed: () async {
-            Conditions.trashed = !Conditions.trashed;
-            setState(() {});
-            BUS.emit(EventBus.ConditionsChanged);
+    return Padding(
+        padding: EdgeInsets.only(right: 10),
+        child: FutureBuilder<String>(
+          future: loadTitle(),
+          builder: (context, snapshot) {
+            return TextButton(
+              onPressed: () async {
+                Conditions.trashed = !Conditions.trashed;
+                setState(() {});
+                BUS.emit(EventBus.ConditionsChanged);
+              },
+              child: Text(
+                snapshot.requireData,
+                style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
+              ),
+            );
           },
-          child: Text(
-            snapshot.requireData,
-            style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
-          ),
-        );
-      },
-    );
+        ));
   }
 
   Future<String> loadTitle() async {

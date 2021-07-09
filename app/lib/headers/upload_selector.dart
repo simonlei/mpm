@@ -20,11 +20,14 @@ class UploadSelector extends StatefulWidget {
 class _UploadSelectorState extends State<UploadSelector> {
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: _selectFolder,
-      child: Text(
-        '上传照片',
-        style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
+    return Padding(
+      padding: EdgeInsets.only(right: 10),
+      child: TextButton(
+        onPressed: _selectFolder,
+        child: Text(
+          '上传照片',
+          style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
+        ),
       ),
     );
   }
