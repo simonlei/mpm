@@ -3,7 +3,6 @@ package org.mpm.server.pics;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityPhoto;
@@ -11,10 +10,8 @@ import org.mpm.server.util.ExplicitPager;
 import org.nutz.dao.Chain;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
-import org.nutz.dao.Sqls;
 import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Criteria;
-import org.nutz.dao.sql.Sql;
 import org.nutz.dao.util.cri.SimpleCriteria;
 import org.nutz.lang.Lang;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +64,8 @@ public class PicsDataSource {
      */
 
     // used in client
-    public int count(boolean trashed) {
+    @PostMapping("/api/getCount")
+    public int count(@RequestBody boolean trashed) {
         return picsModule.count(trashed);
     }
 
@@ -114,26 +112,27 @@ public class PicsDataSource {
         cri.where().andInStrList("name", names);
         return dao.update(EntityPhoto.class, Chain.makeSpecial("trashed", " !trashed"), cri);
     }
-/*
-    // used in datasource
-    public DSResponse remove(DSRequest req) {
-        DSResponse resp = new DSResponse();
-        Long id = (Long) req.getCriteria().get("id");
-        if (id != null) {
-            Sql sql = Sqls.create("update t_photos set trashed = !trashed where id = @id");
-            sql.setParam("id", id);
-            dao.execute(sql);
-            resp.setData(Lang.list(Lang.map("id", id)));
-            resp.setAffectedRows(1);
+
+    /*
+        // used in datasource
+        public DSResponse remove(DSRequest req) {
+            DSResponse resp = new DSResponse();
+            Long id = (Long) req.getCriteria().get("id");
+            if (id != null) {
+                Sql sql = Sqls.create("update t_photos set trashed = !trashed where id = @id");
+                sql.setParam("id", id);
+                dao.execute(sql);
+                resp.setData(Lang.list(Lang.map("id", id)));
+                resp.setAffectedRows(1);
+            }
+            log.info("remove : {}", req.getCriteria());
+            return resp;
         }
-        log.info("remove : {}", req.getCriteria());
-        return resp;
-    }
-*/
+    */
     @PostMapping("/api/getPics")
     public Map getPics(@RequestBody GetPicsRequest req) {
         log.info("Getting pics");
-        Boolean trashed = false;
+        Boolean trashed = req.trashed;
 
         Boolean star = null;
         String theYear = null;
@@ -203,6 +202,7 @@ public class PicsDataSource {
     @Data
     static class GetPicsRequest {
 
+        boolean trashed;
         int start;
         int size;
     }

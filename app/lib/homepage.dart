@@ -1,4 +1,5 @@
-import 'package:app/headers/UploadSelector.dart';
+import 'package:app/headers/trash_box_switcher.dart';
+import 'package:app/headers/upload_selector.dart';
 import 'package:app/pics_grid.dart';
 import 'package:flutter/material.dart';
 
@@ -19,10 +20,10 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           // text 跳转 |
           // order
-          // 回收站
           // 过滤条件 （只看star）|
-          // 导入
+          TrashBoxSwitcher(),
           UploadSelector(),
+          // 回收站
         ],
         toolbarHeight: 25,
       ),

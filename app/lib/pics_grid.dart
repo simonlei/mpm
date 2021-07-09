@@ -3,6 +3,7 @@ import 'package:app/pics_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
@@ -23,6 +24,7 @@ class _PicsGridState extends State<PicsGrid> {
       onKey: onKey,
       child: Consumer<PicsModel>(
         builder: (context, picsModel, child) {
+          Logger().i('Consumer picsModel ${picsModel.getTotalImages()}');
           _picsModel = picsModel;
           _gridView = buildStaggeredGridView(picsModel);
           return _gridView;
@@ -60,8 +62,7 @@ class _PicsGridState extends State<PicsGrid> {
     } else if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
       _picsModel.selectNext(crossAxisCount);
     } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
-      Navigator.of(context).pushNamed('/detail',
-          arguments: Tuple2(_picsModel, _picsModel.getSelectedIndex()));
+      Navigator.of(context).pushNamed('/detail', arguments: Tuple2(_picsModel, _picsModel.getSelectedIndex()));
     } else if (event.isKeyPressed(LogicalKeyboardKey.keyD)) {
       _picsModel.trashSelected();
     }

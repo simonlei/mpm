@@ -100,7 +100,7 @@ class _UploadSelectorState extends State<UploadSelector> {
                 count++;
                 if (count == files.length) {
                   // realodPicsGrid();
-                  BUS.emit('picsConditionChanged');
+                  BUS.emit(EventBus.ConditionsChanged);
                   showToast("上传完成，共 $count 张照片");
                 }
               }

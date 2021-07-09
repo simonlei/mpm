@@ -1,3 +1,4 @@
+import 'package:app/conditions.dart';
 import 'package:app/config.dart';
 import 'package:app/event_bus.dart';
 import 'package:app/select_model.dart';
@@ -15,16 +16,15 @@ class PicsModel with ChangeNotifier {
 
   PicsModel(this._selectModel) {
     loadImages(0, 75);
-    BUS.on('picsConditionChanged', (arg) {
+    BUS.on(EventBus.ConditionsChanged, (arg) async {
       _init = false;
-      notifyListeners();
+      loadImages(0, 75);
     });
   }
 
   Future<List<PicImage?>> loadImages(int start, int size) async {
     Logger().i("load image from server...$start");
-    var resp = await Dio().post(Config.toUrl('/api/getPics'), data: {'start': start, 'size': size});
-    // _pics.length(resp.data['totalRows']);
+    var resp = await Dio().post(Config.toUrl('/api/getPics'), data: Conditions.makeCondition(start, size));
     if (!_init) {
       _pics = List.filled(resp.data['totalRows'], null);
       BUS.emit("countChange", resp.data['totalRows']);

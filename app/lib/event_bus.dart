@@ -2,6 +2,8 @@
 typedef void EventCallback(arg);
 
 class EventBus {
+  static String ConditionsChanged = 'picsConditionChanged';
+
   //私有构造函数
   EventBus._internal();
 
