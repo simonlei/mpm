@@ -10,14 +10,7 @@ import 'package:js/js.dart';
 import 'package:logger/logger.dart';
 import 'package:oktoast/oktoast.dart';
 
-class UploadSelector extends StatefulWidget {
-  @override
-  _UploadSelectorState createState() {
-    return _UploadSelectorState();
-  }
-}
-
-class _UploadSelectorState extends State<UploadSelector> {
+class UploadSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(

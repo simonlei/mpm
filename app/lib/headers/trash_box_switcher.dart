@@ -19,17 +19,20 @@ class _TrashBoxSwitcherState extends State<TrashBoxSwitcher> {
         child: FutureBuilder<String>(
           future: loadTitle(),
           builder: (context, snapshot) {
-            return TextButton(
-              onPressed: () async {
-                Conditions.trashed = !Conditions.trashed;
-                setState(() {});
-                BUS.emit(EventBus.ConditionsChanged);
-              },
-              child: Text(
-                snapshot.requireData,
-                style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
-              ),
-            );
+            if (snapshot.hasData) {
+              return TextButton(
+                onPressed: () {
+                  Conditions.trashed = !Conditions.trashed;
+                  setState(() {});
+                  BUS.emit(EventBus.ConditionsChanged);
+                },
+                child: Text(
+                  snapshot.data!,
+                  style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
+                ),
+              );
+            } else
+              return Text('loading...');
           },
         ));
   }
