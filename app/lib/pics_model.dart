@@ -76,6 +76,8 @@ class PicsModel with ChangeNotifier {
   }
 
   Future<void> trashSelected() async {
+    if (_selectModel.selected.isEmpty) return;
+
     var resp = await Dio()
         .post(Config.toUrl("/api/trashPhotos"), data: _selectModel.selected.map((e) => _pics[e]!.name).toList());
     Logger().i("Result is $resp");
