@@ -1,3 +1,5 @@
+import 'package:app/conditions.dart';
+import 'package:app/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
@@ -9,7 +11,7 @@ class SortSelector extends StatefulWidget {
 }
 
 class _SortSelectorState extends State<SortSelector> {
-  String sortString = 'xx';
+  String sortString = '-id';
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +20,17 @@ class _SortSelectorState extends State<SortSelector> {
       child: DropdownButton<String>(
         value: sortString,
         items: [
-          DropdownMenuItem(value: 'xx', child: Text('xxx')),
-          DropdownMenuItem(value: 'yy', child: Text('yyy')),
+          DropdownMenuItem(value: '-id', child: Text('导入逆序')),
+          DropdownMenuItem(value: 'id', child: Text('导入顺序')),
+          DropdownMenuItem(value: '-takenDate', child: Text('拍照逆序')),
+          DropdownMenuItem(value: 'takenDate', child: Text('拍照顺序')),
         ],
         onChanged: (String? newValue) {
           Logger().i(newValue);
+          Conditions.order = newValue!;
+          BUS.emit(EventBus.ConditionsChanged);
           setState(() {
-            sortString = newValue!;
+            sortString = newValue;
           });
         },
       ),

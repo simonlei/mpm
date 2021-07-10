@@ -140,7 +140,7 @@ public class PicsDataSource {
         String filePath = null;
         int start = req.getStart();
         int end = req.getStart() + req.getSize();
-        String sortedBy = null;
+        String sortedBy = req.order;
         sortedBy = sortedBy == null ? "id" : sortedBy;
         boolean desc = sortedBy.startsWith("-");
         sortedBy = desc ? sortedBy.substring(1) : sortedBy;
@@ -205,5 +205,6 @@ public class PicsDataSource {
         boolean trashed;
         int start;
         int size;
+        String order;
     }
 }
