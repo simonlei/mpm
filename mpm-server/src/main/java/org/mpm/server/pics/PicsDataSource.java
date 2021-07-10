@@ -69,7 +69,7 @@ public class PicsDataSource {
         return picsModule.count(trashed);
     }
 
-    // used in client
+    @PostMapping("/api/emptyTrash")
     public String emptyTrash() {
         String taskId = ProgressDataSource.addTask(emptyTask);
         new Thread(emptyTask).start();

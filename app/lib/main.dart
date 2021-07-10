@@ -29,11 +29,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     BUS.on(EventBus.CountChange, (arg) {
-      Logger().i("change $arg");
-      SystemChrome.setApplicationSwitcherDescription(ApplicationSwitcherDescription(
-        label: 'My Photo Manager($arg)',
-        primaryColor: Theme.of(context).primaryColor.value,
-      ));
+      Logger().i("Count Change $arg");
+      SystemChrome.setApplicationSwitcherDescription(
+        ApplicationSwitcherDescription(
+          label: 'My Photo Manager($arg)',
+          primaryColor: Theme.of(context).primaryColor.value,
+        ),
+      );
     });
     return OKToast(
       position: ToastPosition.bottom,

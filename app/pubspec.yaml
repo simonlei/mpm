@@ -37,6 +37,8 @@ dependencies:
   provider: ^5.0.0
   js: ^0.6.3
   oktoast: ^3.0.0
+  confirm_dialog: ^1.0.0
+  sn_progress_dialog: ^1.0.2
 
 dev_dependencies:
   flutter_test:

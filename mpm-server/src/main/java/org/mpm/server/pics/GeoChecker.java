@@ -13,23 +13,24 @@ import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.dao.pager.Pager;
 import org.nutz.dao.util.cri.Exps;
-import org.nutz.ioc.loader.annotation.Inject;
-import org.nutz.ioc.loader.annotation.IocBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-@IocBean
+@Service
 @Slf4j
 public class GeoChecker {
 
     public static final int GEO_API_LIMIT = 8000;
-    @Inject
+    @Autowired
     Dao dao;
-    @Inject
+    @Autowired
     PicsModule picsModule;
 
     private int tokens = GEO_API_LIMIT;
     private ScheduledExecutorService executorService;
 
     public void startTasks() {
+        // todo: enable scheduled
         executorService = Executors.newScheduledThreadPool(2);
         executorService.scheduleAtFixedRate(() -> {
             log.info("Reset token from " + tokens);

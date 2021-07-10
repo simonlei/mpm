@@ -33,6 +33,7 @@ class _SortSelectorState extends State<SortSelector> {
             sortString = newValue;
           });
         },
+        style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
       ),
     );
   }

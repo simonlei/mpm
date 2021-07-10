@@ -1,4 +1,5 @@
 import 'package:app/event_bus.dart';
+import 'package:app/headers/empty_trash_button.dart';
 import 'package:app/headers/sort_selector.dart';
 import 'package:app/headers/trash_box_switcher.dart';
 import 'package:app/headers/upload_selector.dart';
@@ -32,6 +33,8 @@ class _MyHomePageState extends State<MyHomePage> {
           // 过滤条件 （只看star）|
           SortSelector(),
           TrashBoxSwitcher(),
+          // |
+          EmptyTrashButton(),
           UploadSelector(),
           // 回收站
         ],

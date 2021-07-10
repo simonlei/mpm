@@ -5,15 +5,15 @@ import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.progress.AbstractProgressTask;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
-import org.nutz.ioc.loader.annotation.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TrashEmptyTask extends AbstractProgressTask implements Runnable {
 
-    @Inject
+    @Autowired
     Dao dao;
-    @Inject
+    @Autowired
     PicsModule picsModule;
 
     @Override
