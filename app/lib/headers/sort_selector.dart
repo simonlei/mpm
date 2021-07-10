@@ -22,8 +22,8 @@ class _SortSelectorState extends State<SortSelector> {
         items: [
           DropdownMenuItem(value: '-id', child: Text('导入逆序')),
           DropdownMenuItem(value: 'id', child: Text('导入顺序')),
-          DropdownMenuItem(value: '-takenDate', child: Text('拍照逆序')),
-          DropdownMenuItem(value: 'takenDate', child: Text('拍照顺序')),
+          DropdownMenuItem(value: '-takenDate', child: Text('时间逆序')),
+          DropdownMenuItem(value: 'takenDate', child: Text('时间顺序')),
         ],
         onChanged: (String? newValue) {
           Logger().i(newValue);

@@ -26,7 +26,8 @@ class UploadSelector extends StatelessWidget {
   }
 
   void _selectFolder() {
-    var input = html.Element.html('<input type="file" webkitdirectory directory/>',
+    var input = html.Element.html(
+        '<input type="file" webkitdirectory directory/>',
         validator: html.NodeValidatorBuilder()
           ..allowElement('input', attributes: ['webkitdirectory', 'directory'])
           ..allowHtml5()) as html.InputElement;
@@ -38,7 +39,8 @@ class UploadSelector extends StatelessWidget {
       // Logger().i('childNodes ${input.childNodes}');
       // Logger().i('input ${input.files}');
 
-      COS cos = new COS(CosInitParam(getAuthorization: allowInterop((options, callback) async {
+      COS cos = new COS(CosInitParam(
+          getAuthorization: allowInterop((options, callback) async {
         var resp = await Dio().get(Config.toUrl("/tmpCredential"));
         if (resp.statusCode == 200) {
           var data = json.decode(resp.data);
@@ -71,7 +73,7 @@ class UploadSelector extends StatelessWidget {
           ));
         }
       }
-      // Logger().i("Cosfiles: $cosFiles");
+      Logger().i("Cosfiles: $cosFiles");
       var count = 0;
 
       cos.uploadFiles(
@@ -84,18 +86,19 @@ class UploadSelector extends StatelessWidget {
               showToast('进度：' + percent + '%; 速度：' + speed + 'Mb/s;');
             }),
             onFileFinish: allowInterop((err, data, options) async {
-              var key = Map<String, dynamic>.from(jsonDecode(stringify(options)))['Key'];
+              var key = Map<String, dynamic>.from(
+                  jsonDecode(stringify(options)))['Key'];
               var resp = await Dio().post(Config.toUrl("/uploadFile"), data: {
                 'key': key,
                 'data': stringify(options),
                 'err': err,
               });
               if (resp.statusCode == 200) {
-                Logger().i(resp.data);
-                showToast("第 $count/${files.length}个文件 ${key.split("\/").last} 上传${err != null ? '失败' : '完成'}");
                 count++;
-                if (count == files.length) {
-                  // realodPicsGrid();
+                Logger().i("第 $count/${cosFiles.length}个文件resp: ${resp.data}");
+                showToast(
+                    "第 $count/${cosFiles.length}个文件 ${key.split("\/").last} 上传${err != null ? '失败' : '完成'}");
+                if (count == cosFiles.length) {
                   BUS.emit(EventBus.ConditionsChanged);
                   showToast("上传完成，共 $count 张照片");
                 }
