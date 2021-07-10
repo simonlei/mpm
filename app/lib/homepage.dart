@@ -3,6 +3,7 @@ import 'package:app/headers/empty_trash_button.dart';
 import 'package:app/headers/sort_selector.dart';
 import 'package:app/headers/trash_box_switcher.dart';
 import 'package:app/headers/upload_selector.dart';
+import 'package:app/left_panel/left_panel.dart';
 import 'package:app/pics_grid.dart';
 import 'package:flutter/material.dart';
 
@@ -40,7 +41,12 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
         toolbarHeight: 25,
       ),
-      body: PicsGrid(),
+      body: Row(children: [
+        LeftPanel(),
+        Expanded(
+          child: PicsGrid(),
+        ),
+      ]),
     );
   }
 }

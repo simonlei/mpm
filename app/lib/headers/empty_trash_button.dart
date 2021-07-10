@@ -25,7 +25,7 @@ class _EmptyTrashButtonState extends State<EmptyTrashButton> {
       visible: Conditions.trashed,
       child: Padding(
         padding: EdgeInsets.only(right: 10),
-        child: TextButton(
+        child: OutlinedButton(
           onPressed: () async {
             //confirm
             bool empty = await confirm(context,

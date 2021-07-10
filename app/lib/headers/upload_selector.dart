@@ -15,7 +15,7 @@ class UploadSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(right: 10),
-      child: TextButton(
+      child: OutlinedButton(
         onPressed: _selectFolder,
         child: Text(
           '上传照片',
