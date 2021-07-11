@@ -1,3 +1,5 @@
+import 'package:app/left_panel/date_tree_panel.dart';
+import 'package:app/left_panel/folder_tree_panel.dart';
 import 'package:flutter/material.dart';
 
 class LeftPanel extends StatefulWidget {
@@ -36,8 +38,8 @@ class _LeftPanelState extends State<LeftPanel> {
             Expanded(
               child: TabBarView(
                 children: [
-                  Text('Icons.add'),
-                  Text('Icons.subject'),
+                  DateTreePanel(),
+                  FolderTreePanel(),
                 ],
               ),
             ),

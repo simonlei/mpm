@@ -39,6 +39,7 @@ dependencies:
   oktoast: ^3.0.0
   confirm_dialog: ^1.0.0
   sn_progress_dialog: ^1.0.2
+  flutter_treeview: ^1.0.4+1
 
 dev_dependencies:
   flutter_test:
