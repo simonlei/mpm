@@ -30,6 +30,9 @@ class _DateTreePanelState extends State<DateTreePanel> {
               allowParentSelect: true,
               supportParentDoubleTap: true,
               onExpansionChanged: _expandNodeHandler,
+              theme: TreeViewTheme(
+                colorScheme: ColorScheme.dark().copyWith(onPrimary: Colors.blue),
+              ),
               onNodeTap: (key) {
                 _selectChange(key);
               },
@@ -60,9 +63,10 @@ class _DateTreePanelState extends State<DateTreePanel> {
       List<Node> months = <Node>[];
       List monthResults = element['months'] as List;
       monthResults.forEach((element) {
-        months.add(Node(label: element['title'], key: '${element['id']}'));
+        months.add(Node(label: element['title'], key: '${element['id']}', icon: Icons.calendar_view_day));
       });
-      years.add(Node(label: element['title'], key: '${element['id']}', children: months));
+      years.add(
+          Node(label: element['title'], key: '${element['id']}', children: months, icon: Icons.calendar_view_month));
     });
 
     List<Node> nodes = [

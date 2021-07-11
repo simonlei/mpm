@@ -65,6 +65,7 @@ My Photo Manager client side.
 - [ ] bug: 如果takenDate是null，那么就用当天的日期
 - [ ] bug: cos 版本和 万象版本不一致导致video不正常
 - [ ] bug: tile会复用，要删掉不必要的视频标签
+- [ ] 选中的颜色没有变化，这个问题留待解决
 
 ### v1.0.2
 
