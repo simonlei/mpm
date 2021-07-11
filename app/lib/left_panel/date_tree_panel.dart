@@ -16,6 +16,7 @@ class DateTreePanel extends StatefulWidget {
 
 class _DateTreePanelState extends State<DateTreePanel> {
   late TreeViewController _treeViewController;
+  bool _inited = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +46,15 @@ class _DateTreePanelState extends State<DateTreePanel> {
 
   void _selectChange(String key) {
     setState(() {
-      _treeViewController = _treeViewController.copyWith(selectedKey: key);
+      _treeViewController = _treeViewController.copyWith(selectedKey: key).withExpandToNode(key);
       Conditions.dateKey = key;
       BUS.emit(EventBus.ConditionsChanged);
     });
   }
 
   Future<TreeViewController> doInit() async {
+    if (_inited) return _treeViewController;
+
     var resp = await Dio().post(Config.toUrl("/api/getPicsDate"), data: {'trashed': Conditions.trashed});
 
     if (resp.statusCode != 200) {
@@ -79,6 +82,7 @@ class _DateTreePanelState extends State<DateTreePanel> {
         children: years,
       ),
     ];
+    _inited = true;
     return TreeViewController(children: nodes);
   }
 

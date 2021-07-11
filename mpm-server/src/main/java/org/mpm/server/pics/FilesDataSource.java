@@ -39,7 +39,7 @@ public class FilesDataSource {
         if (req.star != null) {
             s.setParam("star", req.star);
         }
-        log.info(s.toString());
+        log.debug(s.toString());
         s.setCallback(Sqls.callback.records());
         dao.execute(s);
         List<Record> list = s.getList(Record.class);

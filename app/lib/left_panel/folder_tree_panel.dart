@@ -16,6 +16,7 @@ class FolderTreePanel extends StatefulWidget {
 
 class _FolderTreePanelState extends State<FolderTreePanel> {
   late TreeViewController _treeViewController;
+  bool _inited = false;
 
   @override
   Widget build(BuildContext context) {
@@ -43,13 +44,39 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
     );
   }
 
-  _expandNodeHandler(String key, bool p2) {
-    _selectChange(key);
+  _expandNodeHandler(String key, bool expend) async {
+    Logger().i('going to expand $expend $key');
+    if (expend) {
+      var node = _treeViewController.getNode(key);
+      if (node != null && node.children.isEmpty) {
+        var resp = await Dio()
+            .post(Config.toUrl("/api/getFoldersData"), data: {'trashed': Conditions.trashed, 'parentId': key});
+        if (resp.statusCode != 200) {
+          Logger().e("Can't load folders data: $resp");
+          return;
+        }
+        List<Node> folders = <Node>[];
+        resp.data.forEach((element) {
+          folders.add(Node(label: element['title'], key: '${element['id']}', data: element['path'], parent: true));
+        });
+        setState(() {
+          if (folders.isEmpty) {
+            _treeViewController =
+                _treeViewController.withUpdateNode(key, _treeViewController.getNode(key)!.copyWith(parent: false));
+          }
+          folders.forEach((element) {
+            _treeViewController = _treeViewController.withAddNode(key, element);
+          });
+        });
+      }
+    }
   }
 
   void _selectChange(String key) {
+    Logger().i('select state change $key');
     setState(() {
-      _treeViewController = _treeViewController.copyWith(selectedKey: key);
+      _treeViewController = _treeViewController.copyWith(selectedKey: key).withExpandToNode(key);
+      _expandNodeHandler(key, true);
       var node = _treeViewController.getNode(key);
       if (node != null && node.hasData) {
         Conditions.path = node.data;
@@ -61,6 +88,7 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
   }
 
   Future<TreeViewController> doInit() async {
+    if (_inited) return _treeViewController;
     var resp = await Dio().post(Config.toUrl("/api/getFoldersData"), data: {'trashed': Conditions.trashed});
 
     if (resp.statusCode != 200) {
@@ -70,7 +98,7 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
     List results = resp.data;
     List<Node> folders = <Node>[];
     results.forEach((element) {
-      folders.add(Node(label: element['title'], key: '${element['id']}', data: element['path']));
+      folders.add(Node(label: element['title'], key: '${element['id']}', data: element['path'], parent: true));
     });
 
     List<Node> nodes = [
@@ -82,6 +110,7 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
         children: folders,
       ),
     ];
+    _inited = true;
     return TreeViewController(children: nodes);
   }
 }
