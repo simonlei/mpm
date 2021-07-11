@@ -21,25 +21,26 @@ class _DateTreePanelState extends State<DateTreePanel> {
   Widget build(BuildContext context) {
     Logger().i('build date tree');
     return FutureBuilder<TreeViewController>(
-        future: doInit(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            _treeViewController = snapshot.data!;
-            return TreeView(
-              controller: _treeViewController,
-              allowParentSelect: true,
-              supportParentDoubleTap: true,
-              onExpansionChanged: _expandNodeHandler,
-              theme: TreeViewTheme(
-                colorScheme: ColorScheme.dark().copyWith(onPrimary: Colors.blue),
-              ),
-              onNodeTap: (key) {
-                _selectChange(key);
-              },
-            );
-          } else
-            return Text('Loading...');
-        });
+      future: doInit(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          _treeViewController = snapshot.data!;
+          return TreeView(
+            controller: _treeViewController,
+            allowParentSelect: true,
+            supportParentDoubleTap: true,
+            onExpansionChanged: _expandNodeHandler,
+            theme: TreeViewTheme(
+              colorScheme: ColorScheme.dark().copyWith(onPrimary: Colors.blue),
+            ),
+            onNodeTap: (key) {
+              _selectChange(key);
+            },
+          );
+        } else
+          return Text('Loading...');
+      },
+    );
   }
 
   void _selectChange(String key) {

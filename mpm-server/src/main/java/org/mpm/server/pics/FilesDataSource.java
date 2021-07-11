@@ -1,7 +1,7 @@
 package org.mpm.server.pics;
 
 import java.util.List;
-import java.util.Map;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.util.BusiException;
@@ -11,35 +11,35 @@ import org.nutz.dao.Sqls;
 import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Sql;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Component
+@RestController
 @Slf4j
 public class FilesDataSource {
 
     @Autowired
     Dao dao;
-/*
-    // used in datasource
-    public DSResponse fetch(DSRequest req) {
-        DSResponse resp = new DSResponse();
-        Boolean trashed = (Boolean) req.getCriteria().get("trashed");
-        Boolean star = (Boolean) req.getCriteria().get("star");
-        Long parentId = (Long) req.getCriteria().get("parentId");
-        Sql s = Sqls.create("select f.*, concat(f.name,'(',count(distinct p.id),')') title from t_files f  "
+
+    @PostMapping("/api/getFoldersData")
+    public List<Record> getFoldersData(@RequestBody FoldersDataRequest req) {
+        Long parentId = req.parentId;
+        Sql s = Sqls.create("select f.id, f.path, concat(f.name,'(',count(distinct p.id),')') title from t_files f  "
                 + " left join t_files fp on fp.path like concat(f.path, '%')"
                 + " left join t_photos p  on fp.photoId=p.id"
                 + " where f.isFolder=true and"
                 + (parentId == null ? " f.parentId is null " : " f.parentId=@parentId")
                 + " and p.trashed=@trashed "
-                + (star == null ? "" : " and p.star=@star ")
+                + (req.star == null ? "" : " and p.star=@star ")
                 + " group by f.id"
                 + " order by "
                 + (parentId == null ? " f.id" : " f.name"));
-        s.setParam("trashed", trashed).setParam("parentId", parentId);
-        if (star != null) {
-            s.setParam("star", star);
+        s.setParam("trashed", req.trashed).setParam("parentId", parentId);
+        if (req.star != null) {
+            s.setParam("star", req.star);
         }
+        log.info(s.toString());
         s.setCallback(Sqls.callback.records());
         dao.execute(s);
         List<Record> list = s.getList(Record.class);
@@ -47,13 +47,11 @@ public class FilesDataSource {
             for (Record r : list) {
                 r.set("parentId", -1);
             }
-            list.add(0, new Record().set("title", "全部").set("id", -1));
         }
-        resp.setData(list);
-        return resp;
+        return list;
     }
 
-
+/*
     // used in datasource
     public DSResponse update(DSRequest req) {
         DSResponse resp = new DSResponse();
@@ -108,5 +106,13 @@ public class FilesDataSource {
             resetParentTo(child, newParent);
         }
         dao.delete(node);
+    }
+
+    @Data
+    static class FoldersDataRequest {
+
+        Boolean trashed;
+        Boolean star;
+        Long parentId;
     }
 }

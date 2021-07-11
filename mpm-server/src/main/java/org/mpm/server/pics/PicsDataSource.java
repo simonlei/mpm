@@ -14,6 +14,7 @@ import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Criteria;
 import org.nutz.dao.util.cri.SimpleCriteria;
 import org.nutz.lang.Lang;
+import org.nutz.lang.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -135,7 +136,7 @@ public class PicsDataSource {
         Boolean trashed = req.trashed;
 
         Boolean star = null;
-        String filePath = null;
+        String filePath = req.path;
         int start = req.getStart();
         int end = req.getStart() + req.getSize();
         String sortedBy = req.order;
@@ -146,7 +147,7 @@ public class PicsDataSource {
 
         int totalRows;
         // TODO: 要重构
-        if (filePath != null) {
+        if (Strings.isNotBlank(filePath)) {
             String joinSql = "inner join t_files on t_photos.id = t_files.photoId ";
             SimpleCriteria cnd = new SimpleCriteria(joinSql);
             cnd.where().and("t_files.path", "like", filePath + "%")
@@ -224,5 +225,6 @@ public class PicsDataSource {
         int size;
         String order;
         String dateKey;
+        String path;
     }
 }
