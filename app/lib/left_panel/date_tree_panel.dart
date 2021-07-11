@@ -1,5 +1,6 @@
 import 'package:app/conditions.dart';
 import 'package:app/config.dart';
+import 'package:app/event_bus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,18 +27,24 @@ class _DateTreePanelState extends State<DateTreePanel> {
             _treeViewController = snapshot.data!;
             return TreeView(
               controller: _treeViewController,
-              allowParentSelect: false,
-              supportParentDoubleTap: false,
+              allowParentSelect: true,
+              supportParentDoubleTap: true,
               onExpansionChanged: _expandNodeHandler,
               onNodeTap: (key) {
-                setState(() {
-                  _treeViewController = _treeViewController.copyWith(selectedKey: key);
-                });
+                _selectChange(key);
               },
             );
           } else
             return Text('Loading...');
         });
+  }
+
+  void _selectChange(String key) {
+    setState(() {
+      _treeViewController = _treeViewController.copyWith(selectedKey: key);
+      Conditions.dateKey = key;
+      BUS.emit(EventBus.ConditionsChanged);
+    });
   }
 
   Future<TreeViewController> doInit() async {
@@ -61,7 +68,7 @@ class _DateTreePanelState extends State<DateTreePanel> {
     List<Node> nodes = [
       Node(
         label: '全部',
-        key: 'all',
+        key: '',
         expanded: true,
         icon: Icons.folder_open,
         children: years,
@@ -69,6 +76,8 @@ class _DateTreePanelState extends State<DateTreePanel> {
     ];
     return TreeViewController(children: nodes);
   }
-}
 
-_expandNodeHandler(String p1, bool p2) {}
+  _expandNodeHandler(String key, bool p2) {
+    _selectChange(key);
+  }
+}

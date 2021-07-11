@@ -135,8 +135,6 @@ public class PicsDataSource {
         Boolean trashed = req.trashed;
 
         Boolean star = null;
-        String theYear = null;
-        String theMonth = null;
         String filePath = null;
         int start = req.getStart();
         int end = req.getStart() + req.getSize();
@@ -163,8 +161,7 @@ public class PicsDataSource {
             photos = dao.query("t_photos", cnd, null, "distinct t_photos.*");
         } else {
             Cnd cnd = Cnd.where("trashed", "=", trashed);
-            cnd = theYear == null ? cnd : cnd.and("year(takenDate)", "=", theYear);
-            cnd = theMonth == null ? cnd : cnd.and("month(takenDate)", "=", theMonth);
+            cnd = addDateCondition(req, cnd);
             addStarCriteria(star, cnd.getCri());
 
             totalRows = dao.count(EntityPhoto.class, cnd);
@@ -176,6 +173,26 @@ public class PicsDataSource {
 
         return Lang.map("totalRows", totalRows).setv("startRow", start)
                 .setv("endRow", start + photos.size()).setv("data", addThumbField(photos));
+    }
+
+    private Cnd addDateCondition(GetPicsRequest req, Cnd cnd) {
+        Integer date = parseDate(req.dateKey); // 2021 或 202106
+        if (date == null) {
+            return cnd;
+        }
+        Integer theYear = date > 9999 ? date / 100 : date;
+        Integer theMonth = date > 9999 ? date % 100 : null;
+        cnd = theYear == null ? cnd : cnd.and("year(takenDate)", "=", theYear);
+        cnd = theMonth == null ? cnd : cnd.and("month(takenDate)", "=", theMonth);
+        return cnd;
+    }
+
+    private Integer parseDate(String dateKey) {
+        try {
+            return Integer.parseInt(dateKey);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private List<Record> addThumbField(List<Record> photos) {
@@ -206,5 +223,6 @@ public class PicsDataSource {
         int start;
         int size;
         String order;
+        String dateKey;
     }
 }
