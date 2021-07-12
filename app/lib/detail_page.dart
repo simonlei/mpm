@@ -50,10 +50,13 @@ class _DetailPageState extends State<DetailPage> {
             builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
               if (snapshot.hasData) {
                 return Center(
-                  child: FadeInImage.memoryNetwork(
-                      fit: BoxFit.fitHeight,
-                      placeholder: kTransparentImage,
-                      image: Config.imageUrl(snapshot.data!.name)),
+                  child: Tooltip(
+                    message: snapshot.data!.getTooltip(),
+                    child: FadeInImage.memoryNetwork(
+                        fit: BoxFit.fitHeight,
+                        placeholder: kTransparentImage,
+                        image: Config.imageUrl(snapshot.data!.name)),
+                  ),
                 );
               } else if (snapshot.hasError)
                 return Text('Error:${snapshot.error}');
@@ -69,8 +72,7 @@ class _DetailPageState extends State<DetailPage> {
   void showNext(int next) {
     setState(() {
       _index += next;
-      if (_index > _picsModel.getTotalImages() - 1)
-        _index = _picsModel.getTotalImages() - 1;
+      if (_index > _picsModel.getTotalImages() - 1) _index = _picsModel.getTotalImages() - 1;
       if (_index < 0) _index = 0;
       if (_picsModel.getTotalImages() == 0) Navigator.pop(context);
     });
