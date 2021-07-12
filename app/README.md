@@ -37,7 +37,7 @@ My Photo Manager client side.
 - [x] 支持清空回收站
 - [x] 导入完成后刷新页面
 - [x] 左侧树支持"全部"
-- [ ] 支持放大/缩小图片
+- [x] 支持放大/缩小图片
 - [ ] 支持在放大的情况下用 HJKL 来移动图片
 - [x] 详情时展示图片信息
 - [x] 列表时展示图片信息
@@ -50,9 +50,8 @@ My Photo Manager client side.
 - [x] 上传的时候要控制一下，避免重复创建
 - [x] 上传完成后要刷新当前页面的内容
 - [x] 身份认证之后才能访问
-- [ ] header bar 可以滚动或者自动隐藏
 
-### v1.0.1
+### v1.1.1
 
 - [ ] 支持视频上传
 - [ ] 支持视频展示
@@ -67,7 +66,7 @@ My Photo Manager client side.
 - [ ] bug: cos 版本和 万象版本不一致导致video不正常
 - [ ] bug: tile会复用，要删掉不必要的视频标签
 
-### v1.0.2
+### v1.1.2
 
 - [ ] 重构代码，删除不必要的代码
 - [ ] 支持删除某个目录下的所有照片
@@ -85,7 +84,7 @@ My Photo Manager client side.
 - [ ] 全屏状态下也支持旋转
 - [ ] bug: mediaType error
 
-### v1.0.3
+### v1.1.3
 
 - [ ] 上传文件的时候，左侧的提醒消退的太慢了
 - [ ] 支持修改描述信息
@@ -97,7 +96,7 @@ My Photo Manager client side.
 - [ ] 可以合并照片到另一个文件夹下
 - [ ] 还是切换成springboot吧，nutzboot 还是有点小众
 
-### v1.0.4
+### v1.1.4
 
 - [ ] 数据库密码去掉
 - [ ] 增加 rotate快捷键
@@ -114,3 +113,4 @@ My Photo Manager client side.
 - [ ] thumb 可以根据rotate来进生成
 - [ ] bug: thumb 有缓存，需要刷新
 - [ ] bug: 有条件的时候更新图片会导致从当前结果列表里面消失
+- [ ] header bar 可以滚动或者自动隐藏
