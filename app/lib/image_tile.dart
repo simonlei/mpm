@@ -36,21 +36,20 @@ class _ImageTileState extends State<ImageTile> {
               },
               onDoubleTap: () => openDetailPage(context),
               child: Selector<SelectModel, bool>(
-                selector: (context, selectModel) =>
-                    selectModel.isSelected(widget.index),
-                shouldRebuild: (preSelected, nextSelected) =>
-                    preSelected != nextSelected,
+                selector: (context, selectModel) => selectModel.isSelected(widget.index),
+                shouldRebuild: (preSelected, nextSelected) => preSelected != nextSelected,
                 builder: (context, selected, child) {
                   return Container(
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                            color: selected ? Colors.blue : Colors.grey,
-                            width: 2)),
-                    child: FadeInImage.memoryNetwork(
-                      width: image.width,
-                      height: image.height,
-                      placeholder: kTransparentImage,
-                      image: Config.imageUrl(image.thumb),
+                    decoration:
+                        BoxDecoration(border: Border.all(color: selected ? Colors.blue : Colors.grey, width: 2)),
+                    child: Tooltip(
+                      message: image.getTooltip(),
+                      child: FadeInImage.memoryNetwork(
+                        width: image.width,
+                        height: image.height,
+                        placeholder: kTransparentImage,
+                        image: Config.imageUrl(image.thumb),
+                      ),
                     ),
                   );
                 },
@@ -65,7 +64,6 @@ class _ImageTileState extends State<ImageTile> {
 
   void openDetailPage(BuildContext context) {
     widget.picsModel.select(widget.index);
-    Navigator.of(context).pushNamed('/detail',
-        arguments: Tuple2(widget.picsModel, widget.index));
+    Navigator.of(context).pushNamed('/detail', arguments: Tuple2(widget.picsModel, widget.index));
   }
 }

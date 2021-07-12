@@ -3,6 +3,7 @@ import 'package:app/config.dart';
 import 'package:app/event_bus.dart';
 import 'package:app/select_model.dart';
 import 'package:dio/dio.dart';
+import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:mutex/mutex.dart';
@@ -33,7 +34,8 @@ class PicsModel with ChangeNotifier {
     List data = resp.data['data'];
     for (int i = 0; i < data.length; i++) {
       var element = data.elementAt(i);
-      _pics[start + i] = PicImage(element['width'], element['height'], element['thumb'], element['name']);
+      _pics[start + i] = PicImage(element);
+      ;
     }
     notifyListeners();
     return _pics;
@@ -97,10 +99,32 @@ class PicsModel with ChangeNotifier {
 }
 
 class PicImage {
-  PicImage(this.width, this.height, this.thumb, this.name);
+  PicImage(element) {
+    width = element['width'];
+    height = element['height'];
+    thumb = element['thumb'];
+    name = element['name'];
+    size = element['size'];
+    description = element['description'];
+    address = element['address'];
+    takenDate = DateTime.parse(element['takendate']);
+  }
 
-  final double width;
-  final double height;
-  final String thumb;
-  final String name;
+  late final double width;
+  late final double height;
+  late final String thumb;
+  late final String name;
+  late final int size;
+  late final String? description;
+  late final String? address;
+  late final DateTime takenDate;
+
+  String getTooltip() {
+    return "大小：${filesize(size)} \n" +
+        "宽度：$width px\n" +
+        "高度：$height px\n" +
+        "描述：$description\n" +
+        (address == null ? "" : "地址：$address\n") +
+        "时间：${takenDate.year}-${takenDate.month.toString().padLeft(2, '0')}-${takenDate.day.toString().padLeft(2, '0')}";
+  }
 }
