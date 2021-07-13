@@ -1,5 +1,6 @@
 import 'package:app/config.dart';
 import 'package:app/pics_model.dart';
+import 'package:app/video_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,8 +23,8 @@ class _DetailPageState extends State<DetailPage> {
   late PicsModel _picsModel;
   late int _index;
   bool _scale = true;
-  ScrollController _vertical_controller = new ScrollController();
-  ScrollController _horizontal_controller = new ScrollController();
+  ScrollController _verticalController = new ScrollController();
+  ScrollController _horizontalController = new ScrollController();
 
   _DetailPageState(Tuple2 arguments) {
     _picsModel = arguments.item1;
@@ -32,8 +33,8 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   void dispose() {
-    _vertical_controller.dispose();
-    _horizontal_controller.dispose();
+    _verticalController.dispose();
+    _horizontalController.dispose();
     super.dispose();
   }
 
@@ -66,25 +67,12 @@ class _DetailPageState extends State<DetailPage> {
             future: _picsModel.getImage(_index),
             builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
               if (snapshot.hasData) {
-                return SingleChildScrollView(
-                  controller: _vertical_controller,
-                  scrollDirection: Axis.vertical,
-                  child: SingleChildScrollView(
-                    controller: _horizontal_controller,
-                    scrollDirection: Axis.horizontal,
-                    child: Container(
-                      width: _scale ? MediaQuery.of(context).size.width : snapshot.data!.width,
-                      height: _scale ? MediaQuery.of(context).size.height : snapshot.data!.height,
-                      child: Tooltip(
-                        message: snapshot.data!.getTooltip(),
-                        child: FadeInImage.memoryNetwork(
-                            fit: _scale ? BoxFit.scaleDown : BoxFit.none,
-                            placeholder: kTransparentImage,
-                            image: Config.imageUrl(snapshot.data!.name)),
-                      ),
-                    ),
-                  ),
-                );
+                var image = snapshot.data!;
+                if (image.mediaType == MediaType.video) {
+                  _scale = true;
+                  return VideoView(image);
+                }
+                return makeImageView(context, image);
               } else if (snapshot.hasError)
                 return Text('Error:${snapshot.error}');
               else
@@ -96,8 +84,31 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
+  SingleChildScrollView makeImageView(BuildContext context, PicImage image) {
+    return SingleChildScrollView(
+      controller: _verticalController,
+      scrollDirection: Axis.vertical,
+      child: SingleChildScrollView(
+        controller: _horizontalController,
+        scrollDirection: Axis.horizontal,
+        child: Container(
+          width: _scale ? MediaQuery.of(context).size.width : image.width,
+          height: _scale ? MediaQuery.of(context).size.height : image.height,
+          child: Tooltip(
+            message: image.getTooltip(),
+            child: FadeInImage.memoryNetwork(
+                fit: _scale ? BoxFit.scaleDown : BoxFit.none,
+                placeholder: kTransparentImage,
+                image: Config.imageUrl(image.name)),
+          ),
+        ),
+      ),
+    );
+  }
+
   void showNext(int next) {
     setState(() {
+      _scale = true;
       _index += next;
       if (_index > _picsModel.getTotalImages() - 1) _index = _picsModel.getTotalImages() - 1;
       if (_index < 0) _index = 0;
@@ -116,11 +127,11 @@ class _DetailPageState extends State<DetailPage> {
     setState(() {
       if (scrollY == 0) {
         var delta = MediaQuery.of(context).size.width * scrollX / 100;
-        _horizontal_controller.animateTo(_horizontal_controller.offset + delta,
+        _horizontalController.animateTo(_horizontalController.offset + delta,
             duration: Duration(milliseconds: 200), curve: Curves.ease);
       } else if (scrollX == 0) {
         var delta = MediaQuery.of(context).size.height * scrollY / 100;
-        _vertical_controller.animateTo(_vertical_controller.offset + delta,
+        _verticalController.animateTo(_verticalController.offset + delta,
             duration: Duration(milliseconds: 200), curve: Curves.ease);
       }
     });

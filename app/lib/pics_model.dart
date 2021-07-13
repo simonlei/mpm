@@ -112,7 +112,7 @@ class PicImage {
     address = element['address'];
     takenDate = DateTime.parse(element['takendate']);
     mediaType = 'photo' == element['mediatype'] ? MediaType.photo : MediaType.video;
-    duration = element['duration'];
+    duration = element['duration'] ?? 0.0;
   }
 
   late final double width;

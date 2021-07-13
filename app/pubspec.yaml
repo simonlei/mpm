@@ -41,6 +41,7 @@ dependencies:
   sn_progress_dialog: ^1.0.2
   flutter_treeview: ^1.0.4+1
   filesize: ^2.0.1
+  video_player: ^2.1.10
 
 dev_dependencies:
   flutter_test:
