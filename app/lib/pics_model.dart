@@ -105,6 +105,7 @@ class PicImage {
     thumb = element['thumb'];
     name = element['name'];
     size = element['size'];
+    star = element['star'];
     description = element['description'];
     address = element['address'];
     takenDate = DateTime.parse(element['takendate']);
@@ -118,6 +119,7 @@ class PicImage {
   late final String? description;
   late final String? address;
   late final DateTime takenDate;
+  late final bool star;
 
   String getTooltip() {
     return "大小：${filesize(size)} \n" +

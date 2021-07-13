@@ -40,16 +40,22 @@ class _ImageTileState extends State<ImageTile> {
                 shouldRebuild: (preSelected, nextSelected) => preSelected != nextSelected,
                 builder: (context, selected, child) {
                   return Container(
-                    decoration:
-                        BoxDecoration(border: Border.all(color: selected ? Colors.blue : Colors.grey, width: 2)),
-                    child: Tooltip(
-                      message: image.getTooltip(),
-                      child: FadeInImage.memoryNetwork(
-                        width: image.width,
-                        height: image.height,
-                        placeholder: kTransparentImage,
-                        image: Config.imageUrl(image.thumb),
-                      ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: selected ? Colors.blue : Colors.grey, width: 2),
+                    ),
+                    child: Stack(
+                      children: [
+                        Tooltip(
+                          message: image.getTooltip(),
+                          child: FadeInImage.memoryNetwork(
+                            width: image.width,
+                            height: image.height,
+                            placeholder: kTransparentImage,
+                            image: Config.imageUrl(image.thumb),
+                          ),
+                        ),
+                        Image.asset(image.star ? "web/icons/star.png" : "web/icons/notstar.png"),
+                      ],
                     ),
                   );
                 },
