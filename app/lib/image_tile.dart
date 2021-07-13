@@ -54,7 +54,26 @@ class _ImageTileState extends State<ImageTile> {
                             image: Config.imageUrl(image.thumb),
                           ),
                         ),
-                        Image.asset(image.star ? "web/icons/star.png" : "web/icons/notstar.png"),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: Image.asset(image.star ? "web/icons/star.png" : "web/icons/notstar.png"),
+                              onPressed: () {
+                                //TODO: togger star
+                              },
+                            ),
+                            image.mediaType == MediaType.video
+                                ? Row(children: [
+                                    Image.asset('web/icons/start.png'),
+                                    Text(
+                                      // image.duration == null ? '' :
+                                      image.duration.toStringAsPrecision(2),
+                                      style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
+                                    )
+                                  ])
+                                : Text(''),
+                          ],
+                        ),
                       ],
                     ),
                   );

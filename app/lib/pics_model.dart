@@ -98,6 +98,8 @@ class PicsModel with ChangeNotifier {
   }
 }
 
+enum MediaType { photo, video }
+
 class PicImage {
   PicImage(element) {
     width = element['width'];
@@ -109,6 +111,8 @@ class PicImage {
     description = element['description'];
     address = element['address'];
     takenDate = DateTime.parse(element['takendate']);
+    mediaType = 'photo' == element['mediatype'] ? MediaType.photo : MediaType.video;
+    duration = element['duration'];
   }
 
   late final double width;
@@ -120,6 +124,8 @@ class PicImage {
   late final String? address;
   late final DateTime takenDate;
   late final bool star;
+  late final MediaType mediaType;
+  late final double duration;
 
   String getTooltip() {
     return "大小：${filesize(size)} \n" +
