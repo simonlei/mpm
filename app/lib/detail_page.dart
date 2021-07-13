@@ -22,10 +22,19 @@ class _DetailPageState extends State<DetailPage> {
   late PicsModel _picsModel;
   late int _index;
   bool _scale = true;
+  ScrollController _vertical_controller = new ScrollController();
+  ScrollController _horizontal_controller = new ScrollController();
 
   _DetailPageState(Tuple2 arguments) {
     _picsModel = arguments.item1;
     _index = arguments.item2;
+  }
+
+  @override
+  void dispose() {
+    _vertical_controller.dispose();
+    _horizontal_controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -57,15 +66,22 @@ class _DetailPageState extends State<DetailPage> {
             future: _picsModel.getImage(_index),
             builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
               if (snapshot.hasData) {
-                return Tooltip(
-                  message: snapshot.data!.getTooltip(),
-                  child: Container(
-                    width: MediaQuery.of(context).size.width,
+                return SingleChildScrollView(
+                  controller: _vertical_controller,
+                  scrollDirection: Axis.vertical,
+                  child: SingleChildScrollView(
+                    controller: _horizontal_controller,
+                    scrollDirection: Axis.horizontal,
                     child: Container(
-                      child: FadeInImage.memoryNetwork(
-                          fit: _scale ? BoxFit.scaleDown : BoxFit.none,
-                          placeholder: kTransparentImage,
-                          image: Config.imageUrl(snapshot.data!.name)),
+                      width: _scale ? MediaQuery.of(context).size.width : snapshot.data!.width,
+                      height: _scale ? MediaQuery.of(context).size.height : snapshot.data!.height,
+                      child: Tooltip(
+                        message: snapshot.data!.getTooltip(),
+                        child: FadeInImage.memoryNetwork(
+                            fit: _scale ? BoxFit.scaleDown : BoxFit.none,
+                            placeholder: kTransparentImage,
+                            image: Config.imageUrl(snapshot.data!.name)),
+                      ),
                     ),
                   ),
                 );
@@ -94,6 +110,21 @@ class _DetailPageState extends State<DetailPage> {
       _scale = !_scale;
     });
   }
+
+  void scroll(int scrollX, int scrollY) {
+    if (_scale) return;
+    setState(() {
+      if (scrollY == 0) {
+        var delta = MediaQuery.of(context).size.width * scrollX / 100;
+        _horizontal_controller.animateTo(_horizontal_controller.offset + delta,
+            duration: Duration(milliseconds: 200), curve: Curves.ease);
+      } else if (scrollX == 0) {
+        var delta = MediaQuery.of(context).size.height * scrollY / 100;
+        _vertical_controller.animateTo(_vertical_controller.offset + delta,
+            duration: Duration(milliseconds: 200), curve: Curves.ease);
+      }
+    });
+  }
 }
 
 class MoveAction extends Action<MoveIntent> {
@@ -103,8 +134,7 @@ class MoveAction extends Action<MoveIntent> {
 
   @override
   Object? invoke(covariant MoveIntent intent) {
-    // TODO: implement invoke
-    throw UnimplementedError();
+    _detailPageState.scroll(intent.scrollX, intent.scrollY);
   }
 }
 
