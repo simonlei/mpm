@@ -66,7 +66,7 @@ My Photo Manager client side.
 - [x] bug: cos 版本和 万象版本不一致导致video不正常
 - [x] bug: tile会复用，要删掉不必要的视频标签
 - [x] 视频进度条
-- [ ] 上传到cos增加progress dialog
+- [x] 上传到cos增加progress dialog
 
 ### v1.1.2
 

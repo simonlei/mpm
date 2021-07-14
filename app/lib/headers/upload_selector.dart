@@ -9,8 +9,16 @@ import 'package:flutter/material.dart';
 import 'package:js/js.dart';
 import 'package:logger/logger.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
-class UploadSelector extends StatelessWidget {
+class UploadSelector extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return _UploadSelectorState();
+  }
+}
+
+class _UploadSelectorState extends State<UploadSelector> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -26,8 +34,7 @@ class UploadSelector extends StatelessWidget {
   }
 
   void _selectFolder() {
-    var input = html.Element.html(
-        '<input type="file" webkitdirectory directory/>',
+    var input = html.Element.html('<input type="file" webkitdirectory directory/>',
         validator: html.NodeValidatorBuilder()
           ..allowElement('input', attributes: ['webkitdirectory', 'directory'])
           ..allowHtml5()) as html.InputElement;
@@ -39,8 +46,7 @@ class UploadSelector extends StatelessWidget {
       // Logger().i('childNodes ${input.childNodes}');
       // Logger().i('input ${input.files}');
 
-      COS cos = new COS(CosInitParam(
-          getAuthorization: allowInterop((options, callback) async {
+      COS cos = new COS(CosInitParam(getAuthorization: allowInterop((options, callback) async {
         var resp = await Dio().get(Config.toUrl("/tmpCredential"));
         if (resp.statusCode == 200) {
           var data = json.decode(resp.data);
@@ -73,6 +79,9 @@ class UploadSelector extends StatelessWidget {
           ));
         }
       }
+      ProgressDialog pd = ProgressDialog(context: context);
+      pd.show(max: cosFiles.length, msg: '正在上传文件...');
+
       Logger().i("Cosfiles: $cosFiles");
       var count = 0;
 
@@ -83,11 +92,10 @@ class UploadSelector extends StatelessWidget {
             onProgress: allowInterop((info) {
               var percent = info.percent * 10000 / 100;
               var speed = info.speed / 1024 / 1024 * 100 / 100;
-              showToast('进度：' + percent + '%; 速度：' + speed + 'Mb/s;');
+              // showToast('进度：' + percent + '%; 速度：' + speed + 'Mb/s;');
             }),
             onFileFinish: allowInterop((err, data, options) async {
-              var key = Map<String, dynamic>.from(
-                  jsonDecode(stringify(options)))['Key'];
+              var key = Map<String, dynamic>.from(jsonDecode(stringify(options)))['Key'];
               var resp = await Dio().post(Config.toUrl("/uploadFile"), data: {
                 'key': key,
                 'data': stringify(options),
@@ -95,9 +103,12 @@ class UploadSelector extends StatelessWidget {
               });
               if (resp.statusCode == 200) {
                 count++;
+                pd.update(
+                  value: count,
+                  msg: "第 $count/${cosFiles.length}个文件 ${key.split("\/").last} 上传${err != null ? '失败' : '完成'}",
+                );
                 Logger().i("第 $count/${cosFiles.length}个文件resp: ${resp.data}");
-                showToast(
-                    "第 $count/${cosFiles.length}个文件 ${key.split("\/").last} 上传${err != null ? '失败' : '完成'}");
+                // showToast("第 $count/${cosFiles.length}个文件 ${key.split("\/").last} 上传${err != null ? '失败' : '完成'}");
                 if (count == cosFiles.length) {
                   BUS.emit(EventBus.ConditionsChanged);
                   showToast("上传完成，共 $count 张照片");
