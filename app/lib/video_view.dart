@@ -55,7 +55,13 @@ class _VideoViewState extends State<VideoView> {
               _controller.play();
               return AspectRatio(
                 aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    VideoPlayer(_controller),
+                    VideoProgressIndicator(_controller, allowScrubbing: true),
+                  ],
+                ),
               );
             } else {
               return Center(

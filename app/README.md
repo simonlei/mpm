@@ -65,6 +65,8 @@ My Photo Manager client side.
 - [x] bug: 如果takenDate是null，那么就用当天的日期
 - [x] bug: cos 版本和 万象版本不一致导致video不正常
 - [x] bug: tile会复用，要删掉不必要的视频标签
+- [x] 视频进度条
+- [ ] 上传到cos增加progress dialog
 
 ### v1.1.2
 
@@ -83,6 +85,7 @@ My Photo Manager client side.
 - [ ] 支持照片的旋转
 - [ ] 全屏状态下也支持旋转
 - [ ] bug: mediaType error
+- [ ] 增加rotate按钮
 
 ### v1.1.3
 
