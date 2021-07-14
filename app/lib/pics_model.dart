@@ -115,6 +115,8 @@ class PicImage {
     duration = element['duration'] ?? 0.0;
   }
 
+  String formatDuration() => Duration(seconds: duration.toInt()).toString().split('.').first.padLeft(8, "0");
+
   late final double width;
   late final double height;
   late final String thumb;

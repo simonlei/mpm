@@ -67,7 +67,7 @@ class _ImageTileState extends State<ImageTile> {
                                     Image.asset('web/icons/start.png'),
                                     Text(
                                       // image.duration == null ? '' :
-                                      image.duration.toStringAsPrecision(2),
+                                      image.formatDuration(),
                                       style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
                                     )
                                   ])
