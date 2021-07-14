@@ -5,14 +5,14 @@ class Config {
     //return '';
   }
 
-  static String toUrl(String api) {
+  static String api(String api) {
     return getApiUrl() + api;
   }
 
   static String imageBase = '';
 
-  static imageUrl(String thumb) {
-    return imageBase + thumb;
+  static imageUrl(String name) {
+    return imageBase + name;
   }
 
   static void setImageBase(base) {

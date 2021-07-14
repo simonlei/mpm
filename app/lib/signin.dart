@@ -64,8 +64,7 @@ class _SignUpFormState extends State<SignInForm> {
     if (value == null || value.isEmpty)
       _validatedMsg = '请输入密码';
     else {
-      var response =
-          await Dio().post(Config.toUrl('/api/authPassword'), data: value);
+      var response = await Dio().post(Config.api('/api/authPassword'), data: value);
       _validatedMsg = 'ok' == response.data['ok'] ? null : '密码不对，请重新输入';
     }
   }

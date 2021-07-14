@@ -55,7 +55,7 @@ class _DateTreePanelState extends State<DateTreePanel> {
   Future<TreeViewController> doInit() async {
     if (_inited) return _treeViewController;
 
-    var resp = await Dio().post(Config.toUrl("/api/getPicsDate"), data: {'trashed': Conditions.trashed});
+    var resp = await Dio().post(Config.api("/api/getPicsDate"), data: {'trashed': Conditions.trashed});
 
     if (resp.statusCode != 200) {
       Logger().e("Can't load picsDate: $resp");

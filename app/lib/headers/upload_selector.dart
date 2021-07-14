@@ -47,7 +47,7 @@ class _UploadSelectorState extends State<UploadSelector> {
       // Logger().i('input ${input.files}');
 
       COS cos = new COS(CosInitParam(getAuthorization: allowInterop((options, callback) async {
-        var resp = await Dio().get(Config.toUrl("/tmpCredential"));
+        var resp = await Dio().get(Config.api("/tmpCredential"));
         if (resp.statusCode == 200) {
           var data = json.decode(resp.data);
           var credentials = data['credentials'];
@@ -96,7 +96,7 @@ class _UploadSelectorState extends State<UploadSelector> {
             }),
             onFileFinish: allowInterop((err, data, options) async {
               var key = Map<String, dynamic>.from(jsonDecode(stringify(options)))['Key'];
-              var resp = await Dio().post(Config.toUrl("/uploadFile"), data: {
+              var resp = await Dio().post(Config.api("/uploadFile"), data: {
                 'key': key,
                 'data': stringify(options),
                 'err': err,

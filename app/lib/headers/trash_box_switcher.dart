@@ -28,8 +28,7 @@ class _TrashBoxSwitcherState extends State<TrashBoxSwitcher> {
                 },
                 child: Text(
                   snapshot.data!,
-                  style: TextStyle(
-                      fontWeight: FontWeight.w500, color: Colors.white),
+                  style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
                 ),
               );
             } else
@@ -39,10 +38,7 @@ class _TrashBoxSwitcherState extends State<TrashBoxSwitcher> {
   }
 
   Future<String> loadTitle() async {
-    var response = await Dio()
-        .post(Config.toUrl('/api/getCount'), data: !Conditions.trashed);
-    return Conditions.trashed
-        ? '正常照片(${response.data})'
-        : '回收站(${response.data})';
+    var response = await Dio().post(Config.api('/api/getCount'), data: !Conditions.trashed);
+    return Conditions.trashed ? '正常照片(${response.data})' : '回收站(${response.data})';
   }
 }

@@ -25,7 +25,7 @@ class PicsModel with ChangeNotifier {
 
   Future<List<PicImage?>> loadImages(int start, int size) async {
     Logger().i("load image from server...$start");
-    var resp = await Dio().post(Config.toUrl('/api/getPics'), data: Conditions.makeCondition(start, size));
+    var resp = await Dio().post(Config.api('/api/getPics'), data: Conditions.makeCondition(start, size));
     if (!_init) {
       _pics = List.filled(resp.data['totalRows'], null);
       BUS.emit(EventBus.CountChange, resp.data['totalRows']);
@@ -81,7 +81,7 @@ class PicsModel with ChangeNotifier {
     if (_selectModel.selected.isEmpty) return;
 
     var resp = await Dio()
-        .post(Config.toUrl("/api/trashPhotos"), data: _selectModel.selected.map((e) => _pics[e]!.name).toList());
+        .post(Config.api("/api/trashPhotos"), data: _selectModel.selected.map((e) => _pics[e]!.name).toList());
     Logger().i("Result is $resp");
     if (resp.statusCode == 200 && resp.data == _selectModel.selected.length) {
       var list = _selectModel.selected.toList();

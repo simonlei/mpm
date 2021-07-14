@@ -28,11 +28,9 @@ class _EmptyTrashButtonState extends State<EmptyTrashButton> {
         child: OutlinedButton(
           onPressed: () async {
             //confirm
-            bool empty = await confirm(context,
-                title: Text('确认清空回收站？'),
-                content: Text('清空回收站后，回收站内的照片将无法找回，请确认清空'));
+            bool empty = await confirm(context, title: Text('确认清空回收站？'), content: Text('清空回收站后，回收站内的照片将无法找回，请确认清空'));
             if (empty) {
-              var resp = await Dio().post(Config.toUrl('/api/emptyTrash'));
+              var resp = await Dio().post(Config.api('/api/emptyTrash'));
               if (resp.statusCode == 200) {
                 showProgressDialog(resp.data);
               }
@@ -53,7 +51,7 @@ class _EmptyTrashButtonState extends State<EmptyTrashButton> {
     ProgressDialog pd = ProgressDialog(context: context);
     pd.show(max: 100, msg: '正在清空回收站...');
     Timer.periodic(new Duration(seconds: 1), (timer) async {
-      var resp = await Dio().get(Config.toUrl("/api/getProgress/$taskId"));
+      var resp = await Dio().get(Config.api("/api/getProgress/$taskId"));
       if (resp.statusCode == 200) {
         Logger().i('Resp ${resp.data}');
         pd.update(value: resp.data['progress']);
