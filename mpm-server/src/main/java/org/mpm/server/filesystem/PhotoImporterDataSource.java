@@ -6,11 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityFile;
+import org.mpm.server.entity.EntityMeta;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.pics.PicsModule;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.lang.Lang;
+import org.nutz.lang.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,6 +34,9 @@ public class PhotoImporterDataSource {
         log.info("Key is " + key);
         if (Lang.isNotEmpty(upload.err)) {
             log.info("Error {} when upload {}, with data {} ", upload.err, key, upload.data);
+            dao.insert(EntityMeta.builder().key("Error_Log_" + key)
+                    .value(Strings.cutStr(2000, upload.err, "..."))
+                    .build());
         }
         // upload/1616851720630_tmpupload/七上1025义工/IMG_002.jpg
         String[] paths = key.split("\\/");

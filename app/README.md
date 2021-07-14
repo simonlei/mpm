@@ -59,7 +59,7 @@ My Photo Manager client side.
 - [x] 日志输出到文件
 - [x] 视频直接用万象API来截图，不需要配置cos上的流程，也不需要循环等待
 - [x] 记录视频时长
-- [ ] cos上传出错之后，上报到后台并记录
+- [x] cos上传出错之后，上报到后台并记录
 - [x] tile中的视频加上一个视频的标记
 - [x] tile中的视频加上一个视频的时长
 - [x] bug: 如果takenDate是null，那么就用当天的日期
