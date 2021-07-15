@@ -27,12 +27,11 @@ class _VideoViewState extends State<VideoView> {
   @override
   void initState() {
     super.initState();
-    var imageUrl = Config.imageUrl('video/${_image.name}');
+    var imageUrl = Config.imageUrl('video_t/${_image.name}.mp4');
     print("Image url is $imageUrl");
     _controller = VideoPlayerController.network(imageUrl);
     _initializeVideoPlayerFuture = _controller.initialize();
     _controller.setLooping(true);
-    // _controller.play();
   }
 
   @override

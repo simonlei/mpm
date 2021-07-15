@@ -102,7 +102,7 @@ public class PicsModule {
         video.setTakenDate(new Date());
         dao.updateIgnoreNull(video);
 
-        cosClient.copyObject(bucket, key, bucket, "video/" + video.getName());
+        cosClient.copyObject(bucket, key, bucket, "video/" + video.getName() + ".mp4");
         cosClient.deleteObject(bucket, key);
 
         return video;
@@ -270,6 +270,10 @@ public class PicsModule {
         Trans.exec(() -> {
             try {
                 cosClient.deleteObject(bucket, photo.getName());
+                if (Lang.equals("video", photo.getMediaType())) {
+                    cosClient.deleteObject(bucket, "video/" + photo.getName() + ".mp4");
+                    cosClient.deleteObject(bucket, "video_t/" + photo.getName() + ".mp4");
+                }
                 dao.insert(blackList);
                 dao.delete(photo);
                 dao.clear(EntityFile.class, Cnd.where("photoId", "=", photo.getId()));
