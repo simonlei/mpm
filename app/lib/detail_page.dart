@@ -66,7 +66,7 @@ class _DetailPageState extends State<DetailPage> {
           child: FutureBuilder<PicImage?>(
             future: _picsModel.getImage(_index),
             builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
-              if (snapshot.hasData) {
+              if (snapshot.connectionState == ConnectionState.done) {
                 var image = snapshot.data!;
                 if (image.mediaType == MediaType.video) {
                   _scale = true;

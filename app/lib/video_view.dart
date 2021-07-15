@@ -37,6 +37,7 @@ class _VideoViewState extends State<VideoView> {
 
   @override
   void dispose() {
+    _controller.pause();
     _controller.dispose();
     super.dispose();
   }
