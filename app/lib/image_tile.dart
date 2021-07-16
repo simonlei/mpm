@@ -1,6 +1,7 @@
 import 'package:app/config.dart';
 import 'package:app/pics_model.dart';
 import 'package:app/select_model.dart';
+import 'package:app/widgets/star_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -56,12 +57,7 @@ class _ImageTileState extends State<ImageTile> {
                         ),
                         Row(
                           children: [
-                            IconButton(
-                              icon: Image.asset(image.star ? "web/icons/star.png" : "web/icons/notstar.png"),
-                              onPressed: () {
-                                //TODO: togger star
-                              },
-                            ),
+                            StarButton(image),
                             image.mediaType == MediaType.video
                                 ? Row(children: [
                                     Image.asset('web/icons/start.png'),

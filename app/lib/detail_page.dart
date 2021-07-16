@@ -1,6 +1,7 @@
 import 'package:app/config.dart';
 import 'package:app/pics_model.dart';
 import 'package:app/video_view.dart';
+import 'package:app/widgets/star_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -61,23 +62,25 @@ class _DetailPageState extends State<DetailPage> {
           ZoomIntent: ZoomAction(this),
           MoveIntent: MoveAction(this),
         },
-        child: Focus(
-          autofocus: true,
-          child: FutureBuilder<PicImage?>(
-            future: _picsModel.getImage(_index),
-            builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                var image = snapshot.data!;
-                if (image.mediaType == MediaType.video) {
-                  _scale = true;
-                  return VideoView(image);
-                }
-                return makeImageView(context, image);
-              } else if (snapshot.hasError)
-                return Text('Error:${snapshot.error}');
-              else
-                return CircularProgressIndicator();
-            },
+        child: Card(
+          child: Focus(
+            autofocus: true,
+            child: FutureBuilder<PicImage?>(
+              future: _picsModel.getImage(_index),
+              builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  var image = snapshot.data!;
+                  if (image.mediaType == MediaType.video) {
+                    _scale = true;
+                    return wrapStack(VideoView(image), image);
+                  }
+                  return wrapStack(makeImageView(context, image), image);
+                } else if (snapshot.hasError)
+                  return Text('Error:${snapshot.error}');
+                else
+                  return CircularProgressIndicator();
+              },
+            ),
           ),
         ),
       ),
@@ -135,6 +138,19 @@ class _DetailPageState extends State<DetailPage> {
             duration: Duration(milliseconds: 200), curve: Curves.ease);
       }
     });
+  }
+
+  Widget wrapStack(Widget child, image) {
+    return Stack(
+      children: [
+        child,
+        Row(
+          children: [
+            StarButton(image),
+          ],
+        ),
+      ],
+    );
   }
 }
 
