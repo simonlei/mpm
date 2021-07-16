@@ -124,14 +124,14 @@ class _DetailPageState extends State<DetailPage> {
 
   void scroll(int scrollX, int scrollY) {
     if (_scale) return;
-    setState(() {
+    setState(() async {
       if (scrollY == 0) {
         var delta = MediaQuery.of(context).size.width * scrollX / 100;
-        _horizontalController.animateTo(_horizontalController.offset + delta,
+        await _horizontalController.animateTo(_horizontalController.offset + delta,
             duration: Duration(milliseconds: 200), curve: Curves.ease);
       } else if (scrollX == 0) {
         var delta = MediaQuery.of(context).size.height * scrollY / 100;
-        _verticalController.animateTo(_verticalController.offset + delta,
+        await _verticalController.animateTo(_verticalController.offset + delta,
             duration: Duration(milliseconds: 200), curve: Curves.ease);
       }
     });
