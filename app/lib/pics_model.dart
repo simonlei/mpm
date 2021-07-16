@@ -34,8 +34,7 @@ class PicsModel with ChangeNotifier {
     List data = resp.data['data'];
     for (int i = 0; i < data.length; i++) {
       var element = data.elementAt(i);
-      _pics[start + i] = PicImage(element);
-      ;
+      _pics[start + i] = PicImage(this, element);
     }
     notifyListeners();
     return _pics;
@@ -101,7 +100,8 @@ class PicsModel with ChangeNotifier {
 enum MediaType { photo, video }
 
 class PicImage {
-  PicImage(element) {
+  PicImage(this._picsModel, element) {
+    id = element['id'];
     width = element['width'];
     height = element['height'];
     thumb = element['thumb'];
@@ -117,15 +117,17 @@ class PicImage {
 
   String formatDuration() => Duration(seconds: duration.toInt()).toString().split('.').first.padLeft(8, "0");
 
+  late final PicsModel _picsModel;
+  late final int id;
   late final double width;
   late final double height;
-  late final String thumb;
+  late String thumb;
   late final String name;
   late final int size;
-  late final String? description;
-  late final String? address;
-  late final DateTime takenDate;
-  late final bool star;
+  late String? description;
+  late String? address;
+  late DateTime takenDate;
+  late bool star;
   late final MediaType mediaType;
   late final double duration;
 
@@ -136,5 +138,29 @@ class PicImage {
         "描述：$description\n" +
         (address == null ? "" : "地址：$address\n") +
         "时间：${takenDate.year}-${takenDate.month.toString().padLeft(2, '0')}-${takenDate.day.toString().padLeft(2, '0')}";
+  }
+
+  Future<void> update(Map<String, dynamic> map) async {
+    map.putIfAbsent('id', () => id);
+    var resp = await Dio().post(Config.api("/api/updateImage"), data: map);
+    if (resp.statusCode == 200) {
+      //print('reseting...');
+      resetElement(resp.data);
+      _picsModel.notifyListeners();
+    }
+  }
+
+  void resetElement(Map<String, dynamic> element) {
+    //print(element);
+    //print(element.containsKey('star'));
+    star = element.containsKey('star') ? element['star'] : star;
+    description = element.containsKey(['description'])
+        ? element['description']
+        : description == null
+            ? ''
+            : description;
+    address = element.containsKey('address') ? element['address'] : address;
+    takenDate = element.containsKey('takendate') ? DateTime.parse(element['takendate']) : takenDate;
+    thumb = element.containsKey('thumb') ? element['thumb'] : thumb;
   }
 }

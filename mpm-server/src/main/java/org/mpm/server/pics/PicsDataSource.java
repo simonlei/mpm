@@ -77,12 +77,10 @@ public class PicsDataSource {
         return taskId;
     }
 
-    /*
-    // used in datasource
-    public DSResponse update(DSRequest req) {
-        DSResponse resp = new DSResponse();
+
+    @PostMapping("/api/updateImage")
+    public Map update(@RequestBody Map values) {
         Record record = new Record();
-        Map values = req.getValues();
         record.putAll(values);
 
         if (values.get("longitude") != null || values.get("latitude") != null) {
@@ -91,12 +89,10 @@ public class PicsDataSource {
                 record.set("address", address);
             }
         }
-        int affectedRows = dao.updateIgnoreNull(dao.getEntity(EntityPhoto.class).getObject(record));
-        resp.setData(addThumbField(Lang.list(record)));
-        resp.setAffectedRows(affectedRows);
-        return resp;
+        dao.updateIgnoreNull(dao.getEntity(EntityPhoto.class).getObject(record));
+        return addThumbField(dao.query("t_photos", Cnd.where("id", "=", record.getInt("id")))).get(0);
     }
-*/
+
     private String getAddress(Map values) {
         try {
             return picsModule.getAddress(Double.parseDouble("" + values.get("latitude")),
