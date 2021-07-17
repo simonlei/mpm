@@ -14,19 +14,16 @@ class StarButton extends StatefulWidget {
 }
 
 class _StarButtonState extends State<StarButton> {
-  bool _star = false;
+  //bool _star = false;
 
   @override
   Widget build(BuildContext context) {
     var image = widget._image;
-    _star = image.star;
     return IconButton(
-      icon: Image.asset(_star ? "web/icons/star.png" : "web/icons/notstar.png"),
+      icon: Image.asset(image.star ? "web/icons/star.png" : "web/icons/notstar.png"),
       onPressed: () async {
         await image.update({'star': !image.star});
-        setState(() {
-          _star = image.star;
-        });
+        setState(() {});
       },
     );
   }
