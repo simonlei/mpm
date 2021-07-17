@@ -172,7 +172,7 @@ class PicImage {
   }
 
   void resetElement(Map<String, dynamic> element) {
-    // print(element);
+    print(element);
     //print(element.containsKey('star'));
     star = element.containsKey('star') ? element['star'] : star;
     description = element.containsKey(['description'])

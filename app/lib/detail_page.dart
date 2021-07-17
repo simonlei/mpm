@@ -1,3 +1,4 @@
+import 'package:app/actions/star_action.dart';
 import 'package:app/config.dart';
 import 'package:app/pics_model.dart';
 import 'package:app/video_view.dart';
@@ -53,6 +54,7 @@ class _DetailPageState extends State<DetailPage> {
         LogicalKeySet(LogicalKeyboardKey.keyK): MoveIntent(0, -50),
         LogicalKeySet(LogicalKeyboardKey.keyL): MoveIntent(50, 0),
         LogicalKeySet(LogicalKeyboardKey.keyH): MoveIntent(-50, 0),
+        LogicalKeySet(LogicalKeyboardKey.keyS): StarIntent(_picsModel.imageAt(_index)!),
       },
       child: Actions(
         actions: {
@@ -61,6 +63,7 @@ class _DetailPageState extends State<DetailPage> {
           DeleteIntent: DeleteAction(this),
           ZoomIntent: ZoomAction(this),
           MoveIntent: MoveAction(this),
+          StarIntent: StarAction(),
         },
         child: Card(
           child: Focus(
