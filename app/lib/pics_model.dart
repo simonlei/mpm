@@ -114,6 +114,21 @@ class PicsModel with ChangeNotifier {
   PicImage? imageAt(int index) {
     return _pics[index];
   }
+
+  void starSelected() {
+    if (_selectModel.selected.isEmpty) return;
+    _selectModel.selected.forEach((element) async {
+      await _pics[element]!.update({'star': !_pics[element]!.star});
+    });
+  }
+
+  Future<void> updateImage(PicImage image, Map<String, dynamic> map) async {
+    var resp = await Dio().post(Config.api("/api/updateImage"), data: map);
+    if (resp.statusCode == 200) {
+      image.resetElement(resp.data);
+      notifyListeners();
+    }
+  }
 }
 
 enum MediaType { photo, video }
@@ -163,12 +178,7 @@ class PicImage {
 
   Future<void> update(Map<String, dynamic> map) async {
     map.putIfAbsent('id', () => id);
-    var resp = await Dio().post(Config.api("/api/updateImage"), data: map);
-    if (resp.statusCode == 200) {
-      //print('reseting...');
-      resetElement(resp.data);
-      _picsModel.notifyListeners();
-    }
+    await _picsModel.updateImage(this, map);
   }
 
   void resetElement(Map<String, dynamic> element) {

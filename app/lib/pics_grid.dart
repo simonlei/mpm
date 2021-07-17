@@ -1,3 +1,4 @@
+import 'package:app/actions/star_action.dart';
 import 'package:app/image_tile.dart';
 import 'package:app/pics_model.dart';
 import 'package:flutter/material.dart';
@@ -19,16 +20,21 @@ class _PicsGridState extends State<PicsGrid> {
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      autofocus: true,
-      onKey: onKey,
-      child: Consumer<PicsModel>(
-        builder: (context, picsModel, child) {
-          Logger().i('Consumer picsModel ${picsModel.getTotalImages()}');
-          _picsModel = picsModel;
-          _gridView = buildStaggeredGridView(picsModel);
-          return _gridView;
-        },
+    return Actions(
+      actions: {
+        StarIntent: StarAction(),
+      },
+      child: Focus(
+        autofocus: true,
+        onKey: onKey,
+        child: Consumer<PicsModel>(
+          builder: (context, picsModel, child) {
+            Logger().i('Consumer picsModel ${picsModel.getTotalImages()}');
+            _picsModel = picsModel;
+            _gridView = buildStaggeredGridView(picsModel);
+            return _gridView;
+          },
+        ),
       ),
     );
   }
@@ -67,6 +73,8 @@ class _PicsGridState extends State<PicsGrid> {
       _picsModel.trashSelected();
     } else if (event.isKeyPressed(LogicalKeyboardKey.keyR)) {
       _picsModel.rotateSelected();
+    } else if (event.isKeyPressed(LogicalKeyboardKey.keyS)) {
+      _picsModel.starSelected();
     }
     return true;
   }
