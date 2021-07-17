@@ -1,6 +1,6 @@
-import 'package:app/actions/star_action.dart';
 import 'package:app/image_tile.dart';
 import 'package:app/pics_model.dart';
+import 'package:app/widgets/star_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';

@@ -1,6 +1,8 @@
 import 'package:app/config.dart';
+import 'package:app/detail_page.dart';
 import 'package:app/pics_model.dart';
 import 'package:app/select_model.dart';
+import 'package:app/widgets/rotate_button.dart';
 import 'package:app/widgets/star_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -31,49 +33,55 @@ class _ImageTileState extends State<ImageTile> {
         builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
           if (snapshot.hasData) {
             PicImage image = snapshot.data!;
-            return GestureDetector(
-              onTap: () {
-                widget.picsModel.select(widget.index);
+            return Actions(
+              actions: {
+                RotateIntent: RotateAction(this),
               },
-              onDoubleTap: () => openDetailPage(context),
-              child: Selector<SelectModel, bool>(
-                selector: (context, selectModel) => selectModel.isSelected(widget.index),
-                shouldRebuild: (preSelected, nextSelected) => preSelected != nextSelected,
-                builder: (context, selected, child) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: selected ? Colors.blue : Colors.grey, width: 2),
-                    ),
-                    child: Stack(
-                      children: [
-                        Tooltip(
-                          message: image.getTooltip(),
-                          child: FadeInImage.memoryNetwork(
-                            width: image.width,
-                            height: image.height,
-                            placeholder: kTransparentImage,
-                            image: Config.imageUrl(image.thumb),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            StarButton(image),
-                            image.mediaType == MediaType.video
-                                ? Row(children: [
-                                    Image.asset('web/icons/start.png'),
-                                    Text(
-                                      // image.duration == null ? '' :
-                                      image.formatDuration(),
-                                      style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
-                                    )
-                                  ])
-                                : Text(''),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
+              child: GestureDetector(
+                onTap: () {
+                  widget.picsModel.select(widget.index);
                 },
+                onDoubleTap: () => openDetailPage(context),
+                child: Selector<SelectModel, bool>(
+                  selector: (context, selectModel) => selectModel.isSelected(widget.index),
+                  shouldRebuild: (preSelected, nextSelected) => preSelected != nextSelected,
+                  builder: (context, selected, child) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: selected ? Colors.blue : Colors.grey, width: 2),
+                      ),
+                      child: Stack(
+                        children: [
+                          Tooltip(
+                            message: image.getTooltip(),
+                            child: FadeInImage.memoryNetwork(
+                              width: image.width,
+                              height: image.height,
+                              placeholder: kTransparentImage,
+                              image: Config.imageUrl(image.thumb),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              StarButton(image),
+                              RotateButton(image),
+                              image.mediaType == MediaType.video
+                                  ? Row(children: [
+                                      Image.asset('web/icons/start.png'),
+                                      Text(
+                                        // image.duration == null ? '' :
+                                        image.formatDuration(),
+                                        style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
+                                      )
+                                    ])
+                                  : Text(''),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             );
           } else if (snapshot.hasError)

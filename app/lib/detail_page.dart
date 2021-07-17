@@ -1,7 +1,7 @@
-import 'package:app/actions/star_action.dart';
 import 'package:app/config.dart';
 import 'package:app/pics_model.dart';
 import 'package:app/video_view.dart';
+import 'package:app/widgets/rotate_button.dart';
 import 'package:app/widgets/star_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -55,6 +55,7 @@ class _DetailPageState extends State<DetailPage> {
         LogicalKeySet(LogicalKeyboardKey.keyL): MoveIntent(50, 0),
         LogicalKeySet(LogicalKeyboardKey.keyH): MoveIntent(-50, 0),
         LogicalKeySet(LogicalKeyboardKey.keyS): StarIntent(_picsModel.imageAt(_index)!),
+        LogicalKeySet(LogicalKeyboardKey.keyR): RotateIntent(_picsModel.imageAt(_index)!),
       },
       child: Actions(
         actions: {
@@ -64,6 +65,7 @@ class _DetailPageState extends State<DetailPage> {
           ZoomIntent: ZoomAction(this),
           MoveIntent: MoveAction(this),
           StarIntent: StarAction(),
+          RotateIntent: RotateAction(this),
         },
         child: Card(
           child: Focus(
@@ -102,10 +104,13 @@ class _DetailPageState extends State<DetailPage> {
           height: _scale ? MediaQuery.of(context).size.height : image.height,
           child: Tooltip(
             message: image.getTooltip(),
-            child: FadeInImage.memoryNetwork(
-                fit: _scale ? BoxFit.scaleDown : BoxFit.none,
-                placeholder: kTransparentImage,
-                image: Config.imageUrl(image.name)),
+            child: RotatedBox(
+              quarterTurns: ((((360 + image.rotate) % 360) / 90) % 4).toInt(),
+              child: FadeInImage.memoryNetwork(
+                  fit: _scale ? BoxFit.scaleDown : BoxFit.none,
+                  placeholder: kTransparentImage,
+                  image: Config.imageUrl(image.name)),
+            ),
           ),
         ),
       ),
@@ -150,6 +155,7 @@ class _DetailPageState extends State<DetailPage> {
         Row(
           children: [
             StarButton(image),
+            RotateButton(image),
           ],
         ),
       ],
@@ -233,4 +239,23 @@ class NextPageAction extends Action<NextPageIntent> {
     Logger().i("intent: ${intent.next}");
     _detailPageState.showNext(intent.next);
   }
+}
+
+class RotateAction extends Action<RotateIntent> {
+  RotateAction(this._detailPage);
+
+  State _detailPage;
+
+  @override
+  Future<Object?> invoke(covariant RotateIntent intent) async {
+    PicImage image = intent._image;
+    await image.picsModel.rotateImage(image);
+    _detailPage.setState(() {});
+  }
+}
+
+class RotateIntent extends Intent {
+  RotateIntent(this._image);
+
+  final PicImage _image;
 }

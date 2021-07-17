@@ -83,9 +83,9 @@ My Photo Manager client side.
 - [ ] 支持按目录修改图片的日期
 - [ ] 支持按目录修改图片的gis信息
 - [x] 支持照片的旋转
-- [ ] 全屏状态下也支持旋转
+- [x] 全屏状态下也支持旋转
 - [x] bug: mediaType error
-- [ ] 增加rotate按钮
+- [x] 增加rotate按钮
 
 ### v1.1.3
 
