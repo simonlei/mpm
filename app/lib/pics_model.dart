@@ -95,6 +95,25 @@ class PicsModel with ChangeNotifier {
       Logger().e("Result is $resp");
     }
   }
+
+  void rotateSelected() {
+    if (_selectModel.selected.isEmpty) return;
+    _selectModel.selected.forEach((element) async {
+      var image = _pics[element];
+      int rotate = (image!.rotate + 90) % 360;
+      var resp = await Dio().post(Config.api("/api/updateImage"), data: {'id': image.id, 'rotate': rotate});
+      if (resp.statusCode == 200) {
+        // print('reseting...');
+        image.resetElement(resp.data);
+        notifyListeners();
+      }
+    });
+  }
+
+  /// 同步获取index位置的图片，可能获取到空
+  PicImage? imageAt(int index) {
+    return _pics[index];
+  }
 }
 
 enum MediaType { photo, video }
@@ -108,6 +127,7 @@ class PicImage {
     name = element['name'];
     size = element['size'];
     star = element['star'];
+    rotate = element['rotate'];
     description = element['description'];
     address = element['address'];
     takenDate = DateTime.parse(element['takendate']);
@@ -130,6 +150,7 @@ class PicImage {
   late bool star;
   late final MediaType mediaType;
   late final double duration;
+  late int rotate;
 
   String getTooltip() {
     return "大小：${filesize(size)} \n" +
@@ -151,7 +172,7 @@ class PicImage {
   }
 
   void resetElement(Map<String, dynamic> element) {
-    //print(element);
+    // print(element);
     //print(element.containsKey('star'));
     star = element.containsKey('star') ? element['star'] : star;
     description = element.containsKey(['description'])
@@ -162,5 +183,6 @@ class PicImage {
     address = element.containsKey('address') ? element['address'] : address;
     takenDate = element.containsKey('takendate') ? DateTime.parse(element['takendate']) : takenDate;
     thumb = element.containsKey('thumb') ? element['thumb'] : thumb;
+    rotate = element.containsKey('rotate') ? element['rotate'] : rotate;
   }
 }

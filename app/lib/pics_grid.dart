@@ -65,6 +65,8 @@ class _PicsGridState extends State<PicsGrid> {
       Navigator.of(context).pushNamed('/detail', arguments: Tuple2(_picsModel, _picsModel.getSelectedIndex()));
     } else if (event.isKeyPressed(LogicalKeyboardKey.keyD)) {
       _picsModel.trashSelected();
+    } else if (event.isKeyPressed(LogicalKeyboardKey.keyR)) {
+      _picsModel.rotateSelected();
     }
     return true;
   }

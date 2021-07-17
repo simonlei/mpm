@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class StarButton extends StatefulWidget {
-  PicImage _image;
+  final PicImage _image;
 
   StarButton(this._image);
 
@@ -14,8 +14,6 @@ class StarButton extends StatefulWidget {
 }
 
 class _StarButtonState extends State<StarButton> {
-  //bool _star = false;
-
   @override
   Widget build(BuildContext context) {
     var image = widget._image;
