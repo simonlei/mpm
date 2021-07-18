@@ -5,6 +5,7 @@ import 'package:app/select_model.dart';
 import 'package:app/widgets/rotate_button.dart';
 import 'package:app/widgets/star_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:tuple/tuple.dart';
@@ -69,7 +70,7 @@ class _ImageTileState extends State<ImageTile> {
                               SizedBox(width: 5),
                               image.mediaType == MediaType.video
                                   ? Row(children: [
-                                      Image.asset('web/icons/start.png'),
+                                      SvgPicture.asset('web/icons/play.svg', width: 16),
                                       SizedBox(width: 5),
                                       Text(
                                         image.formatDuration(),

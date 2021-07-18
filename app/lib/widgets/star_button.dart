@@ -1,6 +1,7 @@
 import 'package:app/pics_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 class StarButton extends StatefulWidget {
@@ -23,7 +24,7 @@ class _StarButtonState extends State<StarButton> {
         shouldRebuild: (prev, next) => prev != next,
         builder: (context, star, child) {
           return InkResponse(
-            child: Image.asset(image.star ? "web/icons/star.png" : "web/icons/notstar.png"),
+            child: SvgPicture.asset(image.star ? "web/icons/star.svg" : "web/icons/notstar.svg", width: 16),
             onTap: () async {
               setState(() {
                 Actions.invoke(context, StarIntent(image));
