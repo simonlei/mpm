@@ -22,10 +22,9 @@ class _StarButtonState extends State<StarButton> {
         selector: (context, picsModel) => image.star,
         shouldRebuild: (prev, next) => prev != next,
         builder: (context, star, child) {
-          return IconButton(
-            icon: Image.asset(image.star ? "web/icons/star.png" : "web/icons/notstar.png"),
-            onPressed: () async {
-              // await image.update({'star': !image.star});
+          return InkResponse(
+            child: Image.asset(image.star ? "web/icons/star.png" : "web/icons/notstar.png"),
+            onTap: () async {
               setState(() {
                 Actions.invoke(context, StarIntent(image));
               });

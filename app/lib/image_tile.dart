@@ -64,12 +64,14 @@ class _ImageTileState extends State<ImageTile> {
                           Row(
                             children: [
                               StarButton(image),
+                              SizedBox(width: 5),
                               RotateButton(image),
+                              SizedBox(width: 5),
                               image.mediaType == MediaType.video
                                   ? Row(children: [
                                       Image.asset('web/icons/start.png'),
+                                      SizedBox(width: 5),
                                       Text(
-                                        // image.duration == null ? '' :
                                         image.formatDuration(),
                                         style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
                                       )

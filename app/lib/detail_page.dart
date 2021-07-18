@@ -155,6 +155,7 @@ class _DetailPageState extends State<DetailPage> {
         Row(
           children: [
             StarButton(image),
+            SizedBox(width: 5),
             RotateButton(image),
           ],
         ),

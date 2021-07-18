@@ -9,9 +9,9 @@ class RotateButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: Image.asset("web/icons/rotate.png"),
-      onPressed: () async {
+    return InkResponse(
+      child: Image.asset("web/icons/rotate.png"),
+      onTap: () async {
         Actions.invoke(context, RotateIntent(_image));
         // await _image.picsModel.rotateImage(_image);
       },
