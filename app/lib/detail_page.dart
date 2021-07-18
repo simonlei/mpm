@@ -105,7 +105,7 @@ class _DetailPageState extends State<DetailPage> {
           child: Tooltip(
             message: image.getTooltip(),
             child: RotatedBox(
-              quarterTurns: ((((360 + image.rotate) % 360) / 90) % 4).toInt(),
+              quarterTurns: image.getQuarterTurns(),
               child: FadeInImage.memoryNetwork(
                   fit: _scale ? BoxFit.scaleDown : BoxFit.none,
                   placeholder: kTransparentImage,

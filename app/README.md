@@ -86,6 +86,7 @@ My Photo Manager client side.
 - [x] 全屏状态下也支持旋转
 - [x] bug: mediaType error
 - [x] 增加rotate按钮
+- [x] 视频也支持rotate
 
 ### v1.1.3
 

@@ -58,7 +58,10 @@ class _VideoViewState extends State<VideoView> {
                 child: Stack(
                   alignment: Alignment.bottomCenter,
                   children: [
-                    VideoPlayer(_controller),
+                    RotatedBox(
+                      quarterTurns: _image.getQuarterTurns(),
+                      child: VideoPlayer(_controller),
+                    ),
                     VideoProgressIndicator(_controller, allowScrubbing: true),
                   ],
                 ),

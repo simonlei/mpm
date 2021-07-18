@@ -195,4 +195,8 @@ class PicImage {
     thumb = element.containsKey('thumb') ? element['thumb'] : thumb;
     rotate = element.containsKey('rotate') ? element['rotate'] : rotate;
   }
+
+  int getQuarterTurns() {
+    return ((((360 + rotate) % 360) / 90) % 4).toInt();
+  }
 }
