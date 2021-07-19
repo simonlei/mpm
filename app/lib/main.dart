@@ -41,11 +41,6 @@ class MyApp extends StatelessWidget {
       position: ToastPosition.bottom,
       child: MaterialApp(
         title: 'My Photo Manager',
-        /*theme: ThemeData.dark(),
-        (
-          primarySwatch: Colors.blue,
-          colorScheme: ThemeData().colorScheme.copyWith(primary: Colors.green),
-        )*/
         onGenerateRoute: (RouteSettings settings) {
           var routes = <String, WidgetBuilder>{
             '/': (context) => JumpWidget(),

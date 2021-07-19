@@ -5,6 +5,7 @@ import 'package:app/headers/trash_box_switcher.dart';
 import 'package:app/headers/upload_selector.dart';
 import 'package:app/left_panel/left_panel.dart';
 import 'package:app/pics_grid.dart';
+import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -24,29 +25,31 @@ class _MyHomePageState extends State<MyHomePage> {
       appTitle = 'My Photo Manager($args)';
       setState(() {});
     });
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(appTitle),
-        centerTitle: true,
-        actions: [
-          // text 跳转 |
-          // order
-          // 过滤条件 （只看star）|
-          SortSelector(),
-          TrashBoxSwitcher(),
-          // |
-          EmptyTrashButton(),
-          UploadSelector(),
-          // 回收站
-        ],
-        toolbarHeight: 25,
-      ),
-      body: Row(children: [
-        LeftPanel(),
-        Expanded(
-          child: PicsGrid(),
+    return ContextMenuOverlay(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(appTitle),
+          centerTitle: true,
+          actions: [
+            // text 跳转 |
+            // order
+            // 过滤条件 （只看star）|
+            SortSelector(),
+            TrashBoxSwitcher(),
+            // |
+            EmptyTrashButton(),
+            UploadSelector(),
+            // 回收站
+          ],
+          toolbarHeight: 25,
         ),
-      ]),
+        body: Row(children: [
+          LeftPanel(),
+          Expanded(
+            child: PicsGrid(),
+          ),
+        ]),
+      ),
     );
   }
 }

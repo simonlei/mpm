@@ -1,6 +1,7 @@
 import 'package:app/conditions.dart';
 import 'package:app/config.dart';
 import 'package:app/event_bus.dart';
+import 'package:context_menus/context_menus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +37,12 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
             ),
             onNodeTap: (key) {
               _selectChange(key);
+            },
+            nodeBuilder: (context, node) {
+              return ContextMenuRegion(
+                contextMenu: LinkContextMenu(url: 'http://flutter.dev ${node.label}'),
+                child: _buildLabel(context, node),
+              );
             },
           );
         } else
@@ -112,5 +119,43 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
     ];
     _inited = true;
     return TreeViewController(children: nodes);
+  }
+
+  Widget _buildLabel(BuildContext context, Node node) {
+    // copy from TreeNode.class
+    TreeView? _treeView = TreeView.of(context);
+    assert(_treeView != null, 'TreeView must exist in context');
+    TreeViewTheme _theme = _treeView!.theme;
+    bool isSelected = _treeView.controller.selectedKey != null && _treeView.controller.selectedKey == node.key;
+    //final icon = _buildNodeIcon(node);
+    return Container(
+      padding: EdgeInsets.symmetric(
+        vertical: _theme.verticalSpacing ?? (_theme.dense ? 10 : 15),
+        horizontal: 0,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          // icon,
+          Expanded(
+            child: Text(
+              node.label,
+              softWrap: node.isParent ? _theme.parentLabelOverflow == null : _theme.labelOverflow == null,
+              overflow: node.isParent ? _theme.parentLabelOverflow : _theme.labelOverflow,
+              style: node.isParent
+                  ? _theme.parentLabelStyle.copyWith(
+                      fontWeight: _theme.parentLabelStyle.fontWeight,
+                      color: isSelected ? _theme.colorScheme.onPrimary : _theme.parentLabelStyle.color,
+                    )
+                  : _theme.labelStyle.copyWith(
+                      fontWeight: _theme.labelStyle.fontWeight,
+                      color: isSelected ? _theme.colorScheme.onPrimary : null,
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
