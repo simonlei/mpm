@@ -155,8 +155,8 @@ public class PicsService {
         }
         EntityPhoto photo = createEntityPhotoFrom(file);
 
-        setExifInfo(key, photo);
-        setDateFromExif(file, photo);
+        setInfosFromCos(key, photo);
+        setInfosFromFile(file, photo);
         checkInBlacklist(file, photo);
         log.info("Saving photo " + photo.getId());
         photo = dao.insert(photo, true, false, false);
@@ -206,7 +206,7 @@ public class PicsService {
         return existPhoto;
     }
 
-    private void setExifInfo(String key, EntityPhoto photo) {
+    private void setInfosFromCos(String key, EntityPhoto photo) {
         Map imageInfo = cosRemoteService.getImageInfo(key);
         photo.setWidth(MyUtils.parseInt(imageInfo.get("width"), 0));
         photo.setHeight(MyUtils.parseInt(imageInfo.get("height"), 0));
@@ -220,16 +220,19 @@ public class PicsService {
         photo.setTakenDate(date);
         photo.setLatitude(parseGps(MyUtils.cell(exifInfo, "GPSLatitude.val")));
         photo.setLongitude(parseGps(MyUtils.cell(exifInfo, "GPSLongitude.val")));
-        // Todo: 写单元测试
     }
 
-    private Double parseGps(String str) {
-        String[] strs = str.split(" ");
-        return (Double) El.eval("1.0*" + strs[0]) + (Double) El.eval("1.0*" + strs[1]) / 60
-                + (Double) El.eval("1.0*" + strs[2]) / 3600;
+    Double parseGps(String str) {
+        try {
+            String[] strs = str.split(" ");
+            return (Double) El.eval("1.0*" + strs[0]) + (Double) El.eval("1.0*" + strs[1]) / 60
+                    + (Double) El.eval("1.0*" + strs[2]) / 3600;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    public void setDateFromExif(File file, EntityPhoto photo) {
+    public void setInfosFromFile(File file, EntityPhoto photo) {
         if (photo.getTakenDate() == null) { // 如果已经有就不要重复设置了
             photo.setTakenDate(new Date(file.lastModified()));
         }

@@ -1,6 +1,7 @@
 package org.mpm.server.pics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.COSObjectSummary;
@@ -18,6 +19,8 @@ public class PicsServiceTest extends BaseTest {
 
     @Autowired
     COSClient cosClient;
+    @Autowired
+    PicsService picsService;
 
     @Test
     public void testGetCoverName() {
@@ -43,5 +46,12 @@ public class PicsServiceTest extends BaseTest {
             cosClient.deleteObject(bucket, tmpKey);
             log.info(name);
         }
+    }
+
+    @Test
+    void testParseGps() {
+        assertNull(picsService.parseGps(null));
+        assertNull(picsService.parseGps("not valid gps"));
+        assertEquals(22.18611111111111, picsService.parseGps("22/1 11/1 1000/100"));
     }
 }
