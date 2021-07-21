@@ -1,6 +1,7 @@
 import 'package:app/conditions.dart';
 import 'package:app/config.dart';
 import 'package:app/event_bus.dart';
+import 'package:app/left_panel/folder_context_menu.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -40,7 +41,7 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
             },
             nodeBuilder: (context, node) {
               return ContextMenuRegion(
-                contextMenu: LinkContextMenu(url: 'http://flutter.dev ${node.label}'),
+                contextMenu: FolderContextMenu(node.key),
                 child: _buildLabel(context, node),
               );
             },
