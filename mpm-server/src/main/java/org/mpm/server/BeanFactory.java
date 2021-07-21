@@ -49,17 +49,6 @@ public class BeanFactory {
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
         dataSource.setUsername(dbUsername);
         dataSource.setPassword(dbPassword);
-        /*
-        JndiTemplate jndiTemplate = new JndiTemplate();
-        try {
-            jndiTemplate.lookup("mpmdb");
-        } catch (NamingException e) {
-            try {
-                jndiTemplate.bind("mpmdb", dataSource);
-            } catch (NamingException namingException) {
-                namingException.printStackTrace();
-            }
-        }*/
         return new NutDao(dataSource);
     }
 }
