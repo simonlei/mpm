@@ -28,7 +28,7 @@ public class PicsDataSource {
     Dao dao;
 
     @Autowired
-    PicsModule picsModule;
+    PicsService picsService;
     @Autowired
     TrashEmptyTask emptyTask;
 
@@ -67,7 +67,7 @@ public class PicsDataSource {
     // used in client
     @PostMapping("/api/getCount")
     public int count(@RequestBody boolean trashed) {
-        return picsModule.count(trashed);
+        return picsService.count(trashed);
     }
 
     @PostMapping("/api/emptyTrash")
@@ -95,7 +95,7 @@ public class PicsDataSource {
 
     private String getAddress(Map values) {
         try {
-            return picsModule.getAddress(Double.parseDouble("" + values.get("latitude")),
+            return picsService.getAddress(Double.parseDouble("" + values.get("latitude")),
                     Double.parseDouble("" + values.get("longitude")));
         } catch (Exception e) {
             log.error("Can't set address", e);

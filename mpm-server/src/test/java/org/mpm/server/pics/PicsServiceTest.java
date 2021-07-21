@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 @Slf4j
-public class PicsModuleTest extends BaseTest {
+public class PicsServiceTest extends BaseTest {
 
     @Autowired
     COSClient cosClient;

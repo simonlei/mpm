@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityMeta;
 import org.mpm.server.entity.EntityPhoto;
-import org.mpm.server.pics.PicsModule;
+import org.mpm.server.pics.PicsService;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.lang.Lang;
@@ -25,7 +25,7 @@ public class PhotoImporterDataSource {
     @Autowired
     Dao dao;
     @Autowired
-    PicsModule picsModule;
+    PicsService picsService;
 
     // used in client
     @PostMapping("/uploadFile")
@@ -52,7 +52,7 @@ public class PhotoImporterDataSource {
             }
         }
         String name = paths[paths.length - 1];
-        EntityPhoto photo = picsModule.savePhotoInDb(parent, key, name);
+        EntityPhoto photo = picsService.savePhotoInDb(parent, key, name);
         if (photo != null) {
             EntityFile file = existOrCreate(parent, path + "/" + name, name, false);
             file.setPhotoId(photo.getId());

@@ -24,7 +24,7 @@ public class GeoChecker {
     @Autowired
     Dao dao;
     @Autowired
-    PicsModule picsModule;
+    PicsService picsService;
 
     private int tokens = GEO_API_LIMIT;
     private ScheduledExecutorService executorService;
@@ -70,9 +70,9 @@ public class GeoChecker {
         try {
             // download photo
             tmpFile = File.createTempFile(p.getName(), "" + Math.random());
-            picsModule.saveCosFile(p.getName(), tmpFile);
+            picsService.saveCosFile(p.getName(), tmpFile);
             // check taken date and geo
-            picsModule.setDateFromExif(tmpFile, p);
+            picsService.setDateFromExif(tmpFile, p);
             dao.updateIgnoreNull(p);
             if (p.getLatitude() != null) {
                 tokens--;

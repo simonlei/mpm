@@ -14,14 +14,14 @@ public class TrashEmptyTask extends AbstractProgressTask implements Runnable {
     @Autowired
     Dao dao;
     @Autowired
-    PicsModule picsModule;
+    PicsService picsService;
 
     @Override
     public void run() {
         List<EntityPhoto> trashed = dao.query(EntityPhoto.class, Cnd.where("trashed", "=", true));
         setTotal(trashed.size());
         for (EntityPhoto p : trashed) {
-            picsModule.realDelete(p);
+            picsService.realDelete(p);
             countInc();
         }
     }

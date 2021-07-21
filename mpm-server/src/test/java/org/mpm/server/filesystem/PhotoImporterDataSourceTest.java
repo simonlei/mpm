@@ -13,7 +13,7 @@ import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.mpm.server.BaseTest;
 import org.mpm.server.filesystem.PhotoImporterDataSource.UploadFileSchema;
-import org.mpm.server.pics.PicsModule;
+import org.mpm.server.pics.PicsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,11 +27,11 @@ public class PhotoImporterDataSourceTest extends BaseTest {
     PhotoImporterDataSource photoImporterDataSource;
 
     @MockBean
-    PicsModule picsModule;
+    PicsService picsService;
 
     @Test
     public void testImportPhoto() throws FileNotFoundException {
-        Mockito.when(picsModule.saveCosFile(Mockito.any(), Mockito.any()))
+        Mockito.when(picsService.saveCosFile(Mockito.any(), Mockito.any()))
                 .thenAnswer((Answer<String>) invocation -> "image/jpeg");
         String key = photoImporterDataSource.uploadFile(
                 UploadFileSchema.builder().key("upload/1616940995641_tmpupload/七上1025义工/IMG_004.jpg")

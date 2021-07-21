@@ -32,22 +32,18 @@ import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.mapl.Mapl;
 import org.nutz.trans.Trans;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @Slf4j
-public class PicsModule {
+public class PicsService {
 
     private static final String PHOTO = "photo";
     private static final String VIDEO = "video";
-    @Autowired
-    Dao dao;
-    @Autowired
-    COSClient cosClient;
-    @Autowired
-    CosRemoteService cosRemoteService;
+    final Dao dao;
+    final COSClient cosClient;
+    final CosRemoteService cosRemoteService;
 
     @Value("${qqlbsKey}")
     String qqlbsKey;
@@ -55,6 +51,12 @@ public class PicsModule {
     String qqlbsToken;
     @Value("${cos.bucket}")
     String bucket;
+
+    public PicsService(Dao dao, COSClient cosClient, CosRemoteService cosRemoteService) {
+        this.dao = dao;
+        this.cosClient = cosClient;
+        this.cosRemoteService = cosRemoteService;
+    }
 
     public int count(boolean trashed) {
         return dao.count(EntityPhoto.class, Cnd.where("trashed", "=", trashed));
