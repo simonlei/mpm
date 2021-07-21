@@ -1,6 +1,6 @@
 package org.mpm.server.pics;
 
-import com.drew.imaging.jpeg.JpegMetadataReader;
+import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
@@ -10,19 +10,20 @@ import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoRequest;
 import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoResponse;
 import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoVideo;
 import com.qcloud.cos.model.ciModel.snapshot.SnapshotRequest;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Date;
-import javax.imageio.ImageIO;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityBlockPicture;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityPhoto;
+import org.mpm.server.remote.CosRemoteService;
+import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
+import org.nutz.el.El;
 import org.nutz.http.Http;
 import org.nutz.http.Response;
 import org.nutz.json.Json;
@@ -45,6 +46,8 @@ public class PicsModule {
     Dao dao;
     @Autowired
     COSClient cosClient;
+    @Autowired
+    CosRemoteService cosRemoteService;
 
     @Value("${qqlbsKey}")
     String qqlbsKey;
@@ -144,33 +147,22 @@ public class PicsModule {
     }
 
     public EntityPhoto saveFileInRepository(File file, String key, String name) {
-        try {
-            final BufferedImage image = ImageIO.read(file);
-            if (image == null) {
-                return null; // 不是正确的图片
-            }
-
-            EntityPhoto samePhoto = sameFileExist(file, key);
-            if (samePhoto != null) {
-                return samePhoto;
-            }
-            EntityPhoto photo = createEntityPhotoFrom(file);
-
-            photo.setWidth(image.getWidth());
-            photo.setHeight(image.getHeight());
-            setDateFromExif(file, photo);
-            checkInBlacklist(file, photo);
-            log.info("Saving photo " + photo.getId());
-            photo = dao.insert(photo, true, false, false);
-
-            log.info("Photo:" + photo);
-            cosClient.copyObject(bucket, key, bucket, photo.getName());
-            cosClient.deleteObject(bucket, key);
-            return photo;
-        } catch (IOException e) {
-            log.error("Can't read file " + key, e);
-            return null;
+        EntityPhoto samePhoto = sameFileExist(file, key);
+        if (samePhoto != null) {
+            return samePhoto;
         }
+        EntityPhoto photo = createEntityPhotoFrom(file);
+
+        setExifInfo(key, photo);
+        setDateFromExif(file, photo);
+        checkInBlacklist(file, photo);
+        log.info("Saving photo " + photo.getId());
+        photo = dao.insert(photo, true, false, false);
+
+        log.info("Photo:" + photo);
+        cosClient.copyObject(bucket, key, bucket, photo.getName());
+        cosClient.deleteObject(bucket, key);
+        return photo;
     }
 
     private void checkInBlacklist(File file, EntityPhoto photo) {
@@ -212,12 +204,35 @@ public class PicsModule {
         return existPhoto;
     }
 
+    private void setExifInfo(String key, EntityPhoto photo) {
+        Map imageInfo = cosRemoteService.getImageInfo(key);
+        photo.setWidth(MyUtils.parseInt(imageInfo.get("width"), 0));
+        photo.setHeight(MyUtils.parseInt(imageInfo.get("height"), 0));
+
+        Map exifInfo = cosRemoteService.getExifInfo(key);
+        if (exifInfo.get("error") != null) {
+            return;
+        }
+        String dateTime = MyUtils.cell(exifInfo, "DateTime.val");
+        Date date = MyUtils.parseDate(dateTime, "yyyy:MM:dd HH:mm:ss");
+        photo.setTakenDate(date);
+        photo.setLatitude(parseGps(MyUtils.cell(exifInfo, "GPSLatitude.val")));
+        photo.setLongitude(parseGps(MyUtils.cell(exifInfo, "GPSLongitude.val")));
+        // Todo: 写单元测试
+    }
+
+    private Double parseGps(String str) {
+        String[] strs = str.split(" ");
+        return (Double) El.eval("1.0*" + strs[0]) + (Double) El.eval("1.0*" + strs[1]) / 60
+                + (Double) El.eval("1.0*" + strs[2]) / 3600;
+    }
+
     public void setDateFromExif(File file, EntityPhoto photo) {
         if (photo.getTakenDate() == null) { // 如果已经有就不要重复设置了
             photo.setTakenDate(new Date(file.lastModified()));
         }
         try {
-            Metadata metadata = JpegMetadataReader.readMetadata(file);
+            Metadata metadata = ImageMetadataReader.readMetadata(file);
             setDate(photo, metadata);
             GpsDirectory gpsDirectory = metadata.getFirstDirectoryOfType(GpsDirectory.class);
             if (gpsDirectory != null && gpsDirectory.getGeoLocation() != null) {

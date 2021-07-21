@@ -74,6 +74,17 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <groupId>org.springframework.cloud</groupId>
+            <version>2.2.5.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-httpclient</artifactId>
+            <version>10.9.1</version>
+        </dependency>
+
+        <dependency>
             <artifactId>spring-webmvc</artifactId>
             <groupId>org.springframework</groupId>
             <version>5.2.7.RELEASE</version>

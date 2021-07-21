@@ -21,6 +21,22 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
   bool _inited = false;
 
   @override
+  void initState() {
+    super.initState();
+    BUS.on(EventBus.ConditionsChanged, (arg) {
+      setState(() {
+        _inited = false;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    BUS.off(EventBus.ConditionsChanged);
+  }
+
+  @override
   Widget build(BuildContext context) {
     Logger().i('build folder tree');
     return FutureBuilder<TreeViewController>(

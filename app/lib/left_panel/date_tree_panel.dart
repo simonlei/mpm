@@ -19,6 +19,22 @@ class _DateTreePanelState extends State<DateTreePanel> {
   bool _inited = false;
 
   @override
+  void initState() {
+    super.initState();
+    BUS.on(EventBus.ConditionsChanged, (arg) {
+      setState(() {
+        _inited = false;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    BUS.off(EventBus.ConditionsChanged);
+  }
+
+  @override
   Widget build(BuildContext context) {
     Logger().i('build date tree');
     return FutureBuilder<TreeViewController>(
