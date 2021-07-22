@@ -21,6 +21,8 @@ public class CronService {
 
     @Scheduled(fixedDelay = 5000)
     void checkPhotos() {
-        geoChecker.checkPhotoGeos();
+        if (gisService.hasToken()) {
+            geoChecker.checkPhotoGeos();
+        }
     }
 }
