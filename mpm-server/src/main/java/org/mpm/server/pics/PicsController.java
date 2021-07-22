@@ -32,6 +32,8 @@ public class PicsController {
     PicsService picsService;
     @Autowired
     TrashEmptyTask emptyTask;
+    @Autowired
+    GisService gisService;
 
     /*
     // used in client
@@ -96,7 +98,7 @@ public class PicsController {
 
     private String getAddress(Map values) {
         try {
-            return picsService.getAddress(Double.parseDouble("" + values.get("latitude")),
+            return gisService.getAddress(Double.parseDouble("" + values.get("latitude")),
                     Double.parseDouble("" + values.get("longitude")));
         } catch (Exception e) {
             log.error("Can't set address", e);

@@ -24,14 +24,11 @@ import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.el.El;
-import org.nutz.http.Http;
-import org.nutz.http.Response;
-import org.nutz.json.Json;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
-import org.nutz.mapl.Mapl;
 import org.nutz.trans.Trans;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -44,11 +41,9 @@ public class PicsService {
     final Dao dao;
     final COSClient cosClient;
     final CosRemoteService cosRemoteService;
+    @Autowired
+    GisService gisService;
 
-    @Value("${qqlbsKey}")
-    String qqlbsKey;
-    @Value("${qqlbsToken}")
-    String qqlbsToken;
     @Value("${cos.bucket}")
     String bucket;
 
@@ -206,7 +201,7 @@ public class PicsService {
         return existPhoto;
     }
 
-    private void setInfosFromCos(String key, EntityPhoto photo) {
+    void setInfosFromCos(String key, EntityPhoto photo) {
         Map imageInfo = cosRemoteService.getImageInfo(key);
         photo.setWidth(MyUtils.parseInt(imageInfo.get("width"), 0));
         photo.setHeight(MyUtils.parseInt(imageInfo.get("height"), 0));
@@ -244,7 +239,7 @@ public class PicsService {
                 photo.setLatitude(gpsDirectory.getGeoLocation().getLatitude());
                 photo.setLongitude(gpsDirectory.getGeoLocation().getLongitude());
 
-                photo.setAddress(getAddress(photo.getLatitude(), photo.getLongitude()));
+                photo.setAddress(gisService.getAddress(photo.getLatitude(), photo.getLongitude()));
             }
         } catch (Throwable e) {
             log.error("Can't read exif info", e);
@@ -260,24 +255,6 @@ public class PicsService {
             }
         } catch (Exception e) {
             log.error("Can't read exif date", e);
-        }
-    }
-
-    public String getAddress(double latitude, double longtitude) {
-        try {
-            String requestStr = "key=" + qqlbsKey + "&location=" + latitude + "," + longtitude;
-
-            String sig = Lang.md5("/ws/geocoder/v1?" + requestStr + qqlbsToken);
-
-            String url = "https://apis.map.qq.com/ws/geocoder/v1?" + requestStr + "&sig=" + sig;
-            log.info("qqlbs url is " + url);
-            Response response = Http.get(url);
-            String result = response.getContent();
-            log.info("qqlbs result:" + result);
-            return (String) Mapl.cell(Json.fromJson(result), "result.address");
-        } catch (Exception e) {
-            log.error("Can't get lbs address", e);
-            return "";
         }
     }
 
