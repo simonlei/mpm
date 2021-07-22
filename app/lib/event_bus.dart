@@ -3,12 +3,13 @@ typedef void EventCallback(arg);
 
 class EventBus {
   /// 只刷新图片grid
-  static String ConditionsChanged = 'picsConditionChanged';
+  static final String ConditionsChanged = 'picsConditionChanged';
 
   /// 刷新左侧的树
-  static String LeftTreeConditionsChanged = 'treeConditionChanged';
+  static final String LeftTreeConditionsChanged = 'treeConditionChanged';
 
-  static String CountChange = 'countChange';
+  /// 计数发生变化
+  static final String CountChange = 'countChange';
 
   //私有构造函数
   EventBus._internal();
@@ -22,14 +23,14 @@ class EventBus {
   //保存事件订阅者队列，key:事件名(id)，value: 对应事件的订阅者队列
   var _emap = new Map<Object, List<EventCallback>?>();
 
-  //添加订阅者
+  /// 添加订阅者
   void on(eventName, EventCallback f) {
     if (eventName == null || f == null) return;
     _emap[eventName] ??= <EventCallback>[];
     _emap[eventName]!.add(f);
   }
 
-  //移除订阅者（两个订阅者就会出问题）
+  /// 移除订阅者（两个订阅者的情况，后面的f不能为空，否则就会出问题）
   void off(eventName, [EventCallback? f]) {
     var list = _emap[eventName];
     if (eventName == null || list == null) return;

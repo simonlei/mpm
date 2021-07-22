@@ -51,6 +51,21 @@ public class FilesController {
         return list;
     }
 
+    @PostMapping("/api/switchTrashFolder")
+    public int switchTrashFolder(@RequestBody SwitchTrashFolderSchema request) {
+        String s = "update t_photos "
+                + " inner join t_files on t_photos.id=t_files.photoId "
+                + " SET trashed = @to"
+                + " where t_files.path like @filePath";
+        Sql sql = Sqls.create(s);
+        sql.setParam("to", request.to);
+        sql.setParam("filePath", request.path + "%");
+        sql.setCallback(Sqls.callback.integer());
+        dao.execute(sql);
+
+        return sql.getInt();
+    }
+    
 /*
     // used in datasource
     public DSResponse update(DSRequest req) {
@@ -114,5 +129,11 @@ public class FilesController {
         Boolean trashed;
         Boolean star;
         Long parentId;
+    }
+
+    static class SwitchTrashFolderSchema {
+
+        Boolean to;
+        String path;
     }
 }

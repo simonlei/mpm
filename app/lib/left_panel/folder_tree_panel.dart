@@ -59,7 +59,7 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
             },
             nodeBuilder: (context, node) {
               return ContextMenuRegion(
-                contextMenu: FolderContextMenu(node.key),
+                contextMenu: FolderContextMenu(node.data),
                 child: _buildLabel(context, node),
               );
             },
@@ -131,6 +131,7 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
       Node(
         label: '全部',
         key: '',
+        data: '',
         expanded: true,
         icon: Icons.folder_open,
         children: folders,
