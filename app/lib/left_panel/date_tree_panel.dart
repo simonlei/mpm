@@ -18,20 +18,24 @@ class _DateTreePanelState extends State<DateTreePanel> {
   late TreeViewController _treeViewController;
   bool _inited = false;
 
+  _conditionCallback(arg) {
+    setState(() {
+      _inited = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    BUS.on(EventBus.ConditionsChanged, (arg) {
-      setState(() {
-        _inited = false;
-      });
-    });
+    print('Initing date tree');
+    BUS.on(EventBus.LeftTreeConditionsChanged, _conditionCallback);
   }
 
   @override
   void dispose() {
     super.dispose();
-    BUS.off(EventBus.ConditionsChanged);
+    print('dispose date tree');
+    BUS.off(EventBus.LeftTreeConditionsChanged, _conditionCallback);
   }
 
   @override
@@ -70,6 +74,8 @@ class _DateTreePanelState extends State<DateTreePanel> {
 
   Future<TreeViewController> doInit() async {
     if (_inited) return _treeViewController;
+
+    print('I am going to init controller...');
 
     var resp = await Dio().post(Config.api("/api/getPicsDate"), data: {'trashed': Conditions.trashed});
 

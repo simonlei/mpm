@@ -2,7 +2,11 @@
 typedef void EventCallback(arg);
 
 class EventBus {
+  /// 只刷新图片grid
   static String ConditionsChanged = 'picsConditionChanged';
+
+  /// 刷新左侧的树
+  static String LeftTreeConditionsChanged = 'treeConditionChanged';
 
   static String CountChange = 'countChange';
 
@@ -25,7 +29,7 @@ class EventBus {
     _emap[eventName]!.add(f);
   }
 
-  //移除订阅者
+  //移除订阅者（两个订阅者就会出问题）
   void off(eventName, [EventCallback? f]) {
     var list = _emap[eventName];
     if (eventName == null || list == null) return;

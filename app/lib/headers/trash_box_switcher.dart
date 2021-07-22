@@ -25,6 +25,7 @@ class _TrashBoxSwitcherState extends State<TrashBoxSwitcher> {
                   Conditions.trashed = !Conditions.trashed;
                   setState(() {});
                   BUS.emit(EventBus.ConditionsChanged);
+                  BUS.emit(EventBus.LeftTreeConditionsChanged);
                 },
                 child: Text(
                   snapshot.data!,

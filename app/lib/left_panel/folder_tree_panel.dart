@@ -20,20 +20,22 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
   late TreeViewController _treeViewController;
   bool _inited = false;
 
+  _conditionCallback(arg) {
+    setState(() {
+      _inited = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    BUS.on(EventBus.ConditionsChanged, (arg) {
-      setState(() {
-        _inited = false;
-      });
-    });
+    BUS.on(EventBus.LeftTreeConditionsChanged, _conditionCallback);
   }
 
   @override
   void dispose() {
     super.dispose();
-    BUS.off(EventBus.ConditionsChanged);
+    BUS.off(EventBus.LeftTreeConditionsChanged, _conditionCallback);
   }
 
   @override
