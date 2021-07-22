@@ -1,4 +1,4 @@
-package org.mpm.server.filesystem;
+package org.mpm.server.pics;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityMeta;
 import org.mpm.server.entity.EntityPhoto;
-import org.mpm.server.pics.PicsService;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.lang.Lang;
@@ -20,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
-public class PhotoImporterDataSource {
+public class PhotoImportService {
 
     @Autowired
     Dao dao;

@@ -90,6 +90,7 @@ My Photo Manager client side.
 - [ ] 切换trash之后左边树没有重新加载
 - [x] 不支持上传 heic 格式图片，主要是ImageIO不支持
 - [x] 直接从cos读取图片的基本信息和exif信息
+- [ ] 历史数据的exif数据不对，要重新刷一遍
 
 ### v1.1.3
 
