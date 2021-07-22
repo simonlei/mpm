@@ -6,14 +6,14 @@
                 <method name="authPassword"/>
             </visibleMethods>
         </ServerObject>
-        <ServerObject ID="pics" lookupStyle="spring" className="org.mpm.server.pics.PicsDataSource" bean="picsDataSource">
+        <ServerObject ID="pics" lookupStyle="spring" className="org.mpm.server.pics.PicsController" bean="picsDataSource">
             <visibleMethods>
                 <method name="count"/>
                 <method name="emptyTrash"/>
                 <method name="batchUpdatePics"/>
             </visibleMethods>
         </ServerObject>
-        <ServerObject ID="pics" lookupStyle="spring" className="org.mpm.server.pics.ProgressDataSource" bean="progressDataSource">
+        <ServerObject ID="pics" lookupStyle="spring" className="org.mpm.server.progress.ProgressController" bean="progressDataSource">
             <visibleMethods>
                 <method name="getProgress"/>
             </visibleMethods>

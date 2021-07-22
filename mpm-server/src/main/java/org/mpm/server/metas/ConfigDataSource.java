@@ -80,23 +80,6 @@ public class ConfigDataSource {
         log.info("Config is:" + s);
         return s;
     }
-/*
-    @GetMapping("/thumb/{name}")
-    public @ResponseBody
-    ResponseEntity<String> thumbUrl(HttpServletResponse response, @PathVariable("name") String name)
-            throws IOException {
-        EntityPhoto photo = dao.fetch(EntityPhoto.class, name);
-        if (photo == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        String thumbUrl = String.format("https://%s.cos.%s.myqcloud.com/%s/thumb", bucket, region, name);
-        int rotate = (360 + photo.getRotate()) % 360;
-        response.setHeader(HttpHeaders.CACHE_CONTROL,
-                CacheControl.noCache().cachePrivate().mustRevalidate().getHeaderValue());
-        response.sendRedirect(thumbUrl + rotate);
-        return null;
-    }
-*/
 
     // used in client
     @GetMapping("/api/getConfig")

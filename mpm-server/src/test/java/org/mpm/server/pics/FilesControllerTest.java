@@ -17,12 +17,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 @Slf4j
-public class FilesDataSourceTest extends BaseTest {
+public class FilesControllerTest extends BaseTest {
 
     @Autowired
     Dao dao;
     @Autowired
-    FilesDataSource filesDataSource;
+    FilesController filesController;
     private EntityFile newParent;
     private EntityFile node;
     private EntityFile nodeChild;
@@ -41,7 +41,7 @@ public class FilesDataSourceTest extends BaseTest {
 
     @Test
     public void testChangeParent() {
-        filesDataSource.resetParentTo(node, newParent);
+        filesController.resetParentTo(node, newParent);
         assertEquals(node.getParentId(), newParent.getId());
         assertEquals("/root/newParent/node", dao.fetch(EntityFile.class, node.getId()).getPath());
         assertEquals("/root/newParent/node/child", dao.fetch(EntityFile.class, nodeChild.getId()).getPath());
@@ -51,7 +51,7 @@ public class FilesDataSourceTest extends BaseTest {
     @Test
     public void testChangeToRoot() {
         // set to root
-        filesDataSource.resetParentTo(node, null);
+        filesController.resetParentTo(node, null);
         assertEquals(node.getParentId(), null);
         String newPath = dao.fetch(EntityFile.class, node.getId()).getPath();
         assertNotEquals("/root/newParent/node", newPath);
@@ -64,7 +64,7 @@ public class FilesDataSourceTest extends BaseTest {
     @Test
     public void testMergeFolder() {
         Long id = node.getId();
-        filesDataSource.mergeTo(node, newParent);
+        filesController.mergeTo(node, newParent);
         assertNull(dao.fetch(EntityFile.class, id));
         assertEquals(newParent.getId(), dao.fetch(EntityFile.class, nodeChild.getId()).getParentId());
         assertEquals("/root/newParent/child", dao.fetch(EntityFile.class, nodeChild.getId()).getPath());
@@ -74,6 +74,6 @@ public class FilesDataSourceTest extends BaseTest {
 
     @Test
     public void testMergeToRoot() {
-        assertThrows(Exception.class, () -> filesDataSource.mergeTo(node, null));
+        assertThrows(Exception.class, () -> filesController.mergeTo(node, null));
     }
 }

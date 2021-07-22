@@ -6,6 +6,7 @@ import java.util.Map;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityPhoto;
+import org.mpm.server.progress.ProgressController;
 import org.mpm.server.util.ExplicitPager;
 import org.nutz.dao.Chain;
 import org.nutz.dao.Cnd;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
-public class PicsDataSource {
+public class PicsController {
 
     @Autowired
     Dao dao;
@@ -72,7 +73,7 @@ public class PicsDataSource {
 
     @PostMapping("/api/emptyTrash")
     public String emptyTrash() {
-        String taskId = ProgressDataSource.addTask(emptyTask);
+        String taskId = ProgressController.addTask(emptyTask);
         new Thread(emptyTask).start();
         return taskId;
     }

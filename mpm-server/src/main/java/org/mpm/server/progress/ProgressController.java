@@ -1,10 +1,9 @@
-package org.mpm.server.pics;
+package org.mpm.server.progress;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
-import org.mpm.server.progress.ProgressInterface;
 import org.nutz.lang.Lang;
 import org.nutz.lang.util.NutMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-public class ProgressDataSource {
+public class ProgressController {
 
     private static Map<String, ProgressInterface> tasks = new ConcurrentHashMap<>();
 
