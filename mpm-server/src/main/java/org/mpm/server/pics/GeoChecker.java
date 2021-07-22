@@ -22,7 +22,7 @@ public class GeoChecker {
     @Autowired
     PicsService picsService;
 
-    private void checkPhotoGeos() {
+    public void checkPhotoGeos() {
         EntityMeta meta = dao.fetch(EntityMeta.class, "lastCheckId");
         long lastId = meta == null ? 0 : Long.parseLong(meta.getValue());
         // get first 20
