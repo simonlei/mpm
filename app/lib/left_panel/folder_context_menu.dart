@@ -1,5 +1,7 @@
 import 'package:app/conditions.dart';
 import 'package:app/config.dart';
+import 'package:app/event_bus.dart';
+import 'package:app/homepage.dart';
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:dio/dio.dart';
@@ -35,7 +37,10 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
   }
 
   void _handleDeleteFolderPressed() async {
-    bool toTrash = await confirm(context, title: Text('确认${Conditions.trashed ? '从回收站恢复' : '移到回收站'}？'));
+    bool toTrash = await confirm(
+      scaffoldKey.currentContext!,
+      title: Text('确认${Conditions.trashed ? '从回收站恢复' : '移到回收站'}？'),
+    );
     if (toTrash) {
       var response = await Dio().post(Config.api("/api/switchTrashFolder"), data: {
         'to': !Conditions.trashed,
@@ -43,6 +48,8 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
       });
       if (response.statusCode == 200) {
         showToast('已 ${Conditions.trashed ? '恢复' : '删除'} ${response.data} 张图片');
+        BUS.emit(EventBus.ConditionsChanged);
+        BUS.emit(EventBus.LeftTreeConditionsChanged);
       }
     }
   }

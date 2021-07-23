@@ -56,14 +56,13 @@ public class FilesController {
         String s = "update t_photos "
                 + " inner join t_files on t_photos.id=t_files.photoId "
                 + " SET trashed = @to"
-                + " where t_files.path like @filePath";
+                + " where t_files.path like @filePath and trashed != @to";
         Sql sql = Sqls.create(s);
         sql.setParam("to", request.to);
         sql.setParam("filePath", request.path + "%");
-        sql.setCallback(Sqls.callback.integer());
         dao.execute(sql);
 
-        return sql.getInt();
+        return sql.getUpdateCount();
     }
     
 /*
@@ -131,6 +130,7 @@ public class FilesController {
         Long parentId;
     }
 
+    @Data
     static class SwitchTrashFolderSchema {
 
         Boolean to;

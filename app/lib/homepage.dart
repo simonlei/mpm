@@ -16,6 +16,8 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
 class _MyHomePageState extends State<MyHomePage> {
   var appTitle = 'My Photo Manager';
 
@@ -27,6 +29,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     return ContextMenuOverlay(
       child: Scaffold(
+        key: scaffoldKey,
         appBar: AppBar(
           title: Text(appTitle),
           centerTitle: true,
