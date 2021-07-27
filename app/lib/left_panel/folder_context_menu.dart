@@ -22,7 +22,6 @@ class FolderContextMenu extends StatefulWidget {
 class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuStateMixin {
   @override
   Widget build(BuildContext context) {
-    print(context);
     return cardBuilder.call(
       context,
       [

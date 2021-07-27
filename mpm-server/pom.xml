@@ -3,6 +3,22 @@
         xmlns="http://maven.apache.org/POM/4.0.0"
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <groupId>org.springframework.boot</groupId>
+            </plugin>
+        </plugins>
+    </build>
+
     <artifactId>mpm-server</artifactId>
     <dependencies>
         <dependency>
@@ -126,9 +142,16 @@
     </dependencyManagement>
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <servlets.version>4.0.0</servlets.version>
+    </properties>
+
     <parent>
-        <artifactId>mpm</artifactId>
-        <groupId>org.mpm</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <relativePath/>
+        <version>2.3.1.RELEASE</version> <!-- lookup parent from repository -->
     </parent>
+    <version>1.1.2</version>
 </project>
