@@ -6,7 +6,6 @@
     <artifactId>mpm</artifactId>
 
     <build>
-        <pluginManagement>
             <plugins>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -30,8 +29,11 @@
                     </executions>
                     <version>3.0.1</version>
                 </plugin>
+		<plugin>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <groupId>org.springframework.boot</groupId>
+            </plugin>
             </plugins>
-        </pluginManagement>
     </build>
     <groupId>org.mpm</groupId>
     <modelVersion>4.0.0</modelVersion>
