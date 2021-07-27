@@ -2,22 +2,16 @@ git pull
 cd app
 # install flutter first https://snapcraft.io/install/flutter/centos, after install, flutter at /snap/bin
 flutter build web --dart-define=remote_addr=
-cd ..
+cd ../mpm-server
+cp ../../config/application.properties src/main/resources
 mvn clean package -DskipTests
-mv mpm-server/target/mpm-server-1.0-SNAPSHOT.war ../jetty9/webapps/mpm.war
 # stop jetty
-cd ../jetty9/
-java -DSTOP.PORT=27077 -DSTOP.KEY=stop123 -jar start.jar --stop
-cd webapps/
+killall -9 java
+cd ../../running
 mkdir -p bak
-mv ROOT bak/ROOT_bak.`date "+%Y.%m.%d"`
-mkdir ROOT
-mv mpm.war ROOT
-cd ROOT
-jar xf mpm.war
-cp -R ../../../mpm/app/build/web/* .
-# cd to jetty9
-cd ../..
-cp ../config/application.properties webapps/ROOT/WEB-INF/classes/
+mv mpm.jar bak/mpm.jar.`date "+%Y.%m.%d"`
+mv ../mpm/mpm-server/target/mpm-server-*.jar .
+cp -R ../mpm/app/build/web/ web
 # start jetty
-nohup java -Djetty.http.port=27277 -DSTOP.PORT=27077 -DSTOP.KEY=stop123 -jar start.jar  > nohup.log &
+java -jar `ls -1 mpm-server-*.jar | head -n1` > nohup.log &
+#nohup java -Djetty.http.port=27277 -DSTOP.PORT=27077 -DSTOP.KEY=stop123 -jar start.jar  > nohup.log &
