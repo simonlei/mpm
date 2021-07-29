@@ -12,3 +12,5 @@ qqlbsKey=
 qqlbsToken=
 password=
 isDev=false
+spring.mvc.static-path-pattern=/**
+spring.resources.static-locations=file:./web
