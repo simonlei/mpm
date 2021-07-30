@@ -1,13 +1,15 @@
+import 'dart:typed_data';
+
 import 'package:app/config.dart';
 import 'package:app/pics_model.dart';
 import 'package:app/video_view.dart';
 import 'package:app/widgets/rotate_button.dart';
 import 'package:app/widgets/star_button.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
-import 'package:transparent_image/transparent_image.dart';
 import 'package:tuple/tuple.dart';
 
 class DetailPage extends StatefulWidget {
@@ -71,7 +73,7 @@ class _DetailPageState extends State<DetailPage> {
           child: Focus(
             autofocus: true,
             child: FutureBuilder<PicImage?>(
-              future: _picsModel.getImage(_index),
+              future: _loadImage(),
               builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
                   var image = snapshot.data!;
@@ -92,6 +94,24 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
+  late var _loadedImage;
+
+  Future<PicImage?> _loadImage() async {
+    var image = await _picsModel.getImage(_index);
+    print('getImage');
+    _loadedImage = await _loadRealImage(image);
+    print('loadImage');
+    return image;
+  }
+
+  _loadRealImage(PicImage? image) async {
+    var response = await Dio().get(Config.imageUrl(image!.name), options: Options(responseType: ResponseType.bytes));
+    print('getResponse');
+    if (response.statusCode == 200) {
+      return Uint8List.fromList(response.data);
+    }
+  }
+
   SingleChildScrollView makeImageView(BuildContext context, PicImage image) {
     return SingleChildScrollView(
       controller: _verticalController,
@@ -106,10 +126,12 @@ class _DetailPageState extends State<DetailPage> {
             message: image.getTooltip(),
             child: RotatedBox(
               quarterTurns: image.getQuarterTurns(),
-              child: FadeInImage.memoryNetwork(
-                  fit: _scale ? BoxFit.scaleDown : BoxFit.none,
-                  placeholder: kTransparentImage,
-                  image: Config.imageUrl(image.name)),
+              child: Image.memory(
+                _loadedImage,
+                //Config.imageUrl(image.name),
+                fit: _scale ? BoxFit.scaleDown : BoxFit.none,
+                //placeholder: kTransparentImage,
+              ),
             ),
           ),
         ),
