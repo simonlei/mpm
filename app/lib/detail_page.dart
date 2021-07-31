@@ -1,3 +1,4 @@
+import 'dart:html';
 import 'dart:typed_data';
 
 import 'package:app/config.dart';
@@ -12,6 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:tuple/tuple.dart';
+
+import 'js_wrap/heic2any.dart';
 
 class DetailPage extends StatefulWidget {
   const DetailPage(this.arguments);
@@ -105,7 +108,10 @@ class _DetailPageState extends State<DetailPage> {
     return image;
   }
 
-  static final ExpireCache<String, Uint8List> _cache = ExpireCache(expireDuration: Duration(minutes: 60));
+  static final ExpireCache<String, Uint8List> _cache = ExpireCache(
+    expireDuration: Duration(minutes: 60),
+    sizeLimit: 10,
+  );
 
   _loadRealImage(PicImage? image) async {
     var imgName = image!.name;
@@ -115,8 +121,16 @@ class _DetailPageState extends State<DetailPage> {
       return await _cache.get(imgName);
     }
     var response = await Dio().get(Config.imageUrl(imgName), options: Options(responseType: ResponseType.bytes));
-    print('getResponse');
+    print('getResponse ${response.headers}');
     if (response.statusCode == 200) {
+      if (response.headers['content-type']!.first == 'image/heic') {
+        var blob = heic2any(response.data);
+        var reader = FileReader();
+        reader.readAsArrayBuffer(blob);
+        var img = reader.result as Uint8List;
+        _cache.set(imgName, img);
+        return img;
+      }
       var img = Uint8List.fromList(response.data);
       _cache.set(imgName, img);
       return img;
