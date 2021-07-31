@@ -6,6 +6,7 @@ import 'package:app/video_view.dart';
 import 'package:app/widgets/rotate_button.dart';
 import 'package:app/widgets/star_button.dart';
 import 'package:dio/dio.dart';
+import 'package:expire_cache/expire_cache.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -104,11 +105,21 @@ class _DetailPageState extends State<DetailPage> {
     return image;
   }
 
+  static final ExpireCache<String, Uint8List> _cache = ExpireCache(expireDuration: Duration(minutes: 60));
+
   _loadRealImage(PicImage? image) async {
-    var response = await Dio().get(Config.imageUrl(image!.name), options: Options(responseType: ResponseType.bytes));
+    var imgName = image!.name;
+    if (!_cache.isKeyInFlightOrInCache(imgName)) {
+      _cache.markAsInFlight(imgName);
+    } else {
+      return await _cache.get(imgName);
+    }
+    var response = await Dio().get(Config.imageUrl(imgName), options: Options(responseType: ResponseType.bytes));
     print('getResponse');
     if (response.statusCode == 200) {
-      return Uint8List.fromList(response.data);
+      var img = Uint8List.fromList(response.data);
+      _cache.set(imgName, img);
+      return img;
     }
   }
 
