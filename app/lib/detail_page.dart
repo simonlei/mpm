@@ -11,6 +11,7 @@ import 'package:expire_cache/expire_cache.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:js/js_util.dart';
 import 'package:logger/logger.dart';
 import 'package:tuple/tuple.dart';
 
@@ -124,16 +125,33 @@ class _DetailPageState extends State<DetailPage> {
     print('getResponse ${response.headers}');
     if (response.statusCode == 200) {
       if (response.headers['content-type']!.first == 'image/heic') {
-        var blob = heic2any(response.data);
-        var reader = FileReader();
-        reader.readAsArrayBuffer(blob);
-        var img = reader.result as Uint8List;
+        print('before heic2any ${response.data.runtimeType}');
+        var result = heic2any(HeicParams(blob: Blob(response.data)));
+        // var result = heic2any(response.data);
+        print('after heic2any $result');
+        var future = promiseToFuture(result);
+        print('done');
+        print('$future : ${future.runtimeType}');
+        future.onError((error, stackTrace) {
+          print('$error');
+          print('$stackTrace');
+        }).then((value) {
+          print('Value is $value');
+          var blob = value;
+          print('done2');
+          print('after heic2any $blob');
+          var reader = FileReader();
+          reader.readAsArrayBuffer(blob);
+          var img = reader.result as Uint8List;
+          _cache.set(imgName, img);
+          return img;
+        });
+        return await future;
+      } else {
+        var img = Uint8List.fromList(response.data);
         _cache.set(imgName, img);
         return img;
       }
-      var img = Uint8List.fromList(response.data);
-      _cache.set(imgName, img);
-      return img;
     }
   }
 

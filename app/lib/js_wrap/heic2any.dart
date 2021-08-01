@@ -6,4 +6,12 @@ import 'dart:html';
 import 'package:js/js.dart';
 
 @JS('heic2any')
-external Blob heic2any(Blob blob);
+external Object heic2any(HeicParams heicParams);
+
+@JS()
+@anonymous
+class HeicParams {
+  external Blob blob;
+
+  external factory HeicParams({Blob blob});
+}

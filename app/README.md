@@ -105,6 +105,7 @@ My Photo Manager client side.
 - [ ] 可以移动文件夹到另一个文件夹下
 - [ ] 可以合并照片到另一个文件夹下
 - [ ] 还是切换成springboot吧，nutzboot 还是有点小众
+- [ ] prefetch 下面几张图片
 
 ### v1.1.4
 
