@@ -126,7 +126,17 @@ class _DetailPageState extends State<DetailPage> {
     if (response.statusCode == 200) {
       if (response.headers['content-type']!.first == 'image/heic') {
         print('before heic2any ${response.data.runtimeType}');
-        var result = heic2any(HeicParams(blob: Blob(response.data)));
+        var blob2 = Blob(response.data, 'image/heic');
+        print('blob size ${blob2.size}');
+        /*var reader = FileReader();
+        reader.onLoad.listen((event) {
+          print('on load');
+          var img = reader.result as Uint8List;
+          print('img size is ${img.lengthInBytes}');
+        });
+        reader.readAsArrayBuffer(blob2);
+        */
+        var result = heic2any(HeicParams(blob: blob2));
         // var result = heic2any(response.data);
         print('after heic2any $result');
         var future = promiseToFuture(result);
