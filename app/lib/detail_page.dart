@@ -6,7 +6,6 @@ import 'package:app/pics_model.dart';
 import 'package:app/video_view.dart';
 import 'package:app/widgets/rotate_button.dart';
 import 'package:app/widgets/star_button.dart';
-import 'package:dio/dio.dart';
 import 'package:expire_cache/expire_cache.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -121,23 +120,16 @@ class _DetailPageState extends State<DetailPage> {
     } else {
       return await _cache.get(imgName);
     }
-    var response = await Dio().get(Config.imageUrl(imgName), options: Options(responseType: ResponseType.bytes));
-    print('getResponse ${response.headers}');
-    if (response.statusCode == 200) {
-      if (response.headers['content-type']!.first == 'image/heic') {
-        print('before heic2any ${response.data.runtimeType}');
-        var blob2 = Blob(response.data, 'image/heic');
-        print('blob size ${blob2.size}');
-        /*var reader = FileReader();
-        reader.onLoad.listen((event) {
-          print('on load');
-          var img = reader.result as Uint8List;
-          print('img size is ${img.lengthInBytes}');
-        });
-        reader.readAsArrayBuffer(blob2);
-        */
-        var result = heic2any(HeicParams(blob: blob2));
-        // var result = heic2any(response.data);
+    // var response = await Dio().get(Config.imageUrl(imgName), options: Options(responseType: ResponseType.bytes));
+    await HttpRequest.request(Config.imageUrl(imgName), responseType: 'blob').then((HttpRequest resp) {
+      print('length: ${resp.runtimeType} ${resp.responseType} ${resp.response.runtimeType} ');
+      print('content type: ${resp.responseHeaders['content-type']}');
+      Blob blob = resp.response as Blob;
+      print('blob length ${blob.size}');
+      if (resp.responseHeaders['content-type'] != 'image/heic') {
+        blobReader(imgName).readAsArrayBuffer(blob);
+      } else {
+        var result = heic2any(HeicParams(blob: resp.response));
         print('after heic2any $result');
         var future = promiseToFuture(result);
         print('done');
@@ -150,19 +142,20 @@ class _DetailPageState extends State<DetailPage> {
           var blob = value;
           print('done2');
           print('after heic2any $blob');
-          var reader = FileReader();
-          reader.readAsArrayBuffer(blob);
-          var img = reader.result as Uint8List;
-          _cache.set(imgName, img);
-          return img;
+          blobReader(imgName).readAsArrayBuffer(blob);
         });
-        return await future;
-      } else {
-        var img = Uint8List.fromList(response.data);
-        _cache.set(imgName, img);
-        return img;
       }
-    }
+    });
+    return _cache.get(imgName);
+  }
+
+  FileReader blobReader(String imgName) {
+    var reader = FileReader();
+    reader.onLoad.listen((event) {
+      var img = reader.result as Uint8List;
+      _cache.set(imgName, img);
+    });
+    return reader;
   }
 
   SingleChildScrollView makeImageView(BuildContext context, PicImage image) {

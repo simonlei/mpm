@@ -93,6 +93,8 @@ My Photo Manager client side.
 - [x] 历史数据的exif数据不对，要重新刷一遍
 - [ ] 所有照片缩放成一个可以快速下载的大小，另外保存一份
 - [x] 打包成jar，运行更方便
+- [x] Dart 的Blob()产生的Blob对象，感觉会将二进制list进行base64，从而导致heic2any
+  无法识别对应的内容，所以直接用HttpRequest来读取到Blob就可以了，没必要用Dio
 
 ### v1.1.3
 
