@@ -126,7 +126,8 @@ class _DetailPageState extends State<DetailPage> {
       print('content type: ${resp.responseHeaders['content-type']}');
       Blob blob = resp.response as Blob;
       print('blob length ${blob.size}');
-      if (resp.responseHeaders['content-type'] != 'image/heic') {
+      if (resp.responseHeaders['content-type'] != 'image/heic' &&
+          resp.responseHeaders['content-type'] != 'image/heif') {
         blobReader(imgName).readAsArrayBuffer(blob);
       } else {
         var result = heic2any(HeicParams(blob: resp.response));

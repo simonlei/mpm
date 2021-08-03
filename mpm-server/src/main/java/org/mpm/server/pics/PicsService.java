@@ -7,7 +7,7 @@ import com.drew.metadata.exif.GpsDirectory;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.COSObject;
 import com.qcloud.cos.model.CopyObjectRequest;
-import com.qcloud.cos.model.StorageClass;
+import com.qcloud.cos.model.ObjectMetadata;
 import com.qcloud.cos.model.ciModel.common.ImageProcessRequest;
 import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoRequest;
 import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoResponse;
@@ -26,11 +26,13 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityBlockPicture;
 import org.mpm.server.entity.EntityFile;
+import org.mpm.server.entity.EntityMeta;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.remote.CosRemoteService;
 import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
+import org.nutz.dao.pager.Pager;
 import org.nutz.el.El;
 import org.nutz.json.Json;
 import org.nutz.lang.Files;
@@ -113,7 +115,7 @@ public class PicsService {
         dao.updateIgnoreNull(video);
 
         CopyObjectRequest request = new CopyObjectRequest(bucket, key, bucket, "video/" + video.getName() + ".mp4");
-        request.setStorageClass(StorageClass.Archive);
+        // request.setStorageClass(StorageClass.Archive);
         cosClient.copyObject(request);
         cosClient.deleteObject(bucket, key);
 
@@ -169,15 +171,20 @@ public class PicsService {
         photo = dao.insert(photo, true, false, false);
 
         log.info("Photo:" + photo);
-        CopyObjectRequest request = new CopyObjectRequest(bucket, key, bucket, "/origin/" + photo.getName());
-        request.setStorageClass(StorageClass.Archive);
-        cosClient.copyObject(request);
-        generateSmallPic(bucket, key, photo.getName());
-        cosClient.deleteObject(bucket, key);
+        savePhotosOnCos(key, photo);
         return photo;
     }
 
-    private void generateSmallPic(String bucket, String key, String name) {
+    private void savePhotosOnCos(String key, EntityPhoto photo) {
+        CopyObjectRequest request = new CopyObjectRequest(bucket, key, bucket, "/origin/" + photo.getName());
+        // 归档太麻烦，还要先恢复才行
+        // request.setStorageClass(StorageClass.Archive);
+        cosClient.copyObject(request);
+        generateSmallPic(key, photo.getName());
+        cosClient.deleteObject(bucket, key);
+    }
+
+    private void generateSmallPic(String key, String name) {
         ImageProcessRequest request = new ImageProcessRequest(bucket, key);
         PicOperations picOperations = new PicOperations();
         picOperations.setIsPicInfo(1);
@@ -189,7 +196,12 @@ public class PicsService {
         ruleList.add(rule1);
         picOperations.setRules(ruleList);
         request.setPicOperations(picOperations);
+
         CIUploadResult result = cosClient.processImage(request);
+        String format = result.getProcessResults().getObjectList().get(0).getFormat();
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType("image/" + format);
+        cosClient.updateObjectMetaData(bucket, "small/" + name, metadata);
         log.info("ci upload result: " + Json.toJson(result));
     }
 
@@ -311,5 +323,31 @@ public class PicsService {
                 log.error("Can't real delete photo.", e);
             }
         });
+    }
+
+    public void checkSmallPhotos() {
+        EntityMeta meta = dao.fetch(EntityMeta.class, "lastSmallPhotoCheckId");
+        long lastId = meta == null ? 0 : Long.parseLong(meta.getValue());
+        // get first 20
+        List<EntityPhoto> photos = dao.query(EntityPhoto.class, Cnd.where("id", ">", lastId)
+                .orderBy("id", "asc"), new Pager(1, 20));
+        for (EntityPhoto p : photos) {
+            try {
+                if (VIDEO.equals(p.getMediaType())) {
+                    cosClient.copyObject(bucket, p.getName(), bucket, "small/" + p.getName());
+                    cosClient.deleteObject(bucket, p.getName());
+                } else {
+                    savePhotosOnCos(p.getName(), p);
+                }
+            } catch (Exception e) {
+                log.error("Can't check photo:" + p.getId(), e);
+            }
+            lastId = p.getId();
+        }
+        if (meta == null) {
+            meta = EntityMeta.builder().key("lastSmallPhotoCheckId").build();
+        }
+        meta.setValue("" + lastId);
+        dao.insertOrUpdate(meta);
     }
 }
