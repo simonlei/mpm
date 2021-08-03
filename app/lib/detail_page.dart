@@ -121,7 +121,7 @@ class _DetailPageState extends State<DetailPage> {
       return await _cache.get(imgName);
     }
     // var response = await Dio().get(Config.imageUrl(imgName), options: Options(responseType: ResponseType.bytes));
-    await HttpRequest.request(Config.imageUrl(imgName), responseType: 'blob').then((HttpRequest resp) {
+    await HttpRequest.request(Config.imageUrl('small/$imgName'), responseType: 'blob').then((HttpRequest resp) {
       print('length: ${resp.runtimeType} ${resp.responseType} ${resp.response.runtimeType} ');
       print('content type: ${resp.responseHeaders['content-type']}');
       Blob blob = resp.response as Blob;

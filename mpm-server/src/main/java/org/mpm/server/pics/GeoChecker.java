@@ -49,7 +49,7 @@ public class GeoChecker {
         try {
             // download photo
             tmpFile = File.createTempFile(p.getName(), "" + Math.random());
-            picsService.saveCosFile(p.getName(), tmpFile);
+            picsService.saveCosFile("origin/" + p.getName(), tmpFile);
             // check taken date and geo
             picsService.setInfosFromCos(p.getName(), p);
             picsService.setInfosFromFile(tmpFile, p);

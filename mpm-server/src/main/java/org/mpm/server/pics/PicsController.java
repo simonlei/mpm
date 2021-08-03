@@ -207,7 +207,7 @@ public class PicsController {
 
     private String getThumbUrl(String name, int rotate) {
         rotate = (360 + rotate) % 360;
-        return name + "/thumb" + rotate;
+        return "small/" + name + "/thumb" + rotate;
     }
 
     private void addStarCriteria(Boolean star, SimpleCriteria cnd) {

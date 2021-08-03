@@ -6,14 +6,22 @@ import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.COSObject;
+import com.qcloud.cos.model.CopyObjectRequest;
+import com.qcloud.cos.model.StorageClass;
+import com.qcloud.cos.model.ciModel.common.ImageProcessRequest;
 import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoRequest;
 import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoResponse;
 import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoVideo;
+import com.qcloud.cos.model.ciModel.persistence.CIUploadResult;
+import com.qcloud.cos.model.ciModel.persistence.PicOperations;
+import com.qcloud.cos.model.ciModel.persistence.PicOperations.Rule;
 import com.qcloud.cos.model.ciModel.snapshot.SnapshotRequest;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityBlockPicture;
@@ -24,6 +32,7 @@ import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.el.El;
+import org.nutz.json.Json;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
@@ -64,8 +73,9 @@ public class PicsService {
             String contentType = saveCosFile(key, tmpFile);
             if (contentType.contains("video")) {
                 return saveVideo(tmpFile, key, Files.getMajorName(name));
+            } else {
+                return saveImage(tmpFile, key, Files.getMajorName(name));
             }
-            return saveFileInRepository(tmpFile, key, Files.getMajorName(name));
         } catch (Exception e) {
             log.error("Can't save file " + key, e);
         } finally {
@@ -102,7 +112,9 @@ public class PicsService {
         video.setTakenDate(new Date());
         dao.updateIgnoreNull(video);
 
-        cosClient.copyObject(bucket, key, bucket, "video/" + video.getName() + ".mp4");
+        CopyObjectRequest request = new CopyObjectRequest(bucket, key, bucket, "video/" + video.getName() + ".mp4");
+        request.setStorageClass(StorageClass.Archive);
+        cosClient.copyObject(request);
         cosClient.deleteObject(bucket, key);
 
         return video;
@@ -134,7 +146,7 @@ public class PicsService {
             snapshotRequest.getOutput().setBucket(bucket);
             snapshotRequest.getOutput()
                     .setRegion(cosClient.getClientConfig().getRegion().getRegionName());
-            snapshotRequest.getOutput().setObject(video.getName());
+            snapshotRequest.getOutput().setObject("small/" + video.getName());
             snapshotRequest.setMode("keyframe");
             snapshotRequest.setTime("1");
             cosClient.generateSnapshot(snapshotRequest);
@@ -143,7 +155,7 @@ public class PicsService {
         }
     }
 
-    public EntityPhoto saveFileInRepository(File file, String key, String name) {
+    public EntityPhoto saveImage(File file, String key, String name) {
         EntityPhoto samePhoto = sameFileExist(file, key);
         if (samePhoto != null) {
             return samePhoto;
@@ -157,9 +169,28 @@ public class PicsService {
         photo = dao.insert(photo, true, false, false);
 
         log.info("Photo:" + photo);
-        cosClient.copyObject(bucket, key, bucket, photo.getName());
+        CopyObjectRequest request = new CopyObjectRequest(bucket, key, bucket, "/origin/" + photo.getName());
+        request.setStorageClass(StorageClass.Archive);
+        cosClient.copyObject(request);
+        generateSmallPic(bucket, key, photo.getName());
         cosClient.deleteObject(bucket, key);
         return photo;
+    }
+
+    private void generateSmallPic(String bucket, String key, String name) {
+        ImageProcessRequest request = new ImageProcessRequest(bucket, key);
+        PicOperations picOperations = new PicOperations();
+        picOperations.setIsPicInfo(1);
+        List<Rule> ruleList = new ArrayList<>();
+        PicOperations.Rule rule1 = new PicOperations.Rule();
+        rule1.setBucket(bucket);
+        rule1.setFileId("/small/" + name);
+        rule1.setRule("imageMogr2/thumbnail/2560x1440");
+        ruleList.add(rule1);
+        picOperations.setRules(ruleList);
+        request.setPicOperations(picOperations);
+        CIUploadResult result = cosClient.processImage(request);
+        log.info("ci upload result: " + Json.toJson(result));
     }
 
     private void checkInBlacklist(File file, EntityPhoto photo) {
@@ -266,10 +297,12 @@ public class PicsService {
 
         Trans.exec(() -> {
             try {
-                cosClient.deleteObject(bucket, photo.getName());
+                cosClient.deleteObject(bucket, "small/" + photo.getName());
                 if (Lang.equals("video", photo.getMediaType())) {
                     cosClient.deleteObject(bucket, "video/" + photo.getName() + ".mp4");
                     cosClient.deleteObject(bucket, "video_t/" + photo.getName() + ".mp4");
+                } else {
+                    cosClient.deleteObject(bucket, "origin/" + photo.getName());
                 }
                 dao.insert(blackList);
                 dao.delete(photo);
