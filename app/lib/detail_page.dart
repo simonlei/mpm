@@ -6,6 +6,7 @@ import 'package:app/pics_model.dart';
 import 'package:app/video_view.dart';
 import 'package:app/widgets/rotate_button.dart';
 import 'package:app/widgets/star_button.dart';
+import 'package:dio/dio.dart';
 import 'package:expire_cache/expire_cache.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +42,7 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   void dispose() {
+    print('dispose......');
     _verticalController.dispose();
     _horizontalController.dispose();
     super.dispose();
@@ -99,11 +101,13 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   late var _loadedImage;
+  late var _loadedImageInfo;
 
   Future<PicImage?> _loadImage() async {
     var image = await _picsModel.getImage(_index);
     print('getImage');
-    _loadedImage = await _loadRealImage(image);
+    _loadedImage = await _loadRealImage(image!.name);
+    _loadedImageInfo = await _loadImageInfo(image.name, _loadedImage);
     print('loadImage');
     return image;
   }
@@ -112,9 +116,12 @@ class _DetailPageState extends State<DetailPage> {
     expireDuration: Duration(minutes: 60),
     sizeLimit: 10,
   );
+  static final ExpireCache<String, ImageInfo> _infoCache = ExpireCache(
+    expireDuration: Duration(minutes: 60),
+    sizeLimit: 10,
+  );
 
-  _loadRealImage(PicImage? image) async {
-    var imgName = image!.name;
+  _loadRealImage(String imgName) async {
     if (!_cache.isKeyInFlightOrInCache(imgName)) {
       _cache.markAsInFlight(imgName);
     } else {
@@ -150,6 +157,28 @@ class _DetailPageState extends State<DetailPage> {
     return _cache.get(imgName);
   }
 
+  Future<ImageInfo?> _loadImageInfo(String imgName, Uint8List _loadedImage) async {
+    if (!_infoCache.isKeyInFlightOrInCache(imgName)) {
+      _infoCache.markAsInFlight(imgName);
+    } else {
+      return await _infoCache.get(imgName);
+    }
+
+    bool vertical = false;
+    try {
+      var response = await Dio().get(Config.imageUrl('small/$imgName?exif'));
+      vertical = int.parse(response.data['Orientation']['val']) > 4;
+    } catch (e) {}
+
+    var response = await Dio().get(Config.imageUrl('small/$imgName?imageInfo'));
+    var width = double.parse(response.data['width']);
+    var height = double.parse(response.data['height']);
+
+    var imageInfo = ImageInfo(vertical ? height : width, vertical ? width : height, vertical);
+    _infoCache.set(imgName, imageInfo);
+    return imageInfo;
+  }
+
   FileReader blobReader(String imgName) {
     var reader = FileReader();
     reader.onLoad.listen((event) {
@@ -160,10 +189,17 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   SingleChildScrollView makeImageView(BuildContext context, PicImage image) {
+    print('image is ${_loadedImageInfo.width}x${_loadedImageInfo.height}');
+
     var memoryImage = Image.memory(
       _loadedImage,
-      fit: _scale ? BoxFit.scaleDown : BoxFit.none,
+      width: _loadedImageInfo.width,
+      height: _loadedImageInfo.height,
+      fit: _scale ? BoxFit.fill : BoxFit.fill,
     );
+
+    print('image is ${memoryImage.width}x${memoryImage.height}');
+    // print('scroller is ${_verticalController.offset} and ${_horizontalController.offset}');
     return SingleChildScrollView(
       controller: _verticalController,
       scrollDirection: Axis.vertical,
@@ -171,17 +207,13 @@ class _DetailPageState extends State<DetailPage> {
         controller: _horizontalController,
         scrollDirection: Axis.horizontal,
         child: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: Container(
-            width: _scale ? MediaQuery.of(context).size.width : memoryImage.width,
-            height: _scale ? MediaQuery.of(context).size.height : memoryImage.height,
-            child: Tooltip(
-              message: image.getTooltip(),
-              child: RotatedBox(
-                quarterTurns: image.getQuarterTurns(),
-                child: memoryImage,
-              ),
+          width: _scale ? MediaQuery.of(context).size.width : _loadedImageInfo.width,
+          height: _scale ? MediaQuery.of(context).size.height : _loadedImageInfo.height,
+          child: Tooltip(
+            message: image.getTooltip(),
+            child: RotatedBox(
+              quarterTurns: image.getQuarterTurns(),
+              child: memoryImage,
             ),
           ),
         ),
@@ -207,16 +239,22 @@ class _DetailPageState extends State<DetailPage> {
 
   void scroll(int scrollX, int scrollY) async {
     if (_scale) return;
-    if (scrollY == 0) {
-      var delta = MediaQuery.of(context).size.width * scrollX / 100;
-      await _horizontalController.animateTo(_horizontalController.offset + delta,
-          duration: Duration(milliseconds: 200), curve: Curves.ease);
-    } else if (scrollX == 0) {
-      var delta = MediaQuery.of(context).size.height * scrollY / 100;
-      await _verticalController.animateTo(_verticalController.offset + delta,
-          duration: Duration(milliseconds: 200), curve: Curves.ease);
-    }
-    setState(() {});
+    print('scroller is ${_verticalController.offset} and ${_horizontalController.offset}');
+    setState(() {
+      if (scrollY == 0) {
+        var delta = MediaQuery.of(context).size.width * scrollX / 100;
+        print('scroll ${_horizontalController.offset} with $delta');
+        _horizontalController.jumpTo(_horizontalController.offset + delta);
+        // await _horizontalController.animateTo(_horizontalController.offset + delta,
+        // duration: Duration(milliseconds: 200), curve: Curves.ease);
+      } else if (scrollX == 0) {
+        var delta = MediaQuery.of(context).size.height * scrollY / 100;
+        print('scroll ${_verticalController.offset} with $delta');
+        _verticalController.jumpTo(_verticalController.offset + delta);
+        // await _verticalController.animateTo(_verticalController.offset + delta,
+        // duration: Duration(milliseconds: 200), curve: Curves.ease);
+      }
+    });
   }
 
   Widget wrapStack(Widget child, image) {
@@ -330,4 +368,12 @@ class RotateIntent extends Intent {
   RotateIntent(this._image);
 
   final PicImage _image;
+}
+
+class ImageInfo {
+  ImageInfo(this.width, this.height, this.vertical);
+
+  double width;
+  double height;
+  bool vertical;
 }
