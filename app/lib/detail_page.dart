@@ -160,6 +160,10 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   SingleChildScrollView makeImageView(BuildContext context, PicImage image) {
+    var memoryImage = Image.memory(
+      _loadedImage,
+      fit: _scale ? BoxFit.scaleDown : BoxFit.none,
+    );
     return SingleChildScrollView(
       controller: _verticalController,
       scrollDirection: Axis.vertical,
@@ -167,17 +171,16 @@ class _DetailPageState extends State<DetailPage> {
         controller: _horizontalController,
         scrollDirection: Axis.horizontal,
         child: Container(
-          width: _scale ? MediaQuery.of(context).size.width : image.width,
-          height: _scale ? MediaQuery.of(context).size.height : image.height,
-          child: Tooltip(
-            message: image.getTooltip(),
-            child: RotatedBox(
-              quarterTurns: image.getQuarterTurns(),
-              child: Image.memory(
-                _loadedImage,
-                //Config.imageUrl(image.name),
-                fit: _scale ? BoxFit.scaleDown : BoxFit.none,
-                //placeholder: kTransparentImage,
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: Container(
+            width: _scale ? MediaQuery.of(context).size.width : memoryImage.width,
+            height: _scale ? MediaQuery.of(context).size.height : memoryImage.height,
+            child: Tooltip(
+              message: image.getTooltip(),
+              child: RotatedBox(
+                quarterTurns: image.getQuarterTurns(),
+                child: memoryImage,
               ),
             ),
           ),
@@ -202,19 +205,18 @@ class _DetailPageState extends State<DetailPage> {
     });
   }
 
-  void scroll(int scrollX, int scrollY) {
+  void scroll(int scrollX, int scrollY) async {
     if (_scale) return;
-    setState(() async {
-      if (scrollY == 0) {
-        var delta = MediaQuery.of(context).size.width * scrollX / 100;
-        await _horizontalController.animateTo(_horizontalController.offset + delta,
-            duration: Duration(milliseconds: 200), curve: Curves.ease);
-      } else if (scrollX == 0) {
-        var delta = MediaQuery.of(context).size.height * scrollY / 100;
-        await _verticalController.animateTo(_verticalController.offset + delta,
-            duration: Duration(milliseconds: 200), curve: Curves.ease);
-      }
-    });
+    if (scrollY == 0) {
+      var delta = MediaQuery.of(context).size.width * scrollX / 100;
+      await _horizontalController.animateTo(_horizontalController.offset + delta,
+          duration: Duration(milliseconds: 200), curve: Curves.ease);
+    } else if (scrollX == 0) {
+      var delta = MediaQuery.of(context).size.height * scrollY / 100;
+      await _verticalController.animateTo(_verticalController.offset + delta,
+          duration: Duration(milliseconds: 200), curve: Curves.ease);
+    }
+    setState(() {});
   }
 
   Widget wrapStack(Widget child, image) {
