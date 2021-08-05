@@ -188,32 +188,31 @@ class _DetailPageState extends State<DetailPage> {
     return reader;
   }
 
-  SingleChildScrollView makeImageView(BuildContext context, PicImage image) {
-    print('image is ${_loadedImageInfo.width}x${_loadedImageInfo.height}');
-
-    var memoryImage = Image.memory(
-      _loadedImage,
-      width: _loadedImageInfo.width,
-      height: _loadedImageInfo.height,
-      fit: _scale ? BoxFit.fill : BoxFit.fill,
-    );
-
-    print('image is ${memoryImage.width}x${memoryImage.height}');
-    // print('scroller is ${_verticalController.offset} and ${_horizontalController.offset}');
-    return SingleChildScrollView(
-      controller: _verticalController,
-      scrollDirection: Axis.vertical,
+  Widget makeImageView(BuildContext context, PicImage image) {
+    // print('screen is ${MediaQuery.of(context).size.width}x${MediaQuery.of(context).size.height}');
+    // print('image is ${_loadedImageInfo.width}x${_loadedImageInfo.height}');
+    // print('target is ${_loadedImageInfo.scaledWidth(context)}x${_loadedImageInfo.scaledHeight(context)}');
+    return Center(
       child: SingleChildScrollView(
-        controller: _horizontalController,
-        scrollDirection: Axis.horizontal,
-        child: Container(
-          width: _scale ? MediaQuery.of(context).size.width : _loadedImageInfo.width,
-          height: _scale ? MediaQuery.of(context).size.height : _loadedImageInfo.height,
-          child: Tooltip(
-            message: image.getTooltip(),
-            child: RotatedBox(
-              quarterTurns: image.getQuarterTurns(),
-              child: memoryImage,
+        controller: _verticalController,
+        scrollDirection: Axis.vertical,
+        child: SingleChildScrollView(
+          controller: _horizontalController,
+          scrollDirection: Axis.horizontal,
+          child: Container(
+            width: _scale ? _loadedImageInfo.scaledWidth(context) : _loadedImageInfo.width,
+            height: _scale ? _loadedImageInfo.scaledHeight(context) : _loadedImageInfo.height,
+            child: Tooltip(
+              message: image.getTooltip(),
+              child: RotatedBox(
+                quarterTurns: image.getQuarterTurns(),
+                child: Image.memory(
+                  _loadedImage,
+                  width: _loadedImageInfo.width,
+                  height: _loadedImageInfo.height,
+                  fit: _loadedImageInfo.vertical ? BoxFit.fill : (_scale ? BoxFit.scaleDown : BoxFit.none),
+                ),
+              ),
             ),
           ),
         ),
@@ -237,24 +236,18 @@ class _DetailPageState extends State<DetailPage> {
     });
   }
 
-  void scroll(int scrollX, int scrollY) async {
+  Future<void> scroll(int scrollX, int scrollY) async {
     if (_scale) return;
-    print('scroller is ${_verticalController.offset} and ${_horizontalController.offset}');
-    setState(() {
-      if (scrollY == 0) {
-        var delta = MediaQuery.of(context).size.width * scrollX / 100;
-        print('scroll ${_horizontalController.offset} with $delta');
-        _horizontalController.jumpTo(_horizontalController.offset + delta);
-        // await _horizontalController.animateTo(_horizontalController.offset + delta,
-        // duration: Duration(milliseconds: 200), curve: Curves.ease);
-      } else if (scrollX == 0) {
-        var delta = MediaQuery.of(context).size.height * scrollY / 100;
-        print('scroll ${_verticalController.offset} with $delta');
-        _verticalController.jumpTo(_verticalController.offset + delta);
-        // await _verticalController.animateTo(_verticalController.offset + delta,
-        // duration: Duration(milliseconds: 200), curve: Curves.ease);
-      }
-    });
+
+    if (scrollY == 0) {
+      var delta = MediaQuery.of(context).size.width * scrollX / 100;
+      await _horizontalController.animateTo(_horizontalController.offset + delta,
+          duration: Duration(milliseconds: 200), curve: Curves.ease);
+    } else if (scrollX == 0) {
+      var delta = MediaQuery.of(context).size.height * scrollY / 100;
+      await _verticalController.animateTo(_verticalController.offset + delta,
+          duration: Duration(milliseconds: 200), curve: Curves.ease);
+    }
   }
 
   Widget wrapStack(Widget child, image) {
@@ -372,6 +365,22 @@ class RotateIntent extends Intent {
 
 class ImageInfo {
   ImageInfo(this.width, this.height, this.vertical);
+
+  double scaledWidth(context) {
+    var screenWidth = MediaQuery.of(context).size.width;
+    if (!vertical) return screenWidth;
+    var screenHeight = MediaQuery.of(context).size.height;
+    if (width / height > screenWidth / screenHeight) return screenWidth;
+    return width * screenHeight / height;
+  }
+
+  double scaledHeight(context) {
+    var screenHeight = MediaQuery.of(context).size.height;
+    if (!vertical) return screenHeight;
+    var screenWidth = MediaQuery.of(context).size.width;
+    if (width / height < screenWidth / screenHeight) return screenHeight;
+    return height * screenWidth / width;
+  }
 
   double width;
   double height;
