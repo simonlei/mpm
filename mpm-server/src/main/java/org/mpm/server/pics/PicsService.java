@@ -325,6 +325,7 @@ public class PicsService {
         });
     }
 
+    @Deprecated
     public void checkSmallPhotos() {
         EntityMeta meta = dao.fetch(EntityMeta.class, "lastSmallPhotoCheckId");
         long lastId = meta == null ? 0 : Long.parseLong(meta.getValue());

@@ -29,9 +29,4 @@ public class CronService {
             geoChecker.checkPhotoGeos();
         }
     }
-
-    @Scheduled(fixedDelay = 5000)
-    void checkPhotos() {
-        picsService.checkSmallPhotos();
-    }
 }
