@@ -9,7 +9,8 @@ mvn clean package -DskipTests
 killall -9 java
 cd ../../running
 mkdir -p bak
-mv mpm.jar bak/mpm.jar.`date "+%Y.%m.%d"`
+mv `ls -1 mpm-server-*.jar | head -n1` bak/mpm.jar.`date "+%Y.%m.%d"`
+mv web bak/web.`date "+%Y.%m.%d"`
 mv ../mpm/mpm-server/target/mpm-server-*.jar .
 cp -R ../mpm/app/build/web/ web
 # start jetty
