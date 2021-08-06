@@ -95,6 +95,7 @@ My Photo Manager client side.
 - [x] 打包成jar，运行更方便
 - [x] Dart 的Blob()产生的Blob对象，感觉会将二进制list进行base64，从而导致heic2any
   无法识别对应的内容，所以直接用HttpRequest来读取到Blob就可以了，没必要用Dio
+- [ ] 删除好像有点问题，优先解决
 
 ### v1.1.3
 
