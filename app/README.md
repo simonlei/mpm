@@ -108,6 +108,8 @@ My Photo Manager client side.
 - [ ] 可以合并照片到另一个文件夹下
 - [ ] 还是切换成springboot吧，nutzboot 还是有点小众
 - [ ] prefetch 下面几张图片
+- [ ] 提供原图下载的能力
+- [ ] tooltip 一开始就显示出来遮住了照片，应该鼠标移上去才出来
 
 ### v1.1.4
 
