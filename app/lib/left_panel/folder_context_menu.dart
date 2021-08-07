@@ -6,6 +6,7 @@ import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
 
 class FolderContextMenu extends StatefulWidget {
@@ -25,6 +26,12 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
     return cardBuilder.call(
       context,
       [
+        buttonBuilder.call(
+            context,
+            ContextMenuButtonConfig(
+              '修改目录下所有照片时间',
+              onPressed: () => handlePressed(context, _handleChangeDatePressed),
+            )),
         buttonBuilder.call(
             context,
             ContextMenuButtonConfig(
@@ -50,6 +57,20 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
         BUS.emit(EventBus.ConditionsChanged);
         BUS.emit(EventBus.LeftTreeConditionsChanged);
       }
+    }
+  }
+
+  void _handleChangeDatePressed() async {
+    var result = await showDatePicker(
+        context: context, initialDate: DateTime.now(), firstDate: DateTime(1950), lastDate: DateTime.now());
+    if (result == null) return;
+    print(result.toString());
+    var response = await Dio().post(Config.api("/api/updateFolderDate"), data: {
+      'path': widget._path,
+      'toDate': result.toString(),
+    });
+    if (response.statusCode == 200) {
+      showToast('已设置目录下${response.data}张照片时间拍摄时间至 ${result.toString()}');
     }
   }
 }

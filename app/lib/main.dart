@@ -7,6 +7,7 @@ import 'package:app/signin.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:logger/logger.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
@@ -50,6 +51,15 @@ class MyApp extends StatelessWidget {
           WidgetBuilder builder = routes[settings.name]!;
           return MaterialPageRoute(builder: (ctx) => builder(ctx));
         },
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: [
+          const Locale('zh', 'CH'),
+          const Locale('en', 'US'),
+        ],
+        locale: const Locale('zh'),
       ),
     );
   }

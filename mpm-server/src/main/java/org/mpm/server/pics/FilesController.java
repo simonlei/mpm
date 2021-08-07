@@ -57,14 +57,27 @@ public class FilesController {
                 + " inner join t_files on t_photos.id=t_files.photoId "
                 + " SET trashed = @to"
                 + " where t_files.path like @filePath and trashed != @to";
-        Sql sql = Sqls.create(s);
-        sql.setParam("to", request.to);
-        sql.setParam("filePath", request.path + "%");
+        Sql sql = Sqls.create(s).setParam("to", request.to)
+                .setParam("filePath", request.path + "%");
         dao.execute(sql);
 
         return sql.getUpdateCount();
     }
-    
+
+    @PostMapping("/api/updateFolderDate")
+    public int updateFolderDate(@RequestBody UpdateFolderDateSchema request) {
+        String s = "update t_photos "
+                + " inner join t_files on t_photos.id=t_files.photoId "
+                + " SET takenDate = @toDate "
+                + " where t_files.path like @filePath";
+        log.info("Request is " + request.path + ":" + request.toDate);
+        Sql sql = Sqls.create(s).setParam("filePath", request.path + "%")
+                .setParam("toDate", request.toDate);
+        dao.execute(sql);
+
+        return sql.getUpdateCount();
+    }
+
 /*
     // used in datasource
     public DSResponse update(DSRequest req) {
@@ -135,5 +148,12 @@ public class FilesController {
 
         Boolean to;
         String path;
+    }
+
+    @Data
+    static class UpdateFolderDateSchema {
+
+        String path;
+        String toDate;
     }
 }
