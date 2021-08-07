@@ -71,6 +71,7 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
     });
     if (response.statusCode == 200) {
       showToast('已设置目录下${response.data}张照片时间拍摄时间至 ${result.toString()}');
+      BUS.emit(EventBus.ConditionsChanged);
     }
   }
 }

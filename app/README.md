@@ -111,6 +111,7 @@ My Photo Manager client side.
 - [ ] prefetch 下面几张图片
 - [ ] 提供原图下载的能力
 - [ ] tooltip 一开始就显示出来遮住了照片，应该鼠标移上去才出来
+- [ ] 时间有个时差的问题
 
 ### v1.1.4
 
