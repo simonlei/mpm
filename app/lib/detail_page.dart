@@ -340,6 +340,7 @@ class NextPageAction extends Action<NextPageIntent> {
   @override
   Object? invoke(covariant NextPageIntent intent) {
     Logger().i("intent: ${intent.next}");
+    _detailPageState._picsModel.selectNext(intent.next);
     _detailPageState.showNext(intent.next);
   }
 }
