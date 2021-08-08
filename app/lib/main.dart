@@ -4,6 +4,7 @@ import 'package:app/model/event_bus.dart';
 import 'package:app/model/pics_model.dart';
 import 'package:app/model/select_model.dart';
 import 'package:app/signin.dart';
+import 'package:context_menus/context_menus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -46,7 +47,9 @@ class MyApp extends StatelessWidget {
           var routes = <String, WidgetBuilder>{
             '/': (context) => JumpWidget(),
             '/home': (context) => MyHomePage(title: 'My Photo Manager'),
-            '/detail': (context) => DetailPage(settings.arguments as Tuple2),
+            '/detail': (context) => ContextMenuOverlay(
+                  child: DetailPage(settings.arguments as Tuple2),
+                ),
           };
           WidgetBuilder builder = routes[settings.name]!;
           return MaterialPageRoute(builder: (ctx) => builder(ctx));

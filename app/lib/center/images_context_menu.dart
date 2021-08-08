@@ -5,8 +5,9 @@ import 'package:oktoast/oktoast.dart';
 
 class ImagesContextMenu extends StatefulWidget {
   final PicsModel _picsModel;
+  final bool _detail;
 
-  ImagesContextMenu(this._picsModel);
+  ImagesContextMenu(this._picsModel, this._detail);
 
   @override
   State<StatefulWidget> createState() {
@@ -23,7 +24,7 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
         buttonBuilder.call(
             context,
             ContextMenuButtonConfig(
-              '修改选中照片时间',
+              widget._detail ? '修改时间' : '修改选中照片时间',
               onPressed: () => handlePressed(context, _handleChangeDatePressed),
             )),
       ],

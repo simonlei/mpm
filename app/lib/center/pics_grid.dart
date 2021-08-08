@@ -52,7 +52,7 @@ class _PicsGridState extends State<PicsGrid> {
       staggeredTileBuilder: (index) => const StaggeredTile.extent(1, 150),
     );
     return ContextMenuRegion(
-      contextMenu: ImagesContextMenu(_picsModel),
+      contextMenu: ImagesContextMenu(_picsModel, false),
       child: _gridView,
     );
   }

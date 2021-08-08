@@ -1,11 +1,13 @@
 import 'dart:html';
 import 'dart:typed_data';
 
+import 'package:app/center/images_context_menu.dart';
 import 'package:app/model/config.dart';
 import 'package:app/model/pics_model.dart';
 import 'package:app/video_view.dart';
 import 'package:app/widgets/rotate_button.dart';
 import 'package:app/widgets/star_button.dart';
+import 'package:context_menus/context_menus.dart';
 import 'package:dio/dio.dart';
 import 'package:expire_cache/expire_cache.dart';
 import 'package:flutter/cupertino.dart';
@@ -81,23 +83,27 @@ class _DetailPageState extends State<DetailPage> {
             child: FutureBuilder<PicImage?>(
               future: _loadImage(),
               builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  var image = snapshot.data!;
-                  if (image.mediaType == MediaType.video) {
-                    _scale = true;
-                    return wrapStack(VideoView(image), image);
-                  }
-                  return wrapStack(makeImageView(context, image), image);
-                } else if (snapshot.hasError)
-                  return Text('Error:${snapshot.error}');
-                else
-                  return CircularProgressIndicator();
+                return makeDetailWidget(snapshot, context);
               },
             ),
           ),
         ),
       ),
     );
+  }
+
+  Widget makeDetailWidget(AsyncSnapshot<PicImage?> snapshot, BuildContext context) {
+    if (snapshot.connectionState == ConnectionState.done) {
+      var image = snapshot.data!;
+      if (image.mediaType == MediaType.video) {
+        _scale = true;
+        return wrapStack(VideoView(image), image);
+      }
+      return wrapStack(makeImageView(context, image), image);
+    } else if (snapshot.hasError)
+      return Text('Error:${snapshot.error}');
+    else
+      return CircularProgressIndicator();
   }
 
   late var _loadedImage;
@@ -127,7 +133,6 @@ class _DetailPageState extends State<DetailPage> {
     } else {
       return await _cache.get(imgName);
     }
-    // var response = await Dio().get(Config.imageUrl(imgName), options: Options(responseType: ResponseType.bytes));
     await HttpRequest.request(Config.imageUrl('small/$imgName'), responseType: 'blob').then((HttpRequest resp) {
       print('length: ${resp.runtimeType} ${resp.responseType} ${resp.response.runtimeType} ');
       print('content type: ${resp.responseHeaders['content-type']}');
@@ -251,17 +256,21 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Widget wrapStack(Widget child, image) {
-    return Stack(
-      children: [
-        child,
-        Row(
-          children: [
-            StarButton(image),
-            SizedBox(width: 5),
-            RotateButton(image),
-          ],
-        ),
-      ],
+    print('pic model is $_picsModel');
+    return ContextMenuRegion(
+      contextMenu: ImagesContextMenu(_picsModel, true),
+      child: Stack(
+        children: [
+          child,
+          Row(
+            children: [
+              StarButton(image),
+              SizedBox(width: 5),
+              RotateButton(image),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
