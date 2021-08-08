@@ -10,6 +10,8 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.mpm.server.BaseTest;
+import org.mpm.server.entity.EntityPhoto;
+import org.nutz.dao.Dao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -21,6 +23,8 @@ public class PicsServiceTest extends BaseTest {
     COSClient cosClient;
     @Autowired
     PicsService picsService;
+    @Autowired
+    Dao dao;
 
     @Test
     public void testGetCoverName() {
@@ -53,5 +57,12 @@ public class PicsServiceTest extends BaseTest {
         assertNull(picsService.parseGps(null));
         assertNull(picsService.parseGps("not valid gps"));
         assertEquals(22.18611111111111, picsService.parseGps("22/1 11/1 1000/100"));
+    }
+
+    @Test
+    void testSetDate() {
+        EntityPhoto p = dao.fetch(EntityPhoto.class, 20);
+        picsService.setInfosFromCos("origin/" + p.getName(), p);
+        assertEquals("Sat Sep 13 10:35:08 CST 2014", p.getTakenDate().toString());
     }
 }

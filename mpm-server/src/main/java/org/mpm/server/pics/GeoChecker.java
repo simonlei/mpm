@@ -74,6 +74,7 @@ public class GeoChecker {
         for (EntityPhoto p : photos) {
             try {
                 picsService.setInfosFromCos("origin/" + p.getName(), p);
+                dao.updateIgnoreNull(p);
             } catch (Exception e) {
                 log.error("Can't check photo date:" + p.getId(), e);
             }
