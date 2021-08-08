@@ -29,16 +29,12 @@ class _PicsGridState extends State<PicsGrid> {
       child: Focus(
         autofocus: true,
         onKey: onKey,
-        child: ContextMenuRegion(
-          contextMenu: ImagesContextMenu(),
-          child: Consumer<PicsModel>(
-            builder: (context, picsModel, child) {
-              Logger().i('Consumer picsModel ${picsModel.getTotalImages()}');
-              _picsModel = picsModel;
-              _gridView = buildStaggeredGridView(picsModel);
-              return _gridView;
-            },
-          ),
+        child: Consumer<PicsModel>(
+          builder: (context, picsModel, child) {
+            Logger().i('Consumer picsModel ${picsModel.getTotalImages()}');
+            _picsModel = picsModel;
+            return buildStaggeredGridView(picsModel);
+          },
         ),
       ),
     );
@@ -46,14 +42,18 @@ class _PicsGridState extends State<PicsGrid> {
 
   late StaggeredGridView _gridView;
 
-  StaggeredGridView buildStaggeredGridView(PicsModel _picsModel) {
-    return StaggeredGridView.extentBuilder(
+  ContextMenuRegion buildStaggeredGridView(PicsModel _picsModel) {
+    _gridView = StaggeredGridView.extentBuilder(
       maxCrossAxisExtent: 200,
       crossAxisSpacing: 5,
       mainAxisSpacing: 3,
       itemCount: _picsModel.getTotalImages(),
       itemBuilder: (context, index) => ImageTile(index, _picsModel),
       staggeredTileBuilder: (index) => const StaggeredTile.extent(1, 150),
+    );
+    return ContextMenuRegion(
+      contextMenu: ImagesContextMenu(_picsModel),
+      child: _gridView,
     );
   }
 

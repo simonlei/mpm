@@ -77,7 +77,7 @@ class PicsModel with ChangeNotifier {
   }
 
   Future<void> trashSelected() async {
-    if (_selectModel.selected.isEmpty) return;
+    if (selectNothing) return;
 
     var resp = await Dio()
         .post(Config.api("/api/trashPhotos"), data: _selectModel.selected.map((e) => _pics[e]!.name).toList());
@@ -97,11 +97,13 @@ class PicsModel with ChangeNotifier {
   }
 
   void rotateSelected() {
-    if (_selectModel.selected.isEmpty) return;
+    if (selectNothing) return;
     _selectModel.selected.forEach((element) async {
       await rotateImage(_pics[element]!);
     });
   }
+
+  bool get selectNothing => _selectModel.selected.isEmpty;
 
   Future<void> rotateImage(PicImage image) async {
     int rotate = (image.rotate + 90) % 360;
@@ -114,7 +116,7 @@ class PicsModel with ChangeNotifier {
   }
 
   void starSelected() {
-    if (_selectModel.selected.isEmpty) return;
+    if (selectNothing) return;
     _selectModel.selected.forEach((element) async {
       await updateImage(_pics[element]!, {'star': !_pics[element]!.star});
     });
@@ -127,6 +129,14 @@ class PicsModel with ChangeNotifier {
       image.resetElement(resp.data);
       notifyListeners();
     }
+  }
+
+  Future<void> updateSelectedImages(Map<String, dynamic> map, String reason) async {
+    map.remove('id');
+    _selectModel.selected.forEach((element) async {
+      var img = await getImage(element);
+      await updateImage(img!, Map.from(map));
+    });
   }
 }
 

@@ -113,22 +113,6 @@ public class PicsController {
         return dao.update(EntityPhoto.class, Chain.makeSpecial("trashed", " !trashed"), cri);
     }
 
-    /*
-        // used in datasource
-        public DSResponse remove(DSRequest req) {
-            DSResponse resp = new DSResponse();
-            Long id = (Long) req.getCriteria().get("id");
-            if (id != null) {
-                Sql sql = Sqls.create("update t_photos set trashed = !trashed where id = @id");
-                sql.setParam("id", id);
-                dao.execute(sql);
-                resp.setData(Lang.list(Lang.map("id", id)));
-                resp.setAffectedRows(1);
-            }
-            log.info("remove : {}", req.getCriteria());
-            return resp;
-        }
-    */
     @PostMapping("/api/getPics")
     public Map getPics(@RequestBody GetPicsRequest req) {
         log.info("Getting pics");
