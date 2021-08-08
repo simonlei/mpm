@@ -51,7 +51,7 @@ public class GeoChecker {
             tmpFile = File.createTempFile(p.getName(), "" + Math.random());
             picsService.saveCosFile("origin/" + p.getName(), tmpFile);
             // check taken date and geo
-            picsService.setInfosFromCos(p.getName(), p);
+            picsService.setInfosFromCos("origin/" + p.getName(), p);
             picsService.setInfosFromFile(tmpFile, p);
             dao.updateIgnoreNull(p);
             if (p.getLatitude() != null) {
