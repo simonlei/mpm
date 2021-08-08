@@ -1,10 +1,10 @@
-import 'package:app/event_bus.dart';
+import 'package:app/center/pics_grid.dart';
 import 'package:app/headers/empty_trash_button.dart';
 import 'package:app/headers/sort_selector.dart';
 import 'package:app/headers/trash_box_switcher.dart';
 import 'package:app/headers/upload_selector.dart';
 import 'package:app/left_panel/left_panel.dart';
-import 'package:app/pics_grid.dart';
+import 'package:app/model/event_bus.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 

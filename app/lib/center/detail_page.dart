@@ -1,8 +1,8 @@
 import 'dart:html';
 import 'dart:typed_data';
 
-import 'package:app/config.dart';
-import 'package:app/pics_model.dart';
+import 'package:app/model/config.dart';
+import 'package:app/model/pics_model.dart';
 import 'package:app/video_view.dart';
 import 'package:app/widgets/rotate_button.dart';
 import 'package:app/widgets/star_button.dart';
@@ -15,7 +15,7 @@ import 'package:js/js_util.dart';
 import 'package:logger/logger.dart';
 import 'package:tuple/tuple.dart';
 
-import 'js_wrap/heic2any.dart';
+import '../js_wrap/heic2any.dart';
 
 class DetailPage extends StatefulWidget {
   const DetailPage(this.arguments);

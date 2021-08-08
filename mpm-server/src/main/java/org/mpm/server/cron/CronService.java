@@ -33,5 +33,7 @@ public class CronService {
     @Scheduled(fixedDelay = 5000)
     void checkPhotoDates() {
         geoChecker.checkPhotoDates();
+        // 还要再查一遍拿到了gps信息但是没获取地址的
+        // select * from t_photos where latitude is not null and address is null limit 10;
     }
 }

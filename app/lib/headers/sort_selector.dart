@@ -1,5 +1,5 @@
-import 'package:app/conditions.dart';
-import 'package:app/event_bus.dart';
+import 'package:app/model/conditions.dart';
+import 'package:app/model/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 

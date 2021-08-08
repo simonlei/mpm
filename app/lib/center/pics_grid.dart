@@ -1,6 +1,8 @@
-import 'package:app/image_tile.dart';
-import 'package:app/pics_model.dart';
+import 'package:app/center/image_tile.dart';
+import 'package:app/center/images_context_menu.dart';
+import 'package:app/model/pics_model.dart';
 import 'package:app/widgets/star_button.dart';
+import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -27,13 +29,16 @@ class _PicsGridState extends State<PicsGrid> {
       child: Focus(
         autofocus: true,
         onKey: onKey,
-        child: Consumer<PicsModel>(
-          builder: (context, picsModel, child) {
-            Logger().i('Consumer picsModel ${picsModel.getTotalImages()}');
-            _picsModel = picsModel;
-            _gridView = buildStaggeredGridView(picsModel);
-            return _gridView;
-          },
+        child: ContextMenuRegion(
+          contextMenu: ImagesContextMenu(),
+          child: Consumer<PicsModel>(
+            builder: (context, picsModel, child) {
+              Logger().i('Consumer picsModel ${picsModel.getTotalImages()}');
+              _picsModel = picsModel;
+              _gridView = buildStaggeredGridView(picsModel);
+              return _gridView;
+            },
+          ),
         ),
       ),
     );

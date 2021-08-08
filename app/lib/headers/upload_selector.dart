@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:html' as html;
 
-import 'package:app/config.dart';
-import 'package:app/event_bus.dart';
 import 'package:app/js_wrap/tecent_cos.dart';
+import 'package:app/model/config.dart';
+import 'package:app/model/event_bus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:js/js.dart';

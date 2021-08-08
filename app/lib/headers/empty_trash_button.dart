@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:app/conditions.dart';
-import 'package:app/config.dart';
-import 'package:app/event_bus.dart';
+import 'package:app/model/conditions.dart';
+import 'package:app/model/config.dart';
+import 'package:app/model/event_bus.dart';
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';

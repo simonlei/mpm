@@ -1,8 +1,8 @@
-import 'package:app/config.dart';
-import 'package:app/event_bus.dart';
 import 'package:app/homepage.dart';
-import 'package:app/pics_model.dart';
-import 'package:app/select_model.dart';
+import 'package:app/model/config.dart';
+import 'package:app/model/event_bus.dart';
+import 'package:app/model/pics_model.dart';
+import 'package:app/model/select_model.dart';
 import 'package:app/signin.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +13,7 @@ import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import 'detail_page.dart';
+import 'center/detail_page.dart';
 
 void main() {
   var selectModel = SelectModel();

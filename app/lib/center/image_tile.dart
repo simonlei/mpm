@@ -1,7 +1,7 @@
-import 'package:app/config.dart';
-import 'package:app/detail_page.dart';
-import 'package:app/pics_model.dart';
-import 'package:app/select_model.dart';
+import 'package:app/center/detail_page.dart';
+import 'package:app/model/config.dart';
+import 'package:app/model/pics_model.dart';
+import 'package:app/model/select_model.dart';
 import 'package:app/widgets/rotate_button.dart';
 import 'package:app/widgets/star_button.dart';
 import 'package:flutter/material.dart';

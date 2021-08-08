@@ -1,7 +1,7 @@
-import 'package:app/conditions.dart';
-import 'package:app/config.dart';
-import 'package:app/event_bus.dart';
-import 'package:app/select_model.dart';
+import 'package:app/model/conditions.dart';
+import 'package:app/model/config.dart';
+import 'package:app/model/event_bus.dart';
+import 'package:app/model/select_model.dart';
 import 'package:dio/dio.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';

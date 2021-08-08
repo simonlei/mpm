@@ -1,6 +1,6 @@
-import 'package:app/conditions.dart';
 import 'package:app/left_panel/date_tree_panel.dart';
 import 'package:app/left_panel/folder_tree_panel.dart';
+import 'package:app/model/conditions.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
