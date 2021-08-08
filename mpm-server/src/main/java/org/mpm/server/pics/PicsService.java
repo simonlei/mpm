@@ -245,9 +245,7 @@ public class PicsService {
     }
 
     void setInfosFromCos(String key, EntityPhoto photo) {
-        Map imageInfo = cosRemoteService.getImageInfo(key);
-        photo.setWidth(MyUtils.parseInt(imageInfo.get("width"), 0));
-        photo.setHeight(MyUtils.parseInt(imageInfo.get("height"), 0));
+        setImageInfo(key, photo);
 
         Map exifInfo = cosRemoteService.getExifInfo(key);
         if (exifInfo.get("error") != null) {
@@ -255,9 +253,27 @@ public class PicsService {
         }
         String dateTime = MyUtils.cell(exifInfo, "DateTime.val");
         Date date = MyUtils.parseDate(dateTime, "yyyy:MM:dd HH:mm:ss");
-        photo.setTakenDate(date);
-        photo.setLatitude(parseGps(MyUtils.cell(exifInfo, "GPSLatitude.val")));
-        photo.setLongitude(parseGps(MyUtils.cell(exifInfo, "GPSLongitude.val")));
+        if (date != null) {
+            photo.setTakenDate(date);
+        }
+        Double latitude = parseGps(MyUtils.cell(exifInfo, "GPSLatitude.val"));
+        if (latitude != null) {
+            photo.setLatitude(latitude);
+        }
+        Double longitude = parseGps(MyUtils.cell(exifInfo, "GPSLongitude.val"));
+        if (longitude != null) {
+            photo.setLongitude(longitude);
+        }
+    }
+
+    private void setImageInfo(String key, EntityPhoto photo) {
+        try {
+            Map imageInfo = cosRemoteService.getImageInfo(key);
+            photo.setWidth(MyUtils.parseInt(imageInfo.get("width"), 0));
+            photo.setHeight(MyUtils.parseInt(imageInfo.get("height"), 0));
+        } catch (Exception e) {
+            log.error("Can't set image info ", e);
+        }
     }
 
     Double parseGps(String str) {

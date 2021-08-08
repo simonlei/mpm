@@ -63,4 +63,26 @@ public class GeoChecker {
             }
         }
     }
+
+    public void checkPhotoDates() {
+        EntityMeta meta = dao.fetch(EntityMeta.class, "lastDateCheckId");
+        long lastId = meta == null ? 0 : Long.parseLong(meta.getValue());
+        // get first 20
+        List<EntityPhoto> photos = dao.query(EntityPhoto.class, Cnd.where("id", ">", lastId)
+                .and("mediaType", "=", "photo")
+                .orderBy("id", "asc"), new Pager(1, 20));
+        for (EntityPhoto p : photos) {
+            try {
+                picsService.setInfosFromCos("origin/" + p.getName(), p);
+            } catch (Exception e) {
+                log.error("Can't check photo date:" + p.getId(), e);
+            }
+            lastId = p.getId();
+        }
+        if (meta == null) {
+            meta = EntityMeta.builder().key("lastDateCheckId").build();
+        }
+        meta.setValue("" + lastId);
+        dao.insertOrUpdate(meta);
+    }
 }
