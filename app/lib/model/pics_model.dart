@@ -7,6 +7,7 @@ import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:mutex/mutex.dart';
+import 'package:oktoast/oktoast.dart';
 
 class PicsModel with ChangeNotifier {
   List<PicImage?> _pics = <PicImage>[];
@@ -136,6 +137,7 @@ class PicsModel with ChangeNotifier {
     _selectModel.selected.forEach((element) async {
       var img = await getImage(element);
       await updateImage(img!, Map.from(map));
+      showToast('已修改照片 $reason');
     });
   }
 }

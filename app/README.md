@@ -78,8 +78,8 @@ My Photo Manager client side.
 - [x] 照片排序也要按新的datasource来支持
 - [x] 支持修改图片的日期
 - [x] 支持拷贝图片的gis信息
-- [ ] 支持修改图片的gis信息
-- [ ] 图片gis信息被修改之后，要重新调用一下address接口
+- [x] 支持修改图片的gis信息
+- [x] 图片gis信息被修改之后，要重新调用一下address接口
 - [x] 支持按目录修改图片的日期
 - [ ] 支持按目录修改图片的gis信息
 - [x] 支持照片的旋转
