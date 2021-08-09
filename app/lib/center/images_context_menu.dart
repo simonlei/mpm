@@ -1,6 +1,7 @@
 import 'package:app/model/pics_model.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:oktoast/oktoast.dart';
 
 class ImagesContextMenu extends StatefulWidget {
@@ -27,6 +28,12 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
               widget._detail ? '修改时间' : '修改选中照片时间',
               onPressed: () => handlePressed(context, _handleChangeDatePressed),
             )),
+        buttonBuilder.call(
+            context,
+            ContextMenuButtonConfig(
+              '拷贝GIS信息',
+              onPressed: () => handlePressed(context, _handleCopyGisPressed),
+            )),
       ],
     );
   }
@@ -42,5 +49,17 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
     if (result == null) return;
     print(result.toString());
     widget._picsModel.updateSelectedImages({'takenDate': result.toString()}, ' 拍摄时间到 ${result.toString()}');
+  }
+
+  void _handleCopyGisPressed() async {
+    if (widget._picsModel.selectNothing) {
+      showToast('请选中照片后再试');
+      return;
+    }
+
+    var selectedIndex = widget._picsModel.getSelectedIndex();
+    var image = await widget._picsModel.getImage(selectedIndex);
+    await Clipboard.setData(ClipboardData(text: '${image!.latitude},${image.longitude}'));
+    showToast('已拷贝GIS信息至剪贴板');
   }
 }

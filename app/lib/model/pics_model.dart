@@ -153,6 +153,8 @@ class PicImage {
     star = element['star'];
     rotate = element['rotate'];
     description = element['description'];
+    longitude = element['longitude'];
+    latitude = element['latitude'];
     address = element['address'];
     takenDate = DateTime.parse(element['takendate']);
     mediaType = 'photo' == element['mediatype'] ? MediaType.photo : MediaType.video;
@@ -170,6 +172,8 @@ class PicImage {
   late final int size;
   late String? description;
   late String? address;
+  late double? longitude;
+  late double? latitude;
   late DateTime takenDate;
   late bool star;
   late final MediaType mediaType;
