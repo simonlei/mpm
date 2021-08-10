@@ -40,7 +40,7 @@ jobs:
           FROM openjdk:8-jdk-alpine
           COPY . /
           WORKDIR .
-          ENTRYPOINT ["/bin/sh","-c","java -jar mpm.jar 2> /logs/error.log"]
+          ENTRYPOINT ["/bin/sh","-c","java -jar mpm.jar --spring.config.location=file:/config/application.properties 2> /logs/error.log"]
         ' > Dockerfile
     
     - name: Log in to GitHub Docker Registry
