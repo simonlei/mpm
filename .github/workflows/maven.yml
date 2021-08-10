@@ -30,7 +30,7 @@ jobs:
         flutter build -v web --dart-define=remote_addr=
         cd ../mpm-server
         mvn -B package --file pom.xml -DskipTests
-        
+        cd ..
         mkdir docker
         cd docker
         cp -R ../app/build/web web
