@@ -21,6 +21,8 @@ public class FilesController {
 
     @Autowired
     Dao dao;
+    @Autowired
+    GisService gisService;
 
     @PostMapping("/api/getFoldersData")
     public List<Record> getFoldersData(@RequestBody FoldersDataRequest req) {
@@ -77,6 +79,25 @@ public class FilesController {
 
         return sql.getUpdateCount();
     }
+
+    @PostMapping("/api/updateFolderGis")
+    public int updateFolderGis(@RequestBody UpdateFolderGisSchema request) {
+        String s = "update t_photos "
+                + " inner join t_files on t_photos.id=t_files.photoId "
+                + " SET latitude = @latitude, longitude=@longitude, address=@address "
+                + " where t_files.path like @filePath";
+        log.info("Request is " + request.path + ":" + request.latitude + "," + request.longitude);
+        String address = gisService.getAddress(request.latitude, request.longitude);
+        Sql sql = Sqls.create(s).setParam("filePath", request.path + "%")
+                .setParam("latitude", request.latitude)
+                .setParam("longitude", request.longitude)
+                .setParam("address", address);
+        dao.execute(sql);
+
+        return sql.getUpdateCount();
+    }
+
+
 
 /*
     // used in datasource
@@ -155,5 +176,13 @@ public class FilesController {
 
         String path;
         String toDate;
+    }
+
+    @Data
+    static class UpdateFolderGisSchema {
+
+        String path;
+        Double latitude;
+        Double longitude;
     }
 }

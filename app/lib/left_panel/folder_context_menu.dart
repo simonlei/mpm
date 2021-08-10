@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:prompt_dialog/prompt_dialog.dart';
 
 class FolderContextMenu extends StatefulWidget {
   FolderContextMenu(this._path);
@@ -31,6 +32,12 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
             ContextMenuButtonConfig(
               '修改目录下所有照片时间',
               onPressed: () => handlePressed(context, _handleChangeDatePressed),
+            )),
+        buttonBuilder.call(
+            context,
+            ContextMenuButtonConfig(
+              '修改目录下所有照片GIS信息',
+              onPressed: () => handlePressed(context, _handleChangeGisPressed),
             )),
         buttonBuilder.call(
             context,
@@ -60,6 +67,27 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
     }
   }
 
+  void _handleChangeGisPressed() async {
+    // 这里最好能抽象出一个方法来，重复了
+    var result = await prompt(scaffoldKey.currentContext!, title: Text('请输入纬度,经度，例如 22.57765,113.9504277778'));
+    if (result == null) return;
+    print(' result is $result');
+    var splitted = result.split(',');
+    if (splitted.isEmpty || splitted.length != 2) {
+      showToast('请按照 纬度,经度 模式来输入');
+      return;
+    }
+    var response = await Dio().post(Config.api("/api/updateFolderGis"), data: {
+      'path': widget._path,
+      'latitude': splitted[0],
+      'longitude': splitted[1],
+    });
+    if (response.statusCode == 200) {
+      showToast('已设置目录下${response.data}张照片GIS信息至 ${result.toString()}');
+      BUS.emit(EventBus.ConditionsChanged);
+    }
+  }
+
   void _handleChangeDatePressed() async {
     var result = await showDatePicker(
         context: context, initialDate: DateTime.now(), firstDate: DateTime(1950), lastDate: DateTime.now());
@@ -70,7 +98,7 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
       'toDate': result.toString(),
     });
     if (response.statusCode == 200) {
-      showToast('已设置目录下${response.data}张照片时间拍摄时间至 ${result.toString()}');
+      showToast('已设置目录下${response.data}张照片拍摄时间至 ${result.toString()}');
       BUS.emit(EventBus.ConditionsChanged);
     }
   }

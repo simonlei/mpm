@@ -81,7 +81,7 @@ My Photo Manager client side.
 - [x] 支持修改图片的gis信息
 - [x] 图片gis信息被修改之后，要重新调用一下address接口
 - [x] 支持按目录修改图片的日期
-- [ ] 支持按目录修改图片的gis信息
+- [x] 支持按目录修改图片的gis信息
 - [x] 支持照片的旋转
 - [x] 全屏状态下也支持旋转
 - [x] bug: mediaType error
