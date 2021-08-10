@@ -11,9 +11,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 8
@@ -24,6 +22,7 @@ jobs:
     - uses: subosito/flutter-action@v1
       with:
         channel: 'stable' 
+
     - name: Build with Maven
       run: |
         cd app
@@ -31,3 +30,29 @@ jobs:
         flutter build -v web --dart-define=remote_addr=
         cd ../mpm-server
         mvn -B package --file pom.xml -DskipTests
+        
+        mkdir docker
+        cd docker
+        cp -R ../app/build/web web
+        cp ../mpm-server/target/mpm-server-*.jar mpm.jar
+        echo '
+          FROM openjdk:8-jdk-alpine
+          COPY . /
+          WORKDIR .
+          ENTRYPOINT ["/bin/sh","-c","java -jar mpm.jar 2> /logs/error.log"]
+        ' > Dockerfile
+    
+    - name: Log in to GitHub Docker Registry
+      uses: docker/login-action@v1
+      with:
+        registry: docker.pkg.github.com
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Build container image
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: docker.pkg.github.com/${{ github.repository }}/mpm:${{ github.sha }}
+            
+
