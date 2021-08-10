@@ -77,7 +77,10 @@ class _DateTreePanelState extends State<DateTreePanel> {
 
     print('I am going to init controller...');
 
-    var resp = await Dio().post(Config.api("/api/getPicsDate"), data: {'trashed': Conditions.trashed});
+    var resp = await Dio().post(Config.api("/api/getPicsDate"), data: {
+      'trashed': Conditions.trashed,
+      'star': Conditions.star,
+    });
 
     if (resp.statusCode != 200) {
       Logger().e("Can't load picsDate: $resp");

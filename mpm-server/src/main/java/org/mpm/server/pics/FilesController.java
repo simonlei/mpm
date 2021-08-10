@@ -41,7 +41,7 @@ public class FilesController {
         if (req.star != null) {
             s.setParam("star", req.star);
         }
-        log.debug(s.toString());
+        log.info(s.toString());
         s.setCallback(Sqls.callback.records());
         dao.execute(s);
         List<Record> list = s.getList(Record.class);

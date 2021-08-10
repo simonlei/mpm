@@ -14,6 +14,7 @@ import org.nutz.dao.Dao;
 import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Criteria;
 import org.nutz.dao.util.cri.SimpleCriteria;
+import org.nutz.json.Json;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,10 +116,10 @@ public class PicsController {
 
     @PostMapping("/api/getPics")
     public Map getPics(@RequestBody GetPicsRequest req) {
-        log.info("Getting pics");
+        log.info("Getting pics " + Json.toJson(req));
         Boolean trashed = req.trashed;
 
-        Boolean star = null;
+        Boolean star = req.star;
         String filePath = req.path;
         int start = req.getStart();
         int end = req.getStart() + req.getSize();
@@ -195,14 +196,15 @@ public class PicsController {
     }
 
     private void addStarCriteria(Boolean star, SimpleCriteria cnd) {
-        if (star != null) {
-            cnd.where().and("star", "=", star);
+        if (star != null && star) {
+            cnd.where().and("star", "=", true);
         }
     }
 
     @Data
     static class GetPicsRequest {
 
+        Boolean star;
         boolean trashed;
         int start;
         int size;

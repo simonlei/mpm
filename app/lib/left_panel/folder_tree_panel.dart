@@ -75,8 +75,11 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
     if (expend) {
       var node = _treeViewController.getNode(key);
       if (node != null && node.children.isEmpty) {
-        var resp =
-            await Dio().post(Config.api("/api/getFoldersData"), data: {'trashed': Conditions.trashed, 'parentId': key});
+        var resp = await Dio().post(Config.api("/api/getFoldersData"), data: {
+          'trashed': Conditions.trashed,
+          'parentId': key,
+          'star': Conditions.star,
+        });
         if (resp.statusCode != 200) {
           Logger().e("Can't load folders data: $resp");
           return;
@@ -115,7 +118,10 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
 
   Future<TreeViewController> doInit() async {
     if (_inited) return _treeViewController;
-    var resp = await Dio().post(Config.api("/api/getFoldersData"), data: {'trashed': Conditions.trashed});
+    var resp = await Dio().post(Config.api("/api/getFoldersData"), data: {
+      'trashed': Conditions.trashed,
+      'star': Conditions.star,
+    });
 
     if (resp.statusCode != 200) {
       Logger().e("Can't load folders data: $resp");
