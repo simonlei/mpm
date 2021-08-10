@@ -33,6 +33,12 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
         buttonBuilder.call(
             context,
             ContextMenuButtonConfig(
+              widget._detail ? '修改描述信息' : '修改选中照片描述信息',
+              onPressed: () => handlePressed(context, _handleChangeDescPressed),
+            )),
+        buttonBuilder.call(
+            context,
+            ContextMenuButtonConfig(
               '拷贝GIS信息',
               onPressed: () => handlePressed(context, _handleCopyGisPressed),
             )),
@@ -73,6 +79,17 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
     var image = await widget._picsModel.getImage(selectedIndex);
     await Clipboard.setData(ClipboardData(text: '${image!.latitude},${image.longitude}'));
     showToast('已拷贝GIS信息至剪贴板');
+  }
+
+  Future<void> _handleChangeDescPressed() async {
+    if (widget._picsModel.selectNothing) {
+      showToast('请选中照片后再试');
+      return;
+    }
+    var result = await prompt(scaffoldKey.currentContext!, title: Text('请输入描述信息'));
+    if (result == null) return;
+    print(' result is $result');
+    widget._picsModel.updateSelectedImages({'description': result}, ' 描述信息到 $result');
   }
 
   Future<void> _handleChangeGisPressed() async {

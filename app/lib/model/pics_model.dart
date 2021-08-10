@@ -201,11 +201,7 @@ class PicImage {
     print(element);
     //print(element.containsKey('star'));
     star = element.containsKey('star') ? element['star'] : star;
-    description = element.containsKey(['description'])
-        ? element['description']
-        : description == null
-            ? ''
-            : description;
+    description = element.containsKey('description') ? element['description'] : description ?? '';
     address = element.containsKey('address') ? element['address'] : address;
     takenDate = element.containsKey('takendate') ? DateTime.parse(element['takendate']) : takenDate;
     thumb = element.containsKey('thumb') ? element['thumb'] : thumb;
