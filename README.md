@@ -8,44 +8,27 @@ My Photo Manager，个人相册管理
 
 后端使用 springboot
 
-前端使用 smartgwt
+前端使用 flutter
 
 ## 开发
 
-先启动gwt codeserver
+1. 准备好数据库，按sql目录下的版本次序执行sql语句
+2. 在本地 resources 目录下建立 application.properties 文件，参考 application.properties.template
+3. 其中的 isDev要设置为true
+4. 后端在IDEA里面启动springboot的方式运行后台或者用 mvn 来启动后台服务
+5. 前端使用 flutter run 来运行
 
-```
-mvn gwt:codeserver -am -pl *-client
-```
+## 本地部署
 
-再启动后台服务
+1. 准备好数据库，按sql目录下的版本次序执行sql语句
+2. 在源码的上一级目录下创建 config 目录，并创建 application.properties，参考源码中的 application.properties.template
+3. 运行 deploy.sh 来进行本地构建和部署
 
-```
-mvn jetty:run -Pdev -pl *-server
-```
+## Docker 部署
 
-或者开发者可以在IDEA里面启动springboot的方式运行后台
-
-然后访问 localhost:8080 即可
-
-## 运行
-
-先打包
-
-```
-mvn package -DskipTests
-或者
-mvn package -Dgwt.style=PRETTY -DskipTests
-```
-
-然后用jetty-runner 运行打包后的war包即可。
-
-## 部署
-
-1. 下载jetty9，并展开
-2. clone 源代码，放在 mpm 目录下
-3. 在 ~/config/ 目录下创建 application.properties，参考源码中的 application.properties.template
-4. 进入 mpm 目录，运行 sh ./deploy.sh
+1. 准备好数据库，按sql目录下的版本次序执行sql语句
+2. 创建 config 目录，并创建 application.properties，参考源码中的 application.properties.template
+3. 使用 docker run  --net=host --name mpm -v /home/simon/config:/config -d ghcr.io/simonlei/mpm:xxx 来启动docker镜像
 
 ## Release:
 
