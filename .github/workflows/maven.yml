@@ -33,6 +33,7 @@ jobs:
         cd ..
         mkdir docker
         cd docker
+        mkdir logs
         cp -R ../app/build/web web
         cp ../mpm-server/target/mpm-server-*.jar mpm.jar
         echo '
@@ -54,6 +55,6 @@ jobs:
       with:
         context: docker
         push: true
-        tags: ghcr.io/${{ github.actor }}/mpm:${{ github.sha }}
+        tags: ghcr.io/${{ github.actor }}/mpm:1.1.3.${{ github.run_id }}
             
 
