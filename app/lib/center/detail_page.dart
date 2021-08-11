@@ -13,9 +13,11 @@ import 'package:expire_cache/expire_cache.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:js/js_util.dart';
 import 'package:logger/logger.dart';
 import 'package:tuple/tuple.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../js_wrap/heic2any.dart';
 
@@ -268,6 +270,10 @@ class _DetailPageState extends State<DetailPage> {
               StarButton(image),
               SizedBox(width: 5),
               RotateButton(image),
+              InkResponse(
+                child: SvgPicture.asset("web/icons/download.svg", width: 16),
+                onTap: () => launch(Config.imageUrl('origin/${image.name}')),
+              ),
             ],
           ),
         ],
