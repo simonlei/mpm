@@ -209,6 +209,7 @@ class _DetailPageState extends State<DetailPage> {
             height: _scale ? _loadedImageInfo.scaledHeight(context) : _loadedImageInfo.height,
             child: Tooltip(
               message: image.getTooltip(),
+              waitDuration: Duration(seconds: 2),
               child: RotatedBox(
                 quarterTurns: image.getQuarterTurns(),
                 child: Image.memory(
