@@ -68,11 +68,12 @@ public class PicsService {
         return dao.count(EntityPhoto.class, Cnd.where("trashed", "=", trashed));
     }
 
-    public EntityPhoto savePhotoInDb(EntityFile parent, String key, String name) {
+    public EntityPhoto savePhotoInDb(EntityFile parent, String key, String name, long date) {
         File tmpFile = null;
         try {
             tmpFile = File.createTempFile(name, "" + Math.random());
             String contentType = saveCosFile(key, tmpFile);
+            tmpFile.setLastModified(date);
             if (contentType.contains("video")) {
                 return saveVideo(tmpFile, key, Files.getMajorName(name));
             } else {
@@ -98,11 +99,12 @@ public class PicsService {
 
     private EntityPhoto saveVideo(File file, String key, String name) {
         // 去重
-        EntityPhoto samePhoto = sameFileExist(file, key);
+        EntityPhoto samePhoto = sameFileExist(file, key, name);
         if (samePhoto != null) {
             return samePhoto;
         }
         EntityPhoto video = createEntityPhotoFrom(file);
+        video.setDescription(name);
         video.setMediaType(VIDEO);
         checkInBlacklist(file, video);
         log.info("Saving video " + video.getId());
@@ -111,7 +113,7 @@ public class PicsService {
         generatePoster(key, video);
         getVideoMetadata(key, video);
         // TODO: 应该有办法获取到video的拍摄时间吧？
-        video.setTakenDate(new Date());
+        video.setTakenDate(new Date(file.lastModified()));
         dao.updateIgnoreNull(video);
 
         CopyObjectRequest request = new CopyObjectRequest(bucket, key, bucket, "video/" + video.getName() + ".mp4");
@@ -158,12 +160,13 @@ public class PicsService {
     }
 
     public EntityPhoto saveImage(File file, String key, String name) {
-        EntityPhoto samePhoto = sameFileExist(file, key);
+        EntityPhoto samePhoto = sameFileExist(file, key, name);
         if (samePhoto != null) {
             return samePhoto;
         }
         EntityPhoto photo = createEntityPhotoFrom(file);
 
+        photo.setDescription(name);
         setInfosFromCos(key, photo);
         setInfosFromFile(file, photo);
         checkInBlacklist(file, photo);
@@ -223,13 +226,15 @@ public class PicsService {
         return photo;
     }
 
-    private EntityPhoto sameFileExist(File file, String key) {
+    private EntityPhoto sameFileExist(File file, String key, String name) {
         String md5 = Lang.md5(file);
         String sha1 = Lang.sha1(file);
         EntityPhoto existPhoto = dao.fetch(EntityPhoto.class,
                 Cnd.where("md5", "=", md5).and("sha1", "=", sha1).and("size", "=", file.length()));
         if (existPhoto != null) {
             log.info("与图片 " + existPhoto.getId() + " 重复，file " + key + " 被抛弃！");
+            existPhoto.setDescription(existPhoto.getDescription() + "\n" + name);
+            dao.updateIgnoreNull(existPhoto);
             cosClient.deleteObject(bucket, key);
         }
         return existPhoto;

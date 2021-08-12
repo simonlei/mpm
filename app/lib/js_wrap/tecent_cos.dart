@@ -42,25 +42,21 @@ class AuthData {
   external int get ExpiredTime;
 
   external factory AuthData(
-      {String TmpSecretId,
-      String TmpSecretKey,
-      String XCosSecurityToken,
-      int StartTime,
-      int ExpiredTime});
+      {String TmpSecretId, String TmpSecretKey, String XCosSecurityToken, int StartTime, int ExpiredTime});
 }
 
 @JS()
 @anonymous
 class UploadFilesParams {
   external List<CosFile> get files;
+
   external int get SliceSize;
 
   external Function get onProgress;
 
   external Function get onFileFinish;
 
-  external factory UploadFilesParams(
-      {List<CosFile> files, int SliceSize, Function onProgress, Function onFileFinish});
+  external factory UploadFilesParams({List<CosFile> files, int SliceSize, Function onProgress, Function onFileFinish});
 }
 
 @JS()
@@ -74,6 +70,7 @@ class CosFile {
 
   external File get Body;
 
-  external factory CosFile(
-      {String Region, String Bucket, String Key, File Body});
+  external int get Date;
+
+  external factory CosFile({String Region, String Bucket, String Key, File Body, int Date});
 }

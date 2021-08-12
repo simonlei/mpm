@@ -70,11 +70,13 @@ class _UploadSelectorState extends State<UploadSelector> {
       var files = input.files;
       for (var i = 0; i < files!.length; i++) {
         var file = files[i];
+
         if (file.type.startsWith("image") || file.type.startsWith("video")) {
           cosFiles.add(CosFile(
             Bucket: Config.bucket,
             Region: Config.region,
             Key: 'upload/${id}_${file.relativePath!}',
+            Date: file.lastModified!,
             Body: file,
           ));
         }
@@ -92,12 +94,14 @@ class _UploadSelectorState extends State<UploadSelector> {
             onProgress: allowInterop((info) {
               var percent = info.percent * 10000 / 100;
               var speed = info.speed / 1024 / 1024 * 100 / 100;
-              // showToast('进度：' + percent + '%; 速度：' + speed + 'Mb/s;');
+              pd.update(value: count, msg: '进度：' + percent + '%; 速度：' + speed + 'Mb/s');
             }),
             onFileFinish: allowInterop((err, data, options) async {
-              var key = Map<String, dynamic>.from(jsonDecode(stringify(options)))['Key'];
+              var map = Map<String, dynamic>.from(jsonDecode(stringify(options)));
+              var key = map['Key'];
               var resp = await Dio().post(Config.api("/uploadFile"), data: {
                 'key': key,
+                'date': map['Date'],
                 'data': stringify(options),
                 'err': err,
               });

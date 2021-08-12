@@ -26,7 +26,6 @@ public class PhotoImportService {
     @Autowired
     PicsService picsService;
 
-    // used in client
     @PostMapping("/uploadFile")
     public String uploadFile(@RequestBody UploadFileSchema upload) {
         String key = upload.key;
@@ -51,7 +50,7 @@ public class PhotoImportService {
             }
         }
         String name = paths[paths.length - 1];
-        EntityPhoto photo = picsService.savePhotoInDb(parent, key, name);
+        EntityPhoto photo = picsService.savePhotoInDb(parent, key, name, upload.date);
         if (photo != null) {
             EntityFile file = existOrCreate(parent, path + "/" + name, name, false);
             file.setPhotoId(photo.getId());
@@ -82,6 +81,7 @@ public class PhotoImportService {
     @AllArgsConstructor
     static class UploadFileSchema {
 
+        long date;
         String key;
         String err;
         Object data;
