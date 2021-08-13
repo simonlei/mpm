@@ -29,4 +29,9 @@ class SelectModel with ChangeNotifier {
   bool isSelected(int index) {
     return _selectedSet.contains(index);
   }
+
+  void clearSelect() {
+    lastIndex = -1;
+    _selectedSet.clear();
+  }
 }

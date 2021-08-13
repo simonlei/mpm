@@ -20,6 +20,7 @@ class PicsModel with ChangeNotifier {
     loadImages(0, 75);
     BUS.on(EventBus.ConditionsChanged, (arg) async {
       _init = false;
+      _selectModel.clearSelect();
       loadImages(0, 75);
     });
   }
