@@ -57,7 +57,7 @@ class _LeftPanelState extends State<LeftPanel> {
                 child: TabBarView(
                   children: [
                     DateTreePanel(),
-                    FolderTreePanel(),
+                    FolderTreePanel(true),
                   ],
                 ),
               ),

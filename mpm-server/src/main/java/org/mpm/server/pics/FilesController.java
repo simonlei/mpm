@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.util.BusiException;
+import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.dao.Sqls;
@@ -97,34 +98,19 @@ public class FilesController {
         return sql.getUpdateCount();
     }
 
-
-
-/*
-    // used in datasource
-    public DSResponse update(DSRequest req) {
-        DSResponse resp = new DSResponse();
-        Record record = new Record();
-        Map values = req.getValues();
-        record.putAll(values);
-        int affectedRows = dao.updateIgnoreNull(dao.getEntity(EntityFile.class).getObject(record));
-
-        if (values.get("parentId") != null) {
-            EntityFile node = dao.fetch(EntityFile.class, (Long) values.get("id"));
-            EntityFile newParent = dao.fetch(EntityFile.class, (Long) values.get("parentId"));
-            if ((Boolean) values.get("merge")) {
-                mergeTo(node, newParent);
-            } else {
-                resetParentTo(node, newParent);
-            }
+    @PostMapping("/api/moveFolder")
+    public boolean moveFolder(@RequestBody FolderActionSchema request) {
+        EntityFile node = dao.fetch(EntityFile.class, Cnd.where("path", "=", request.fromPath));
+        EntityFile newParent = dao.fetch(EntityFile.class, MyUtils.parseLong(request.toId, -1L));
+        if (request.merge) {
+            mergeTo(node, newParent);
+        } else {
+            moveFolderTo(node, newParent);
         }
-
-        resp.setData(dao.fetch("t_files", Cnd.where("id", "=", values.get("id"))));
-        resp.setAffectedRows(affectedRows);
-        return resp;
+        return true;
     }
-*/
 
-    public void resetParentTo(EntityFile child, EntityFile newParent) {
+    void moveFolderTo(EntityFile child, EntityFile newParent) {
         if (newParent == null) {
             newParent = EntityFile.builder().path("/" + Math.random()).build();
         }
@@ -136,7 +122,7 @@ public class FilesController {
         dao.updateIgnoreNull(child);
         List<EntityFile> children = dao.query(EntityFile.class, Cnd.where("parentId", "=", child.getId()));
         for (EntityFile subChild : children) {
-            resetParentTo(subChild, child);
+            moveFolderTo(subChild, child);
         }
     }
 
@@ -144,14 +130,14 @@ public class FilesController {
      * 将node 下的所有目录和文件都转移到 newParent 目录下，并删除node
      * Used by dmi
      */
-    public void mergeTo(EntityFile node, EntityFile newParent) {
+    void mergeTo(EntityFile node, EntityFile newParent) {
         if (newParent == null) {
             throw new BusiException("不能合并到root下");
         }
         log.info("New parent id {}", newParent.getId());
         List<EntityFile> children = dao.query(EntityFile.class, Cnd.where("parentId", "=", node.getId()));
         for (EntityFile child : children) {
-            resetParentTo(child, newParent);
+            moveFolderTo(child, newParent);
         }
         dao.delete(node);
     }
@@ -184,5 +170,13 @@ public class FilesController {
         String path;
         Double latitude;
         Double longitude;
+    }
+
+    @Data
+    static class FolderActionSchema {
+
+        String fromPath;
+        String toId;
+        Boolean merge;
     }
 }

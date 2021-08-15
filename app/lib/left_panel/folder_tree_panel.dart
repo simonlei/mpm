@@ -10,9 +10,18 @@ import 'package:flutter_treeview/flutter_treeview.dart';
 import 'package:logger/logger.dart';
 
 class FolderTreePanel extends StatefulWidget {
+  final _folderTreePanelState = _FolderTreePanelState();
+  final _inLeftPanel;
+
+  FolderTreePanel(this._inLeftPanel);
+
   @override
   State<StatefulWidget> createState() {
-    return _FolderTreePanelState();
+    return _folderTreePanelState;
+  }
+
+  String? getSelected() {
+    return _folderTreePanelState._treeViewController.selectedKey;
   }
 }
 
@@ -29,13 +38,13 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
   @override
   void initState() {
     super.initState();
-    BUS.on(EventBus.LeftTreeConditionsChanged, _conditionCallback);
+    if (widget._inLeftPanel) BUS.on(EventBus.LeftTreeConditionsChanged, _conditionCallback);
   }
 
   @override
   void dispose() {
     super.dispose();
-    BUS.off(EventBus.LeftTreeConditionsChanged, _conditionCallback);
+    if (widget._inLeftPanel) BUS.off(EventBus.LeftTreeConditionsChanged, _conditionCallback);
   }
 
   @override
@@ -106,13 +115,15 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
     setState(() {
       _treeViewController = _treeViewController.copyWith(selectedKey: key).withExpandToNode(key);
       _expandNodeHandler(key, true);
-      var node = _treeViewController.getNode(key);
-      if (node != null && node.hasData) {
-        Conditions.path = node.data;
-      } else {
-        Conditions.path = '';
+      if (widget._inLeftPanel) {
+        var node = _treeViewController.getNode(key);
+        if (node != null && node.hasData) {
+          Conditions.path = node.data;
+        } else {
+          Conditions.path = '';
+        }
+        BUS.emit(EventBus.ConditionsChanged);
       }
-      BUS.emit(EventBus.ConditionsChanged);
     });
   }
 

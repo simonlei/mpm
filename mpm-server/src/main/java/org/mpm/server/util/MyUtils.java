@@ -31,4 +31,12 @@ public class MyUtils {
             return null;
         }
     }
+
+    public static Long parseLong(String str, Long defaultValue) {
+        try {
+            return Long.parseLong("" + str);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
 }

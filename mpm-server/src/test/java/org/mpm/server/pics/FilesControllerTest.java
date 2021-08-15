@@ -41,7 +41,7 @@ public class FilesControllerTest extends BaseTest {
 
     @Test
     public void testChangeParent() {
-        filesController.resetParentTo(node, newParent);
+        filesController.moveFolderTo(node, newParent);
         assertEquals(node.getParentId(), newParent.getId());
         assertEquals("/root/newParent/node", dao.fetch(EntityFile.class, node.getId()).getPath());
         assertEquals("/root/newParent/node/child", dao.fetch(EntityFile.class, nodeChild.getId()).getPath());
@@ -51,7 +51,7 @@ public class FilesControllerTest extends BaseTest {
     @Test
     public void testChangeToRoot() {
         // set to root
-        filesController.resetParentTo(node, null);
+        filesController.moveFolderTo(node, null);
         assertEquals(node.getParentId(), null);
         String newPath = dao.fetch(EntityFile.class, node.getId()).getPath();
         assertNotEquals("/root/newParent/node", newPath);

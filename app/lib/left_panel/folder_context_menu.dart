@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:prompt_dialog/prompt_dialog.dart';
 
+import 'folder_tree_panel.dart';
+
 class FolderContextMenu extends StatefulWidget {
   FolderContextMenu(this._path);
 
@@ -30,13 +32,13 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
         buttonBuilder.call(
             context,
             ContextMenuButtonConfig(
-              '修改目录下所有照片时间',
+              '修改目录下所有照片时间...',
               onPressed: () => handlePressed(context, _handleChangeDatePressed),
             )),
         buttonBuilder.call(
             context,
             ContextMenuButtonConfig(
-              '修改目录下所有照片GIS信息',
+              '修改目录下所有照片GIS信息...',
               onPressed: () => handlePressed(context, _handleChangeGisPressed),
             )),
         buttonBuilder.call(
@@ -45,8 +47,54 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
               Conditions.trashed ? '恢复目录' : '删除目录',
               onPressed: () => handlePressed(context, _handleDeleteFolderPressed),
             )),
+        buttonBuilder.call(
+            context,
+            ContextMenuButtonConfig(
+              '移动目录至...',
+              onPressed: () => handlePressed(context, _handleMoveFolderPressed),
+            )),
       ],
     );
+  }
+
+  void _handleMoveFolderPressed() async {
+    var folder = await showFolderSelectDialog('移动至目录');
+    if (folder == null) return;
+    await Dio().post(Config.api("/api/moveFolder"), data: {'fromPath': widget._path, 'toId': folder, 'merge': false});
+    BUS.emit(EventBus.LeftTreeConditionsChanged);
+  }
+
+  Future<String?> showFolderSelectDialog(title) async {
+    var folder = await showDialog<String>(
+      context: scaffoldKey.currentContext!,
+      builder: (context) {
+        var treePanel = FolderTreePanel(false);
+        return AlertDialog(
+          title: Text(title),
+          content: Container(
+            width: 640,
+            height: 480,
+            child: treePanel,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('确定'),
+              onPressed: () {
+                Navigator.of(context).pop(treePanel.getSelected());
+              },
+            ),
+            TextButton(
+              child: Text('取消'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    print('select folder is $folder');
+    return folder;
   }
 
   void _handleDeleteFolderPressed() async {
