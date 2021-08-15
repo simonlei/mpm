@@ -53,8 +53,21 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
               '移动目录至...',
               onPressed: () => handlePressed(context, _handleMoveFolderPressed),
             )),
+        buttonBuilder.call(
+            context,
+            ContextMenuButtonConfig(
+              '合并目录至...',
+              onPressed: () => handlePressed(context, _handleMergeFolderPressed),
+            )),
       ],
     );
+  }
+
+  void _handleMergeFolderPressed() async {
+    var folder = await showFolderSelectDialog('合并至目录');
+    if (folder == null) return;
+    await Dio().post(Config.api("/api/moveFolder"), data: {'fromPath': widget._path, 'toId': folder, 'merge': true});
+    BUS.emit(EventBus.LeftTreeConditionsChanged);
   }
 
   void _handleMoveFolderPressed() async {

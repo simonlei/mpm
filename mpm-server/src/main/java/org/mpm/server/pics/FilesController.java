@@ -11,6 +11,7 @@ import org.nutz.dao.Dao;
 import org.nutz.dao.Sqls;
 import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Sql;
+import org.nutz.json.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -100,6 +101,7 @@ public class FilesController {
 
     @PostMapping("/api/moveFolder")
     public boolean moveFolder(@RequestBody FolderActionSchema request) {
+        log.info("Move Folder " + Json.toJson(request));
         EntityFile node = dao.fetch(EntityFile.class, Cnd.where("path", "=", request.fromPath));
         EntityFile newParent = dao.fetch(EntityFile.class, MyUtils.parseLong(request.toId, -1L));
         if (request.merge) {
