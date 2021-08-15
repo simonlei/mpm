@@ -58,6 +58,8 @@ class PicsModel with ChangeNotifier {
   var _lock = Mutex();
 
   Future<PicImage?> getImage(int index) async {
+    if (index < 0) return null;
+    if (index > _pics.length - 1) return null;
     await _lock.acquire();
     try {
       if (!_init || _pics[index] == null) {

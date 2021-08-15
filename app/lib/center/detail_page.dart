@@ -117,7 +117,16 @@ class _DetailPageState extends State<DetailPage> {
     _loadedImage = await _loadRealImage(image!.name);
     _loadedImageInfo = await _loadImageInfo(image.name, _loadedImage);
     print('loadImage');
+    preloadImage(_index + 1);
+    print('load next Image');
     return image;
+  }
+
+  Future<void> preloadImage(int i) async {
+    var image = await _picsModel.getImage(i);
+    if (image == null) return;
+    await _loadRealImage(image.name);
+    await _loadImageInfo(image.name, _loadedImage);
   }
 
   static final ExpireCache<String, Uint8List> _cache = ExpireCache(
