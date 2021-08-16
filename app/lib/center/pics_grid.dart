@@ -41,10 +41,13 @@ class _PicsGridState extends State<PicsGrid> {
   }
 
   late StaggeredGridView _gridView;
+  late ScrollController _scrollController;
 
   ContextMenuRegion buildStaggeredGridView(PicsModel _picsModel) {
+    _scrollController = ScrollController();
     _gridView = StaggeredGridView.extentBuilder(
-      maxCrossAxisExtent: 200,
+      controller: _scrollController,
+      maxCrossAxisExtent: maxCrossAxisExtent,
       crossAxisSpacing: 5,
       mainAxisSpacing: 3,
       itemCount: _picsModel.getTotalImages(),
@@ -53,17 +56,19 @@ class _PicsGridState extends State<PicsGrid> {
     );
     return ContextMenuRegion(
       contextMenu: ImagesContextMenu(_picsModel, false),
+      // TODO: 在这里加scroll
       child: _gridView,
     );
   }
+
+  static const maxCrossAxisExtent = 200.0;
 
   onKey(FocusNode node, RawKeyEvent event) {
     // PicsModel _picsModel = Provider.of<PicsModel>(context, listen: false);
     _picsModel.metaDown = event.isMetaPressed;
     _picsModel.shiftDown = event.isShiftPressed;
 
-    double crossAxisExtent = MediaQuery.of(context).size.width;
-    int crossAxisCount = ((crossAxisExtent + 5) / (200 + 5)).ceil();
+    int crossAxisCount = getCrossAxisCount();
     if (event.isKeyPressed(LogicalKeyboardKey.arrowLeft)) {
       _picsModel.selectNext(-1);
     } else if (event.isKeyPressed(LogicalKeyboardKey.arrowRight)) {
@@ -82,5 +87,11 @@ class _PicsGridState extends State<PicsGrid> {
       _picsModel.starSelected();
     }
     return true;
+  }
+
+  int getCrossAxisCount() {
+    double crossAxisExtent = MediaQuery.of(context).size.width;
+    int crossAxisCount = ((crossAxisExtent + 5) / (maxCrossAxisExtent + 5)).ceil();
+    return crossAxisCount;
   }
 }
