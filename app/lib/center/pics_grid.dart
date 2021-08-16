@@ -1,6 +1,7 @@
 import 'package:app/center/image_tile.dart';
 import 'package:app/center/images_context_menu.dart';
 import 'package:app/model/pics_model.dart';
+import 'package:app/model/select_model.dart';
 import 'package:app/widgets/star_button.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
@@ -56,8 +57,14 @@ class _PicsGridState extends State<PicsGrid> {
     );
     return ContextMenuRegion(
       contextMenu: ImagesContextMenu(_picsModel, false),
-      // TODO: 在这里加scroll
-      child: _gridView,
+      child: Consumer<SelectModel>(builder: (context, selectModel, child) {
+        if (selectModel.lastIndex >= 0) {
+          var rows = selectModel.lastIndex / getCrossAxisCount();
+          print('row: $rows -> ${rows.floor()}');
+          _scrollController.animateTo(rows.floor() * 150, duration: Duration(milliseconds: 200), curve: Curves.ease);
+        }
+        return _gridView;
+      }),
     );
   }
 
