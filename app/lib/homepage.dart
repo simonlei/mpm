@@ -1,5 +1,6 @@
 import 'package:app/center/pics_grid.dart';
 import 'package:app/headers/empty_trash_button.dart';
+import 'package:app/headers/location_jumper.dart';
 import 'package:app/headers/sort_selector.dart';
 import 'package:app/headers/star_filter.dart';
 import 'package:app/headers/trash_box_switcher.dart';
@@ -37,6 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
           actions: [
             // text 跳转 |
             // order
+            LocationJumper(),
             // 过滤条件 （只看star）|
             StarFilter(),
             SortSelector(),
@@ -46,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
             UploadSelector(),
             // 回收站
           ],
-          toolbarHeight: 25,
+          toolbarHeight: 28,
         ),
         body: Row(children: [
           LeftPanel(),
