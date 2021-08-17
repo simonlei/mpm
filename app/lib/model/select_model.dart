@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SelectModel with ChangeNotifier {
   Set<int> _selectedSet = Set();
@@ -8,7 +9,7 @@ class SelectModel with ChangeNotifier {
 
   Set<int> get selected => Set.unmodifiable(_selectedSet);
 
-  void select(bool metaDown, bool shiftDown, int index) {
+  Future<void> select(bool metaDown, bool shiftDown, int index) async {
     if (!metaDown && !shiftDown) {}
     if (shiftDown && lastIndex > 0) {
       for (int i = min(lastIndex, index); i <= max(lastIndex, index); i++) {
@@ -23,6 +24,8 @@ class SelectModel with ChangeNotifier {
       lastIndex = index;
       _selectedSet.add(index);
     }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt("lastIndex", index);
     notifyListeners();
   }
 

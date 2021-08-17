@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:mutex/mutex.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PicsModel with ChangeNotifier {
   List<PicImage?> _pics = <PicImage>[];
@@ -18,11 +19,17 @@ class PicsModel with ChangeNotifier {
 
   PicsModel(this._selectModel) {
     loadImages(0, 75);
+    setLastSelect();
     BUS.on(EventBus.ConditionsChanged, (arg) async {
       _init = false;
       _selectModel.clearSelect();
       loadImages(0, 75);
     });
+  }
+
+  setLastSelect() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _selectModel.select(false, false, prefs.getInt("lastIndex") ?? 0);
   }
 
   Future<List<PicImage?>> loadImages(int start, int size) async {

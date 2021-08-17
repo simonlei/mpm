@@ -61,7 +61,8 @@ class _PicsGridState extends State<PicsGrid> {
         if (selectModel.lastIndex >= 0) {
           var rows = selectModel.lastIndex / getCrossAxisCount();
           print('row: $rows -> ${rows.floor()}');
-          _scrollController.animateTo(rows.floor() * 150, duration: Duration(milliseconds: 200), curve: Curves.ease);
+          if (_scrollController.hasClients)
+            _scrollController.animateTo(rows.floor() * 150, duration: Duration(milliseconds: 200), curve: Curves.ease);
         }
         return _gridView;
       }),

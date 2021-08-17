@@ -49,6 +49,7 @@ dependencies:
   expire_cache: ^2.0.1
   prompt_dialog: ^1.0.4
   url_launcher: ^6.0.9
+  shared_preferences: ^2.0.6
 
 dev_dependencies:
   flutter_test:
