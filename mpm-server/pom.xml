@@ -148,5 +148,5 @@
         <relativePath/>
         <version>2.3.1.RELEASE</version> <!-- lookup parent from repository -->
     </parent>
-    <version>1.1.4</version>
+    <version>${revision}</version>
 </project>
