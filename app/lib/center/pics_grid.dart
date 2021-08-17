@@ -43,10 +43,12 @@ class _PicsGridState extends State<PicsGrid> {
 
   late StaggeredGridView _gridView;
   late ScrollController _scrollController;
+  final GlobalKey _gridViewKey = GlobalKey();
 
   ContextMenuRegion buildStaggeredGridView(PicsModel _picsModel) {
     _scrollController = ScrollController();
     _gridView = StaggeredGridView.extentBuilder(
+      key: _gridViewKey,
       controller: _scrollController,
       maxCrossAxisExtent: maxCrossAxisExtent,
       crossAxisSpacing: 5,
@@ -57,14 +59,20 @@ class _PicsGridState extends State<PicsGrid> {
     );
     return ContextMenuRegion(
       contextMenu: ImagesContextMenu(_picsModel, false),
-      child: Consumer<SelectModel>(builder: (context, selectModel, child) {
-        if (selectModel.lastIndex >= 0) {
-          var rows = selectModel.lastIndex / getCrossAxisCount();
-          print('row: $rows -> ${rows.floor()}');
-          if (_scrollController.hasClients)
-            _scrollController.animateTo(rows.floor() * 150, duration: Duration(milliseconds: 200), curve: Curves.ease);
-        }
-        return _gridView;
+      child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        return Consumer<SelectModel>(builder: (context, selectModel, child) {
+          print('constrains ${constraints.maxWidth}');
+          if (selectModel.lastIndex >= 0) {
+            if (_scrollController.hasClients) {
+              var rows = selectModel.lastIndex / getCrossAxisCount(constraints.maxWidth);
+              print('row: $rows -> ${rows.floor()}');
+
+              _scrollController.animateTo(rows.floor() * 150,
+                  duration: Duration(milliseconds: 200), curve: Curves.ease);
+            }
+          }
+          return _gridView;
+        });
       }),
     );
   }
@@ -72,11 +80,15 @@ class _PicsGridState extends State<PicsGrid> {
   static const maxCrossAxisExtent = 200.0;
 
   onKey(FocusNode node, RawKeyEvent event) {
-    // PicsModel _picsModel = Provider.of<PicsModel>(context, listen: false);
     _picsModel.metaDown = event.isMetaPressed;
     _picsModel.shiftDown = event.isShiftPressed;
+    try {
+      if (_gridViewKey.currentContext != null) print('screen width ${_gridViewKey.currentContext!.size}');
+    } catch (e) {
+      print(e);
+    }
 
-    int crossAxisCount = getCrossAxisCount();
+    int crossAxisCount = getCrossAxisCount(_gridViewKey.currentContext!.size!.width);
     if (event.isKeyPressed(LogicalKeyboardKey.arrowLeft)) {
       _picsModel.selectNext(-1);
     } else if (event.isKeyPressed(LogicalKeyboardKey.arrowRight)) {
@@ -97,9 +109,7 @@ class _PicsGridState extends State<PicsGrid> {
     return true;
   }
 
-  int getCrossAxisCount() {
-    double crossAxisExtent = MediaQuery.of(context).size.width;
-    int crossAxisCount = ((crossAxisExtent + 5) / (maxCrossAxisExtent + 5)).ceil();
-    return crossAxisCount;
+  int getCrossAxisCount(double width) {
+    return ((width + 5) / (maxCrossAxisExtent + 5)).ceil();
   }
 }
