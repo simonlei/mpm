@@ -65,11 +65,11 @@ class _PicsGridState extends State<PicsGrid> {
           if (selectModel.lastIndex >= 0) {
             if (_scrollController.hasClients) {
               var rows = selectModel.lastIndex / getCrossAxisCount(constraints.maxWidth);
-              var tileTop = rows.floor() * 150.0;
+              var tileTop = rows.floor() * 153.0;
               print('row: $rows -> $tileTop');
               print('position ${_scrollController.offset} height ${constraints.maxHeight}');
               if (tileTop < _scrollController.offset ||
-                  tileTop + 150 > _scrollController.offset + constraints.maxHeight) _scrollController.jumpTo(tileTop);
+                  tileTop + 153 > _scrollController.offset + constraints.maxHeight) _scrollController.jumpTo(tileTop);
               //_scrollController.animateTo(tileTop, duration: Duration(milliseconds: 200), curve: Curves.ease);
             }
           }
