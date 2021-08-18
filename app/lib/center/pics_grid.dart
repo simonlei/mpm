@@ -69,8 +69,8 @@ class _PicsGridState extends State<PicsGrid> {
               print('row: $rows -> $tileTop');
               print('position ${_scrollController.offset} height ${constraints.maxHeight}');
               if (tileTop < _scrollController.offset ||
-                  tileTop + 150 > _scrollController.offset + constraints.maxHeight)
-                _scrollController.animateTo(tileTop, duration: Duration(milliseconds: 200), curve: Curves.ease);
+                  tileTop + 150 > _scrollController.offset + constraints.maxHeight) _scrollController.jumpTo(tileTop);
+              //_scrollController.animateTo(tileTop, duration: Duration(milliseconds: 200), curve: Curves.ease);
             }
           }
           return _gridView;
