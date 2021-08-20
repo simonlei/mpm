@@ -17,13 +17,15 @@ class PicsModel with ChangeNotifier {
   bool shiftDown = false;
   SelectModel _selectModel;
 
+  static const int pageSize = 75;
+
   PicsModel(this._selectModel) {
-    loadImages(0, 75);
+    loadImages(0, pageSize);
     setLastSelect();
     BUS.on(EventBus.ConditionsChanged, (arg) async {
       _init = false;
       _selectModel.clearSelect();
-      loadImages(0, 75);
+      loadImages(0, pageSize);
     });
   }
 
@@ -70,8 +72,8 @@ class PicsModel with ChangeNotifier {
     await _lock.acquire();
     try {
       if (!_init || _pics[index] == null) {
-        Logger().i('image is null, load it');
-        await loadImages(index, 75);
+        Logger().i('image $index is null, load it');
+        await loadImages(index, pageSize);
       }
       return _pics[index];
     } finally {

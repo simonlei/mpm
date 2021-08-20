@@ -42,21 +42,10 @@ class _PicsGridState extends State<PicsGrid> {
   }
 
   late StaggeredGridView _gridView;
-  late ScrollController _scrollController;
+  late ScrollController _scrollController = ScrollController();
   final GlobalKey _gridViewKey = GlobalKey();
 
   ContextMenuRegion buildStaggeredGridView(PicsModel _picsModel) {
-    _scrollController = ScrollController();
-    _gridView = StaggeredGridView.extentBuilder(
-      key: _gridViewKey,
-      controller: _scrollController,
-      maxCrossAxisExtent: maxCrossAxisExtent,
-      crossAxisSpacing: 5,
-      mainAxisSpacing: 3,
-      itemCount: _picsModel.getTotalImages(),
-      itemBuilder: (context, index) => ImageTile(index, _picsModel),
-      staggeredTileBuilder: (index) => const StaggeredTile.extent(1, 150),
-    );
     return ContextMenuRegion(
       contextMenu: ImagesContextMenu(_picsModel, false),
       child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
@@ -73,10 +62,30 @@ class _PicsGridState extends State<PicsGrid> {
               //_scrollController.animateTo(tileTop, duration: Duration(milliseconds: 200), curve: Curves.ease);
             }
           }
-          return _gridView;
+          return _makeGridView(_picsModel, constraints);
         });
       }),
     );
+  }
+
+  StaggeredGridView _makeGridView(PicsModel _picsModel, BoxConstraints constraints) {
+    _gridView = StaggeredGridView.extentBuilder(
+      key: _gridViewKey,
+      controller: _scrollController,
+      maxCrossAxisExtent: maxCrossAxisExtent,
+      crossAxisSpacing: 5,
+      mainAxisSpacing: 3,
+      itemCount: _picsModel.getTotalImages(),
+      itemBuilder: (context, index) {
+        var rows = index / getCrossAxisCount(constraints.maxWidth);
+        var tileTop = rows.floor() * 153.0;
+        if (tileTop + 153 < _scrollController.offset || tileTop > _scrollController.offset + constraints.maxHeight)
+          return Text('No show.');
+        return ImageTile(index, _picsModel);
+      },
+      staggeredTileBuilder: (index) => const StaggeredTile.extent(1, 150),
+    );
+    return _gridView;
   }
 
   static const maxCrossAxisExtent = 200.0;
