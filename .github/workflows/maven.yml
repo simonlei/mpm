@@ -27,7 +27,7 @@ jobs:
       run: |
         cd app
         flutter pub get
-        flutter build -v web --dart-define=remote_addr=
+        flutter build web --dart-define=remote_addr= --source-maps
         cd ../mpm-server
         mvn -B package --file pom.xml -DskipTests -Drevision=1.1.4
         cd ..
