@@ -19,6 +19,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+final GlobalKey<PicsGridState> gridViewKey = GlobalKey<PicsGridState>();
 
 class _MyHomePageState extends State<MyHomePage> {
   var appTitle = 'My Photo Manager';
@@ -29,6 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appTitle = 'My Photo Manager($args)';
       setState(() {});
     });
+    late final picsGrid;
     return ContextMenuOverlay(
       child: Scaffold(
         key: scaffoldKey,
@@ -53,7 +55,10 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Row(children: [
           LeftPanel(),
           Expanded(
-            child: PicsGrid(),
+            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+              picsGrid = PicsGrid(gridViewKey, constraints);
+              return picsGrid;
+            }),
           ),
         ]),
       ),

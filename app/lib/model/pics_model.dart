@@ -47,7 +47,7 @@ class PicsModel with ChangeNotifier {
       var element = data.elementAt(i);
       _pics[start + i] = PicImage(this, element);
     }
-    notifyListeners();
+    // notifyListeners();
     return _pics;
   }
 

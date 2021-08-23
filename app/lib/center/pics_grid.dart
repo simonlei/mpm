@@ -1,5 +1,6 @@
 import 'package:app/center/image_tile.dart';
 import 'package:app/center/images_context_menu.dart';
+import 'package:app/homepage.dart';
 import 'package:app/model/pics_model.dart';
 import 'package:app/model/select_model.dart';
 import 'package:app/widgets/star_button.dart';
@@ -12,13 +13,17 @@ import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 class PicsGrid extends StatefulWidget {
+  final BoxConstraints _constraints;
+
+  PicsGrid(Key? key, this._constraints) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
-    return _PicsGridState();
+    return PicsGridState();
   }
 }
 
-class _PicsGridState extends State<PicsGrid> {
+class PicsGridState extends State<PicsGrid> {
   late PicsModel _picsModel;
 
   @override
@@ -41,51 +46,20 @@ class _PicsGridState extends State<PicsGrid> {
     );
   }
 
-  late StaggeredGridView _gridView;
   late ScrollController _scrollController = ScrollController();
-  final GlobalKey _gridViewKey = GlobalKey();
 
   ContextMenuRegion buildStaggeredGridView(PicsModel _picsModel) {
     return ContextMenuRegion(
-      contextMenu: ImagesContextMenu(_picsModel, false),
-      child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-        return Consumer<SelectModel>(builder: (context, selectModel, child) {
-          print('constrains ${constraints.maxWidth}');
-          if (selectModel.lastIndex >= 0) {
-            if (_scrollController.hasClients) {
-              var rows = selectModel.lastIndex / getCrossAxisCount(constraints.maxWidth);
-              var tileTop = rows.floor() * 153.0;
-              print('row: $rows -> $tileTop');
-              print('position ${_scrollController.offset} height ${constraints.maxHeight}');
-              if (tileTop < _scrollController.offset ||
-                  tileTop + 153 > _scrollController.offset + constraints.maxHeight) _scrollController.jumpTo(tileTop);
-              //_scrollController.animateTo(tileTop, duration: Duration(milliseconds: 200), curve: Curves.ease);
-            }
-          }
-          return _makeGridView(_picsModel, constraints);
-        });
-      }),
-    );
-  }
-
-  StaggeredGridView _makeGridView(PicsModel _picsModel, BoxConstraints constraints) {
-    _gridView = StaggeredGridView.extentBuilder(
-      key: _gridViewKey,
-      controller: _scrollController,
-      maxCrossAxisExtent: maxCrossAxisExtent,
-      crossAxisSpacing: 5,
-      mainAxisSpacing: 3,
-      itemCount: _picsModel.getTotalImages(),
-      itemBuilder: (context, index) {
-        var rows = index / getCrossAxisCount(constraints.maxWidth);
-        var tileTop = rows.floor() * 153.0;
-        if (tileTop + 153 < _scrollController.offset || tileTop > _scrollController.offset + constraints.maxHeight)
-          return Text('No show.');
-        return ImageTile(index, _picsModel);
-      },
-      staggeredTileBuilder: (index) => const StaggeredTile.extent(1, 150),
-    );
-    return _gridView;
+        contextMenu: ImagesContextMenu(_picsModel, false),
+        child: StaggeredGridView.extentBuilder(
+          controller: _scrollController,
+          maxCrossAxisExtent: maxCrossAxisExtent,
+          crossAxisSpacing: 5,
+          mainAxisSpacing: 3,
+          itemCount: _picsModel.getTotalImages(),
+          itemBuilder: (context, index) => ImageTile(index, _picsModel),
+          staggeredTileBuilder: (index) => const StaggeredTile.extent(1, 150),
+        ));
   }
 
   static const maxCrossAxisExtent = 200.0;
@@ -94,12 +68,12 @@ class _PicsGridState extends State<PicsGrid> {
     _picsModel.metaDown = event.isMetaPressed;
     _picsModel.shiftDown = event.isShiftPressed;
     try {
-      if (_gridViewKey.currentContext != null) print('screen width ${_gridViewKey.currentContext!.size}');
+      if (gridViewKey.currentContext != null) print('screen width ${gridViewKey.currentContext!.size}');
     } catch (e) {
       print(e);
     }
 
-    int crossAxisCount = getCrossAxisCount(_gridViewKey.currentContext!.size!.width);
+    int crossAxisCount = getCrossAxisCount(gridViewKey.currentContext!.size!.width);
     if (event.isKeyPressed(LogicalKeyboardKey.arrowLeft)) {
       _picsModel.selectNext(-1);
     } else if (event.isKeyPressed(LogicalKeyboardKey.arrowRight)) {
@@ -122,5 +96,16 @@ class _PicsGridState extends State<PicsGrid> {
 
   int getCrossAxisCount(double width) {
     return ((width + 5) / (maxCrossAxisExtent + 5)).ceil();
+  }
+
+  void scrollToIndex(SelectModel selectModel) {
+    print(widget._constraints.maxWidth);
+    int crossAxisCount = getCrossAxisCount(widget._constraints.maxWidth);
+    var rows = selectModel.lastIndex / crossAxisCount;
+    var tileTop = rows.floor() * 153.0;
+    print('row: $rows -> $tileTop');
+    print('position ${_scrollController.offset} height ${widget._constraints.maxHeight}');
+    if (tileTop < _scrollController.offset || tileTop + 153 > _scrollController.offset + widget._constraints.maxHeight)
+      _scrollController.jumpTo(tileTop);
   }
 }

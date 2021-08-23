@@ -1,3 +1,4 @@
+import 'package:app/homepage.dart';
 import 'package:app/model/select_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,7 @@ class _LocationJumperState extends State<LocationJumper> {
             child: Consumer<SelectModel>(
               builder: (context, selectModel, child) {
                 _controller.text = '${selectModel.lastIndex + 1}';
-                print('text is ${_controller.text}');
+                if (gridViewKey.currentState != null) gridViewKey.currentState!.scrollToIndex(selectModel);
                 return TextField(
                   textAlign: TextAlign.center,
                   textAlignVertical: TextAlignVertical.center,
