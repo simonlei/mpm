@@ -29,7 +29,7 @@ jobs:
         flutter pub get
         flutter build web --dart-define=remote_addr= --source-maps
         cd ../mpm-server
-        mvn -B package --file pom.xml -DskipTests -Drevision=1.1.4
+        mvn -B package --file pom.xml -DskipTests -Drevision=1.1.5
         cd ..
         mkdir docker
         cd docker
@@ -55,6 +55,6 @@ jobs:
       with:
         context: docker
         push: true
-        tags: ghcr.io/${{ github.actor }}/mpm:1.1.4.${{ github.run_number }}
+        tags: ghcr.io/${{ github.actor }}/mpm:1.1.5.${{ github.run_number }}
             
 
