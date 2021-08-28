@@ -60,6 +60,7 @@ class _DetailPageState extends State<DetailPage> {
         LogicalKeySet(LogicalKeyboardKey.arrowLeft): NextPageIntent(-1),
         LogicalKeySet(LogicalKeyboardKey.arrowRight): NextPageIntent(1),
         LogicalKeySet(LogicalKeyboardKey.escape): EscapeIntent(),
+        LogicalKeySet(LogicalKeyboardKey.keyC): CopyIntent(),
         LogicalKeySet(LogicalKeyboardKey.keyD): DeleteIntent(),
         LogicalKeySet(LogicalKeyboardKey.keyI): ZoomIntent(),
         LogicalKeySet(LogicalKeyboardKey.keyJ): MoveIntent(0, 50),
@@ -71,6 +72,7 @@ class _DetailPageState extends State<DetailPage> {
       },
       child: Actions(
         actions: {
+          CopyIntent: CopyAction(this),
           NextPageIntent: NextPageAction(this),
           EscapeIntent: EscapeAction(this),
           DeleteIntent: DeleteAction(this),
@@ -184,7 +186,7 @@ class _DetailPageState extends State<DetailPage> {
     bool vertical = false;
     try {
       var response = await Dio().get(Config.imageUrl('small/$imgName?exif'));
-      vertical = int.parse(response.data['Orientation']['val']) > 4 || image.rotate % 180 == 90;
+      vertical = int.parse(response.data['Orientation']['val']) > 4;
     } catch (e) {}
 
     var response = await Dio().get(Config.imageUrl('small/$imgName?imageInfo'));
@@ -217,8 +219,16 @@ class _DetailPageState extends State<DetailPage> {
           controller: _horizontalController,
           scrollDirection: Axis.horizontal,
           child: Container(
-            width: _scale ? _loadedImageInfo.scaledWidth(context) : _loadedImageInfo.width,
-            height: _scale ? _loadedImageInfo.scaledHeight(context) : _loadedImageInfo.height,
+            width: _scale
+                ? _loadedImageInfo.scaledWidth(context)
+                : image.rotate % 180 == 90
+                    ? _loadedImageInfo.height
+                    : _loadedImageInfo.width,
+            height: _scale
+                ? _loadedImageInfo.scaledHeight(context)
+                : image.rotate % 180 == 90
+                    ? _loadedImageInfo.width
+                    : _loadedImageInfo.height,
             child: Tooltip(
               message: image.getTooltip(),
               waitDuration: Duration(seconds: 2),
@@ -351,6 +361,20 @@ class EscapeAction extends Action<EscapeIntent> {
 }
 
 class EscapeIntent extends Intent {}
+
+class CopyIntent extends Intent {}
+
+class CopyAction extends Action<CopyIntent> {
+  CopyAction(this._detailPageState);
+
+  _DetailPageState _detailPageState;
+
+  @override
+  Future<Object?> invoke(covariant CopyIntent intent) async {
+    var picImage = await _detailPageState._picsModel.getImage(_detailPageState._index);
+    await Clipboard.setData(ClipboardData(text: Config.imageUrl('small/${picImage!.name}')));
+  }
+}
 
 class NextPageIntent extends Intent {
   const NextPageIntent(this.next);
