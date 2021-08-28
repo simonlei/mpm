@@ -25,6 +25,19 @@ class PicsGrid extends StatefulWidget {
 
 class PicsGridState extends State<PicsGrid> {
   late PicsModel _picsModel;
+  late FocusNode focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +46,7 @@ class PicsGridState extends State<PicsGrid> {
         StarIntent: StarAction(),
       },
       child: Focus(
+        focusNode: focusNode,
         autofocus: true,
         onKey: onKey,
         child: Consumer<PicsModel>(

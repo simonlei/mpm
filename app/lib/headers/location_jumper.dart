@@ -20,6 +20,12 @@ class _LocationJumperState extends State<LocationJumper> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       child: Row(
@@ -45,6 +51,10 @@ class _LocationJumperState extends State<LocationJumper> {
             ),
             onPressed: () {
               Provider.of<SelectModel>(context, listen: false).select(false, false, int.parse(_controller.text) - 1);
+              if (gridViewKey.currentState != null) {
+                print('focus.......${gridViewKey.currentState!.focusNode}');
+                gridViewKey.currentState!.focusNode.requestFocus();
+              }
               print('text is ${_controller.text}');
             },
           ),
