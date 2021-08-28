@@ -115,7 +115,7 @@ class _DetailPageState extends State<DetailPage> {
     var image = await _picsModel.getImage(_index);
     print('getImage');
     _loadedImage = await _loadRealImage(image!.name);
-    _loadedImageInfo = await _loadImageInfo(image.name, _loadedImage);
+    _loadedImageInfo = await _loadImageInfo(image, _loadedImage);
     print('loadImage');
     preloadImage(_index + 1);
     print('load next Image');
@@ -126,7 +126,7 @@ class _DetailPageState extends State<DetailPage> {
     var image = await _picsModel.getImage(i);
     if (image == null) return;
     await _loadRealImage(image.name);
-    await _loadImageInfo(image.name, _loadedImage);
+    await _loadImageInfo(image, _loadedImage);
   }
 
   static final ExpireCache<String, Uint8List> _cache = ExpireCache(
@@ -173,7 +173,8 @@ class _DetailPageState extends State<DetailPage> {
     return _cache.get(imgName);
   }
 
-  Future<ImageInfo?> _loadImageInfo(String imgName, Uint8List _loadedImage) async {
+  Future<ImageInfo?> _loadImageInfo(PicImage image, Uint8List _loadedImage) async {
+    String imgName = image.name;
     if (!_infoCache.isKeyInFlightOrInCache(imgName)) {
       _infoCache.markAsInFlight(imgName);
     } else {
@@ -183,7 +184,7 @@ class _DetailPageState extends State<DetailPage> {
     bool vertical = false;
     try {
       var response = await Dio().get(Config.imageUrl('small/$imgName?exif'));
-      vertical = int.parse(response.data['Orientation']['val']) > 4;
+      vertical = int.parse(response.data['Orientation']['val']) > 4 || image.rotate % 180 == 90;
     } catch (e) {}
 
     var response = await Dio().get(Config.imageUrl('small/$imgName?imageInfo'));
