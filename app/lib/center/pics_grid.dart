@@ -65,6 +65,16 @@ class PicsGridState extends State<PicsGrid> {
   ContextMenuRegion buildStaggeredGridView(PicsModel _picsModel) {
     return ContextMenuRegion(
         contextMenu: ImagesContextMenu(_picsModel, false),
+/*        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 5,
+          ),
+          controller: _scrollController,
+          itemCount: _picsModel.getTotalImages(),
+          itemBuilder: (context, index) => ImageTile(index, _picsModel),
+        ));
+*/
+
         child: StaggeredGridView.extentBuilder(
           controller: _scrollController,
           maxCrossAxisExtent: maxCrossAxisExtent,
