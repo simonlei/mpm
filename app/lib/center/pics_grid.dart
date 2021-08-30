@@ -7,7 +7,6 @@ import 'package:app/widgets/star_button.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
@@ -63,18 +62,22 @@ class PicsGridState extends State<PicsGrid> {
   late ScrollController _scrollController = ScrollController();
 
   ContextMenuRegion buildStaggeredGridView(PicsModel _picsModel) {
+    var crossCount = getCrossAxisCount(widget._constraints.maxWidth);
+    var width = widget._constraints.maxWidth / crossCount;
     return ContextMenuRegion(
         contextMenu: ImagesContextMenu(_picsModel, false),
-/*        child: GridView.builder(
+        child: GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 5,
+            crossAxisCount: crossCount,
+            childAspectRatio: width / 150,
+            mainAxisSpacing: 3,
           ),
           controller: _scrollController,
           itemCount: _picsModel.getTotalImages(),
           itemBuilder: (context, index) => ImageTile(index, _picsModel),
         ));
-*/
 
+/*
         child: StaggeredGridView.extentBuilder(
           controller: _scrollController,
           maxCrossAxisExtent: maxCrossAxisExtent,
@@ -84,6 +87,7 @@ class PicsGridState extends State<PicsGrid> {
           itemBuilder: (context, index) => ImageTile(index, _picsModel),
           staggeredTileBuilder: (index) => const StaggeredTile.extent(1, 150),
         ));
+*/
   }
 
   static const maxCrossAxisExtent = 200.0;

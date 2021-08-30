@@ -103,7 +103,7 @@ class PicsModel with ChangeNotifier {
       });
       selectNext(0);
       BUS.emit(EventBus.CountChange, _pics.length);
-      notifyListeners();
+      // notifyListeners();
     } else {
       Logger().e("Result is $resp");
     }
