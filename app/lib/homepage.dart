@@ -30,7 +30,6 @@ class _MyHomePageState extends State<MyHomePage> {
       appTitle = 'My Photo Manager($args)';
       setState(() {});
     });
-    late final picsGrid;
     return ContextMenuOverlay(
       child: Scaffold(
         key: scaffoldKey,
@@ -56,8 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
           LeftPanel(),
           Expanded(
             child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-              picsGrid = PicsGrid(gridViewKey, constraints);
-              return picsGrid;
+              return PicsGrid(gridViewKey, constraints);
             }),
           ),
         ]),
