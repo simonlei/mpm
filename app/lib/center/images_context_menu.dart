@@ -21,34 +21,42 @@ class ImagesContextMenu extends StatefulWidget {
 class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuStateMixin {
   @override
   Widget build(BuildContext context) {
+    var widgets = [
+      buttonBuilder.call(
+          context,
+          ContextMenuButtonConfig(
+            widget._detail ? '修改时间' : '修改选中照片时间',
+            onPressed: () => handlePressed(context, _handleChangeDatePressed),
+          )),
+      buttonBuilder.call(
+          context,
+          ContextMenuButtonConfig(
+            widget._detail ? '修改描述信息' : '修改选中照片描述信息',
+            onPressed: () => handlePressed(context, _handleChangeDescPressed),
+          )),
+      buttonBuilder.call(
+          context,
+          ContextMenuButtonConfig(
+            '拷贝GIS信息',
+            onPressed: () => handlePressed(context, _handleCopyGisPressed),
+          )),
+      buttonBuilder.call(
+          context,
+          ContextMenuButtonConfig(
+            widget._detail ? '修改GIS信息' : '修改选中照片的GIS信息',
+            onPressed: () => handlePressed(context, _handleChangeGisPressed),
+          )),
+    ];
+    if (!widget._detail)
+      widgets.add(buttonBuilder.call(
+          context,
+          ContextMenuButtonConfig(
+            '跳转到文件夹',
+            onPressed: () => handlePressed(context, _handleJumpToFolderPressed),
+          )));
     return cardBuilder.call(
       context,
-      [
-        buttonBuilder.call(
-            context,
-            ContextMenuButtonConfig(
-              widget._detail ? '修改时间' : '修改选中照片时间',
-              onPressed: () => handlePressed(context, _handleChangeDatePressed),
-            )),
-        buttonBuilder.call(
-            context,
-            ContextMenuButtonConfig(
-              widget._detail ? '修改描述信息' : '修改选中照片描述信息',
-              onPressed: () => handlePressed(context, _handleChangeDescPressed),
-            )),
-        buttonBuilder.call(
-            context,
-            ContextMenuButtonConfig(
-              '拷贝GIS信息',
-              onPressed: () => handlePressed(context, _handleCopyGisPressed),
-            )),
-        buttonBuilder.call(
-            context,
-            ContextMenuButtonConfig(
-              widget._detail ? '修改GIS信息' : '修改选中照片的GIS信息',
-              onPressed: () => handlePressed(context, _handleChangeGisPressed),
-            )),
-      ],
+      widgets,
     );
   }
 
@@ -106,5 +114,15 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
       return;
     }
     widget._picsModel.updateSelectedImages({'latitude': splitted[0], 'longitude': splitted[1]}, ' GIS信息到 $result');
+  }
+
+  Future<void> _handleJumpToFolderPressed() async {
+    if (widget._picsModel.selectNothing) {
+      showToast('请选中照片后再试');
+      return;
+    }
+    // select folder if have two or more folders
+    // switch tab if is not in folder mode
+    // scroll to index
   }
 }
