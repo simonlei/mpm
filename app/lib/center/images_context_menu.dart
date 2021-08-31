@@ -126,12 +126,39 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
       showToast('没有找到对应的目录');
       return;
     }
+    var index = 0;
     if (paths.length > 1) {
       // select folder if have two or more folders
-
+      index = await selectPath(paths);
     }
-    print(paths);
+    print(paths[index]);
     // switch tab if is not in folder mode
     // scroll to index
+  }
+
+  Future<int> selectPath(List paths) async {
+    return await showDialog(
+      context: scaffoldKey.currentContext!,
+      builder: (BuildContext context) {
+        var child = Column(
+          children: <Widget>[
+            ListTile(title: Text("请选择")),
+            Expanded(
+                child: ListView.builder(
+              itemCount: paths.length,
+              itemBuilder: (BuildContext context, int index) {
+                print(paths[index]);
+                print(paths[index]['path']);
+                return ListTile(
+                  title: Text('${paths[index]['path']}'),
+                  onTap: () => Navigator.of(context).pop(index),
+                );
+              },
+            )),
+          ],
+        );
+        return Dialog(child: child);
+      },
+    );
   }
 }
