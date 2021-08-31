@@ -133,6 +133,10 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
     }
     print(paths[index]);
     // switch tab if is not in folder mode
+    if (leftPanelKey.currentState!.selectedTab != 1) {
+      leftPanelKey.currentState!.selectTab(1);
+    }
+    // set folder condition
     // scroll to index
   }
 
@@ -147,8 +151,6 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
                 child: ListView.builder(
               itemCount: paths.length,
               itemBuilder: (BuildContext context, int index) {
-                print(paths[index]);
-                print(paths[index]['path']);
                 return ListTile(
                   title: Text('${paths[index]['path']}'),
                   onTap: () => Navigator.of(context).pop(index),

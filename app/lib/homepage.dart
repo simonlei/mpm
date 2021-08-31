@@ -20,6 +20,7 @@ class MyHomePage extends StatefulWidget {
 
 final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 final GlobalKey<PicsGridState> gridViewKey = GlobalKey<PicsGridState>();
+final GlobalKey<LeftPanelState> leftPanelKey = GlobalKey<LeftPanelState>();
 
 class _MyHomePageState extends State<MyHomePage> {
   var appTitle = 'My Photo Manager';
@@ -52,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
           toolbarHeight: 28,
         ),
         body: Row(children: [
-          LeftPanel(),
+          LeftPanel(leftPanelKey),
           Expanded(
             child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
               return PicsGrid(gridViewKey, constraints);

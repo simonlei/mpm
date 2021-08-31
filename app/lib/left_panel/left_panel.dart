@@ -5,41 +5,52 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
 class LeftPanel extends StatefulWidget {
+  LeftPanel(Key? key) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
-    return _LeftPanelState();
+    return LeftPanelState();
   }
 }
 
-class _LeftPanelState extends State<LeftPanel> {
-  late Container _container;
-  bool _inited = false;
+class LeftPanelState extends State<LeftPanel> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  get selectedTab => _tabController.index;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = new TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) {
+        Logger().i("Changing index ${_tabController.index} from ${_tabController.previousIndex}");
+        if (_tabController.index == 0) {
+          Conditions.path = '';
+        } else {
+          Conditions.dateKey = '';
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (_inited) return _container;
-    _inited = true;
-    _container = Container(
+    return Container(
       width: 250,
-      child: DefaultTabController(
-        length: 2,
-        child: Builder(builder: (BuildContext context) {
-          TabController controller = DefaultTabController.of(context)!;
-          controller.addListener(() {
-            if (controller.indexIsChanging) {
-              Logger().i("Changing index ${controller.index} from ${controller.previousIndex}");
-              if (controller.index == 0) {
-                Conditions.path = '';
-              } else {
-                Conditions.dateKey = '';
-              }
-            }
-          });
-
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TabBar(tabs: [
+      child: Builder(builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TabBar(
+              controller: _tabController,
+              tabs: [
                 Tab(
                   child: Text(
                     '按日期查看',
@@ -52,20 +63,26 @@ class _LeftPanelState extends State<LeftPanel> {
                     style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
                   ),
                 )
-              ]),
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    DateTreePanel(),
-                    FolderTreePanel(true),
-                  ],
-                ),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  DateTreePanel(),
+                  FolderTreePanel(true),
+                ],
               ),
-            ],
-          );
-        }),
-      ),
+            ),
+          ],
+        );
+      }),
     );
-    return _container;
+  }
+
+  void selectTab(int i) {
+    setState(() {
+      _tabController.animateTo(i);
+    });
   }
 }
