@@ -5,14 +5,17 @@ import java.util.List;
 import java.util.Map;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.progress.ProgressController;
 import org.mpm.server.util.ExplicitPager;
 import org.nutz.dao.Chain;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
+import org.nutz.dao.Sqls;
 import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Criteria;
+import org.nutz.dao.sql.Sql;
 import org.nutz.dao.util.cri.SimpleCriteria;
 import org.nutz.json.Json;
 import org.nutz.lang.Lang;
@@ -68,10 +71,19 @@ public class PicsController {
     }
      */
 
-    // used in client
     @PostMapping("/api/getCount")
     public int count(@RequestBody boolean trashed) {
         return picsService.count(trashed);
+    }
+
+    @PostMapping("/api/getParentPathsForPhoto")
+    public List<EntityFile> getParentPathsForPhoto(@RequestBody Long photoId) {
+        Sql sql = Sqls.create("Select * from t_files where id in "
+                + "( select distinct parentId from t_files where photoId=@photoId)");
+        sql.setParam("photoId", photoId).setEntity(dao.getEntity(EntityFile.class));
+        sql.setCallback(Sqls.callback.entities());
+        dao.execute(sql);
+        return sql.getList(EntityFile.class);
     }
 
     @PostMapping("/api/emptyTrash")
@@ -80,7 +92,6 @@ public class PicsController {
         new Thread(emptyTask).start();
         return taskId;
     }
-
 
     @PostMapping("/api/updateImage")
     public Map update(@RequestBody Map values) {

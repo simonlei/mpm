@@ -121,7 +121,16 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
       showToast('请选中照片后再试');
       return;
     }
-    // select folder if have two or more folders
+    var paths = await widget._picsModel.getPathsForSelectedPhoto();
+    if (paths.length == 0) {
+      showToast('没有找到对应的目录');
+      return;
+    }
+    if (paths.length > 1) {
+      // select folder if have two or more folders
+
+    }
+    print(paths);
     // switch tab if is not in folder mode
     // scroll to index
   }

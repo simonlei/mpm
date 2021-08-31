@@ -152,6 +152,12 @@ class PicsModel with ChangeNotifier {
       showToast('已修改照片 $reason');
     });
   }
+
+  Future<List> getPathsForSelectedPhoto() async {
+    var resp = await Dio().post(Config.api('/api/getParentPathsForPhoto'), data: _pics[_selectModel.lastIndex]!.id);
+    if (resp.statusCode == 200) return resp.data;
+    return [];
+  }
 }
 
 enum MediaType { photo, video }
