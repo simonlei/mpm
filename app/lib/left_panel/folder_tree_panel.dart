@@ -10,7 +10,7 @@ import 'package:flutter_treeview/flutter_treeview.dart';
 import 'package:logger/logger.dart';
 
 class FolderTreePanel extends StatefulWidget {
-  final _folderTreePanelState = _FolderTreePanelState();
+  final _folderTreePanelState = FolderTreePanelState();
   final _inLeftPanel;
 
   FolderTreePanel(this._inLeftPanel);
@@ -23,9 +23,13 @@ class FolderTreePanel extends StatefulWidget {
   String? getSelected() {
     return _folderTreePanelState._treeViewController.selectedKey;
   }
+
+  void selectKey(String key) {
+    _folderTreePanelState.selectToKey(key);
+  }
 }
 
-class _FolderTreePanelState extends State<FolderTreePanel> {
+class FolderTreePanelState extends State<FolderTreePanel> {
   late TreeViewController _treeViewController;
   bool _inited = false;
 
@@ -39,6 +43,7 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
   void initState() {
     super.initState();
     if (widget._inLeftPanel) BUS.on(EventBus.LeftTreeConditionsChanged, _conditionCallback);
+    WidgetsBinding.instance!.addPostFrameCallback((_) => selectToKey(context));
   }
 
   @override
@@ -110,21 +115,21 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
     }
   }
 
-  void _selectChange(String key) {
+  Future<void> _selectChange(String key) async {
     Logger().i('select state change $key');
     setState(() {
       _treeViewController = _treeViewController.copyWith(selectedKey: key).withExpandToNode(key);
-      _expandNodeHandler(key, true);
-      if (widget._inLeftPanel) {
-        var node = _treeViewController.getNode(key);
-        if (node != null && node.hasData) {
-          Conditions.path = node.data;
-        } else {
-          Conditions.path = '';
-        }
-        BUS.emit(EventBus.ConditionsChanged);
-      }
     });
+    await _expandNodeHandler(key, true);
+    if (widget._inLeftPanel) {
+      var node = _treeViewController.getNode(key);
+      if (node != null && node.hasData) {
+        Conditions.path = node.data;
+      } else {
+        Conditions.path = '';
+      }
+      BUS.emit(EventBus.ConditionsChanged);
+    }
   }
 
   Future<TreeViewController> doInit() async {
@@ -155,7 +160,9 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
       ),
     ];
     _inited = true;
-    return TreeViewController(children: nodes);
+    var treeViewController = TreeViewController(children: nodes);
+    //selectToKey(treeViewController, widget._initKey);
+    return treeViewController;
   }
 
   Widget _buildLabel(BuildContext context, Node node) {
@@ -194,5 +201,12 @@ class _FolderTreePanelState extends State<FolderTreePanel> {
         ],
       ),
     );
+  }
+
+  // void selectToKey(TreeViewController treeViewController, initKey) {
+  void selectToKey(context) {
+    _selectChange(context);
+    // print('after widget init... ${widget._initKey}');
+    // _selectChange(widget._initKey);
   }
 }

@@ -132,11 +132,14 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
       index = await selectPath(paths);
     }
     print(paths[index]);
+    print(paths[index]['id']);
     // switch tab if is not in folder mode
-    if (leftPanelKey.currentState!.selectedTab != 1) {
-      leftPanelKey.currentState!.selectTab(1);
-    }
+    // if (leftPanelKey.currentState!.selectedTab != 1) {
+    leftPanelKey.currentState!.selectTab(1, '${paths[index]['id']}');
+    //}
     // set folder condition
+    // print(folderTreeKey.currentState);
+    // folderTreeKey.currentState!.selectChange(paths[index]['id']);
     // scroll to index
   }
 
