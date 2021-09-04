@@ -42,14 +42,11 @@ class LeftPanelState extends State<LeftPanel> with SingleTickerProviderStateMixi
     super.dispose();
   }
 
-  late FolderTreePanel _folderTreePanel;
-
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 250,
       child: Builder(builder: (BuildContext context) {
-        _folderTreePanel = FolderTreePanel(true);
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -75,7 +72,7 @@ class LeftPanelState extends State<LeftPanel> with SingleTickerProviderStateMixi
                 controller: _tabController,
                 children: [
                   DateTreePanel(),
-                  _folderTreePanel,
+                  FolderTreePanel(folderTreeKey, true),
                 ],
               ),
             ),
@@ -85,10 +82,9 @@ class LeftPanelState extends State<LeftPanel> with SingleTickerProviderStateMixi
     );
   }
 
-  void selectTab(int i, String key) {
+  void selectTab(int i) {
     setState(() {
       _tabController.animateTo(i);
     });
-    _folderTreePanel.selectKey(key);
   }
 }

@@ -81,7 +81,7 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
     var folder = await showDialog<String>(
       context: scaffoldKey.currentContext!,
       builder: (context) {
-        var treePanel = FolderTreePanel(false);
+        var treePanel = FolderTreePanel(null, false);
         return AlertDialog(
           title: Text(title),
           content: Container(

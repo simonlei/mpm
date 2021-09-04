@@ -10,10 +10,12 @@ import 'package:flutter_treeview/flutter_treeview.dart';
 import 'package:logger/logger.dart';
 
 class FolderTreePanel extends StatefulWidget {
-  final _folderTreePanelState = FolderTreePanelState();
+  final FolderTreePanelState _folderTreePanelState = FolderTreePanelState();
   final _inLeftPanel;
 
-  FolderTreePanel(this._inLeftPanel);
+  FolderTreePanel(Key? key, this._inLeftPanel) : super(key: key) {
+    print('hello FolderTreePanel');
+  }
 
   @override
   State<StatefulWidget> createState() {
@@ -23,19 +25,15 @@ class FolderTreePanel extends StatefulWidget {
   String? getSelected() {
     return _folderTreePanelState._treeViewController.selectedKey;
   }
-
-  void selectKey(String key) {
-    _folderTreePanelState.selectToKey(key);
-  }
 }
 
 class FolderTreePanelState extends State<FolderTreePanel> {
   late TreeViewController _treeViewController;
-  bool _inited = false;
+  bool inited = false;
 
   _conditionCallback(arg) {
     setState(() {
-      _inited = false;
+      inited = false;
     });
   }
 
@@ -43,7 +41,7 @@ class FolderTreePanelState extends State<FolderTreePanel> {
   void initState() {
     super.initState();
     if (widget._inLeftPanel) BUS.on(EventBus.LeftTreeConditionsChanged, _conditionCallback);
-    WidgetsBinding.instance!.addPostFrameCallback((_) => selectToKey(context));
+    // WidgetsBinding.instance!.addPostFrameCallback((_) => selectToKey(context));
   }
 
   @override
@@ -133,7 +131,7 @@ class FolderTreePanelState extends State<FolderTreePanel> {
   }
 
   Future<TreeViewController> doInit() async {
-    if (_inited) return _treeViewController;
+    if (inited) return _treeViewController;
     var resp = await Dio().post(Config.api("/api/getFoldersData"), data: {
       'trashed': Conditions.trashed,
       'star': Conditions.star,
@@ -159,10 +157,8 @@ class FolderTreePanelState extends State<FolderTreePanel> {
         children: folders,
       ),
     ];
-    _inited = true;
-    var treeViewController = TreeViewController(children: nodes);
-    //selectToKey(treeViewController, widget._initKey);
-    return treeViewController;
+    inited = true;
+    return TreeViewController(children: nodes);
   }
 
   Widget _buildLabel(BuildContext context, Node node) {

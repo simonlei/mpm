@@ -1,4 +1,5 @@
 import 'package:app/homepage.dart';
+import 'package:app/left_panel/left_panel.dart';
 import 'package:app/model/pics_model.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
@@ -135,11 +136,14 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
     print(paths[index]['id']);
     // switch tab if is not in folder mode
     // if (leftPanelKey.currentState!.selectedTab != 1) {
-    leftPanelKey.currentState!.selectTab(1, '${paths[index]['id']}');
+    leftPanelKey.currentState!.selectTab(1);
     //}
     // set folder condition
-    // print(folderTreeKey.currentState);
-    // folderTreeKey.currentState!.selectChange(paths[index]['id']);
+    while (folderTreeKey.currentState == null || !folderTreeKey.currentState!.inited) {
+      await new Future.delayed(Duration(milliseconds: 10));
+    }
+    print(' state is ${folderTreeKey.currentState}');
+    folderTreeKey.currentState!.selectToKey('${paths[index]['id']}');
     // scroll to index
   }
 
