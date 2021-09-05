@@ -86,6 +86,7 @@ class FolderTreePanelState extends State<FolderTreePanel> {
     Logger().i('going to expand $expend $key');
     if (expend) {
       var node = _treeViewController.getNode(key);
+      // print('node is $node and children is empty? ${node!.children.isEmpty}');
       if (node != null && node.children.isEmpty) {
         var resp = await Dio().post(Config.api("/api/getFoldersData"), data: {
           'trashed': Conditions.trashed,
@@ -100,24 +101,25 @@ class FolderTreePanelState extends State<FolderTreePanel> {
         resp.data.forEach((element) {
           folders.add(Node(label: element['title'], key: '${element['id']}', data: element['path'], parent: true));
         });
-        setState(() {
-          if (folders.isEmpty) {
-            _treeViewController =
-                _treeViewController.withUpdateNode(key, _treeViewController.getNode(key)!.copyWith(parent: false));
-          }
+        // print('folders is $folders');
+        if (folders.isEmpty) {
+          _treeViewController =
+              _treeViewController.withUpdateNode(key, _treeViewController.getNode(key)!.copyWith(parent: false));
+        } else {
           folders.forEach((element) {
             _treeViewController = _treeViewController.withAddNode(key, element);
           });
-        });
+          _treeViewController = _treeViewController.withExpandToNode(key);
+        }
+        setState(() {});
       }
     }
   }
 
   Future<void> _selectChange(String key) async {
     Logger().i('select state change $key');
-    setState(() {
-      _treeViewController = _treeViewController.copyWith(selectedKey: key).withExpandToNode(key);
-    });
+    _treeViewController = _treeViewController.copyWith(selectedKey: key).withExpandToNode(key);
+    setState(() {});
     await _expandNodeHandler(key, true);
     if (widget._inLeftPanel) {
       var node = _treeViewController.getNode(key);
@@ -199,10 +201,16 @@ class FolderTreePanelState extends State<FolderTreePanel> {
     );
   }
 
-  // void selectToKey(TreeViewController treeViewController, initKey) {
-  void selectToKey(context) {
-    _selectChange(context);
-    // print('after widget init... ${widget._initKey}');
-    // _selectChange(widget._initKey);
+  Future<void> selectToKey(keyId) async {
+    var resp = await Dio().post(Config.api('/api/getFolderPaths'), data: keyId);
+    if (resp.statusCode == 200) {
+      var data = resp.data as List;
+
+      for (var e in data) {
+        print('element is $e');
+        await _expandNodeHandler('$e', true);
+      }
+      _selectChange(keyId);
+    }
   }
 }

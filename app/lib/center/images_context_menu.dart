@@ -143,7 +143,7 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
       await new Future.delayed(Duration(milliseconds: 10));
     }
     print(' state is ${folderTreeKey.currentState}');
-    folderTreeKey.currentState!.selectToKey('${paths[index]['id']}');
+    await folderTreeKey.currentState!.selectToKey('${paths[index]['id']}');
     // scroll to index
   }
 

@@ -1,6 +1,7 @@
 package org.mpm.server.pics;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
@@ -84,6 +85,21 @@ public class PicsController {
         sql.setCallback(Sqls.callback.entities());
         dao.execute(sql);
         return sql.getList(EntityFile.class);
+    }
+
+    /**
+     * 返回 path 从root开始的id列表
+     */
+    @PostMapping("/api/getFolderPaths")
+    public List<Long> getFolderPaths(@RequestBody Long pathId) {
+        List<Long> paths = new ArrayList<>();
+        paths.add(pathId);
+        EntityFile entityFile = dao.fetch(EntityFile.class, pathId);
+        while (entityFile.getParentId() != null) {
+            paths.add(0, entityFile.getParentId());
+            entityFile = dao.fetch(EntityFile.class, entityFile.getParentId());
+        }
+        return paths;
     }
 
     @PostMapping("/api/emptyTrash")
