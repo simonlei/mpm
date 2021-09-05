@@ -1,11 +1,16 @@
 import 'package:app/homepage.dart';
 import 'package:app/left_panel/left_panel.dart';
+import 'package:app/model/conditions.dart';
+import 'package:app/model/config.dart';
 import 'package:app/model/pics_model.dart';
+import 'package:app/model/select_model.dart';
 import 'package:context_menus/context_menus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:prompt_dialog/prompt_dialog.dart';
+import 'package:provider/provider.dart';
 
 class ImagesContextMenu extends StatefulWidget {
   final PicsModel _picsModel;
@@ -122,6 +127,7 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
       showToast('请选中照片后再试');
       return;
     }
+    var picImage = await widget._picsModel.getImage(widget._picsModel.getSelectedIndex());
     var paths = await widget._picsModel.getPathsForSelectedPhoto();
     if (paths.length == 0) {
       showToast('没有找到对应的目录');
@@ -144,7 +150,16 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
     }
     print(' state is ${folderTreeKey.currentState}');
     await folderTreeKey.currentState!.selectToKey('${paths[index]['id']}');
-    // scroll to index
+    await new Future.delayed(Duration(milliseconds: 10));
+    // get index of current photo
+    var resp = await Dio().post(Config.api('/api/getPicIndex'), data: {
+      'condition': Conditions.makeCondition(0, 100),
+      'picId': picImage!.id,
+    });
+    // jump to photo
+    if (resp.statusCode == 200) {
+      Provider.of<SelectModel>(scaffoldKey.currentContext!, listen: false).select(false, false, resp.data);
+    }
   }
 
   Future<int> selectPath(List paths) async {

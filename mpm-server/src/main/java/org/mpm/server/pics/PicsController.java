@@ -1,5 +1,6 @@
 package org.mpm.server.pics;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -141,6 +142,16 @@ public class PicsController {
         return dao.update(EntityPhoto.class, Chain.makeSpecial("trashed", " !trashed"), cri);
     }
 
+    @PostMapping("/api/getPicIndex")
+    public Long getPicIndex(@RequestBody GetPicIndexRequest req) {
+        req.condition.setIdRank(req.picId);
+        BigInteger r = (BigInteger) getPics(req.condition).get("r");
+        if (r == null) {
+            return 0L;
+        }
+        return r.longValue() - 1;
+    }
+
     @PostMapping("/api/getPics")
     public Map getPics(@RequestBody GetPicsRequest req) {
         log.info("Getting pics " + Json.toJson(req));
@@ -167,10 +178,23 @@ public class PicsController {
             addStarCriteria(star, cnd);
 
             totalRows = (int) dao.fetch("t_photos", cnd, "count(distinct t_photos.id) as c").getLong("c");
-            cnd.setPager(new ExplicitPager(start, end - start));
-            cnd.orderBy(sortedBy, desc ? "desc" : "asc");
-            // ...
-            photos = dao.query("t_photos", cnd, null, "distinct t_photos.*");
+            if (req.idRank == null) {
+                cnd.setPager(new ExplicitPager(start, end - start));
+                cnd.orderBy(sortedBy, desc ? "desc" : "asc");
+                // ...
+                photos = dao.query("t_photos", cnd, null, "distinct t_photos.*");
+            } else {
+                Sql sql = Sqls.create("select id, r from ("
+                        + " select distinct t_photos.id, rank() over (order by $sortedBy $desc) as r from t_photos "
+                        + "     $condition "
+                        + " ) t where id=@id");
+                sql.setVar("sortedBy", sortedBy).setVar("desc", desc ? "desc" : "asc")
+                        .setParam("id", req.idRank).setCondition(cnd);
+                sql.setCallback(Sqls.callback.map());
+                log.info("Sql is " + sql.toString());
+                dao.execute(sql);
+                return (Map) sql.getResult();
+            }
         } else {
             Cnd cnd = Cnd.where("trashed", "=", trashed);
             cnd = addDateCondition(req, cnd);
@@ -229,6 +253,13 @@ public class PicsController {
     }
 
     @Data
+    static class GetPicIndexRequest {
+
+        GetPicsRequest condition;
+        Long picId;
+    }
+
+    @Data
     static class GetPicsRequest {
 
         Boolean star;
@@ -238,5 +269,6 @@ public class PicsController {
         String order;
         String dateKey;
         String path;
+        Long idRank;
     }
 }
