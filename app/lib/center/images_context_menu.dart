@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:app/homepage.dart';
 import 'package:app/left_panel/left_panel.dart';
 import 'package:app/model/conditions.dart';
@@ -5,6 +7,7 @@ import 'package:app/model/config.dart';
 import 'package:app/model/pics_model.dart';
 import 'package:app/model/select_model.dart';
 import 'package:context_menus/context_menus.dart';
+import 'package:custom_searchable_dropdown/custom_searchable_dropdown.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -52,6 +55,12 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
             widget._detail ? '修改GIS信息' : '修改选中照片的GIS信息',
             onPressed: () => handlePressed(context, _handleChangeGisPressed),
           )),
+      buttonBuilder.call(
+          context,
+          ContextMenuButtonConfig(
+            widget._detail ? '修改标签' : '修改选中照片的标签',
+            onPressed: () => handlePressed(context, _handleChangeTagsPressed),
+          )),
     ];
     if (!widget._detail)
       widgets.add(buttonBuilder.call(
@@ -77,6 +86,58 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
       initialDate: DateTime.now(),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
+    );
+    if (result == null) return;
+    print(result.toString());
+    widget._picsModel.updateSelectedImages({'takenDate': result.toString()}, ' 拍摄时间到 ${result.toString()}');
+  }
+
+  void _handleChangeTagsPressed() async {
+    if (widget._picsModel.selectNothing) {
+      showToast('请选中照片后再试');
+      return;
+    }
+
+    var resp = await Dio().post(Config.api("/api/getAllTags"));
+    if (resp.statusCode != 200) {
+      showToast("获取tags失败 ${resp.data}");
+    }
+    var listToSearch = (resp.data as String).split(",");
+    var selectedIndex = widget._picsModel.getSelectedIndex();
+    var image = await widget._picsModel.getImage(selectedIndex);
+    var initialValue = image!.tags == null ? null : jsonDecode(image.tags!);
+    var selectedList;
+
+    // https://www.woolha.com/tutorials/flutter-using-inputchip-widget-examples
+
+    var result = await showDialog(
+      context: scaffoldKey.currentContext!,
+      builder: (BuildContext context) {
+        var child = CustomSearchableDropDown(
+          menuMode: true,
+          items: listToSearch,
+          initialValue: initialValue,
+          label: 'Select Name',
+          multiSelectTag: 'Names',
+          multiSelectValuesAsWidget: true,
+          decoration: BoxDecoration(border: Border.all(color: Colors.blue)),
+          multiSelect: true,
+          prefixIcon: Padding(
+            padding: const EdgeInsets.all(0.0),
+            child: Icon(Icons.search),
+          ),
+          dropDownMenuItems: listToSearch,
+          onChanged: (value) {
+            print('value:$value');
+            if (value != null) {
+              selectedList = jsonDecode(value);
+            } else {
+              selectedList.clear();
+            }
+          },
+        );
+        return Dialog(child: child);
+      },
     );
     if (result == null) return;
     print(result.toString());

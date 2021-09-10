@@ -179,6 +179,7 @@ class PicImage {
     takenDate = DateTime.parse(element['takendate']);
     mediaType = 'photo' == element['mediatype'] ? MediaType.photo : MediaType.video;
     duration = element['duration'] ?? 0.0;
+    tags = element['tags'];
   }
 
   String formatDuration() => Duration(seconds: duration.toInt()).toString().split('.').first.padLeft(8, "0");
@@ -199,6 +200,7 @@ class PicImage {
   late final MediaType mediaType;
   late final double duration;
   late int rotate;
+  late String? tags;
 
   PicsModel get picsModel => _picsModel;
 
@@ -207,6 +209,7 @@ class PicImage {
         "宽度：$width px\n" +
         "高度：$height px\n" +
         "描述：$description\n" +
+        (tags == null ? "" : "标签：$tags\n") +
         (address == null ? "" : "地址：$address\n") +
         "时间：${takenDate.year}-${takenDate.month.toString().padLeft(2, '0')}-${takenDate.day.toString().padLeft(2, '0')}";
   }
@@ -224,6 +227,7 @@ class PicImage {
     takenDate = element.containsKey('takendate') ? DateTime.parse(element['takendate']) : takenDate;
     thumb = element.containsKey('thumb') ? element['thumb'] : thumb;
     rotate = element.containsKey('rotate') ? element['rotate'] : rotate;
+    tags = element.containsKey('tags') ? element['tags'] : tags;
   }
 
   int getQuarterTurns() {
