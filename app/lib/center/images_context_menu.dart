@@ -1,13 +1,11 @@
-import 'dart:convert';
-
 import 'package:app/homepage.dart';
 import 'package:app/left_panel/left_panel.dart';
 import 'package:app/model/conditions.dart';
 import 'package:app/model/config.dart';
 import 'package:app/model/pics_model.dart';
 import 'package:app/model/select_model.dart';
+import 'package:app/widgets/tags_selector.dart';
 import 'package:context_menus/context_menus.dart';
-import 'package:custom_searchable_dropdown/custom_searchable_dropdown.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -102,46 +100,38 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
     if (resp.statusCode != 200) {
       showToast("获取tags失败 ${resp.data}");
     }
-    var listToSearch = (resp.data as String).split(",");
+    var listToSearch = (resp.data as String).split(",").where((s) => s.isNotEmpty).toList();
     var selectedIndex = widget._picsModel.getSelectedIndex();
     var image = await widget._picsModel.getImage(selectedIndex);
-    var initialValue = image!.tags == null ? null : jsonDecode(image.tags!);
-    var selectedList;
+    var initialValue = image!.tags == null ? null : image.tags!.split(",").where((s) => s.isNotEmpty).toList();
 
-    // https://www.woolha.com/tutorials/flutter-using-inputchip-widget-examples
-
-    var result = await showDialog(
+    List? result = await showDialog(
       context: scaffoldKey.currentContext!,
       builder: (BuildContext context) {
-        var child = CustomSearchableDropDown(
-          menuMode: true,
-          items: listToSearch,
-          initialValue: initialValue,
-          label: 'Select Name',
-          multiSelectTag: 'Names',
-          multiSelectValuesAsWidget: true,
-          decoration: BoxDecoration(border: Border.all(color: Colors.blue)),
-          multiSelect: true,
-          prefixIcon: Padding(
-            padding: const EdgeInsets.all(0.0),
-            child: Icon(Icons.search),
-          ),
-          dropDownMenuItems: listToSearch,
-          onChanged: (value) {
-            print('value:$value');
-            if (value != null) {
-              selectedList = jsonDecode(value);
-            } else {
-              selectedList.clear();
-            }
-          },
+        var tagsSelector = TagsSelector(
+          tags: listToSearch,
+          initValues: initialValue,
         );
-        return Dialog(child: child);
+        return AlertDialog(
+          title: Text('选择标签'),
+          content: tagsSelector,
+          actions: [
+            TextButton(
+              child: Text('确定'),
+              onPressed: () => Navigator.of(context).pop(tagsSelector.selectedValues),
+            ),
+            TextButton(
+              child: Text('取消'),
+              onPressed: () => Navigator.of(context).pop(null),
+            ),
+          ],
+        );
       },
     );
     if (result == null) return;
-    print(result.toString());
-    widget._picsModel.updateSelectedImages({'takenDate': result.toString()}, ' 拍摄时间到 ${result.toString()}');
+
+    print(result.join(","));
+    widget._picsModel.updateSelectedImages({'tags': result.join(",")}, ' 标签更新为 ${result.join(",")}');
   }
 
   void _handleCopyGisPressed() async {

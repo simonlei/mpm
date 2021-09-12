@@ -40,6 +40,8 @@ public class PicsController {
     TrashEmptyTask emptyTask;
     @Autowired
     GisService gisService;
+    @Autowired
+    TagsService tagsService;
 
     /*
     // used in client
@@ -120,6 +122,9 @@ public class PicsController {
             if (address != null) {
                 record.set("address", address);
             }
+        }
+        if (values.get("tags") != null) {
+            tagsService.setTagsRelation(record.getInt("id"), (String) values.get("tags"));
         }
         dao.updateIgnoreNull(dao.getEntity(EntityPhoto.class).getObject(record));
         return addThumbField(dao.query("t_photos", Cnd.where("id", "=", record.getInt("id")))).get(0);
