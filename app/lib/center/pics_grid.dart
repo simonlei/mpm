@@ -92,7 +92,7 @@ class PicsGridState extends State<PicsGrid> {
 
   static const maxCrossAxisExtent = 200.0;
 
-  onKey(FocusNode node, RawKeyEvent event) {
+  KeyEventResult onKey(FocusNode node, RawKeyEvent event) {
     _picsModel.metaDown = event.isMetaPressed;
     _picsModel.shiftDown = event.isShiftPressed;
     try {
@@ -119,7 +119,7 @@ class PicsGridState extends State<PicsGrid> {
     } else if (event.isKeyPressed(LogicalKeyboardKey.keyS)) {
       _picsModel.starSelected();
     }
-    return true;
+    return KeyEventResult.handled;
   }
 
   int getCrossAxisCount(double width) {
