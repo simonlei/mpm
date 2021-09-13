@@ -3,6 +3,7 @@ import 'package:app/headers/empty_trash_button.dart';
 import 'package:app/headers/location_jumper.dart';
 import 'package:app/headers/sort_selector.dart';
 import 'package:app/headers/star_filter.dart';
+import 'package:app/headers/tag_filter.dart';
 import 'package:app/headers/trash_box_switcher.dart';
 import 'package:app/headers/upload_selector.dart';
 import 'package:app/left_panel/left_panel.dart';
@@ -43,6 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
             LocationJumper(),
             // 过滤条件 （只看star）|
             StarFilter(),
+            TagFilter(),
             SortSelector(),
             TrashBoxSwitcher(),
             // |

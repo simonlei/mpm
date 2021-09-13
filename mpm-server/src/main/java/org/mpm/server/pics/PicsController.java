@@ -181,6 +181,7 @@ public class PicsController {
                     .and("trashed", "=", trashed);
 
             addStarCriteria(star, cnd);
+            addTagCriteria(req.getTag(), cnd);
 
             totalRows = (int) dao.fetch("t_photos", cnd, "count(distinct t_photos.id) as c").getLong("c");
             if (req.idRank == null) {
@@ -204,6 +205,7 @@ public class PicsController {
             Cnd cnd = Cnd.where("trashed", "=", trashed);
             cnd = addDateCondition(req, cnd);
             addStarCriteria(star, cnd.getCri());
+            addTagCriteria(req.getTag(), cnd.getCri());
 
             totalRows = dao.count(EntityPhoto.class, cnd);
             cnd.limit(new ExplicitPager(start, end - start));
@@ -257,6 +259,12 @@ public class PicsController {
         }
     }
 
+    private void addTagCriteria(String tag, SimpleCriteria cnd) {
+        if (tag != null) {
+            cnd.where().and("tags", "like", "%" + tag + "%");
+        }
+    }
+
     @Data
     static class GetPicIndexRequest {
 
@@ -275,5 +283,6 @@ public class PicsController {
         String dateKey;
         String path;
         Long idRank;
+        String tag;
     }
 }

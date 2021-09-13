@@ -1,9 +1,10 @@
 class Conditions {
   static bool trashed = false;
-  static bool? star = null;
+  static bool? star;
   static String order = '-id';
   static String dateKey = '';
   static String path = '';
+  static String? tag;
 
   static makeCondition(int start, int size) {
     return {
@@ -14,6 +15,7 @@ class Conditions {
       'dateKey': dateKey,
       'path': path,
       'star': star,
+      'tag': tag,
     };
   }
 }
