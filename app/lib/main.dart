@@ -1,3 +1,4 @@
+import 'package:app/center/map_page.dart';
 import 'package:app/homepage.dart';
 import 'package:app/model/config.dart';
 import 'package:app/model/event_bus.dart';
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
         onGenerateRoute: (RouteSettings settings) {
           var routes = <String, WidgetBuilder>{
             '/': (context) => JumpWidget(),
+            '/map': (context) => MapPage(),
             '/home': (context) => MyHomePage(title: 'My Photo Manager'),
             '/detail': (context) => ContextMenuOverlay(
                   child: DetailPage(settings.arguments as Tuple2),

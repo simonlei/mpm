@@ -47,6 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
             TagFilter(),
             SortSelector(),
             TrashBoxSwitcher(),
+            // MapSwitcher(),
             // |
             EmptyTrashButton(),
             UploadSelector(),
