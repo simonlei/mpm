@@ -114,23 +114,32 @@ public class FilesController {
 
     void moveFolderTo(EntityFile child, EntityFile newParent) {
         if (newParent == null) {
+            if (child.getParentId() == null) {
+                return;
+            }
             newParent = EntityFile.builder().path("/" + Math.random()).build();
         }
         log.info("Child {} parent id {}", child.getId(), newParent.getId());
-        child.setParentId(newParent.getId());
-        String newPath = newParent.getPath() + "/" + child.getName();
-        log.info("New path {} {}", newPath, child.getParentId());
-        child.setPath(newPath);
-        dao.updateIgnoreNull(child);
-        List<EntityFile> children = dao.query(EntityFile.class, Cnd.where("parentId", "=", child.getId()));
-        for (EntityFile subChild : children) {
-            moveFolderTo(subChild, child);
+        // 如果 newParent 下面有同名 node，那么将node merge到newParent下的同名node下
+        EntityFile sameNode = dao.fetch(EntityFile.class,
+                Cnd.where("parentId", "=", newParent.getId()).and("name", "=", child.getName()));
+        if (!child.getIsFolder() || sameNode == null || sameNode.getId().equals(child.getId())) {
+            child.setParentId(newParent.getId());
+            String newPath = newParent.getPath() + "/" + child.getName();
+            log.info("New path {} {}", newPath, child.getParentId());
+            child.setPath(newPath);
+            dao.updateIgnoreNull(child);
+            List<EntityFile> children = dao.query(EntityFile.class, Cnd.where("parentId", "=", child.getId()));
+            for (EntityFile subChild : children) {
+                moveFolderTo(subChild, child);
+            }
+        } else {
+            mergeTo(child, sameNode);
         }
     }
 
     /**
      * 将node 下的所有目录和文件都转移到 newParent 目录下，并删除node
-     * Used by dmi
      */
     void mergeTo(EntityFile node, EntityFile newParent) {
         if (newParent == null) {
