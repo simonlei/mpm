@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:typed_data';
 
 import 'package:app/center/images_context_menu.dart';
+import 'package:app/center/photo_edit_form.dart';
 import 'package:app/model/config.dart';
 import 'package:app/model/pics_model.dart';
 import 'package:app/video_view.dart';
@@ -99,15 +100,24 @@ class _DetailPageState extends State<DetailPage> {
   Widget makeDetailWidget(AsyncSnapshot<PicImage?> snapshot, BuildContext context) {
     if (snapshot.connectionState == ConnectionState.done) {
       var image = snapshot.data!;
-      if (image.mediaType == MediaType.video) {
-        _scale = true;
-        return wrapStack(VideoView(image), image);
-      }
-      return wrapStack(makeImageView(context, image), image);
+      return Row(
+        children: [
+          Expanded(child: wrapDetail(image, context)),
+          PhotoEditForm(image),
+        ],
+      );
     } else if (snapshot.hasError)
       return Text('Error:${snapshot.error}');
     else
       return CircularProgressIndicator();
+  }
+
+  wrapDetail(PicImage image, BuildContext context) {
+    if (image.mediaType == MediaType.video) {
+      _scale = true;
+      return wrapStack(VideoView(image), image);
+    }
+    return wrapStack(makeImageView(context, image), image);
   }
 
   late var _loadedImage;

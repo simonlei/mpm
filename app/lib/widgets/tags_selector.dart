@@ -24,13 +24,15 @@ class TagsSelectorState extends State<TagsSelector> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
+        Wrap(
+          spacing: 8.0, // 主轴(水平)方向间距
+          runSpacing: 4.0, // 纵轴（垂直）方向间距
           children: buildChips(),
         ),
         Row(
           children: [
             SizedBox(
-              width: 200,
+              width: 100,
               child: TextField(
                 controller: _textController,
               ),
