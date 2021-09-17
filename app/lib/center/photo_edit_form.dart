@@ -1,3 +1,4 @@
+import 'package:app/main.dart';
 import 'package:app/model/config.dart';
 import 'package:app/model/pics_model.dart';
 import 'package:app/widgets/tags_selector.dart';
@@ -75,6 +76,9 @@ class _PhotoEditFormState extends State<PhotoEditForm> {
               map.addAll(_formKey.currentState!.value);
               map['tags'] = tagsSelector.selectedValues.join(",");
               widget._image.picsModel.updateImage(widget._image, map);
+              if (detailViewKey.currentState != null) {
+                detailViewKey.currentState!.focusNode.requestFocus();
+              }
             },
             child: Text('保存'),
           ),

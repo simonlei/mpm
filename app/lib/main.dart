@@ -28,6 +28,8 @@ void main() {
   ));
 }
 
+final GlobalKey<DetailPageState> detailViewKey = GlobalKey<DetailPageState>();
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -50,7 +52,7 @@ class MyApp extends StatelessWidget {
             '/map': (context) => MapPage(),
             '/home': (context) => MyHomePage(title: 'My Photo Manager'),
             '/detail': (context) => ContextMenuOverlay(
-                  child: DetailPage(settings.arguments as Tuple2),
+                  child: DetailPage(detailViewKey, settings.arguments as Tuple2),
                 ),
           };
           WidgetBuilder builder = routes[settings.name]!;

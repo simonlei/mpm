@@ -25,6 +25,10 @@ public class TagsService {
 
     public void setTagsRelation(int id, String tags) {
         String[] tagList = Arrays.stream(tags.split(",")).filter(e -> e.trim().length() > 0).toArray(String[]::new);
+        if (tagList.length == 0) {
+            dao.clear("photo_tags", Cnd.where("photoId", "=", id));
+            return;
+        }
         Trans.exec(() -> {
             Sql sql = Sqls.create("delete from photo_tags where photoId=@id and name not in (@tagList)")
                     .setParam("id", id).setParam("tagList", tagList);

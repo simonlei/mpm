@@ -23,26 +23,33 @@ import 'package:url_launcher/url_launcher.dart';
 import '../js_wrap/heic2any.dart';
 
 class DetailPage extends StatefulWidget {
-  const DetailPage(this.arguments);
+  const DetailPage(Key? key, this.arguments) : super(key: key);
 
   final Tuple2 arguments;
 
   @override
   State<StatefulWidget> createState() {
-    return _DetailPageState(arguments);
+    return DetailPageState(arguments);
   }
 }
 
-class _DetailPageState extends State<DetailPage> {
+class DetailPageState extends State<DetailPage> {
   late PicsModel _picsModel;
   late int _index;
   bool _scale = true;
   ScrollController _verticalController = new ScrollController();
   ScrollController _horizontalController = new ScrollController();
+  late FocusNode focusNode;
 
-  _DetailPageState(Tuple2 arguments) {
+  DetailPageState(Tuple2 arguments) {
     _picsModel = arguments.item1;
     _index = arguments.item2;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    focusNode = new FocusNode();
   }
 
   @override
@@ -50,49 +57,19 @@ class _DetailPageState extends State<DetailPage> {
     print('dispose......');
     _verticalController.dispose();
     _horizontalController.dispose();
+    focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     Logger().i('params is $_index');
-    return Shortcuts(
-      shortcuts: {
-        LogicalKeySet(LogicalKeyboardKey.arrowLeft): NextPageIntent(-1),
-        LogicalKeySet(LogicalKeyboardKey.arrowRight): NextPageIntent(1),
-        LogicalKeySet(LogicalKeyboardKey.escape): EscapeIntent(),
-        LogicalKeySet(LogicalKeyboardKey.keyC): CopyIntent(),
-        LogicalKeySet(LogicalKeyboardKey.keyD): DeleteIntent(),
-        LogicalKeySet(LogicalKeyboardKey.keyI): ZoomIntent(),
-        LogicalKeySet(LogicalKeyboardKey.keyJ): MoveIntent(0, 50),
-        LogicalKeySet(LogicalKeyboardKey.keyK): MoveIntent(0, -50),
-        LogicalKeySet(LogicalKeyboardKey.keyL): MoveIntent(50, 0),
-        LogicalKeySet(LogicalKeyboardKey.keyH): MoveIntent(-50, 0),
-        LogicalKeySet(LogicalKeyboardKey.keyS): StarIntent(_picsModel.imageAt(_index)!),
-        LogicalKeySet(LogicalKeyboardKey.keyR): RotateIntent(_picsModel.imageAt(_index)!),
-      },
-      child: Actions(
-        actions: {
-          CopyIntent: CopyAction(this),
-          NextPageIntent: NextPageAction(this),
-          EscapeIntent: EscapeAction(this),
-          DeleteIntent: DeleteAction(this),
-          ZoomIntent: ZoomAction(this),
-          MoveIntent: MoveAction(this),
-          StarIntent: StarAction(),
-          RotateIntent: RotateAction(this),
+    return Card(
+      child: FutureBuilder<PicImage?>(
+        future: _loadImage(),
+        builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
+          return makeDetailWidget(snapshot, context);
         },
-        child: Card(
-          child: Focus(
-            autofocus: true,
-            child: FutureBuilder<PicImage?>(
-              future: _loadImage(),
-              builder: (BuildContext context, AsyncSnapshot<PicImage?> snapshot) {
-                return makeDetailWidget(snapshot, context);
-              },
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -102,7 +79,41 @@ class _DetailPageState extends State<DetailPage> {
       var image = snapshot.data!;
       return Row(
         children: [
-          Expanded(child: wrapDetail(image, context)),
+          Expanded(
+            child: Shortcuts(
+              shortcuts: {
+                LogicalKeySet(LogicalKeyboardKey.arrowLeft): NextPageIntent(-1),
+                LogicalKeySet(LogicalKeyboardKey.arrowRight): NextPageIntent(1),
+                LogicalKeySet(LogicalKeyboardKey.escape): EscapeIntent(),
+                LogicalKeySet(LogicalKeyboardKey.keyC): CopyIntent(),
+                LogicalKeySet(LogicalKeyboardKey.keyD): DeleteIntent(),
+                LogicalKeySet(LogicalKeyboardKey.keyI): ZoomIntent(),
+                LogicalKeySet(LogicalKeyboardKey.keyJ): MoveIntent(0, 50),
+                LogicalKeySet(LogicalKeyboardKey.keyK): MoveIntent(0, -50),
+                LogicalKeySet(LogicalKeyboardKey.keyL): MoveIntent(50, 0),
+                LogicalKeySet(LogicalKeyboardKey.keyH): MoveIntent(-50, 0),
+                LogicalKeySet(LogicalKeyboardKey.keyS): StarIntent(_picsModel.imageAt(_index)!),
+                LogicalKeySet(LogicalKeyboardKey.keyR): RotateIntent(_picsModel.imageAt(_index)!),
+              },
+              child: Actions(
+                actions: {
+                  CopyIntent: CopyAction(this),
+                  NextPageIntent: NextPageAction(this),
+                  EscapeIntent: EscapeAction(this),
+                  DeleteIntent: DeleteAction(this),
+                  ZoomIntent: ZoomAction(this),
+                  MoveIntent: MoveAction(this),
+                  StarIntent: StarAction(),
+                  RotateIntent: RotateAction(this),
+                },
+                child: Focus(
+                  autofocus: true,
+                  focusNode: focusNode,
+                  child: wrapDetail(image, context),
+                ),
+              ),
+            ),
+          ),
           PhotoEditForm(image),
         ],
       );
@@ -315,7 +326,7 @@ class _DetailPageState extends State<DetailPage> {
 class MoveAction extends Action<MoveIntent> {
   MoveAction(this._detailPageState);
 
-  _DetailPageState _detailPageState;
+  DetailPageState _detailPageState;
 
   @override
   Object? invoke(covariant MoveIntent intent) {
@@ -333,7 +344,7 @@ class MoveIntent extends Intent {
 class ZoomAction extends Action<ZoomIntent> {
   ZoomAction(this._detailPageState);
 
-  _DetailPageState _detailPageState;
+  DetailPageState _detailPageState;
 
   @override
   Object? invoke(covariant ZoomIntent intent) {
@@ -346,7 +357,7 @@ class ZoomIntent extends Intent {}
 class DeleteAction extends Action<DeleteIntent> {
   DeleteAction(this._detailPageState);
 
-  _DetailPageState _detailPageState;
+  DetailPageState _detailPageState;
 
   @override
   Future<Object?> invoke(covariant DeleteIntent intent) async {
@@ -362,7 +373,7 @@ class DeleteIntent extends Intent {}
 class EscapeAction extends Action<EscapeIntent> {
   EscapeAction(this._detailPageState);
 
-  _DetailPageState _detailPageState;
+  DetailPageState _detailPageState;
 
   @override
   Object? invoke(covariant EscapeIntent intent) {
@@ -377,7 +388,7 @@ class CopyIntent extends Intent {}
 class CopyAction extends Action<CopyIntent> {
   CopyAction(this._detailPageState);
 
-  _DetailPageState _detailPageState;
+  DetailPageState _detailPageState;
 
   @override
   Future<Object?> invoke(covariant CopyIntent intent) async {
@@ -395,7 +406,7 @@ class NextPageIntent extends Intent {
 class NextPageAction extends Action<NextPageIntent> {
   NextPageAction(this._detailPageState);
 
-  _DetailPageState _detailPageState;
+  DetailPageState _detailPageState;
 
   @override
   Object? invoke(covariant NextPageIntent intent) {

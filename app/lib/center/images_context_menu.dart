@@ -1,5 +1,6 @@
 import 'package:app/homepage.dart';
 import 'package:app/left_panel/left_panel.dart';
+import 'package:app/main.dart';
 import 'package:app/model/conditions.dart';
 import 'package:app/model/config.dart';
 import 'package:app/model/pics_model.dart';
@@ -245,6 +246,9 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
 
   void returnFocus() {
     if (widget._detail) {
+      if (detailViewKey.currentState != null) {
+        detailViewKey.currentState!.focusNode.requestFocus();
+      }
     } else {
       if (gridViewKey.currentState != null) {
         print('focus.......${gridViewKey.currentState!.focusNode}');
