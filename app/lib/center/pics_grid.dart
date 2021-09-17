@@ -72,6 +72,7 @@ class PicsGridState extends State<PicsGrid> {
             childAspectRatio: width / 150,
             mainAxisSpacing: 3,
           ),
+          cacheExtent: 1000.0,
           controller: _scrollController,
           itemCount: _picsModel.getTotalImages(),
           itemBuilder: (context, index) => ImageTile(index, _picsModel),
