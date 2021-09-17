@@ -84,6 +84,7 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
       initialDate: DateTime.now(),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
+      initialEntryMode: DatePickerEntryMode.input,
     );
     if (result == null) return;
     print(result.toString());
