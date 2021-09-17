@@ -89,6 +89,7 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
     if (result == null) return;
     print(result.toString());
     widget._picsModel.updateSelectedImages({'takenDate': result.toString()}, ' 拍摄时间到 ${result.toString()}');
+    returnFocus();
   }
 
   void _handleChangeTagsPressed() async {
@@ -133,6 +134,7 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
 
     print(result.join(","));
     widget._picsModel.updateSelectedImages({'tags': result.join(",")}, ' 标签更新为 ${result.join(",")}');
+    returnFocus();
   }
 
   void _handleCopyGisPressed() async {
@@ -156,6 +158,7 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
     if (result == null) return;
     print(' result is $result');
     widget._picsModel.updateSelectedImages({'description': result}, ' 描述信息到 $result');
+    returnFocus();
   }
 
   Future<void> _handleChangeGisPressed() async {
@@ -172,6 +175,7 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
       return;
     }
     widget._picsModel.updateSelectedImages({'latitude': splitted[0], 'longitude': splitted[1]}, ' GIS信息到 $result');
+    returnFocus();
   }
 
   Future<void> _handleJumpToFolderPressed() async {
@@ -212,6 +216,7 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
     if (resp.statusCode == 200) {
       Provider.of<SelectModel>(scaffoldKey.currentContext!, listen: false).select(false, false, resp.data);
     }
+    returnFocus();
   }
 
   Future<int> selectPath(List paths) async {
@@ -236,5 +241,15 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
         return Dialog(child: child);
       },
     );
+  }
+
+  void returnFocus() {
+    if (widget._detail) {
+    } else {
+      if (gridViewKey.currentState != null) {
+        print('focus.......${gridViewKey.currentState!.focusNode}');
+        gridViewKey.currentState!.focusNode.requestFocus();
+      }
+    }
   }
 }
