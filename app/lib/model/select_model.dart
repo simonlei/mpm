@@ -18,7 +18,10 @@ class SelectModel with ChangeNotifier {
       lastIndex = index;
     } else if (metaDown) {
       lastIndex = index;
-      _selectedSet.add(index);
+      if (_selectedSet.contains(index))
+        _selectedSet.remove(index);
+      else
+        _selectedSet.add(index);
     } else {
       _selectedSet.clear();
       lastIndex = index;
