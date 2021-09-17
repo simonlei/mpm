@@ -81,7 +81,7 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
 
     var result = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: widget._picsModel.imageAt(widget._picsModel.getSelectedIndex())!.takenDate,
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
       initialEntryMode: DatePickerEntryMode.input,
