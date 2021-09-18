@@ -44,7 +44,7 @@ class _VideoViewState extends State<VideoView> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: MediaQuery.of(context).size.width,
+      width: MediaQuery.of(context).size.width - 250,
       height: MediaQuery.of(context).size.height,
       child: Tooltip(
         message: _image.getTooltip(),

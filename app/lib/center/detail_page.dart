@@ -3,9 +3,10 @@ import 'dart:typed_data';
 
 import 'package:app/center/images_context_menu.dart';
 import 'package:app/center/photo_edit_form.dart';
+import 'package:app/center/photo_view.dart';
+import 'package:app/center/video_view.dart';
 import 'package:app/model/config.dart';
 import 'package:app/model/pics_model.dart';
-import 'package:app/video_view.dart';
 import 'package:app/widgets/rotate_button.dart';
 import 'package:app/widgets/star_button.dart';
 import 'package:context_menus/context_menus.dart';
@@ -33,12 +34,12 @@ class DetailPage extends StatefulWidget {
   }
 }
 
+final GlobalKey<PhotoViewState> photoViewKey = GlobalKey<PhotoViewState>();
+
 class DetailPageState extends State<DetailPage> {
   late PicsModel _picsModel;
   late int _index;
   bool _scale = true;
-  ScrollController _verticalController = new ScrollController();
-  ScrollController _horizontalController = new ScrollController();
   late FocusNode focusNode;
 
   DetailPageState(Tuple2 arguments) {
@@ -54,9 +55,6 @@ class DetailPageState extends State<DetailPage> {
 
   @override
   void dispose() {
-    print('dispose......');
-    _verticalController.dispose();
-    _horizontalController.dispose();
     focusNode.dispose();
     super.dispose();
   }
@@ -102,7 +100,7 @@ class DetailPageState extends State<DetailPage> {
                   EscapeIntent: EscapeAction(this),
                   DeleteIntent: DeleteAction(this),
                   ZoomIntent: ZoomAction(this),
-                  MoveIntent: MoveAction(this),
+                  MoveIntent: MoveAction(),
                   StarIntent: StarAction(),
                   RotateIntent: RotateAction(this),
                 },
@@ -128,7 +126,7 @@ class DetailPageState extends State<DetailPage> {
       _scale = true;
       return wrapStack(VideoView(image), image);
     }
-    return wrapStack(makeImageView(context, image), image);
+    return wrapStack(PhotoView(photoViewKey, image, _scale, _loadedImage, _loadedImageInfo), image);
   }
 
   late var _loadedImage;
@@ -228,47 +226,6 @@ class DetailPageState extends State<DetailPage> {
     return reader;
   }
 
-  Widget makeImageView(BuildContext context, PicImage image) {
-    // print('screen is ${MediaQuery.of(context).size.width}x${MediaQuery.of(context).size.height}');
-    // print('image is ${_loadedImageInfo.width}x${_loadedImageInfo.height}');
-    // print('target is ${_loadedImageInfo.scaledWidth(context)}x${_loadedImageInfo.scaledHeight(context)}');
-    return Center(
-      child: SingleChildScrollView(
-        controller: _verticalController,
-        scrollDirection: Axis.vertical,
-        child: SingleChildScrollView(
-          controller: _horizontalController,
-          scrollDirection: Axis.horizontal,
-          child: Container(
-            width: _scale
-                ? _loadedImageInfo.scaledWidth(context)
-                : image.rotate % 180 == 90
-                    ? _loadedImageInfo.height
-                    : _loadedImageInfo.width,
-            height: _scale
-                ? _loadedImageInfo.scaledHeight(context)
-                : image.rotate % 180 == 90
-                    ? _loadedImageInfo.width
-                    : _loadedImageInfo.height,
-            child: Tooltip(
-              message: image.getTooltip(),
-              waitDuration: Duration(seconds: 2),
-              child: RotatedBox(
-                quarterTurns: image.getQuarterTurns(),
-                child: Image.memory(
-                  _loadedImage,
-                  width: _loadedImageInfo.width,
-                  height: _loadedImageInfo.height,
-                  fit: _loadedImageInfo.vertical ? BoxFit.fill : (_scale ? BoxFit.scaleDown : BoxFit.none),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   void showNext(int next) {
     setState(() {
       _scale = true;
@@ -283,20 +240,6 @@ class DetailPageState extends State<DetailPage> {
     setState(() {
       _scale = !_scale;
     });
-  }
-
-  Future<void> scroll(int scrollX, int scrollY) async {
-    if (_scale) return;
-
-    if (scrollY == 0) {
-      var delta = MediaQuery.of(context).size.width * scrollX / 100;
-      await _horizontalController.animateTo(_horizontalController.offset + delta,
-          duration: Duration(milliseconds: 200), curve: Curves.ease);
-    } else if (scrollX == 0) {
-      var delta = MediaQuery.of(context).size.height * scrollY / 100;
-      await _verticalController.animateTo(_verticalController.offset + delta,
-          duration: Duration(milliseconds: 200), curve: Curves.ease);
-    }
   }
 
   Widget wrapStack(Widget child, image) {
@@ -324,13 +267,9 @@ class DetailPageState extends State<DetailPage> {
 }
 
 class MoveAction extends Action<MoveIntent> {
-  MoveAction(this._detailPageState);
-
-  DetailPageState _detailPageState;
-
   @override
   Object? invoke(covariant MoveIntent intent) {
-    _detailPageState.scroll(intent.scrollX, intent.scrollY);
+    if (photoViewKey.currentState != null) photoViewKey.currentState!.scroll(intent.scrollX, intent.scrollY);
   }
 }
 
@@ -438,18 +377,19 @@ class RotateIntent extends Intent {
 class ImageInfo {
   ImageInfo(this.width, this.height, this.vertical);
 
-  double scaledWidth(context) {
-    var screenWidth = MediaQuery.of(context).size.width;
+  double scaledWidth(_context) {
+    var screenWidth = MediaQuery.of(_context).size.width - 250;
+    print('screen width is $screenWidth');
     if (!vertical) return screenWidth;
-    var screenHeight = MediaQuery.of(context).size.height;
+    var screenHeight = MediaQuery.of(_context).size.height;
     if (width / height > screenWidth / screenHeight) return screenWidth;
     return width * screenHeight / height;
   }
 
-  double scaledHeight(context) {
-    var screenHeight = MediaQuery.of(context).size.height;
+  double scaledHeight(_context) {
+    var screenHeight = MediaQuery.of(_context).size.height;
     if (!vertical) return screenHeight;
-    var screenWidth = MediaQuery.of(context).size.width;
+    var screenWidth = MediaQuery.of(_context).size.width - 250;
     if (width / height < screenWidth / screenHeight) return screenHeight;
     return height * screenWidth / width;
   }
