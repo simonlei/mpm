@@ -107,7 +107,12 @@ class DetailPageState extends State<DetailPage> {
                 child: Focus(
                   autofocus: true,
                   focusNode: focusNode,
-                  child: wrapDetail(image, context),
+                  child: GestureDetector(
+                    onTap: () {
+                      focusNode.requestFocus();
+                    },
+                    child: wrapDetail(image, context),
+                  ),
                 ),
               ),
             ),
