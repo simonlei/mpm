@@ -215,7 +215,7 @@ class PicImage {
         "描述：$description\n" +
         (tags == null ? "" : "标签：$tags\n") +
         (address == null ? "" : "地址：$address\n") +
-        "时间：${takenDate.year}-${takenDate.month.toString().padLeft(2, '0')}-${takenDate.day.toString().padLeft(2, '0')}";
+        "时间：${takenDate.year}/${takenDate.month.toString().padLeft(2, '0')}/${takenDate.day.toString().padLeft(2, '0')}";
   }
 
   Future<void> update(Map<String, dynamic> map) async {

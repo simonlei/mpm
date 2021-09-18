@@ -5,6 +5,7 @@ import 'package:app/widgets/tags_selector.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:intl/intl.dart';
 import 'package:oktoast/oktoast.dart';
 
 class PhotoEditForm extends StatefulWidget {
@@ -37,6 +38,7 @@ class _PhotoEditFormState extends State<PhotoEditForm> {
                   name: 'takenDate',
                   decoration: InputDecoration(labelText: '拍照日期'),
                   inputType: InputType.date,
+                  format: DateFormat('y/M/d'),
                   initialEntryMode: DatePickerEntryMode.input,
                   initialDate: widget._image.takenDate,
                   initialValue: widget._image.takenDate,
