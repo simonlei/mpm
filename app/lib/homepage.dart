@@ -1,6 +1,7 @@
 import 'package:app/center/pics_grid.dart';
 import 'package:app/headers/empty_trash_button.dart';
 import 'package:app/headers/location_jumper.dart';
+import 'package:app/headers/map_switcher.dart';
 import 'package:app/headers/sort_selector.dart';
 import 'package:app/headers/star_filter.dart';
 import 'package:app/headers/tag_filter.dart';
@@ -47,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
             TagFilter(),
             SortSelector(),
             TrashBoxSwitcher(),
-            // MapSwitcher(),
+            MapSwitcher(),
             // |
             EmptyTrashButton(),
             UploadSelector(),

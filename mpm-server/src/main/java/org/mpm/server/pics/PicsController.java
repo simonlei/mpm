@@ -18,6 +18,7 @@ import org.nutz.dao.Sqls;
 import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Criteria;
 import org.nutz.dao.sql.Sql;
+import org.nutz.dao.util.cri.Exps;
 import org.nutz.dao.util.cri.SimpleCriteria;
 import org.nutz.json.Json;
 import org.nutz.lang.Lang;
@@ -155,6 +156,11 @@ public class PicsController {
             return 0L;
         }
         return r.longValue() - 1;
+    }
+
+    @PostMapping("/api/loadMarkers")
+    public List loadMarkers() {
+        return addThumbField(dao.query("t_photos", Cnd.where(Exps.isNull("latitude").setNot(true))));
     }
 
     @PostMapping("/api/getPics")
