@@ -35,7 +35,6 @@ class _LocationJumperState extends State<LocationJumper> {
             child: Consumer<SelectModel>(
               builder: (context, selectModel, child) {
                 _controller.text = '${selectModel.lastIndex + 1}';
-                if (gridViewKey.currentState != null) gridViewKey.currentState!.scrollToIndex(selectModel);
                 return TextField(
                   textAlign: TextAlign.center,
                   textAlignVertical: TextAlignVertical.center,
@@ -50,8 +49,10 @@ class _LocationJumperState extends State<LocationJumper> {
               style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
             ),
             onPressed: () {
-              Provider.of<SelectModel>(context, listen: false).select(false, false, int.parse(_controller.text) - 1);
+              var selectModel = Provider.of<SelectModel>(context, listen: false);
+              selectModel.select(false, false, int.parse(_controller.text) - 1);
               if (gridViewKey.currentState != null) {
+                gridViewKey.currentState!.scrollToIndex(selectModel);
                 print('focus.......${gridViewKey.currentState!.focusNode}');
                 gridViewKey.currentState!.focusNode.requestFocus();
               }

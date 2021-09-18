@@ -10,6 +10,8 @@ import 'package:mutex/mutex.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../homepage.dart';
+
 class PicsModel with ChangeNotifier {
   List<PicImage?> _pics = <PicImage>[];
   bool _init = false;
@@ -30,8 +32,10 @@ class PicsModel with ChangeNotifier {
   }
 
   setLastSelect() async {
+    await new Future.delayed(Duration(milliseconds: 500));
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    _selectModel.select(false, false, prefs.getInt("lastIndex") ?? 0);
+    await _selectModel.select(false, false, prefs.getInt("lastIndex") ?? 0);
+    if (gridViewKey.currentState != null) gridViewKey.currentState!.scrollToIndex(_selectModel);
   }
 
   Future<List<PicImage?>> loadImages(int start, int size) async {
