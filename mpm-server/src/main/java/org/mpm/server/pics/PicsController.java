@@ -18,7 +18,6 @@ import org.nutz.dao.Sqls;
 import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Criteria;
 import org.nutz.dao.sql.Sql;
-import org.nutz.dao.util.cri.Exps;
 import org.nutz.dao.util.cri.SimpleCriteria;
 import org.nutz.json.Json;
 import org.nutz.lang.Lang;
@@ -160,7 +159,10 @@ public class PicsController {
 
     @PostMapping("/api/loadMarkers")
     public List loadMarkers() {
-        return addThumbField(dao.query("t_photos", Cnd.where(Exps.isNull("latitude").setNot(true))));
+        Sql sql = Sqls.create("select id,name, latitude, longitude, width, height, rotate, takenDate"
+                + " from t_photos where latitude is not null").setCallback(Sqls.callback.records());
+        dao.execute(sql);
+        return addThumbField(sql.getList(Record.class));
     }
 
     @PostMapping("/api/getPics")

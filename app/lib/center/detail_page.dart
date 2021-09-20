@@ -170,7 +170,8 @@ class DetailPageState extends State<DetailPage> {
     } else {
       return await _cache.get(imgName);
     }
-    await HttpRequest.request(Config.imageUrl('small/$imgName'), responseType: 'blob').then((HttpRequest resp) {
+    await HttpRequest.request(Config.imageUrl('small/$imgName?imageMogr2/strip'), responseType: 'blob')
+        .then((HttpRequest resp) {
       print('length: ${resp.runtimeType} ${resp.responseType} ${resp.response.runtimeType} ');
       print('content type: ${resp.responseHeaders['content-type']}');
       Blob blob = resp.response as Blob;

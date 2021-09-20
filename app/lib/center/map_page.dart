@@ -22,6 +22,8 @@ class _MapPageState extends State<MapPage> {
       for (int i = 0; i < photos.length; i++) {
         var p = photos[i];
         markers.add(Marker(
+            width: 100,
+            height: 100,
             builder: (BuildContext context) {
               return FadeInImage.memoryNetwork(
                 width: p['width'],
@@ -68,7 +70,7 @@ class _MapPageState extends State<MapPage> {
         ),
         MarkerClusterLayerOptions(
           maxClusterRadius: 120,
-          size: Size(40, 40),
+          size: Size(80, 80),
           fitBoundsOptions: FitBoundsOptions(
             padding: EdgeInsets.all(50),
           ),
@@ -76,7 +78,14 @@ class _MapPageState extends State<MapPage> {
           polygonOptions: PolygonOptions(borderColor: Colors.blueAccent, color: Colors.black12, borderStrokeWidth: 3),
           builder: (context, markers) {
             return FloatingActionButton(
-              child: Text(markers.length.toString()),
+              shape: RoundedRectangleBorder(),
+              child: Column(children: [
+                Text(markers.length.toString()),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 50, maxHeight: 50),
+                  child: markers[0].builder(context),
+                ),
+              ]),
               onPressed: null,
             );
           },
