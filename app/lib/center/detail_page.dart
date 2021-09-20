@@ -209,12 +209,13 @@ class DetailPageState extends State<DetailPage> {
     }
 
     bool vertical = false;
-    /*
-    try {
-      var response = await Dio().get(Config.imageUrl('small/$imgName?exif'));
-      vertical = int.parse(response.data['Orientation']['val']) > 4;
-    } catch (e) {}
-    */
+    if (image.rotate == 3600) {
+      try {
+        var response = await Dio().get(Config.imageUrl('small/$imgName?exif'));
+        vertical = int.parse(response.data['Orientation']['val']) > 4;
+      } catch (e) {}
+    }
+
     var response = await Dio().get(Config.imageUrl('small/$imgName?imageInfo'));
     var width = double.parse(response.data['width']);
     var height = double.parse(response.data['height']);

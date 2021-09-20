@@ -257,6 +257,9 @@ public class PicsController {
     }
 
     private String getThumbUrl(String name, int rotate) {
+        if (rotate == 3600) {
+            return "small/" + name + "/thumb";
+        }
         rotate = (360 + rotate) % 360;
         return "small/" + name + "/thumb" + rotate;
     }
