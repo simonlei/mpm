@@ -22,8 +22,8 @@ class _MapPageState extends State<MapPage> {
       for (int i = 0; i < photos.length; i++) {
         var p = photos[i];
         markers.add(Marker(
-            width: 150,
-            height: 150,
+            width: 100,
+            height: 75,
             builder: (BuildContext context) {
               return FadeInImage.memoryNetwork(
                 width: p['width'],
