@@ -5,6 +5,7 @@ import 'package:app/model/select_model.dart';
 import 'package:dio/dio.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:mutex/mutex.dart';
 import 'package:oktoast/oktoast.dart';
@@ -215,7 +216,7 @@ class PicImage {
         "描述：$description\n" +
         (tags == null ? "" : "标签：$tags\n") +
         (address == null ? "" : "地址：$address\n") +
-        "时间：${takenDate.year}/${takenDate.month.toString().padLeft(2, '0')}/${takenDate.day.toString().padLeft(2, '0')}";
+        "时间：${DateFormat('y/M/d').format(takenDate)}";
   }
 
   Future<void> update(Map<String, dynamic> map) async {
