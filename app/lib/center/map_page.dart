@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:transparent_image/transparent_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -23,6 +24,7 @@ class _MapPageState extends State<MapPage> {
       for (int i = 0; i < photos.length; i++) {
         var p = photos[i];
         markers.add(Marker(
+            key: ValueKey(p['name']),
             width: 100,
             height: 75,
             builder: (BuildContext context) {
@@ -80,6 +82,7 @@ class _MapPageState extends State<MapPage> {
             padding: EdgeInsets.all(50),
           ),
           markers: markers,
+          onMarkerTap: popOverImage,
           polygonOptions: PolygonOptions(borderColor: Colors.blueAccent, color: Colors.black12, borderStrokeWidth: 3),
           builder: (context, markers) {
             return FloatingActionButton(
@@ -105,5 +108,32 @@ class _MapPageState extends State<MapPage> {
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
+  }
+
+  void popOverImage(Marker p1) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FadeInImage.memoryNetwork(
+                width: 800,
+                height: 600,
+                placeholder: kTransparentImage,
+                image: Config.imageUrl('small/${(p1.key as ValueKey).value}'),
+              ),
+              TextButton(
+                onPressed: () {
+                  launch(Config.imageUrl('origin/${(p1.key as ValueKey).value}'));
+                },
+                child: Text('查看原图'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
