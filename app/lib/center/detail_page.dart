@@ -140,7 +140,7 @@ class DetailPageState extends State<DetailPage> {
   Future<PicImage?> _loadImage() async {
     var image = await _picsModel.getImage(_index);
     print('getImage');
-    _loadedImage = await _loadRealImage(image!.name);
+    _loadedImage = await _loadRealImage(image!.name, image.rotate);
     _loadedImageInfo = await _loadImageInfo(image, _loadedImage);
     print('loadImage');
     preloadImage(_index + 1);
@@ -151,7 +151,7 @@ class DetailPageState extends State<DetailPage> {
   Future<void> preloadImage(int i) async {
     var image = await _picsModel.getImage(i);
     if (image == null) return;
-    await _loadRealImage(image.name);
+    await _loadRealImage(image.name, image.rotate);
     await _loadImageInfo(image, _loadedImage);
   }
 
@@ -164,14 +164,14 @@ class DetailPageState extends State<DetailPage> {
     sizeLimit: 10,
   );
 
-  _loadRealImage(String imgName) async {
+  _loadRealImage(String imgName, int rotate) async {
     if (!_cache.isKeyInFlightOrInCache(imgName)) {
       _cache.markAsInFlight(imgName);
     } else {
       return await _cache.get(imgName);
     }
-    await HttpRequest.request(Config.imageUrl('small/$imgName?imageMogr2/strip'), responseType: 'blob')
-        .then((HttpRequest resp) {
+    var strip = rotate == 3600 ? '' : '?imageMogr2/strip';
+    await HttpRequest.request(Config.imageUrl('small/$imgName$strip'), responseType: 'blob').then((HttpRequest resp) {
       print('length: ${resp.runtimeType} ${resp.responseType} ${resp.response.runtimeType} ');
       print('content type: ${resp.responseHeaders['content-type']}');
       Blob blob = resp.response as Blob;
@@ -271,6 +271,12 @@ class DetailPageState extends State<DetailPage> {
         ],
       ),
     );
+  }
+
+  Future<void> clearCache(String name) async {
+    await _cache.invalidate(name);
+    await _infoCache.invalidate(name);
+    setState(() {});
   }
 }
 
@@ -372,7 +378,7 @@ class RotateAction extends Action<RotateIntent> {
   Future<Object?> invoke(covariant RotateIntent intent) async {
     PicImage image = intent._image;
     await image.picsModel.rotateImage(image);
-    _detailPage.setState(() {});
+    if (_detailPage is DetailPageState) (_detailPage as DetailPageState).clearCache(image.name);
   }
 }
 
