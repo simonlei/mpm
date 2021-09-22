@@ -1,6 +1,7 @@
 import 'package:app/model/config.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
@@ -41,16 +42,20 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Marker>>(
-      future: loadMarkers(),
-      builder: (BuildContext context, AsyncSnapshot<List<Marker>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return makeFlutterMap(snapshot.data!);
-        } else if (snapshot.hasError)
-          return Text('Error:${snapshot.error}');
-        else
-          return CircularProgressIndicator();
-      },
+    return Focus(
+      autofocus: true,
+      onKey: onKey,
+      child: FutureBuilder<List<Marker>>(
+        future: loadMarkers(),
+        builder: (BuildContext context, AsyncSnapshot<List<Marker>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return makeFlutterMap(snapshot.data!);
+          } else if (snapshot.hasError)
+            return Text('Error:${snapshot.error}');
+          else
+            return CircularProgressIndicator();
+        },
+      ),
     );
   }
 
@@ -92,5 +97,13 @@ class _MapPageState extends State<MapPage> {
         ),
       ],
     );
+  }
+
+  KeyEventResult onKey(FocusNode node, RawKeyEvent event) {
+    if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+      Navigator.of(context).pop();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 }
