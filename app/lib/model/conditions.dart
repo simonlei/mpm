@@ -1,6 +1,7 @@
 class Conditions {
   static bool trashed = false;
   static bool? star;
+  static bool? video;
   static String order = '-id';
   static String dateKey = '';
   static String path = '';
@@ -15,6 +16,7 @@ class Conditions {
       'dateKey': dateKey,
       'path': path,
       'star': star,
+      'video': video,
       'tag': tag,
     };
   }

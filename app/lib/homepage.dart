@@ -12,6 +12,8 @@ import 'package:app/model/event_bus.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 
+import 'headers/video_filter.dart';
+
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
@@ -43,8 +45,9 @@ class _MyHomePageState extends State<MyHomePage> {
             // text 跳转 |
             // order
             LocationJumper(),
-            // 过滤条件 （只看star）|
+            // 过滤条件
             StarFilter(),
+            VideoFilter(),
             TagFilter(),
             SortSelector(),
             TrashBoxSwitcher(),

@@ -189,6 +189,7 @@ public class PicsController {
                     .and("trashed", "=", trashed);
 
             addStarCriteria(star, cnd);
+            addVideoCriteria(req.getVideo(), cnd);
             addTagCriteria(req.getTag(), cnd);
 
             totalRows = (int) dao.fetch("t_photos", cnd, "count(distinct t_photos.id) as c").getLong("c");
@@ -213,6 +214,7 @@ public class PicsController {
             Cnd cnd = Cnd.where("trashed", "=", trashed);
             cnd = addDateCondition(req, cnd);
             addStarCriteria(star, cnd.getCri());
+            addVideoCriteria(req.getVideo(), cnd.getCri());
             addTagCriteria(req.getTag(), cnd.getCri());
 
             totalRows = dao.count(EntityPhoto.class, cnd);
@@ -270,6 +272,12 @@ public class PicsController {
         }
     }
 
+    private void addVideoCriteria(Boolean video, SimpleCriteria cnd) {
+        if (video != null && video) {
+            cnd.where().and("mediaType", "=", "video");
+        }
+    }
+
     private void addTagCriteria(String tag, SimpleCriteria cnd) {
         if (tag != null) {
             cnd.where().and("tags", "like", "%" + tag + "%");
@@ -287,6 +295,7 @@ public class PicsController {
     static class GetPicsRequest {
 
         Boolean star;
+        Boolean video;
         boolean trashed;
         int start;
         int size;
