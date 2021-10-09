@@ -11,7 +11,7 @@ class SortSelector extends StatefulWidget {
 }
 
 class _SortSelectorState extends State<SortSelector> {
-  String sortString = '-id';
+  String sortString = '-takenDate';
 
   @override
   Widget build(BuildContext context) {
@@ -20,12 +20,12 @@ class _SortSelectorState extends State<SortSelector> {
       child: DropdownButton<String>(
         value: sortString,
         items: [
-          DropdownMenuItem(value: '-id', child: Text('导入逆序')),
-          DropdownMenuItem(value: 'id', child: Text('导入顺序')),
           DropdownMenuItem(value: '-takenDate', child: Text('时间逆序')),
           DropdownMenuItem(value: 'takenDate', child: Text('时间顺序')),
           DropdownMenuItem(value: '-size', child: Text('大小逆序')),
           DropdownMenuItem(value: 'size', child: Text('大小顺序')),
+          DropdownMenuItem(value: '-id', child: Text('导入逆序')),
+          DropdownMenuItem(value: 'id', child: Text('导入顺序')),
         ],
         onChanged: (String? newValue) {
           Logger().i(newValue);
