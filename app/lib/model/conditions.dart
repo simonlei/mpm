@@ -2,7 +2,7 @@ class Conditions {
   static bool trashed = false;
   static bool? star;
   static bool? video;
-  static String order = '-id';
+  static String order = '-takenDate';
   static String dateKey = '';
   static String path = '';
   static String? tag;

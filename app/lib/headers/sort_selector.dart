@@ -26,6 +26,10 @@ class _SortSelectorState extends State<SortSelector> {
           DropdownMenuItem(value: 'size', child: Text('大小顺序')),
           DropdownMenuItem(value: '-id', child: Text('导入逆序')),
           DropdownMenuItem(value: 'id', child: Text('导入顺序')),
+          DropdownMenuItem(value: '-width', child: Text('宽度逆序')),
+          DropdownMenuItem(value: 'width', child: Text('宽度顺序')),
+          DropdownMenuItem(value: '-height', child: Text('高度逆序')),
+          DropdownMenuItem(value: 'height', child: Text('高度顺序')),
         ],
         onChanged: (String? newValue) {
           Logger().i(newValue);
