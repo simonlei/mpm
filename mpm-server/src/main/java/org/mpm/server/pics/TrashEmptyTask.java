@@ -20,6 +20,7 @@ public class TrashEmptyTask extends AbstractProgressTask implements Runnable {
     public void run() {
         List<EntityPhoto> trashed = dao.query(EntityPhoto.class, Cnd.where("trashed", "=", true));
         setTotal(trashed.size());
+        setCount(0);
         for (EntityPhoto p : trashed) {
             picsService.realDelete(p);
             countInc();

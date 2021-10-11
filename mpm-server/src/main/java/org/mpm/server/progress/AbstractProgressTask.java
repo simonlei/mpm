@@ -22,6 +22,10 @@ public abstract class AbstractProgressTask implements ProgressInterface {
         return count;
     }
 
+    protected void setCount(int count) {
+        this.count = count;
+    }
+
     public void countInc() {
         count++;
     }
