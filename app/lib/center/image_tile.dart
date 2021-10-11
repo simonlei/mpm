@@ -1,4 +1,5 @@
 import 'package:app/center/detail_page.dart';
+import 'package:app/homepage.dart';
 import 'package:app/model/config.dart';
 import 'package:app/model/pics_model.dart';
 import 'package:app/model/select_model.dart';
@@ -41,6 +42,7 @@ class _ImageTileState extends State<ImageTile> {
               child: GestureDetector(
                 onTap: () {
                   widget.picsModel.select(widget.index);
+                  gridViewKey.currentState!.focusNode.requestFocus();
                 },
                 onDoubleTap: () => openDetailPage(context),
                 child: Selector<SelectModel, bool>(
