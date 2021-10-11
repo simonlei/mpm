@@ -57,6 +57,7 @@ class _ImageTileState extends State<ImageTile> {
                         children: [
                           Tooltip(
                             message: image.getTooltip(),
+                            waitDuration: Duration(milliseconds: 500),
                             child: FadeInImage.memoryNetwork(
                               width: image.width,
                               height: image.height,
