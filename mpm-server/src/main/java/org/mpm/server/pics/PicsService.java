@@ -378,6 +378,7 @@ public class PicsService {
         String key = "/origin/" + photo.getName();
         setInfosFromCos(key, photo);
         generateSmallPic(key, photo.getName());
+        dao.updateIgnoreNull(photo);
         return "ok";
     }
 }
