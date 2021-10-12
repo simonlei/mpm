@@ -1,6 +1,5 @@
 package org.mpm.server.pics;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +10,7 @@ import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.progress.ProgressController;
 import org.mpm.server.util.ExplicitPager;
+import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Chain;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
@@ -150,11 +150,7 @@ public class PicsController {
     @PostMapping("/api/getPicIndex")
     public Long getPicIndex(@RequestBody GetPicIndexRequest req) {
         req.condition.setIdRank(req.picId);
-        BigInteger r = (BigInteger) getPics(req.condition).get("r");
-        if (r == null) {
-            return 0L;
-        }
-        return r.longValue() - 1;
+        return MyUtils.parseLong("" + getPics(req.condition).get("r"), 1L) - 1;
     }
 
     @PostMapping("/api/loadMarkers")
