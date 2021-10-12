@@ -377,8 +377,8 @@ public class PicsService {
         // fix pic's height/width and thumb
         String key = "/origin/" + photo.getName();
         setInfosFromCos(key, photo);
-        generateSmallPic(key, photo.getName());
         dao.updateIgnoreNull(photo);
+        generateSmallPic(key, photo.getName());
         return "ok";
     }
 }
