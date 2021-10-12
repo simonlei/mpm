@@ -372,4 +372,12 @@ public class PicsService {
         meta.setValue("" + lastId);
         dao.insertOrUpdate(meta);
     }
+
+    public String fixPhoto(EntityPhoto photo) {
+        // fix pic's height/width and thumb
+        String key = "/origin/" + photo.getName();
+        setInfosFromCos(key, photo);
+        generateSmallPic(key, photo.getName());
+        return "ok";
+    }
 }

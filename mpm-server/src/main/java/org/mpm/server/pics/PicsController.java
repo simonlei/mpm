@@ -23,6 +23,8 @@ import org.nutz.json.Json;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -278,6 +280,12 @@ public class PicsController {
         if (tag != null) {
             cnd.where().and("tags", "like", "%" + tag + "%");
         }
+    }
+
+    @GetMapping("/api/fixPic/{picId}")
+    public String fixPic(@PathVariable("picId") Long picId) {
+        EntityPhoto photo = dao.fetch(EntityPhoto.class, picId);
+        return picsService.fixPhoto(photo);
     }
 
     @Data
