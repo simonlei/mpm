@@ -5,6 +5,7 @@ import 'package:app/widgets/tags_selector.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:intl/intl.dart';
 import 'package:oktoast/oktoast.dart';
 
@@ -49,9 +50,10 @@ class _PhotoEditFormState extends State<PhotoEditForm> {
                 FormBuilderTextField(
                   name: 'takenDate',
                   decoration: InputDecoration(labelText: '拍照日期'),
-                  initialValue: DateFormat('y/M/d').format(widget._image.takenDate),
+                  initialValue:
+                      DateFormat('y/M/d').format(widget._image.takenDate),
                   validator: FormBuilderValidators.compose([
-                    FormBuilderValidators.required(context),
+                    FormBuilderValidators.required(),
                     myDateString(context),
                   ]),
                 ),
@@ -74,7 +76,10 @@ class _PhotoEditFormState extends State<PhotoEditForm> {
                     tags: snapshot.data!,
                     initValues: widget._image.tags == null
                         ? []
-                        : widget._image.tags!.split(",").where((s) => s.isNotEmpty).toList());
+                        : widget._image.tags!
+                            .split(",")
+                            .where((s) => s.isNotEmpty)
+                            .toList());
                 return tagsSelector;
               } else {
                 return Text('loading...');
@@ -115,9 +120,11 @@ class _PhotoEditFormState extends State<PhotoEditForm> {
     BuildContext context, {
     String? errorText,
   }) =>
-      (valueCandidate) => true == valueCandidate?.isNotEmpty && !isDate(valueCandidate!)
-          ? errorText ?? FormBuilderLocalizations.of(context).dateStringErrorText
-          : null;
+      (valueCandidate) =>
+          true == valueCandidate?.isNotEmpty && !isDate(valueCandidate!)
+              ? errorText ??
+                  FormBuilderLocalizations.of(context).dateStringErrorText
+              : null;
 
   static bool isDate(String s) {
     try {

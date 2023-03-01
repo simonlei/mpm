@@ -62,44 +62,47 @@ class _MapPageState extends State<MapPage> {
   }
 
   FlutterMap makeFlutterMap(List<Marker> markers) {
-    return FlutterMap(
+    var flutterMap = FlutterMap(
       options: new MapOptions(
         center: LatLng(31.27657805796395, 107.78060238436112),
         zoom: 5,
-        plugins: [
-          MarkerClusterPlugin(),
-        ],
       ),
-      layers: [
-        TileLayerOptions(
-          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      children: [
+        TileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           subdomains: ['a', 'b', 'c'],
         ),
-        MarkerClusterLayerOptions(
-          maxClusterRadius: 120,
-          size: Size(66, 66),
-          fitBoundsOptions: FitBoundsOptions(
-            padding: EdgeInsets.all(50),
+        MarkerClusterLayerWidget(
+          options: MarkerClusterLayerOptions(
+            maxClusterRadius: 120,
+            size: Size(66, 66),
+            fitBoundsOptions: FitBoundsOptions(
+              padding: EdgeInsets.all(50),
+            ),
+            markers: markers,
+            onMarkerTap: popOverImage,
+            polygonOptions: PolygonOptions(
+                borderColor: Colors.blueAccent,
+                color: Colors.black12,
+                borderStrokeWidth: 3),
+            builder: (context, markers) {
+              return FloatingActionButton(
+                //shape: RoundedRectangleBorder(),
+                child: Stack(children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 50, maxHeight: 50),
+                    child: markers[0].builder(context),
+                  ),
+                  Text(markers.length.toString()),
+                ]),
+                onPressed: null,
+              );
+            },
           ),
-          markers: markers,
-          onMarkerTap: popOverImage,
-          polygonOptions: PolygonOptions(borderColor: Colors.blueAccent, color: Colors.black12, borderStrokeWidth: 3),
-          builder: (context, markers) {
-            return FloatingActionButton(
-              //shape: RoundedRectangleBorder(),
-              child: Stack(children: [
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 50, maxHeight: 50),
-                  child: markers[0].builder(context),
-                ),
-                Text(markers.length.toString()),
-              ]),
-              onPressed: null,
-            );
-          },
-        ),
+        )
       ],
     );
+    return flutterMap;
   }
 
   KeyEventResult onKey(FocusNode node, RawKeyEvent event) {
@@ -126,7 +129,8 @@ class _MapPageState extends State<MapPage> {
               ),
               TextButton(
                 onPressed: () {
-                  launch(Config.imageUrl('origin/${(p1.key as ValueKey).value}'));
+                  launch(
+                      Config.imageUrl('origin/${(p1.key as ValueKey).value}'));
                 },
                 child: Text('查看原图'),
               ),
