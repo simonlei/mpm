@@ -4,7 +4,6 @@ import 'package:app/model/config.dart';
 import 'package:app/model/event_bus.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_treeview/flutter_treeview.dart';
 import 'package:logger/logger.dart';
@@ -40,14 +39,16 @@ class FolderTreePanelState extends State<FolderTreePanel> {
   @override
   void initState() {
     super.initState();
-    if (widget._inLeftPanel) BUS.on(EventBus.LeftTreeConditionsChanged, _conditionCallback);
+    if (widget._inLeftPanel)
+      BUS.on(EventBus.LeftTreeConditionsChanged, _conditionCallback);
     // WidgetsBinding.instance!.addPostFrameCallback((_) => selectToKey(context));
   }
 
   @override
   void dispose() {
     super.dispose();
-    if (widget._inLeftPanel) BUS.off(EventBus.LeftTreeConditionsChanged, _conditionCallback);
+    if (widget._inLeftPanel)
+      BUS.off(EventBus.LeftTreeConditionsChanged, _conditionCallback);
   }
 
   @override
@@ -99,12 +100,16 @@ class FolderTreePanelState extends State<FolderTreePanel> {
         }
         List<Node> folders = <Node>[];
         resp.data.forEach((element) {
-          folders.add(Node(label: element['title'], key: '${element['id']}', data: element['path'], parent: true));
+          folders.add(Node(
+              label: element['title'],
+              key: '${element['id']}',
+              data: element['path'],
+              parent: true));
         });
         // print('folders is $folders');
         if (folders.isEmpty) {
-          _treeViewController =
-              _treeViewController.withUpdateNode(key, _treeViewController.getNode(key)!.copyWith(parent: false));
+          _treeViewController = _treeViewController.withUpdateNode(
+              key, _treeViewController.getNode(key)!.copyWith(parent: false));
         } else {
           folders.forEach((element) {
             _treeViewController = _treeViewController.withAddNode(key, element);
@@ -118,7 +123,8 @@ class FolderTreePanelState extends State<FolderTreePanel> {
 
   Future<void> _selectChange(String key) async {
     Logger().i('select state change $key');
-    _treeViewController = _treeViewController.copyWith(selectedKey: key).withExpandToNode(key);
+    _treeViewController =
+        _treeViewController.copyWith(selectedKey: key).withExpandToNode(key);
     setState(() {});
     await _expandNodeHandler(key, true);
     if (widget._inLeftPanel) {
@@ -146,7 +152,11 @@ class FolderTreePanelState extends State<FolderTreePanel> {
     List results = resp.data;
     List<Node> folders = <Node>[];
     results.forEach((element) {
-      folders.add(Node(label: element['title'], key: '${element['id']}', data: element['path'], parent: true));
+      folders.add(Node(
+          label: element['title'],
+          key: '${element['id']}',
+          data: element['path'],
+          parent: true));
     });
 
     List<Node> nodes = [
@@ -168,7 +178,8 @@ class FolderTreePanelState extends State<FolderTreePanel> {
     TreeView? _treeView = TreeView.of(context);
     assert(_treeView != null, 'TreeView must exist in context');
     TreeViewTheme _theme = _treeView!.theme;
-    bool isSelected = _treeView.controller.selectedKey != null && _treeView.controller.selectedKey == node.key;
+    bool isSelected = _treeView.controller.selectedKey != null &&
+        _treeView.controller.selectedKey == node.key;
     //final icon = _buildNodeIcon(node);
     return Container(
       padding: EdgeInsets.symmetric(
@@ -183,12 +194,18 @@ class FolderTreePanelState extends State<FolderTreePanel> {
           Expanded(
             child: Text(
               node.label,
-              softWrap: node.isParent ? _theme.parentLabelOverflow == null : _theme.labelOverflow == null,
-              overflow: node.isParent ? _theme.parentLabelOverflow : _theme.labelOverflow,
+              softWrap: node.isParent
+                  ? _theme.parentLabelOverflow == null
+                  : _theme.labelOverflow == null,
+              overflow: node.isParent
+                  ? _theme.parentLabelOverflow
+                  : _theme.labelOverflow,
               style: node.isParent
                   ? _theme.parentLabelStyle.copyWith(
                       fontWeight: _theme.parentLabelStyle.fontWeight,
-                      color: isSelected ? _theme.colorScheme.onPrimary : _theme.parentLabelStyle.color,
+                      color: isSelected
+                          ? _theme.colorScheme.onPrimary
+                          : _theme.parentLabelStyle.color,
                     )
                   : _theme.labelStyle.copyWith(
                       fontWeight: _theme.labelStyle.fontWeight,

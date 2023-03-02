@@ -5,7 +5,6 @@ import 'package:app/model/config.dart';
 import 'package:app/model/event_bus.dart';
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:oktoast/oktoast.dart';
@@ -28,7 +27,9 @@ class _EmptyTrashButtonState extends State<EmptyTrashButton> {
         child: OutlinedButton(
           onPressed: () async {
             //confirm
-            bool empty = await confirm(context, title: Text('确认清空回收站？'), content: Text('清空回收站后，回收站内的照片将无法找回，请确认清空'));
+            bool empty = await confirm(context,
+                title: Text('确认清空回收站？'),
+                content: Text('清空回收站后，回收站内的照片将无法找回，请确认清空'));
             if (empty) {
               var resp = await Dio().post(Config.api('/api/emptyTrash'));
               if (resp.statusCode == 200) {

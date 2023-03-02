@@ -5,7 +5,6 @@ import 'package:app/model/event_bus.dart';
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:prompt_dialog/prompt_dialog.dart';
@@ -23,7 +22,8 @@ class FolderContextMenu extends StatefulWidget {
   }
 }
 
-class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuStateMixin {
+class _FolderContextMenuState extends State<FolderContextMenu>
+    with ContextMenuStateMixin {
   @override
   Widget build(BuildContext context) {
     return cardBuilder.call(
@@ -45,7 +45,8 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
             context,
             ContextMenuButtonConfig(
               Conditions.trashed ? '恢复目录' : '删除目录',
-              onPressed: () => handlePressed(context, _handleDeleteFolderPressed),
+              onPressed: () =>
+                  handlePressed(context, _handleDeleteFolderPressed),
             )),
         buttonBuilder.call(
             context,
@@ -57,7 +58,8 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
             context,
             ContextMenuButtonConfig(
               '合并目录至...',
-              onPressed: () => handlePressed(context, _handleMergeFolderPressed),
+              onPressed: () =>
+                  handlePressed(context, _handleMergeFolderPressed),
             )),
       ],
     );
@@ -66,14 +68,16 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
   void _handleMergeFolderPressed() async {
     var folder = await showFolderSelectDialog('合并至目录');
     if (folder == null) return;
-    await Dio().post(Config.api("/api/moveFolder"), data: {'fromPath': widget._path, 'toId': folder, 'merge': true});
+    await Dio().post(Config.api("/api/moveFolder"),
+        data: {'fromPath': widget._path, 'toId': folder, 'merge': true});
     BUS.emit(EventBus.LeftTreeConditionsChanged);
   }
 
   void _handleMoveFolderPressed() async {
     var folder = await showFolderSelectDialog('移动至目录');
     if (folder == null) return;
-    await Dio().post(Config.api("/api/moveFolder"), data: {'fromPath': widget._path, 'toId': folder, 'merge': false});
+    await Dio().post(Config.api("/api/moveFolder"),
+        data: {'fromPath': widget._path, 'toId': folder, 'merge': false});
     BUS.emit(EventBus.LeftTreeConditionsChanged);
   }
 
@@ -116,7 +120,8 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
       title: Text('确认${Conditions.trashed ? '从回收站恢复' : '移到回收站'}？'),
     );
     if (toTrash) {
-      var response = await Dio().post(Config.api("/api/switchTrashFolder"), data: {
+      var response =
+          await Dio().post(Config.api("/api/switchTrashFolder"), data: {
         'to': !Conditions.trashed,
         'path': widget._path,
       });
@@ -130,7 +135,8 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
 
   void _handleChangeGisPressed() async {
     // 这里最好能抽象出一个方法来，重复了
-    var result = await prompt(scaffoldKey.currentContext!, title: Text('请输入纬度,经度，例如 22.57765,113.9504277778'));
+    var result = await prompt(scaffoldKey.currentContext!,
+        title: Text('请输入纬度,经度，例如 22.57765,113.9504277778'));
     if (result == null) return;
     print(' result is $result');
     var splitted = result.split(',');
@@ -151,7 +157,10 @@ class _FolderContextMenuState extends State<FolderContextMenu> with ContextMenuS
 
   void _handleChangeDatePressed() async {
     var result = await showDatePicker(
-        context: context, initialDate: DateTime.now(), firstDate: DateTime(1950), lastDate: DateTime.now());
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(1950),
+        lastDate: DateTime.now());
     if (result == null) return;
     print(result.toString());
     var response = await Dio().post(Config.api("/api/updateFolderDate"), data: {

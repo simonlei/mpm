@@ -2,7 +2,6 @@ import 'package:app/model/conditions.dart';
 import 'package:app/model/config.dart';
 import 'package:app/model/event_bus.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_treeview/flutter_treeview.dart';
 import 'package:logger/logger.dart';
@@ -66,7 +65,8 @@ class _DateTreePanelState extends State<DateTreePanel> {
 
   void _selectChange(String key) {
     setState(() {
-      _treeViewController = _treeViewController.copyWith(selectedKey: key).withExpandToNode(key);
+      _treeViewController =
+          _treeViewController.copyWith(selectedKey: key).withExpandToNode(key);
       Conditions.dateKey = key;
       BUS.emit(EventBus.ConditionsChanged);
     });
@@ -92,10 +92,16 @@ class _DateTreePanelState extends State<DateTreePanel> {
       List<Node> months = <Node>[];
       List monthResults = element['months'] as List;
       monthResults.forEach((element) {
-        months.add(Node(label: element['title'], key: '${element['id']}', icon: Icons.calendar_view_day));
+        months.add(Node(
+            label: element['title'],
+            key: '${element['id']}',
+            icon: Icons.calendar_view_day));
       });
-      years.add(
-          Node(label: element['title'], key: '${element['id']}', children: months, icon: Icons.calendar_view_month));
+      years.add(Node(
+          label: element['title'],
+          key: '${element['id']}',
+          children: months,
+          icon: Icons.calendar_view_month));
     });
 
     List<Node> nodes = [

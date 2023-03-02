@@ -1,6 +1,5 @@
 import 'package:app/model/config.dart';
 import 'package:app/model/pics_model.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 

@@ -80,7 +80,6 @@ class _MapPageState extends State<MapPage> {
               padding: EdgeInsets.all(50),
             ),
             markers: markers,
-            onMarkerTap: popOverImage,
             polygonOptions: PolygonOptions(
                 borderColor: Colors.blueAccent,
                 color: Colors.black12,
@@ -114,6 +113,7 @@ class _MapPageState extends State<MapPage> {
   }
 
   void popOverImage(Marker p1) {
+    print('Pop over image' + p1.key.toString());
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -129,7 +129,9 @@ class _MapPageState extends State<MapPage> {
               ),
               TextButton(
                 onPressed: () {
-                  launch(
+                  print('Pressed, to launch ' +
+                      Config.imageUrl('origin/${(p1.key as ValueKey).value}'));
+                  launchUrl(
                       Config.imageUrl('origin/${(p1.key as ValueKey).value}'));
                 },
                 child: Text('查看原图'),
