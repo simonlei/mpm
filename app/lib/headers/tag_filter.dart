@@ -24,6 +24,7 @@ class _TagFilterState extends State<TagFilter> {
           builder: (BuildContext context, AsyncSnapshot<List?> snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               var tags = snapshot.data;
+              if ( tags == null) tags = [];
               List<DropdownMenuItem<String>> items = [];
               items.add(DropdownMenuItem(value: null, child: Text('ALL')));
               for (int i = 0; i < tags!.length; i++) {
