@@ -5,7 +5,7 @@ class Config {
 
   static String api(String api) {
     if (url.isEmpty) {
-      return 'http://${Uri.base.host}:${Uri.base.port}$api';
+      return api;
     }
     return url + api;
   }
