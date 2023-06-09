@@ -44,6 +44,7 @@ class StarAction extends Action<StarIntent> {
     PicImage image = intent._image;
     print('image is $image and ${image.star}');
     await image.update({'star': !image.star});
+    return null;
   }
 }
 

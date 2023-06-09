@@ -294,6 +294,7 @@ class MoveAction extends Action<MoveIntent> {
   Object? invoke(covariant MoveIntent intent) {
     if (photoViewKey.currentState != null)
       photoViewKey.currentState!.scroll(intent.scrollX, intent.scrollY);
+    return null;
   }
 }
 
@@ -312,6 +313,7 @@ class ZoomAction extends Action<ZoomIntent> {
   @override
   Object? invoke(covariant ZoomIntent intent) {
     _detailPageState.zoom();
+    return null;
   }
 }
 
@@ -328,6 +330,7 @@ class DeleteAction extends Action<DeleteIntent> {
     await _detailPageState._picsModel.trashSelected();
     _detailPageState._picsModel.selectNext(0);
     _detailPageState.showNext(0);
+    return null;
   }
 }
 
@@ -341,6 +344,7 @@ class EscapeAction extends Action<EscapeIntent> {
   @override
   Object? invoke(covariant EscapeIntent intent) {
     Navigator.pop(_detailPageState.context);
+    return null;
   }
 }
 
@@ -359,6 +363,7 @@ class CopyAction extends Action<CopyIntent> {
         await _detailPageState._picsModel.getImage(_detailPageState._index);
     await Clipboard.setData(
         ClipboardData(text: Config.imageUrl('small/${picImage!.name}')));
+    return null;
   }
 }
 
@@ -378,6 +383,7 @@ class NextPageAction extends Action<NextPageIntent> {
     Logger().i("intent: ${intent.next}");
     _detailPageState._picsModel.selectNext(intent.next);
     _detailPageState.showNext(intent.next);
+    return null;
   }
 }
 
@@ -392,6 +398,7 @@ class RotateAction extends Action<RotateIntent> {
     await image.picsModel.rotateImage(image);
     if (_detailPage is DetailPageState)
       (_detailPage as DetailPageState).clearCache(image.name);
+    return null;
   }
 }
 

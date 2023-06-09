@@ -27,7 +27,7 @@ class _TagFilterState extends State<TagFilter> {
               if ( tags == null) tags = [];
               List<DropdownMenuItem<String>> items = [];
               items.add(DropdownMenuItem(value: null, child: Text('ALL')));
-              for (int i = 0; i < tags!.length; i++) {
+              for (int i = 0; i < tags.length; i++) {
                 items.add(DropdownMenuItem(value: tags[i], child: Text(tags[i])));
               }
               return DropdownButton<String>(
