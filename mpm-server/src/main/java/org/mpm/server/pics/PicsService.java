@@ -16,13 +16,6 @@ import com.qcloud.cos.model.ciModel.persistence.CIUploadResult;
 import com.qcloud.cos.model.ciModel.persistence.PicOperations;
 import com.qcloud.cos.model.ciModel.persistence.PicOperations.Rule;
 import com.qcloud.cos.model.ciModel.snapshot.SnapshotRequest;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityBlockPicture;
 import org.mpm.server.entity.EntityFile;
@@ -42,6 +35,14 @@ import org.nutz.trans.Trans;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -131,7 +132,7 @@ public class PicsService {
             request.setBucketName(bucket);
             request.getInput().setObject(key);
             MediaInfoResponse response = cosClient.generateMediainfo(request);
-            MediaInfoVideo infoVideo = response.getMediaInfo().getStream().getVideo();
+            MediaInfoVideo infoVideo = response.getMediaInfo().getStream().getMediaInfoVideoList().get(0);
             String duration = infoVideo.getDuration();
             video.setWidth(Integer.parseInt(infoVideo.getWidth()));
             video.setHeight(Integer.parseInt(infoVideo.getHeight()));
@@ -187,7 +188,7 @@ public class PicsService {
         cosClient.deleteObject(bucket, key);
     }
 
-    private void generateSmallPic(String key, String name) {
+    void generateSmallPic(String key, String name) {
         ImageProcessRequest request = new ImageProcessRequest(bucket, key);
         PicOperations picOperations = new PicOperations();
         picOperations.setIsPicInfo(1);

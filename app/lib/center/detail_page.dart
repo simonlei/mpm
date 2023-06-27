@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:app/center/images_context_menu.dart';
 import 'package:app/center/photo_edit_form.dart';
 import 'package:app/center/photo_view.dart';
@@ -14,12 +12,11 @@ import 'package:expire_cache/expire_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:js/js_util.dart';
+import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import 'package:plugins/plugins.dart';
 import 'package:tuple/tuple.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../js_wrap/heic2any.dart';
 
 class DetailPage extends StatefulWidget {
   const DetailPage(Key? key, this.arguments) : super(key: key);
@@ -39,6 +36,7 @@ class DetailPageState extends State<DetailPage> {
   late int _index;
   bool _scale = true;
   late FocusNode focusNode;
+  final _plugins = Plugins();
 
   DetailPageState(Tuple2 arguments) {
     _picsModel = arguments.item1;
@@ -72,7 +70,8 @@ class DetailPageState extends State<DetailPage> {
 
   Widget makeDetailWidget(
       AsyncSnapshot<PicImage?> snapshot, BuildContext context) {
-    if (snapshot.connectionState == ConnectionState.done) {
+    if (snapshot.connectionState == ConnectionState.done &&
+        snapshot.data != null) {
       var image = snapshot.data!;
       return Row(
         children: [
@@ -142,7 +141,6 @@ class DetailPageState extends State<DetailPage> {
 
   Future<PicImage?> _loadImage() async {
     var image = await _picsModel.getImage(_index);
-    print('getImage');
     _loadedImage = await _loadRealImage(image!.name, image.rotate);
     _loadedImageInfo = await _loadImageInfo(image, _loadedImage);
     print('loadImage');
@@ -169,39 +167,33 @@ class DetailPageState extends State<DetailPage> {
 
   _loadRealImage(String imgName, int rotate) async {
     if (!_cache.isKeyInFlightOrInCache(imgName)) {
+      print("not in flight");
       _cache.markAsInFlight(imgName);
     } else {
+      print("cached");
       return await _cache.get(imgName);
     }
     var strip = rotate == 3600 ? '' : '?imageMogr2/strip';
-    await HttpRequest.request(Config.imageUrl('small/$imgName$strip'),
-            responseType: 'blob')
-        .then((HttpRequest resp) {
-      print(
-          'length: ${resp.runtimeType} ${resp.responseType} ${resp.response.runtimeType} ');
-      print('content type: ${resp.responseHeaders['content-type']}');
-      Blob blob = resp.response as Blob;
-      print('blob length ${blob.size}');
-      if (resp.responseHeaders['content-type'] != 'image/heic' &&
-          resp.responseHeaders['content-type'] != 'image/heif') {
-        blobReader(imgName).readAsArrayBuffer(blob);
+    print(Config.imageUrl('small/$imgName$strip'));
+    await http
+        .get(Uri.parse(Config.imageUrl('small/$imgName$strip')))
+        .then((http.Response resp) async {
+      print('length: ${resp.runtimeType} ${resp.contentLength}');
+      print('content type: ${resp.headers['content-type']}');
+
+      var blob = resp.bodyBytes;
+
+      print('blob length ${blob.length}');
+      if (resp.headers['content-type'] != 'image/heic' &&
+          resp.headers['content-type'] != 'image/heif') {
+        _cache.set(imgName, blob);
       } else {
-        var result = heic2any(HeicParams(blob: resp.response));
+        var result = await _plugins.heic2jpg(blob) ?? blob;
         print('after heic2any $result');
-        var future = promiseToFuture(result);
-        print('done');
-        print('$future : ${future.runtimeType}');
-        future.onError((error, stackTrace) {
-          print('$error');
-          print('$stackTrace');
-        }).then((value) {
-          print('Value is $value');
-          var blob = value;
-          print('done2');
-          print('after heic2any $blob');
-          blobReader(imgName).readAsArrayBuffer(blob);
-        });
+        _cache.set(imgName, result);
       }
+    }).catchError((e) {
+      print('err ${e.toString()}');
     });
     return _cache.get(imgName);
   }
@@ -231,15 +223,6 @@ class DetailPageState extends State<DetailPage> {
         vertical ? height : width, vertical ? width : height, vertical);
     _infoCache.set(imgName, imageInfo);
     return imageInfo;
-  }
-
-  FileReader blobReader(String imgName) {
-    var reader = FileReader();
-    reader.onLoad.listen((event) {
-      var img = reader.result as Uint8List;
-      _cache.set(imgName, img);
-    });
-    return reader;
   }
 
   void showNext(int next) {

@@ -1,12 +1,8 @@
 package org.mpm.server.pics;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.COSObjectSummary;
 import com.qcloud.cos.model.ObjectListing;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.mpm.server.BaseTest;
@@ -14,6 +10,11 @@ import org.mpm.server.entity.EntityPhoto;
 import org.nutz.dao.Dao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringBootTest
 @Slf4j
@@ -64,5 +65,10 @@ public class PicsServiceTest extends BaseTest {
         EntityPhoto p = dao.fetch(EntityPhoto.class, 20);
         picsService.setInfosFromCos("origin/" + p.getName(), p);
         assertEquals("Sat Sep 13 10:35:08 CST 2014", p.getTakenDate().toString());
+    }
+
+    @Test
+    void testSnapshot() {
+        picsService.generateSmallPic("/origin/3e0ka5dqbmit8odd3nfifc80k6", "3e0ka5dqbmit8odd3nfifc80k6");
     }
 }
