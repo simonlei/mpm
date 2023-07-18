@@ -13,6 +13,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:logger/logger.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 
 import 'center/detail_page.dart';
@@ -52,7 +53,8 @@ class MyApp extends StatelessWidget {
             '/map': (context) => MapPage(),
             '/home': (context) => MyHomePage(title: 'My Photo Manager'),
             '/detail': (context) => ContextMenuOverlay(
-                  child: DetailPage(detailViewKey, settings.arguments as Tuple2),
+                  child:
+                      DetailPage(detailViewKey, settings.arguments as Tuple2),
                 ),
           };
           WidgetBuilder builder = routes[settings.name]!;
@@ -87,10 +89,26 @@ class JumpWidget extends StatelessWidget {
   }
 
   Future<String> getConfig() async {
-    var response = await Dio().get(Config.api('/api/getConfig'));
+    Logger().i("getting config...");
+    var params = await getQueryParameters();
+    Logger().i("params ");
+    var response =
+        await Dio().get(Config.api('/api/getConfig'), queryParameters: params);
+    Logger().i("get config ", response.data);
     Config.setImageBase(response.data['baseUrl']);
     Config.region = response.data['region'];
     Config.bucket = response.data['bucket'];
-    return response.data['isDev'];
+    Logger().i("isLogin", response.data['isLogin'] == true);
+    return response.data['isLogin'] ? 'true' : 'false';
+  }
+
+  getQueryParameters() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    Logger().i("prefs ", prefs.getString("user"));
+    return {
+      "user": prefs.getString("user"),
+      "timestamp": prefs.getString("timestamp"),
+      "signature": prefs.getString("signature")
+    };
   }
 }

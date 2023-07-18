@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.sql.DataSource;
+
 @Configuration
 @Slf4j
 public class BeanFactory {
@@ -43,12 +45,17 @@ public class BeanFactory {
     }
 
     @Bean
-    public Dao getDao() {
+    public DataSource getDataSource() {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl(dbUrl);
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
         dataSource.setUsername(dbUsername);
         dataSource.setPassword(dbPassword);
-        return new NutDao(dataSource);
+        return dataSource;
+    }
+
+    @Bean
+    public Dao getDao() {
+        return new NutDao(getDataSource());
     }
 }

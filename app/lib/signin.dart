@@ -1,6 +1,7 @@
 import 'package:app/model/config.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInScreen extends StatelessWidget {
   @override
@@ -66,7 +67,16 @@ class _SignUpFormState extends State<SignInForm> {
     else {
       var response =
           await Dio().post(Config.api('/api/authPassword'), data: value);
-      _validatedMsg = 'ok' == response.data['ok'] ? null : '密码不对，请重新输入';
+      var result = response.data;
+      if ('ok' == result['ok']) {
+        _validatedMsg = null;
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString("user", result['user']);
+        prefs.setString("timestamp", result['timestamp']);
+        prefs.setString("signature", result['signature']);
+      } else {
+        _validatedMsg = '密码不对，请重新输入';
+      }
     }
   }
 }
