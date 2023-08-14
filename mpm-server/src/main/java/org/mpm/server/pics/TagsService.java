@@ -1,6 +1,5 @@
 package org.mpm.server.pics;
 
-import java.util.Arrays;
 import org.mpm.server.entity.EntityPhotoTags;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
@@ -10,17 +9,20 @@ import org.nutz.trans.Trans;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Service
 public class TagsService {
 
     @Autowired
     Dao dao;
 
-    public String getAllTags() {
+    public List<String> getAllTags() {
         Sql sql = Sqls.create("select distinct name from photo_tags");
-        sql.setCallback(Sqls.callback.strs());
+        sql.setCallback(Sqls.callback.strList());
         dao.execute(sql);
-        return String.join(",", sql.getList(String.class));
+        return sql.getList(String.class);
     }
 
     public void setTagsRelation(int id, String tags) {

@@ -24,11 +24,12 @@ class _TagFilterState extends State<TagFilter> {
           builder: (BuildContext context, AsyncSnapshot<List?> snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               var tags = snapshot.data;
-              if ( tags == null) tags = [];
+              if (tags == null) tags = [];
               List<DropdownMenuItem<String>> items = [];
               items.add(DropdownMenuItem(value: null, child: Text('ALL')));
               for (int i = 0; i < tags.length; i++) {
-                items.add(DropdownMenuItem(value: tags[i], child: Text(tags[i])));
+                items.add(
+                    DropdownMenuItem(value: tags[i], child: Text(tags[i])));
               }
               return DropdownButton<String>(
                 value: selectedTag,
@@ -41,7 +42,8 @@ class _TagFilterState extends State<TagFilter> {
                     selectedTag = newValue;
                   });
                 },
-                style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
+                style:
+                    TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
               );
             } else if (snapshot.hasError)
               return Text('Error:${snapshot.error}');
@@ -53,7 +55,7 @@ class _TagFilterState extends State<TagFilter> {
 
   Future<List> loadTags() async {
     var resp = await Dio().post(Config.api("/api/getAllTags"));
-    if (resp.statusCode == 200) return (resp.data as String).split(",").where((s) => s.isNotEmpty).toList();
+    if (resp.statusCode == 200) return resp.data as List;
     return [];
   }
 }

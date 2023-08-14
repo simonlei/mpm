@@ -26,7 +26,8 @@ class ImagesContextMenu extends StatefulWidget {
   }
 }
 
-class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuStateMixin {
+class _ImagesContextMenuState extends State<ImagesContextMenu>
+    with ContextMenuStateMixin {
   @override
   Widget build(BuildContext context) {
     var widgets = [
@@ -82,14 +83,17 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
 
     var result = await showDatePicker(
       context: context,
-      initialDate: widget._picsModel.imageAt(widget._picsModel.getSelectedIndex())!.takenDate,
+      initialDate: widget._picsModel
+          .imageAt(widget._picsModel.getSelectedIndex())!
+          .takenDate,
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
       initialEntryMode: DatePickerEntryMode.input,
     );
     if (result == null) return;
     print(result.toString());
-    widget._picsModel.updateSelectedImages({'takenDate': result.toString()}, ' 拍摄时间到 ${result.toString()}');
+    widget._picsModel.updateSelectedImages(
+        {'takenDate': result.toString()}, ' 拍摄时间到 ${result.toString()}');
     returnFocus();
   }
 
@@ -103,10 +107,12 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
     if (resp.statusCode != 200) {
       showToast("获取tags失败 ${resp.data}");
     }
-    var listToSearch = (resp.data as String).split(",").where((s) => s.isNotEmpty).toList();
+    var listToSearch = resp.data as List;
     var selectedIndex = widget._picsModel.getSelectedIndex();
     var image = await widget._picsModel.getImage(selectedIndex);
-    var initialValue = image!.tags == null ? null : image.tags!.split(",").where((s) => s.isNotEmpty).toList();
+    var initialValue = image!.tags == null
+        ? null
+        : image.tags!.split(",").where((s) => s.isNotEmpty).toList();
 
     List? result = await showDialog(
       context: scaffoldKey.currentContext!,
@@ -121,7 +127,8 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
           actions: [
             TextButton(
               child: Text('确定'),
-              onPressed: () => Navigator.of(context).pop(tagsSelector.selectedValues),
+              onPressed: () =>
+                  Navigator.of(context).pop(tagsSelector.selectedValues),
             ),
             TextButton(
               child: Text('取消'),
@@ -134,7 +141,8 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
     if (result == null) return;
 
     print(result.join(","));
-    widget._picsModel.updateSelectedImages({'tags': result.join(",")}, ' 标签更新为 ${result.join(",")}');
+    widget._picsModel.updateSelectedImages(
+        {'tags': result.join(",")}, ' 标签更新为 ${result.join(",")}');
     returnFocus();
   }
 
@@ -146,7 +154,8 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
 
     var selectedIndex = widget._picsModel.getSelectedIndex();
     var image = await widget._picsModel.getImage(selectedIndex);
-    await Clipboard.setData(ClipboardData(text: '${image!.latitude},${image.longitude}'));
+    await Clipboard.setData(
+        ClipboardData(text: '${image!.latitude},${image.longitude}'));
     showToast('已拷贝GIS信息至剪贴板');
   }
 
@@ -155,10 +164,12 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
       showToast('请选中照片后再试');
       return;
     }
-    var result = await prompt(scaffoldKey.currentContext!, title: Text('请输入描述信息'));
+    var result =
+        await prompt(scaffoldKey.currentContext!, title: Text('请输入描述信息'));
     if (result == null) return;
     print(' result is $result');
-    widget._picsModel.updateSelectedImages({'description': result}, ' 描述信息到 $result');
+    widget._picsModel
+        .updateSelectedImages({'description': result}, ' 描述信息到 $result');
     returnFocus();
   }
 
@@ -167,7 +178,8 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
       showToast('请选中照片后再试');
       return;
     }
-    var result = await prompt(scaffoldKey.currentContext!, title: Text('请输入纬度,经度，例如 22.57765,113.9504277778'));
+    var result = await prompt(scaffoldKey.currentContext!,
+        title: Text('请输入纬度,经度，例如 22.57765,113.9504277778'));
     if (result == null) return;
     print(' result is $result');
     var splitted = result.split(',');
@@ -175,7 +187,8 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
       showToast('请按照 纬度,经度 模式来输入');
       return;
     }
-    widget._picsModel.updateSelectedImages({'latitude': splitted[0], 'longitude': splitted[1]}, ' GIS信息到 $result');
+    widget._picsModel.updateSelectedImages(
+        {'latitude': splitted[0], 'longitude': splitted[1]}, ' GIS信息到 $result');
     returnFocus();
   }
 
@@ -184,7 +197,8 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
       showToast('请选中照片后再试');
       return;
     }
-    var picImage = await widget._picsModel.getImage(widget._picsModel.getSelectedIndex());
+    var picImage =
+        await widget._picsModel.getImage(widget._picsModel.getSelectedIndex());
     var paths = await widget._picsModel.getPathsForSelectedPhoto();
     if (paths.length == 0) {
       showToast('没有找到对应的目录');
@@ -202,7 +216,8 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
     leftPanelKey.currentState!.selectTab(1);
     //}
     // set folder condition
-    while (folderTreeKey.currentState == null || !folderTreeKey.currentState!.inited) {
+    while (folderTreeKey.currentState == null ||
+        !folderTreeKey.currentState!.inited) {
       await new Future.delayed(Duration(milliseconds: 10));
     }
     print(' state is ${folderTreeKey.currentState}');
@@ -215,7 +230,8 @@ class _ImagesContextMenuState extends State<ImagesContextMenu> with ContextMenuS
     });
     // jump to photo
     if (resp.statusCode == 200) {
-      Provider.of<SelectModel>(scaffoldKey.currentContext!, listen: false).select(false, false, resp.data);
+      Provider.of<SelectModel>(scaffoldKey.currentContext!, listen: false)
+          .select(false, false, resp.data);
     }
     returnFocus();
   }

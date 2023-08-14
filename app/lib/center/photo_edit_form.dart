@@ -112,8 +112,9 @@ class _PhotoEditFormState extends State<PhotoEditForm> {
     var resp = await Dio().post(Config.api("/api/getAllTags"));
     if (resp.statusCode != 200) {
       showToast("获取tags失败 ${resp.data}");
+      return [];
     }
-    return (resp.data as String).split(",").where((s) => s.isNotEmpty).toList();
+    return resp.data as List;
   }
 
   static FormFieldValidator<String> myDateString(
