@@ -36,12 +36,14 @@ class PicsModel with ChangeNotifier {
     await new Future.delayed(Duration(milliseconds: 500));
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await _selectModel.select(false, false, prefs.getInt("lastIndex") ?? 0);
-    if (gridViewKey.currentState != null) gridViewKey.currentState!.scrollToIndex(_selectModel);
+    if (gridViewKey.currentState != null)
+      gridViewKey.currentState!.scrollToIndex(_selectModel);
   }
 
   Future<List<PicImage?>> loadImages(int start, int size) async {
     Logger().i("load image from server...$start");
-    var resp = await Dio().post(Config.api('/api/getPics'), data: Conditions.makeCondition(start, size));
+    var resp = await Dio().post(Config.api('/api/getPics'),
+        data: Conditions.makeCondition(start, size));
     if (!_init) {
       _pics = List.filled(resp.data['totalRows'], null);
       BUS.emit(EventBus.CountChange, resp.data['totalRows']);
@@ -97,8 +99,9 @@ class PicsModel with ChangeNotifier {
   Future<void> trashSelected() async {
     if (selectNothing) return;
 
-    var resp = await Dio()
-        .post(Config.api("/api/trashPhotos"), data: _selectModel.selected.map((e) => _pics[e]!.name).toList());
+    var resp = await Dio().post(Config.api("/api/trashPhotos"),
+        options: Options(contentType: "application/json"),
+        data: _selectModel.selected.map((e) => _pics[e]!.name).toList());
     Logger().i("Result is $resp");
     if (resp.statusCode == 200 && resp.data == _selectModel.selected.length) {
       var list = _selectModel.selected.toList();
@@ -149,7 +152,8 @@ class PicsModel with ChangeNotifier {
     }
   }
 
-  Future<void> updateSelectedImages(Map<String, dynamic> map, String reason) async {
+  Future<void> updateSelectedImages(
+      Map<String, dynamic> map, String reason) async {
     map.remove('id');
     _selectModel.selected.forEach((element) async {
       var img = await getImage(element);
@@ -159,7 +163,8 @@ class PicsModel with ChangeNotifier {
   }
 
   Future<List> getPathsForSelectedPhoto() async {
-    var resp = await Dio().post(Config.api('/api/getParentPathsForPhoto'), data: _pics[_selectModel.lastIndex]!.id);
+    var resp = await Dio().post(Config.api('/api/getParentPathsForPhoto'),
+        data: _pics[_selectModel.lastIndex]!.id);
     if (resp.statusCode == 200) return resp.data;
     return [];
   }
@@ -182,12 +187,17 @@ class PicImage {
     latitude = element['latitude'];
     address = element['address'];
     takenDate = DateTime.parse(element['takendate']);
-    mediaType = 'photo' == element['mediatype'] ? MediaType.photo : MediaType.video;
+    mediaType =
+        'photo' == element['mediatype'] ? MediaType.photo : MediaType.video;
     duration = element['duration'] ?? 0.0;
     tags = element['tags'];
   }
 
-  String formatDuration() => Duration(seconds: duration.toInt()).toString().split('.').first.padLeft(8, "0");
+  String formatDuration() => Duration(seconds: duration.toInt())
+      .toString()
+      .split('.')
+      .first
+      .padLeft(8, "0");
 
   late final PicsModel _picsModel;
   late final int id;
@@ -227,9 +237,13 @@ class PicImage {
     print(element);
     //print(element.containsKey('star'));
     star = element.containsKey('star') ? element['star'] : star;
-    description = element.containsKey('description') ? element['description'] : description ?? '';
+    description = element.containsKey('description')
+        ? element['description']
+        : description ?? '';
     address = element.containsKey('address') ? element['address'] : address;
-    takenDate = element.containsKey('takendate') ? DateTime.parse(element['takendate']) : takenDate;
+    takenDate = element.containsKey('takendate')
+        ? DateTime.parse(element['takendate'])
+        : takenDate;
     thumb = element.containsKey('thumb') ? element['thumb'] : thumb;
     rotate = element.containsKey('rotate') ? element['rotate'] : rotate;
     tags = element.containsKey('tags') ? element['tags'] : tags;
