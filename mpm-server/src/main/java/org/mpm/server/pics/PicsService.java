@@ -9,6 +9,13 @@ import com.qcloud.cos.model.COSObject;
 import com.qcloud.cos.model.CopyObjectRequest;
 import com.qcloud.cos.model.ObjectMetadata;
 import com.qcloud.cos.model.ciModel.common.ImageProcessRequest;
+import com.qcloud.cos.model.ciModel.common.MediaInputObject;
+import com.qcloud.cos.model.ciModel.common.MediaOutputObject;
+import com.qcloud.cos.model.ciModel.job.MediaAudioObject;
+import com.qcloud.cos.model.ciModel.job.MediaContainerObject;
+import com.qcloud.cos.model.ciModel.job.MediaVideoObject;
+import com.qcloud.cos.model.ciModel.job.v2.MediaJobOperation;
+import com.qcloud.cos.model.ciModel.job.v2.MediaJobsRequestV2;
 import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoRequest;
 import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoResponse;
 import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoVideo;
@@ -16,6 +23,9 @@ import com.qcloud.cos.model.ciModel.persistence.CIUploadResult;
 import com.qcloud.cos.model.ciModel.persistence.PicOperations;
 import com.qcloud.cos.model.ciModel.persistence.PicOperations.Rule;
 import com.qcloud.cos.model.ciModel.snapshot.SnapshotRequest;
+import com.qcloud.cos.model.ciModel.template.MediaListTemplateResponse;
+import com.qcloud.cos.model.ciModel.template.MediaTemplateRequest;
+import com.qcloud.cos.model.ciModel.template.MediaTemplateResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityBlockPicture;
 import org.mpm.server.entity.EntityFile;
@@ -58,6 +68,8 @@ public class PicsService {
 
     @Value("${cos.bucket}")
     String bucket;
+    @Value("${cos.region}")
+    String region;
 
     public PicsService(Dao dao, COSClient cosClient, CosRemoteService cosRemoteService) {
         this.dao = dao;
@@ -122,7 +134,67 @@ public class PicsService {
         cosClient.copyObject(request);
         cosClient.deleteObject(bucket, key);
 
+        startVideoConvertTask(video.getName());
+
         return video;
+    }
+
+    void startVideoConvertTask(String name) {
+        String templateId = checkConvertTemplate();
+        MediaJobOperation mediaJobOperation = new MediaJobOperation();
+        mediaJobOperation.setTemplateId(templateId);
+        MediaJobsRequestV2 jobRequest = new MediaJobsRequestV2();
+        MediaInputObject input = new MediaInputObject();
+        input.setObject("video/" + name + ".mp4");
+        jobRequest.setInput(input);
+        jobRequest.setTag("Transcode");
+        jobRequest.setBucketName(bucket);
+
+        MediaOutputObject output = new MediaOutputObject();
+        output.setRegion(region);
+        output.setBucket(bucket);
+        output.setObject("video_t/" + name + ".mp4");
+        mediaJobOperation.setOutput(output);
+        jobRequest.setOperation(mediaJobOperation);
+        cosClient.createMediaJobsV2(jobRequest);
+    }
+
+    String checkConvertTemplate() {
+        MediaTemplateRequest descReq = new MediaTemplateRequest();
+        descReq.setBucketName(bucket);
+        descReq.setTag("Transcode");
+        descReq.setName("video-converter");
+        MediaListTemplateResponse response = cosClient.describeMediaTemplates(descReq);
+        log.info("response.getTemplateList() size is {}", response.getTemplateList().size());
+        if (response.getTemplateList().size() == 0) {
+            return createConvertTemplate(descReq);
+        }
+        return response.getTemplateList().get(0).getTemplateId();
+    }
+
+    private String createConvertTemplate(MediaTemplateRequest request) {
+        request.setTemplateId("video-converter");
+
+        MediaContainerObject container = new MediaContainerObject();
+        container.setFormat("mp4");
+        request.setContainer(container);
+
+        MediaVideoObject mediaVideoObject = new MediaVideoObject();
+        mediaVideoObject.setCodec("H.264");
+        mediaVideoObject.setBitrate("4800");
+        mediaVideoObject.setScanMode("progressive");
+        mediaVideoObject.setPixFmt("yuv420p");
+        mediaVideoObject.setProfile("high");
+        request.setVideo(mediaVideoObject);
+
+        MediaAudioObject mediaAudioObject = new MediaAudioObject();
+        mediaAudioObject.setCodec("aac");
+        mediaAudioObject.setSamplerate("44100");
+        request.setAudio(mediaAudioObject);
+
+        MediaTemplateResponse response = cosClient.createMediaTemplate(request);
+        log.info(response.toString());
+        return response.getTemplateId().getTemplateId();
     }
 
     private void getVideoMetadata(String key, EntityPhoto video) {
@@ -189,17 +261,7 @@ public class PicsService {
     }
 
     void generateSmallPic(String key, String name) {
-        ImageProcessRequest request = new ImageProcessRequest(bucket, key);
-        PicOperations picOperations = new PicOperations();
-        picOperations.setIsPicInfo(1);
-        List<Rule> ruleList = new ArrayList<>();
-        PicOperations.Rule rule1 = new PicOperations.Rule();
-        rule1.setBucket(bucket);
-        rule1.setFileId("/small/" + name);
-        rule1.setRule("imageMogr2/thumbnail/2560x1440");
-        ruleList.add(rule1);
-        picOperations.setRules(ruleList);
-        request.setPicOperations(picOperations);
+        ImageProcessRequest request = getImageProcessRequest(key, name);
 
         CIUploadResult result = cosClient.processImage(request);
         String format = result.getProcessResults().getObjectList().get(0).getFormat();
@@ -207,6 +269,21 @@ public class PicsService {
         metadata.setContentType("image/" + format);
         cosClient.updateObjectMetaData(bucket, "small/" + name, metadata);
         log.info("ci upload result: " + Json.toJson(result));
+    }
+
+    private ImageProcessRequest getImageProcessRequest(String key, String name) {
+        ImageProcessRequest request = new ImageProcessRequest(bucket, key);
+        PicOperations picOperations = new PicOperations();
+        picOperations.setIsPicInfo(1);
+        List<Rule> ruleList = new ArrayList<>();
+        Rule rule1 = new Rule();
+        rule1.setBucket(bucket);
+        rule1.setFileId("/small/" + name);
+        rule1.setRule("imageMogr2/thumbnail/2560x1440");
+        ruleList.add(rule1);
+        picOperations.setRules(ruleList);
+        request.setPicOperations(picOperations);
+        return request;
     }
 
     private void checkInBlacklist(File file, EntityPhoto photo) {

@@ -71,4 +71,14 @@ public class PicsServiceTest extends BaseTest {
     void testSnapshot() {
         picsService.generateSmallPic("/origin/3e0ka5dqbmit8odd3nfifc80k6", "3e0ka5dqbmit8odd3nfifc80k6");
     }
+
+    @Test
+    void checkConvertTemplate() {
+        picsService.checkConvertTemplate();
+    }
+
+    @Test
+    void startVideoConvertTask() {
+        picsService.startVideoConvertTask("3q187s0g7ujrfo5gdht227jtj5");
+    }
 }

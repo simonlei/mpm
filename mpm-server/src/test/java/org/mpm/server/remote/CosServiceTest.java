@@ -1,16 +1,12 @@
 package org.mpm.server.remote;
 
 import com.qcloud.cos.COSClient;
-import com.qcloud.cos.model.ciModel.image.ImageLabelRequest;
-import com.qcloud.cos.model.ciModel.image.ImageLabelResponse;
-import com.qcloud.cos.model.ciModel.image.ImageLabelV2Request;
-import com.qcloud.cos.model.ciModel.image.ImageLabelV2Response;
-import com.qcloud.cos.model.ciModel.image.Lobel;
-import com.qcloud.cos.model.ciModel.image.LobelV2;
-import java.util.List;
+import com.qcloud.cos.model.ciModel.image.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
 
 @SpringBootTest
 public class CosServiceTest {
@@ -25,8 +21,8 @@ public class CosServiceTest {
         labelRequest.setObjectKey("origin/007hm1amr8gcup140u3f33dtnm");
 
         ImageLabelResponse label = cosClient.getImageLabel(labelRequest);
-        List<Lobel> recognitionResult = label.getRecognitionResult();
-        for (Lobel l : recognitionResult) {
+        List<Label> recognitionResult = label.getRecognitionResult();
+        for (Label l : recognitionResult) {
             System.out.println(l.getConfidence() + " : " + l.getName());
         }
     }
@@ -40,8 +36,8 @@ public class CosServiceTest {
         labelRequest2.setScenes("album");
 
         ImageLabelV2Response label2 = cosClient.getImageLabelV2(labelRequest2);
-        List<LobelV2> recognitionResult2 = label2.getAlbumLabels();
-        for (LobelV2 l : recognitionResult2) {
+        List<LabelV2> recognitionResult2 = label2.getAlbumLabels();
+        for (LabelV2 l : recognitionResult2) {
             System.out.println(l.getConfidence() + " : " + l.getName());
         }
 

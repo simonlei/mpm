@@ -37,7 +37,7 @@ My Photo Manager，个人相册管理
 1. 将桶设置成 私写公读
 2. 将桶的 CORS 设置加上所有源均可访问
 ![img.png](docs/img.png)
-3. 在桶的数据处理->图片处理当中，打开高级压缩，同时导入文档 docs/style.txt 中的样式
+3. 在桶的数据处理->图片处理当中，打开高级压缩
 
 ## Release:
 

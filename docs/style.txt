@@ -1,6 +1,0 @@
-﻿styleName: thumb, styleBody: imageMogr2/auto-orient/thumbnail/200x150/pad/1/color/IzNEM0QzRA
-styleName: thumb0, styleBody: imageMogr2/strip|imageMogr2/rotate/0|imageMogr2/thumbnail/200x150/pad/1/color/IzNEM0QzRA
-styleName: thumb180, styleBody: imageMogr2/strip|imageMogr2/rotate/180|imageMogr2/thumbnail/200x150/pad/1/color/IzNEM0QzRA
-styleName: thumb2, styleBody: imageMogr2/thumbnail/!200x150r/|imageMogr2/gravity/center/crop/200x150/format/png/interlace/0
-styleName: thumb270, styleBody: imageMogr2/strip|imageMogr2/rotate/270|imageMogr2/thumbnail/200x150/pad/1/color/IzNEM0QzRA
-styleName: thumb90, styleBody: imageMogr2/strip|imageMogr2/rotate/90|imageMogr2/thumbnail/200x150/pad/1/color/IzNEM0QzRA
