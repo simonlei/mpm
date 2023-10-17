@@ -69,7 +69,7 @@ public class PicsServiceTest extends BaseTest {
 
     @Test
     void testSnapshot() {
-        picsService.generateSmallPic("/origin/3e0ka5dqbmit8odd3nfifc80k6", "3e0ka5dqbmit8odd3nfifc80k6");
+        picsService.generateSmallPic("/origin/rtr5m2b4s2ia0p5te289t66orj", "rtr5m2b4s2ia0p5te289t66orj_new");
     }
 
     @Test

@@ -1,8 +1,5 @@
 package org.mpm.server.pics;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityMeta;
 import org.mpm.server.entity.EntityPhoto;
@@ -12,6 +9,10 @@ import org.nutz.dao.pager.Pager;
 import org.nutz.dao.util.cri.Exps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -82,6 +83,29 @@ public class GeoChecker {
         }
         if (meta == null) {
             meta = EntityMeta.builder().key("lastDateCheckId").build();
+        }
+        meta.setValue("" + lastId);
+        dao.insertOrUpdate(meta);
+    }
+
+    public void generateSmallPhotos() {
+        EntityMeta meta = dao.fetch(EntityMeta.class, "lastRegenerateSmallPhotosCheckId");
+        long lastId = meta == null ? 0 : Long.parseLong(meta.getValue());
+        // get first 200
+        List<EntityPhoto> photos = dao.query(EntityPhoto.class, Cnd.where("id", ">", lastId)
+                .and("mediaType", "=", "photo")
+                .orderBy("id", "asc"), new Pager(1, 200));
+        for (EntityPhoto p : photos) {
+            try {
+                picsService.generateSmallPic("origin/" + p.getName(), p.getName());
+                // dao.updateIgnoreNull(p);
+            } catch (Exception e) {
+                log.error("Can't generate small photo:" + p.getId(), e);
+            }
+            lastId = p.getId();
+        }
+        if (meta == null) {
+            meta = EntityMeta.builder().key("lastRegenerateSmallPhotosCheckId").build();
         }
         meta.setValue("" + lastId);
         dao.insertOrUpdate(meta);

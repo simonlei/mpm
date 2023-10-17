@@ -41,6 +41,7 @@ import org.nutz.json.Json;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
+import org.nutz.lang.Strings;
 import org.nutz.trans.Trans;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,6 +71,8 @@ public class PicsService {
     String bucket;
     @Value("${cos.region}")
     String region;
+    @Value("${smallphoto.format}")
+    String smallFormat;
 
     public PicsService(Dao dao, COSClient cosClient, CosRemoteService cosRemoteService) {
         this.dao = dao;
@@ -279,7 +282,9 @@ public class PicsService {
         Rule rule1 = new Rule();
         rule1.setBucket(bucket);
         rule1.setFileId("/small/" + name);
-        rule1.setRule("imageMogr2/thumbnail/2560x1440");
+
+        rule1.setRule("imageMogr2/thumbnail/2560x1440"
+                + (Strings.isNotBlank(smallFormat) ? "|imageMogr2/format/avif" : ""));
         ruleList.add(rule1);
         picOperations.setRules(ruleList);
         request.setPicOperations(picOperations);
