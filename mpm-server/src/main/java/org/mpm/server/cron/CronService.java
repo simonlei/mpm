@@ -30,7 +30,7 @@ public class CronService {
         }
     }
 
-    @Scheduled(fixedDelay = 5000)
+    // @Scheduled(fixedDelay = 5000)
     void checkPhotoDates() {
         // geoChecker.checkPhotoDates();
         geoChecker.generateSmallPhotos();
