@@ -17,4 +17,5 @@ spring.web.resources.static-locations=file:/web
 spring.jackson.date-format=yyyy-MM-dd HH:mm:ss
 spring.jackson.time-zone=GMT+8
 spring.jackson.locale=zh_CN
-smallphoto.format=webp
+# 默认相同格式
+# smallphoto.format=webp
