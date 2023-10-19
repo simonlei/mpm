@@ -73,8 +73,8 @@ public class CosProxy {
         // COSObject cosObj = cosClient.getObject(bucket, key);
 
         GetObjectRequest getObj = new GetObjectRequest(bucket, key);
-
-        getObj.putCustomQueryParameter(styles.getProperty(param) == null ? param : styles.getProperty(param), null);
+        String queryParam = param == null ? null : (styles.getProperty(param) == null ? param : styles.getProperty(param));
+        getObj.putCustomQueryParameter(queryParam, null);
         COSObject cosObj = cosClient.getObject(getObj);
 
         return ResponseEntity.ok()
