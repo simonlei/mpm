@@ -15,6 +15,9 @@
             <plugin>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <groupId>org.springframework.boot</groupId>
+                <configuration>
+                    <jvmArguments>--add-opens java.base/java.lang=ALL-UNNAMED</jvmArguments>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -25,7 +28,7 @@
             <artifactId>lombok</artifactId>
             <groupId>org.projectlombok</groupId>
             <scope>provided</scope>
-            <version>1.18.12</version>
+            <version>1.18.20</version>
         </dependency>
         <dependency>
             <groupId>com.qcloud</groupId>

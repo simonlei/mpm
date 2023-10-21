@@ -71,7 +71,7 @@ public class PicsService {
     String bucket;
     @Value("${cos.region}")
     String region;
-    @Value("${smallphoto.format}")
+    @Value("${smallphoto.format:}")
     String smallFormat;
 
     public PicsService(Dao dao, COSClient cosClient, CosRemoteService cosRemoteService) {
@@ -284,7 +284,7 @@ public class PicsService {
         rule1.setFileId("/small/" + name);
 
         rule1.setRule("imageMogr2/thumbnail/2560x1440"
-                + (Strings.isNotBlank(smallFormat) ? "|imageMogr2/format/avif" : ""));
+                + (Strings.isEmpty(smallFormat) ? "" : "|imageMogr2/format/" + smallFormat));
         ruleList.add(rule1);
         picOperations.setRules(ruleList);
         request.setPicOperations(picOperations);
