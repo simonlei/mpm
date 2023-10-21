@@ -9,11 +9,10 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @ServletComponentScan("org.mpm")
-@EnableScheduling
+// @EnableScheduling
 @EnableAsync
 @EnableFeignClients
 @Slf4j

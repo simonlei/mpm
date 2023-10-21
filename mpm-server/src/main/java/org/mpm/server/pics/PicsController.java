@@ -1,9 +1,5 @@
 package org.mpm.server.pics;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityFile;
@@ -23,11 +19,12 @@ import org.nutz.json.Json;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @Slf4j
@@ -166,14 +163,13 @@ public class PicsController {
     @PostMapping("/api/getPics")
     public Map getPics(@RequestBody GetPicsRequest req) {
         log.info("Getting pics " + Json.toJson(req));
-        Boolean trashed = req.trashed;
+        Boolean trashed = req.trashed != null && req.trashed;
 
-        Boolean star = req.star;
+        Boolean star = req.star != null && req.star;
         String filePath = req.path;
-        int start = req.getStart();
-        int end = req.getStart() + req.getSize();
-        String sortedBy = req.order;
-        sortedBy = sortedBy == null ? "id" : sortedBy;
+        int start = req.getStart() == null ? 0 : req.getStart();
+        int end = start + (req.getSize() == null ? 75 : req.getSize());
+        String sortedBy = req.order == null ? "id" : req.order;
         boolean desc = sortedBy.startsWith("-");
         sortedBy = desc ? sortedBy.substring(1) : sortedBy;
         List<Record> photos;
@@ -300,9 +296,9 @@ public class PicsController {
 
         Boolean star;
         Boolean video;
-        boolean trashed;
-        int start;
-        int size;
+        Boolean trashed;
+        Integer start;
+        Integer size;
         String order;
         String dateKey;
         String path;

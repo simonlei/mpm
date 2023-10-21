@@ -1,7 +1,5 @@
 package org.mpm.server.pics;
 
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.nutz.dao.Dao;
@@ -15,6 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @RestController
 public class DateController {
@@ -24,6 +25,7 @@ public class DateController {
 
     @PostMapping("/api/getPicsDate")
     public List<NutMap> getPicsDate(@RequestBody PicDateRequest req) {
+        log.info("Req is {}", req);
         NutMap lastYear = null;
         int yearCount = 0;
         List<NutMap> result = new ArrayList<>();
@@ -57,7 +59,7 @@ public class DateController {
         // photo dates...include years and months
         Sql sql = Sqls.create("select year(takenDate) year, month(takenDate) month,"
                 + " count(*) photoCount "
-                + " from t_photos where trashed = " + trashed
+                + " from t_photos where trashed = " + (trashed != null && trashed)
                 + (star == null ? "" : " and star = " + star)
                 + " group by year, month order by year desc, month desc");
         sql.setCallback(Sqls.callback.records());
