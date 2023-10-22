@@ -1,5 +1,5 @@
-import { ConfigEnv, UserConfig, loadEnv } from 'vite';
-import { viteMockServe } from 'vite-plugin-mock';
+import {ConfigEnv, loadEnv, UserConfig} from 'vite';
+import {viteMockServe} from 'vite-plugin-mock';
 import createVuePlugin from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import svgLoader from 'vite-svg-loader';
@@ -9,8 +9,8 @@ import path from 'path';
 const CWD = process.cwd();
 
 // https://vitejs.dev/config/
-export default ({ mode }: ConfigEnv): UserConfig => {
-  const { VITE_BASE_URL } = loadEnv(mode, CWD);
+export default ({mode}: ConfigEnv): UserConfig => {
+  const {VITE_BASE_URL} = loadEnv(mode, CWD);
   return {
     base: VITE_BASE_URL,
     resolve: {
