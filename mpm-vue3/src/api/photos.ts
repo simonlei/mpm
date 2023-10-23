@@ -1,6 +1,6 @@
-import { request } from '@/utils/request';
-import type { PhotosDate, PhotosDateResult } from '@/api/model/photosDate';
-import type { Photo, PhotosResult } from './model/photos';
+import {request} from '@/utils/request';
+import type {PhotosDate} from '@/api/model/photosDate';
+import type {PhotosResult} from './model/photos';
 
 const Api = {
   PicsDateList: '/getPicsDate',
@@ -8,13 +8,16 @@ const Api = {
 };
 
 export function getPicsDateList() {
-    return request.post<PhotosDate>({
-      url: Api.PicsDateList,
-    });
-  }
+  return request.post<PhotosDate>({
+    url: Api.PicsDateList,
+  });
+}
 
 export function getPics() {
-    return request.post<PhotosResult>({
-        url: Api.PicsList,
-    });
+  return request.post<PhotosResult>({
+    url: Api.PicsList,
+    data: {
+      start: 0, size: 1000,
+    }
+  });
 }

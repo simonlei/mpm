@@ -1,21 +1,26 @@
 <template>
-    <div>
+  <t-layout>
+    <t-aside>
+      <div>
         <Suspense>
-            <date-tree/>
+          <date-tree/>
         </Suspense>
-    </div>
-    <div>
+      </div>
+    </t-aside>
+    <t-content>
+      <div>
         <Suspense>
-            <photo-table/>
+          <photo-table/>
         </Suspense>
-    </div>
+      </div>
+    </t-content>
+  </t-layout>
 </template>
 
 
 <script setup lang="ts">
 import DateTree from "./components/DateTree.vue";
 import PhotoTable from "./components/PhotoTable.vue"
-
 </script>
 
 <script lang="ts">
