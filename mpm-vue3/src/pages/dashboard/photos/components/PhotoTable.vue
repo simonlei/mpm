@@ -1,64 +1,62 @@
 <template>
-  <RecycleScroller page-mode
-                   class="scroller"
-                   :items="TABLE_DATA.data"
-                   :item-size="150"
-                   :grid-items="10"
-                   :emit-update="true"
-                   @update="onScrollUpdate"
-                   key-field="id"
-                   v-slot="{ item }"
-  >
-    <div class="user">
-      <t-image :src="base + item.thumb" width="200" height="150">
-      </t-image>
-    </div>
-    <!--
 
-  <t-table :data="TABLE_DATA.data" :row-key="rowkey" :columns="COLUMNS" :showHeader=false>
-    <template #thumb="{ row }">
-      <t-image :src="base + row.thumb">
-      </t-image>
+  <RecycleScroller  ref="scroller"  :emit-update="true"
+                   :grid-items="10"
+                   :item-size="150"
+                    :items="list"
+
+                   class="scroller"
+                   key-field="id"
+                   page-mode
+                   @update="onScrollUpdate"
+  >
+    <template #default="{ item, index }">
+      <div>
+        <t-image :key="item.name" :onError="loadImgError" :src="base + item.thumb" height="150" shape="round" width="200">
+        </t-image>
+      </div>
     </template>
-  </t-table>
-    -->
+
   </RecycleScroller>
+
 
 
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 
-import {getPics} from "@/api/photos";
-import {PrimaryTableCol} from 'tdesign-vue-next';
+import {getPicIds, getPics} from "@/api/photos";
 
-const TABLE_DATA = await getPics();
+
+const list = (await getPicIds()).data;
 // TABLE_DATA.data.length = 10001;
-// 考虑 https://github.com/rocwang/vue-virtual-scroll-grid 看起来更适用
-console.log(TABLE_DATA);
+// 考虑 https://github.com/rocwang/vue-virtual-scroll-grid 看起来更适用，性能太差
+// console.log(TABLE_DATA);
 
-const KEYSX = {value: 'id', label: 'title', children: 'months'};
-const rowkey = 'id';
-const base = 'http://127.0.0.1:8080/cos/';
-const COLUMNS: PrimaryTableCol[] = [
-  {
-    title: 'address',
-    fixed: 'left',
-    width: 280,
-    ellipsis: true,
-    align: 'left',
-    colKey: 'address',
-  },
-  {
-    title: '缩略图',
-    width: 200,
-    colKey: 'thumb',
-  },
-];
-console.log(KEYSX);
+const base = "http://127.0.0.1:8080/cos/";
 
-function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, visibleEndIndex) {
-  console.log("view start " + viewStartIndex + " - " + viewEndIndex + " visiable " + visibleStartIndex + " - " + visibleEndIndex);
+function loadImgError(e) {
+  console.log(e);
+}
+
+async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, visibleEndIndex)  {
+  var hasUnloaded = false;
+  for ( let i = visibleStartIndex; i <= visibleEndIndex; i++) {
+    if ( list[i].name == null) {
+      hasUnloaded=true;
+      break;
+    }
+  }
+  console.log("view start " + viewStartIndex + " - " + viewEndIndex + " visiable " +
+    visibleStartIndex + " - " + visibleEndIndex + " has unload " + hasUnloaded);
+  if (hasUnloaded) {
+    var loadData = (await getPics(viewStartIndex, viewEndIndex-viewStartIndex)).data;
+    for (let i = 0; i < loadData.length; i++) {
+      Object.assign(list[i+viewStartIndex], loadData[i]);
+      // list[i+visibleStartIndex] = loadData[i];
+    }
+  }
+  // console.log( list);
 }
 </script>
 
@@ -68,3 +66,5 @@ export default {
   name: 'PhotoTable',
 };
 </script>
+
+

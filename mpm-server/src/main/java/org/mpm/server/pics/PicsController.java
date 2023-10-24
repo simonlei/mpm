@@ -1,10 +1,15 @@
 package org.mpm.server.pics;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.progress.ProgressController;
+import org.mpm.server.util.DaoUtil;
 import org.mpm.server.util.ExplicitPager;
 import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Chain;
@@ -19,12 +24,11 @@ import org.nutz.json.Json;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
@@ -167,12 +171,14 @@ public class PicsController {
 
         Boolean star = req.star != null && req.star;
         String filePath = req.path;
+        req.idOnly = req.idOnly != null && req.idOnly;
         int start = req.getStart() == null ? 0 : req.getStart();
         int end = start + (req.getSize() == null ? 75 : req.getSize());
         String sortedBy = req.order == null ? "id" : req.order;
         boolean desc = sortedBy.startsWith("-");
         sortedBy = desc ? sortedBy.substring(1) : sortedBy;
-        List<Record> photos;
+        List<Record> photos = new ArrayList<>();
+        List ids = new ArrayList();
 
         int totalRows;
         // TODO: 要重构
@@ -191,7 +197,11 @@ public class PicsController {
                 cnd.setPager(new ExplicitPager(start, end - start));
                 cnd.orderBy(sortedBy, desc ? "desc" : "asc");
                 // ...
-                photos = dao.query("t_photos", cnd, null, "distinct t_photos.*");
+                if (req.idOnly) {
+                    ids = DaoUtil.fetchMaps(dao, "select distinct t_photos.id from t_photos " + cnd);
+                } else {
+                    photos = dao.query("t_photos", cnd, null, "distinct t_photos.*");
+                }
             } else {
                 Sql sql = Sqls.create("select id, r from ("
                         + " select distinct t_photos.id, rank() over (order by $sortedBy $desc) as r from t_photos "
@@ -215,9 +225,16 @@ public class PicsController {
             cnd.limit(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
             // ...
-            photos = dao.query("t_photos", cnd);
+            if (req.idOnly) {
+                ids = DaoUtil.fetchMaps(dao, "select t_photos.id from t_photos " + cnd);
+            } else {
+                photos = dao.query("t_photos", cnd);
+            }
         }
-
+        if (req.idOnly) {
+            return Lang.map("totalRows", totalRows).setv("startRow", 0)
+                    .setv("endRow", ids.size()).setv("data", ids);
+        }
         return Lang.map("totalRows", totalRows).setv("startRow", start)
                 .setv("endRow", start + photos.size()).setv("data", addThumbField(photos));
     }
@@ -304,5 +321,6 @@ public class PicsController {
         String path;
         Long idRank;
         String tag;
+        Boolean idOnly;
     }
 }

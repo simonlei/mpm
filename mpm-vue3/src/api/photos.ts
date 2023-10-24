@@ -13,11 +13,20 @@ export function getPicsDateList() {
   });
 }
 
-export function getPics() {
+export function getPics(start: number ,  size: number) {
   return request.post<PhotosResult>({
     url: Api.PicsList,
     data: {
-      start: 0, size: 1000,
+      start: start, size: size,
+    }
+  });
+}
+
+export function getPicIds() {
+  return request.post<PhotosResult>({
+    url: Api.PicsList,
+    data: {
+      idOnly: true,
     }
   });
 }
