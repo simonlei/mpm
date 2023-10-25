@@ -1,6 +1,7 @@
 <template>
 
-  <RecycleScroller ref="scroller" :emit-update="true"
+  <RecycleScroller :key="Date.now()"
+                   ref="scroller" :emit-update="true"
                    :grid-items="10"
                    :item-size="150"
                    :items="list"
@@ -24,17 +25,15 @@
 <script lang="ts" setup>
 
 import {getPicIds, getPics} from "@/api/photos";
+import {photoFilterStore} from '@/store';
+import {ref} from "vue";
 
 
-const list = (await getPicIds()).data;
-// TABLE_DATA.data.length = 10001;
-// 考虑 https://github.com/rocwang/vue-virtual-scroll-grid 看起来更适用，性能太差
-// console.log(TABLE_DATA);
-
+let list = (await getPicIds()).data;
 
 async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, visibleEndIndex) {
   var hasUnloaded = false;
-  for (let i = visibleStartIndex; i <= visibleEndIndex; i++) {
+  for (let i = viewStartIndex; i <= viewEndIndex; i++) {
     if (list[i].name == null) {
       hasUnloaded = true;
       break;
@@ -43,14 +42,38 @@ async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, v
   console.log("view start " + viewStartIndex + " - " + viewEndIndex + " visiable " +
     visibleStartIndex + " - " + visibleEndIndex + " has unload " + hasUnloaded);
   if (hasUnloaded) {
-    var loadData = (await getPics(viewStartIndex, viewEndIndex - viewStartIndex)).data;
+    const result = (await getPics(viewStartIndex, viewEndIndex - viewStartIndex));
+    const loadData = result.data;
+    list.length = result.totalRows;
     for (let i = 0; i < loadData.length; i++) {
       Object.assign(list[i + viewStartIndex], loadData[i]);
-      // list[i+visibleStartIndex] = loadData[i];
     }
   }
-  // console.log( list);
+  // console.log(list);
 }
+
+const store = photoFilterStore();
+const scroller = ref(null);
+
+store.$onAction(async ({
+                         name, // action 名称
+                         store, // store 实例，类似 `someStore`
+                         args, // 传递给 action 的参数数组
+                         after, // 在 action 返回或解决后的钩子
+                         onError, // action 抛出或拒绝的钩子
+                       }) => {
+  after(async (result) => {
+    let newList = (await getPicIds()).data;
+    list.length = newList.length;
+    for (let i = 0; i < newList.length; i++) {
+      list[i] = newList[i];
+    }
+
+
+    scroller.value.updateVisibleItems(true);
+    scroller.value.scrollToPosition(0);
+  })
+});
 </script>
 
 <script lang="ts">

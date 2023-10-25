@@ -16,28 +16,22 @@ export function getPicsDateList() {
 
 export function getPics(start: number, size: number) {
   const store = photoFilterStore();
+  let req = {start: start, size: size};
+  Object.assign(req, store);
 
   return request.post<PhotosResult>({
     url: Api.PicsList,
-    data: {
-      star: store.star,
-      trashed: store.trashed,
-      video: store.video,
-      order: store.order,
-      dateKey: store.dateKey,
-      path: store.path,
-      tag: store.tag,
-      start: start,
-      size: size,
-    }
+    data: req,
   });
 }
 
 export function getPicIds() {
+  const store = photoFilterStore();
+  let req = {idOnly: true};
+  Object.assign(req, store);
+
   return request.post<PhotosResult>({
     url: Api.PicsList,
-    data: {
-      idOnly: true,
-    }
+    data: req,
   });
 }
