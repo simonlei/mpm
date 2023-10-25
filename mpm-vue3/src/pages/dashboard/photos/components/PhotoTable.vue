@@ -1,10 +1,9 @@
 <template>
 
-  <RecycleScroller  ref="scroller"  :emit-update="true"
+  <RecycleScroller ref="scroller" :emit-update="true"
                    :grid-items="10"
                    :item-size="150"
-                    :items="list"
-
+                   :items="list"
                    class="scroller"
                    key-field="id"
                    page-mode
@@ -12,13 +11,12 @@
   >
     <template #default="{ item, index }">
       <div>
-        <t-image :key="item.name" :onError="loadImgError" :src="base + item.thumb" height="150" shape="round" width="200">
+        <t-image :key="item.name" :src="/cos/ + item.thumb" height="150" shape="round" width="200">
         </t-image>
       </div>
     </template>
 
   </RecycleScroller>
-
 
 
 </template>
@@ -33,26 +31,21 @@ const list = (await getPicIds()).data;
 // 考虑 https://github.com/rocwang/vue-virtual-scroll-grid 看起来更适用，性能太差
 // console.log(TABLE_DATA);
 
-const base = "http://127.0.0.1:8080/cos/";
 
-function loadImgError(e) {
-  console.log(e);
-}
-
-async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, visibleEndIndex)  {
+async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, visibleEndIndex) {
   var hasUnloaded = false;
-  for ( let i = visibleStartIndex; i <= visibleEndIndex; i++) {
-    if ( list[i].name == null) {
-      hasUnloaded=true;
+  for (let i = visibleStartIndex; i <= visibleEndIndex; i++) {
+    if (list[i].name == null) {
+      hasUnloaded = true;
       break;
     }
   }
   console.log("view start " + viewStartIndex + " - " + viewEndIndex + " visiable " +
     visibleStartIndex + " - " + visibleEndIndex + " has unload " + hasUnloaded);
   if (hasUnloaded) {
-    var loadData = (await getPics(viewStartIndex, viewEndIndex-viewStartIndex)).data;
+    var loadData = (await getPics(viewStartIndex, viewEndIndex - viewStartIndex)).data;
     for (let i = 0; i < loadData.length; i++) {
-      Object.assign(list[i+viewStartIndex], loadData[i]);
+      Object.assign(list[i + viewStartIndex], loadData[i]);
       // list[i+visibleStartIndex] = loadData[i];
     }
   }

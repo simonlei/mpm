@@ -1,6 +1,6 @@
 <template>
   <t-layout>
-    <t-aside>
+    <t-aside style="position:sticky; top:10px; height:1200px; width:200px">
       <div>
         <Suspense>
           <date-tree/>
@@ -18,7 +18,7 @@
 </template>
 
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import DateTree from "./components/DateTree.vue";
 import PhotoTable from "./components/PhotoTable.vue"
 </script>
@@ -29,3 +29,4 @@ export default {
   name: 'PhotosByDate',
 };
 </script>
+
