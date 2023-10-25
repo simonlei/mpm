@@ -3,7 +3,8 @@
     <RecycleScroller :key="Date.now()"
                      ref="scroller" :emit-update="true"
                      :grid-items="gridItems"
-                     :item-size="150"
+                     :item-size="156"
+                     :itemSecondarySize="206"
                      :items="list"
                      class="scroller"
                      key-field="id"
@@ -14,7 +15,7 @@
       <template #default="{ item, index }">
         <div>
           <t-image :key="item.name" :src="/cos/ + item.thumb" height="150" shape="round"
-                   width="200">
+                   fit='none' width="200">
           </t-image>
         </div>
       </template>
@@ -37,6 +38,7 @@ let list = (await getPicIds()).data;
 async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, visibleEndIndex) {
   var hasUnloaded = false;
   for (let i = viewStartIndex; i <= viewEndIndex; i++) {
+    if ( list[i] == null) continue;
     if (list[i].name == null) {
       hasUnloaded = true;
       break;
@@ -56,7 +58,8 @@ async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, v
 }
 
 function calcGridItems() {
-  return Math.ceil((photogrid.value.clientWidth + 5) / (150 + 5));
+  console.log( "width:"+photogrid.value.clientWidth);
+  return Math.floor((photogrid.value.clientWidth + 5) / (200 + 6));
 }
 
 function onResize() {
@@ -89,9 +92,8 @@ const photogrid = ref(null);
 
 
 onMounted(async () => {
-  console.log(photogrid.value.clientWidth);
   gridItems.value = calcGridItems();
-  console.log(gridItems);
+  console.log("grid items:"+gridItems.value);
 });
 </script>
 
