@@ -1,24 +1,26 @@
 <template>
+  <div ref="photogrid">
+    <RecycleScroller :key="Date.now()"
+                     ref="scroller" :emit-update="true"
+                     :grid-items="gridItems"
+                     :item-size="150"
+                     :items="list"
+                     class="scroller"
+                     key-field="id"
+                     page-mode
+                     @resize="onResize"
+                     @update="onScrollUpdate"
+    >
+      <template #default="{ item, index }">
+        <div>
+          <t-image :key="item.name" :src="/cos/ + item.thumb" height="150" shape="round"
+                   width="200">
+          </t-image>
+        </div>
+      </template>
 
-  <RecycleScroller :key="Date.now()"
-                   ref="scroller" :emit-update="true"
-                   :grid-items="10"
-                   :item-size="150"
-                   :items="list"
-                   class="scroller"
-                   key-field="id"
-                   page-mode
-                   @update="onScrollUpdate"
-  >
-    <template #default="{ item, index }">
-      <div>
-        <t-image :key="item.name" :src="/cos/ + item.thumb" height="150" shape="round" width="200">
-        </t-image>
-      </div>
-    </template>
-
-  </RecycleScroller>
-
+    </RecycleScroller>
+  </div>
 
 </template>
 
@@ -26,8 +28,9 @@
 
 import {getPicIds, getPics} from "@/api/photos";
 import {photoFilterStore} from '@/store';
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 
+let gridItems = ref(10);
 
 let list = (await getPicIds()).data;
 
@@ -52,6 +55,14 @@ async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, v
   // console.log(list);
 }
 
+function calcGridItems() {
+  return Math.ceil((photogrid.value.clientWidth + 5) / (150 + 5));
+}
+
+function onResize() {
+  gridItems.value = calcGridItems();
+}
+
 const store = photoFilterStore();
 const scroller = ref(null);
 
@@ -73,6 +84,14 @@ store.$onAction(async ({
     scroller.value.updateVisibleItems(true);
     scroller.value.scrollToPosition(0);
   })
+});
+const photogrid = ref(null);
+
+
+onMounted(async () => {
+  console.log(photogrid.value.clientWidth);
+  gridItems.value = calcGridItems();
+  console.log(gridItems);
 });
 </script>
 
