@@ -13,9 +13,11 @@
                      @update="onScrollUpdate"
     >
       <template #default="{ item, index }">
-        <div>
-          <t-image :key="item.name" :src="/cos/ + item.thumb" height="150" shape="round"
-                   fit='none' width="200">
+        <div
+          :style="{'border-width': selectedIndex == index ? '2px' : '0px','border-style': 'solid','border-color': 'blue'}">
+          <t-image :key="item.name" :src="/cos/ + item.thumb" fit='none' height="150"
+                   shape="round" width="200"
+                   @click="selectedIndex=index">
           </t-image>
         </div>
       </template>
@@ -32,13 +34,14 @@ import {photoFilterStore} from '@/store';
 import {onMounted, ref} from "vue";
 
 let gridItems = ref(10);
+let selectedIndex = ref(0);
 
 let list = (await getPicIds()).data;
 
 async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, visibleEndIndex) {
   var hasUnloaded = false;
   for (let i = viewStartIndex; i <= viewEndIndex; i++) {
-    if ( list[i] == null) continue;
+    if (list[i] == null) continue;
     if (list[i].name == null) {
       hasUnloaded = true;
       break;
@@ -58,7 +61,7 @@ async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, v
 }
 
 function calcGridItems() {
-  console.log( "width:"+photogrid.value.clientWidth);
+  console.log("width:" + photogrid.value.clientWidth);
   return Math.floor((photogrid.value.clientWidth + 5) / (200 + 6));
 }
 
@@ -93,7 +96,7 @@ const photogrid = ref(null);
 
 onMounted(async () => {
   gridItems.value = calcGridItems();
-  console.log("grid items:"+gridItems.value);
+  console.log("grid items:" + gridItems.value);
 });
 </script>
 
