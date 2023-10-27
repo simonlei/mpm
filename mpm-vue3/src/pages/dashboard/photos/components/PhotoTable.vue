@@ -17,12 +17,25 @@
           :style="{'border-width': selectedIndex == index ? '2px' : '0px','border-style': 'solid','border-color': 'blue'}">
           <t-image :key="item.name" :src="/cos/ + item.thumb" fit='none' height="150"
                    shape="round" width="200"
-                   @click="selectedIndex=index">
+                   @click="selectedIndex=index"
+                   @doubleclick="console.log('double')"
+                   v-on:dblclick="showDetailView(item,index)"
+          >
           </t-image>
         </div>
       </template>
 
     </RecycleScroller>
+  </div>
+
+  <div>
+    <t-image-viewer ref="imageViewer"
+                    v-model:index="detailViewShowIndex"
+                    v-model:visible="detailVisible"
+                    :images="detailImages"
+                    :onIndexChange="onDetailViewIndexChange"
+    >
+    </t-image-viewer>
   </div>
 
 </template>
@@ -33,10 +46,38 @@ import {getPicIds, getPics} from "@/api/photos";
 import {photoFilterStore} from '@/store';
 import {onMounted, ref} from "vue";
 
-let gridItems = ref(10);
-let selectedIndex = ref(0);
+const gridItems = ref(10);
+const selectedIndex = ref(0);
+const detailVisible = ref(false);
+const detailViewShowIndex = ref(0);
+const detailImages = ref([]);
+const imageViewer = ref(null);
 
 let list = (await getPicIds()).data;
+
+function showDetailView(item, index) {
+  detailImages.value.length = 0;
+  detailViewShowIndex.value = 0;
+  if (index > 0) {
+    detailImages.value.push("/cos/small/" + list[index - 1].name);
+    detailViewShowIndex.value = 1;
+  }
+  detailImages.value.push("/cos/small/" + list[index].name);
+  if (index < list.length - 1) {
+    detailImages.value.push("/cos/small/" + list[index + 1].name);
+  }
+  detailVisible.value = true;
+  selectedIndex.value = index;
+}
+
+function onDetailViewIndexChange(index, context) {
+  let delta = context.trigger == 'prev' ? -1 : context.trigger == 'next' ? 1 : 0;
+  let nextIndex = selectedIndex.value + delta;
+  if (nextIndex < 0) nextIndex = 0;
+  if (nextIndex > list.length - 1) nextIndex = list.length - 1;
+  console.log("changed to " + nextIndex);
+  showDetailView(list[nextIndex], nextIndex);
+}
 
 async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, visibleEndIndex) {
   var hasUnloaded = false;
