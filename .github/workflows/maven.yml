@@ -40,7 +40,7 @@ jobs:
           FROM openjdk:17-jdk-alpine
           COPY . /
           WORKDIR .
-          ENTRYPOINT ["/bin/sh","-c","java -jar mpm.jar > /logs/mpm.log 2> /logs/error.log"]
+          ENTRYPOINT ["/bin/sh","-c","java --add-opens java.base/java.lang=ALL-UNNAMED -jar mpm.jar > /logs/mpm.log 2> /logs/error.log"]
         ' > Dockerfile
     
     - name: Log in to GitHub Docker Registry
