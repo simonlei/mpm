@@ -34,7 +34,7 @@ jobs:
         mkdir docker
         cd docker
         mkdir logs
-        cp -R ../mpm-vue3/dist
+        cp -R ../mpm-vue3/dist web
         cp ../mpm-server/target/mpm-server-*.jar mpm.jar
         echo '
           FROM openjdk:17-jdk-alpine
