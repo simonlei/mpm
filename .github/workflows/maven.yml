@@ -13,31 +13,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 8
-      uses: actions/setup-java@v2
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
       with:
-        java-version: '8'
+        java-version: '17'
         distribution: 'adopt'
-    - uses: subosito/flutter-action@v1
+    - name: Use Node.js 20.8.1
+      uses: actions/setup-node@v3
       with:
-        channel: 'stable' 
-
+        node-version: '20.x'
     - name: Build with Maven
       run: |
-        cd app
-        flutter pub get
-        flutter build web --dart-define=remote_addr= --source-maps
+        cd mpm-vue3
+        npm run build
         cd ../mpm-server
-        mvn -B package --file pom.xml -DskipTests -Drevision=1.8
+        mvn -B package --file pom.xml -DskipTests
         cd ..
         mkdir docker
         cd docker
         mkdir logs
-        cp -R ../app/build/web web
+        cp -R ../mpm-vue3/dist
         cp ../mpm-server/target/mpm-server-*.jar mpm.jar
         echo '
-          FROM openjdk:8-jdk-alpine
+          FROM openjdk:17-jdk-alpine
           COPY . /
           WORKDIR .
           ENTRYPOINT ["/bin/sh","-c","java -jar mpm.jar > /logs/mpm.log 2> /logs/error.log"]
@@ -55,6 +54,6 @@ jobs:
       with:
         context: docker
         push: true
-        tags: ghcr.io/${{ github.actor }}/mpm:1.8.${{ github.run_number }}
+        tags: ghcr.io/${{ github.actor }}/mpm:2.0.${{ github.run_number }}
             
 

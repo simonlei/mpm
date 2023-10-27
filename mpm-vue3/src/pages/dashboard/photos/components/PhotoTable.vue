@@ -18,7 +18,6 @@
           <t-image :key="item.name" :src="/cos/ + item.thumb" fit='none' height="150"
                    shape="round" width="200"
                    @click="selectedIndex=index"
-                   @doubleclick="console.log('double')"
                    v-on:dblclick="showDetailView(item,index)"
           >
           </t-image>
@@ -33,6 +32,7 @@
                     v-model:index="detailViewShowIndex"
                     v-model:visible="detailVisible"
                     :images="detailImages"
+                    :onClose="onDetailViewClosed"
                     :onIndexChange="onDetailViewIndexChange"
     >
     </t-image-viewer>
@@ -54,6 +54,7 @@ const detailImages = ref([]);
 const imageViewer = ref(null);
 
 let list = (await getPicIds()).data;
+let oldWidth = 0;
 
 function showDetailView(item, index) {
   detailImages.value.length = 0;
@@ -70,6 +71,10 @@ function showDetailView(item, index) {
   selectedIndex.value = index;
 }
 
+function onDetailViewClosed() {
+  scroller.value.scrollToItem(selectedIndex.value);
+}
+
 function onDetailViewIndexChange(index, context) {
   let delta = context.trigger == 'prev' ? -1 : context.trigger == 'next' ? 1 : 0;
   let nextIndex = selectedIndex.value + delta;
@@ -80,6 +85,7 @@ function onDetailViewIndexChange(index, context) {
 }
 
 async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, visibleEndIndex) {
+  // TODO: 展示大图时，左右切换，页面会有抖动
   var hasUnloaded = false;
   for (let i = viewStartIndex; i <= viewEndIndex; i++) {
     if (list[i] == null) continue;
@@ -91,7 +97,7 @@ async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, v
   console.log("view start " + viewStartIndex + " - " + viewEndIndex + " visiable " +
     visibleStartIndex + " - " + visibleEndIndex + " has unload " + hasUnloaded);
   if (hasUnloaded) {
-    const result = (await getPics(viewStartIndex, viewEndIndex - viewStartIndex));
+    const result = (await getPics(viewStartIndex, Math.max(viewEndIndex - viewStartIndex, 100)));
     const loadData = result.data;
     list.length = result.totalRows;
     for (let i = 0; i < loadData.length; i++) {
@@ -107,7 +113,9 @@ function calcGridItems() {
 }
 
 function onResize() {
+  if (oldWidth == photogrid.value.clientWidth) return;
   gridItems.value = calcGridItems();
+  oldWidth = photogrid.value.clientWidth;
 }
 
 const store = photoFilterStore();

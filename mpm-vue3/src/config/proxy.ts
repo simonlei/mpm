@@ -1,5 +1,5 @@
 export default {
-  isRequesctProxy: false,
+  isRequestProxy: false,
   development: {
     // 开发环境接口请求
     host: 'http://127.0.0.1:8080',

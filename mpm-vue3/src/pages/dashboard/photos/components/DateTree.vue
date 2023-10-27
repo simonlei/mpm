@@ -1,6 +1,7 @@
 <template>
   <div>
-    <t-tree :data="TREE_DATA" :keys="KEYSX" :onActive="treeActive" activable expand-on-click-node
+    <t-tree :data="TREE_DATA.data" :keys="KEYSX" :onActive="treeActive" activable
+            expand-on-click-node
             hover></t-tree>
   </div>
 
@@ -14,7 +15,7 @@ import {photoFilterStore} from '@/store';
 
 const TREE_DATA = await getPicsDateList();
 
-console.log(TREE_DATA);
+console.log(TREE_DATA.data);
 
 const KEYSX = {value: 'id', label: 'title', children: 'months'};
 console.log(KEYSX);
