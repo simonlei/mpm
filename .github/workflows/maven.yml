@@ -26,6 +26,7 @@ jobs:
     - name: Build with Maven
       run: |
         cd mpm-vue3
+        npm install
         npm run build
         cd ../mpm-server
         mvn -B package --file pom.xml -DskipTests
