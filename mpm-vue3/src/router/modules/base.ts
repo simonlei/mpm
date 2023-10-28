@@ -15,6 +15,12 @@ export default [
         component: () => import('@/pages/dashboard/photos/index.vue'),
         meta: {title: '按时间查看'},
       },
+      {
+        path: 'baseByFolder',
+        name: 'PhotoByFolder',
+        component: () => import('@/pages/dashboard/photos/index2.vue'),
+        meta: {title: '按相册查看'},
+      },
     ],
   },
 ];

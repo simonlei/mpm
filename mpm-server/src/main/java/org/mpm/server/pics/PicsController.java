@@ -198,7 +198,7 @@ public class PicsController {
                 cnd.orderBy(sortedBy, desc ? "desc" : "asc");
                 // ...
                 if (req.idOnly) {
-                    ids = DaoUtil.fetchMaps(dao, "select distinct t_photos.id from t_photos " + cnd);
+                    ids = DaoUtil.fetchMaps(dao, "select distinct t_photos.id," + sortedBy + " from t_photos " + cnd);
                 } else {
                     photos = dao.query("t_photos", cnd, null, "distinct t_photos.*");
                 }

@@ -2,15 +2,28 @@ import {request} from '@/utils/request';
 import type {PhotosResult} from './model/photos';
 import type {PhotosDate} from './model/photosDate';
 import {photoFilterStore} from '@/store';
+import {PhotosFolder} from "@/api/model/photosFolder";
 
 const Api = {
   PicsDateList: '/getPicsDate',
+  PicsFolderList: '/getFoldersData',
   PicsList: '/getPics',
 };
 
 export function getPicsDateList() {
   return request.post<PhotosDate []>({
     url: Api.PicsDateList,
+  });
+}
+
+export function getPicsFolderList(parentId: number) {
+  const store = photoFilterStore();
+  let req = {parentId: parentId};
+  Object.assign(req, store);
+
+  return request.post<PhotosFolder []>({
+    url: Api.PicsFolderList,
+    data: req,
   });
 }
 
