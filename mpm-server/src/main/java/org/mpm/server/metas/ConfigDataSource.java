@@ -1,6 +1,10 @@
 package org.mpm.server.metas;
 
 import com.tencent.cloud.CosStsClient;
+import java.io.IOException;
+import java.util.TreeMap;
+import java.util.UUID;
+import javax.servlet.ServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.mpm.server.entity.EntityFile;
@@ -10,12 +14,11 @@ import org.nutz.lang.Lang;
 import org.nutz.lang.util.NutMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.ServletRequest;
-import java.io.IOException;
-import java.util.TreeMap;
-import java.util.UUID;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
@@ -84,8 +87,8 @@ public class ConfigDataSource {
     // used in client
     @GetMapping("/api/getConfig")
     public NutMap fetchConfig(@RequestParam("user") String user,
-                              @RequestParam("timestamp") String timestamp,
-                              @RequestParam("signature") String signature) {
+            @RequestParam("timestamp") String timestamp,
+            @RequestParam("signature") String signature) {
         log.info("user {} timestamp {} signature {}", user, timestamp, signature);
         NutMap result = new NutMap();
         result.setv("baseUrl", String.format("https://%s.cos.%s.myqcloud.com/", bucket, region));
@@ -117,8 +120,8 @@ public class ConfigDataSource {
 
     // used in client
     @PostMapping("/api/authPassword")
-    public NutMap authPassword(@RequestBody String passwd) {
-        if (password.equals(passwd)) {
+    public NutMap authPassword(@RequestBody NutMap userInfo) {
+        if (password.equals(userInfo.get("password"))) {
             NutMap map = Lang.map("user", "admin"); //todo: add real login
             String timestamp = "" + System.currentTimeMillis();
             map.setv("ok", "ok").setv("timestamp", timestamp).setv("signature", calcSignature("admin", timestamp));
