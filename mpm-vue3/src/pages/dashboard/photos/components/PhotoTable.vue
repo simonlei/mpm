@@ -131,6 +131,7 @@ store.$onAction(async ({
   after(async (result) => {
     let newList = (await getPicIds()).data;
     list.length = newList.length;
+    window.document.title = "My Photo Manager(" + list.length + ")";
     for (let i = 0; i < newList.length; i++) {
       list[i] = newList[i];
     }
