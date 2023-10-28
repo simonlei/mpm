@@ -1,20 +1,10 @@
 <template>
   <div :class="layoutCls">
     <t-head-menu :class="menuCls" :theme="theme" expand-type="popup" :value="active">
-      <template #logo>
-        <span v-if="showLogo" class="header-logo-container" @click="handleNav('/dashboard/base')">
-          <logo-full class="t-logo" />
-        </span>
-        <div v-else class="header-operate-left">
-          <t-button theme="default" shape="square" variant="text" @click="changeCollapsed">
-            <t-icon class="collapsed-icon" name="view-list" />
-          </t-button>
-          <search :layout="layout" />
-        </div>
-      </template>
       <template v-if="layout !== 'side'" #default>
         <menu-content class="header-menu" :nav-data="menu" />
       </template>
+      <!-- My Photo Manager(1111) [ ] 跳转 []只看星标 []只看视频 [tags dropdown] [排序（时间、大小、导入时间、宽度、高度] 回收站(1) 地图模式 上传照片 -->
       <template #operations>
         <div class="operations-container">
           <!-- 搜索框 -->
@@ -23,11 +13,6 @@
           <t-tooltip placement="bottom" content="代码仓库">
             <t-button theme="default" shape="square" variant="text" @click="navToGitHub">
               <t-icon name="logo-github" />
-            </t-button>
-          </t-tooltip>
-          <t-tooltip placement="bottom" content="帮助文档">
-            <t-button theme="default" shape="square" variant="text" @click="navToHelper">
-              <t-icon name="help-circle" />
             </t-button>
           </t-tooltip>
           <t-dropdown :min-column-width="135" trigger="click">
@@ -67,7 +52,6 @@ import { useRouter } from 'vue-router';
 import { useSettingStore } from '@/store';
 import { getActive } from '@/router';
 import { prefix } from '@/config/global';
-import LogoFull from '@/assets/assets-logo-full.svg?component';
 import type { MenuRoute } from '@/types/interface';
 
 import Search from './Search.vue';
@@ -129,12 +113,6 @@ const menuCls = computed(() => {
   ];
 });
 
-const changeCollapsed = () => {
-  settingStore.updateConfig({
-    isSidebarCompact: !settingStore.isSidebarCompact,
-  });
-};
-
 const handleNav = (url) => {
   router.push(url);
 };
@@ -147,11 +125,7 @@ const handleLogout = () => {
 };
 
 const navToGitHub = () => {
-  window.open('https://github.com/tencent/tdesign-vue-next-starter');
-};
-
-const navToHelper = () => {
-  window.open('http://tdesign.tencent.com/starter/docs/get-started');
+  window.open('https://github.com/simonlei/mpm');
 };
 </script>
 <style lang="less" scoped>
