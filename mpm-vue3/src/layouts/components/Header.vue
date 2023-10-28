@@ -20,9 +20,6 @@
           <!-- 搜索框 -->
           <search v-if="layout !== 'side'" :layout="layout" />
 
-          <!-- 全局通知 -->
-          <notice />
-
           <t-tooltip placement="bottom" content="代码仓库">
             <t-button theme="default" shape="square" variant="text" @click="navToGitHub">
               <t-icon name="logo-github" />
@@ -73,7 +70,6 @@ import { prefix } from '@/config/global';
 import LogoFull from '@/assets/assets-logo-full.svg?component';
 import type { MenuRoute } from '@/types/interface';
 
-import Notice from './Notice.vue';
 import Search from './Search.vue';
 import MenuContent from './MenuContent.vue';
 

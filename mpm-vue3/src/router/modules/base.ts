@@ -7,19 +7,13 @@ export default [
     component: Layout,
     redirect: '/dashboard/base',
     name: 'dashboard',
-    meta: { title: '仪表盘', icon: DashboardIcon },
+    meta: {title: '照片', icon: DashboardIcon},
     children: [
-      {
-        path: 'detail',
-        name: 'DashboardDetail',
-        component: () => import('@/pages/dashboard/detail/index.vue'),
-        meta: { title: '统计报表' },
-      },
       {
         path: 'base',
         name: 'PhotoByDate',
         component: () => import('@/pages/dashboard/photos/index.vue'),
-        meta: { title: '照片' },
+        meta: {title: '按时间查看'},
       },
     ],
   },
