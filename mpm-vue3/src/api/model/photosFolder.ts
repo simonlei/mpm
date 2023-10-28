@@ -1,10 +1,12 @@
-export interface PhotosFoderRsult {
+import {TreeOptionData} from "tdesign-vue-next/lib/common";
+
+export interface PhotosFolderResult {
   data: Array<PhotosFolder>;
 }
 
-export interface PhotosFolder {
+export class PhotosFolder implements TreeOptionData {
   id: number;
   title: string;
   path: string;
-  children: true;
+  children: any;
 }
