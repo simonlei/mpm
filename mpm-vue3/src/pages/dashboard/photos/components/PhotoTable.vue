@@ -41,10 +41,10 @@
 </template>
 
 <script lang="ts" setup>
-
 import {getPicIds, getPics} from "@/api/photos";
 import {photoFilterStore} from '@/store';
 import {onMounted, ref} from "vue";
+import {onKeyStroke} from '@vueuse/core'
 
 const gridItems = ref(10);
 const selectedIndex = ref(0);
@@ -55,6 +55,13 @@ const imageViewer = ref(null);
 
 let list = (await getPicIds()).data;
 let oldWidth = 0;
+
+console.log("Setting up photo table...............");
+
+onKeyStroke('Enter', (e) => {
+  if (list == null || selectedIndex.value < 0 || selectedIndex.value > list.length - 1) return;
+  showDetailView(list[selectedIndex.value], selectedIndex.value);
+})
 
 function showDetailView(item, index) {
   detailImages.value.length = 0;
@@ -136,9 +143,10 @@ store.$onAction(async ({
       list[i] = newList[i];
     }
 
-
-    scroller.value.updateVisibleItems(true);
-    scroller.value.scrollToPosition(0);
+    if (scroller.value != null) {
+      scroller.value.updateVisibleItems(true);
+      scroller.value.scrollToPosition(0);
+    }
   })
 });
 const photogrid = ref(null);
