@@ -62,6 +62,25 @@ onKeyStroke('Enter', (e) => {
   if (list == null || selectedIndex.value < 0 || selectedIndex.value > list.length - 1) return;
   showDetailView(list[selectedIndex.value], selectedIndex.value);
 })
+onKeyStroke('ArrowLeft', (e) => {
+  if (detailVisible.value) return;
+  changeSelectedIndex(-1);
+  e.preventDefault();
+})
+onKeyStroke('ArrowRight', (e) => {
+  if (detailVisible.value) return;
+  changeSelectedIndex(1);
+  e.preventDefault();
+})
+onKeyStroke('ArrowUp', (e) => {
+  changeSelectedIndex(-gridItems.value);
+  e.preventDefault();
+})
+onKeyStroke('ArrowDown', (e) => {
+  changeSelectedIndex(gridItems.value);
+  e.preventDefault();
+})
+
 
 function showDetailView(item, index) {
   detailImages.value.length = 0;
@@ -79,16 +98,28 @@ function showDetailView(item, index) {
 }
 
 function onDetailViewClosed() {
+  console.log('detail view closed:' + selectedIndex.value);
   scroller.value.scrollToItem(selectedIndex.value);
 }
 
 function onDetailViewIndexChange(index, context) {
   let delta = context.trigger == 'prev' ? -1 : context.trigger == 'next' ? 1 : 0;
+  changeSelectedIndex(delta);
+}
+
+function changeSelectedIndex(delta: number) {
+  console.log("from " + selectedIndex.value + " with delta " + delta);
   let nextIndex = selectedIndex.value + delta;
   if (nextIndex < 0) nextIndex = 0;
   if (nextIndex > list.length - 1) nextIndex = list.length - 1;
   console.log("changed to " + nextIndex);
-  showDetailView(list[nextIndex], nextIndex);
+
+  if (detailVisible.value)
+    showDetailView(list[nextIndex], nextIndex);
+  else {
+    selectedIndex.value = nextIndex;
+    scroller.value.scrollToItem(selectedIndex.value);
+  }
 }
 
 async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, visibleEndIndex) {
@@ -136,6 +167,7 @@ store.$onAction(async ({
                          onError, // action 抛出或拒绝的钩子
                        }) => {
   after(async (result) => {
+    console.log('store changed... ' + result);
     let newList = (await getPicIds()).data;
     list.length = newList.length;
     window.document.title = "My Photo Manager(" + list.length + ")";
