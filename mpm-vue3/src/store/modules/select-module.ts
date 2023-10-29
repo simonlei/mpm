@@ -3,18 +3,18 @@ import {defineStore} from 'pinia';
 export const selectModuleStore = defineStore('selectModule', {
   state: () => ({
     selectedPhotoIds: [],
-    lastSelectedIndex: null,
+    selectedIndex: null,
   }),
   getters: {},
   actions: {
     clearSelect() {
       // 暂时没用
       this.selectedPhotoIds = [];
-      this.lastSelectedIndex = null;
+      this.selectedIndex = null;
     },
     selectIndex(index: number) {
       this.selectedPhotoIds = [index];
-      this.lastSelectedIndex = index;
+      this.selectedIndex = index;
     }
   },
   persist: true,

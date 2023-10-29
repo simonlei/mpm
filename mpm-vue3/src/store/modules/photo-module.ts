@@ -4,6 +4,7 @@ import {getPics} from "@/api/photos";
 
 export const photoModuleStore = defineStore('photoModule', {
   state: () => ({
+    idList: [],
     picsMap: new Map<number, Photo>(),
     loadingIndex: [],
   }),
@@ -14,7 +15,7 @@ export const photoModuleStore = defineStore('photoModule', {
         state.loadingIndex.forEach((value: number) => {
           if (index >= value && index < value + 150) loading = true;
         });
-        console.log('loading ' + index + ' ' + loading);
+        // console.log('loading ' + index + ' ' + loading);
         return loading;
       }
 
@@ -33,10 +34,10 @@ export const photoModuleStore = defineStore('photoModule', {
       }
 
       return async (id, index) => {
-        console.log('id ' + id + ' index ' + index);
+        // console.log('id ' + id + ' index ' + index);
         while (state.picsMap.get(id) == null) {
           if (isLoading(index)) {
-            await sleep(1000);
+            await sleep(50);
             // await loadingIndex(index);
           } else {
             await loadingIndex(index);

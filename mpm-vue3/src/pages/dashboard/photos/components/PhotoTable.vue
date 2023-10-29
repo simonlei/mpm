@@ -4,16 +4,16 @@
                      :grid-items="gridItems"
                      :item-size="156"
                      :itemSecondarySize="206"
-                     :items="list"
+                     :items="photoStore.idList"
                      class="scroller"
                      key-field="id"
                      page-mode
                      @resize="onResize"
-                     @update="onScrollUpdate"
     >
       <template #default="{ item, index }">
         <Suspense>
-          <photo-item :id="item.id" :key="item.id" :index="index"/>
+          <photo-item :id="item.id" :key="item.id" :index="index"
+                      :style="{'border-width': selectStore.selectedIndex == index ? '2px' : '0px','border-style': 'solid','border-color': 'blue'}"/>
         </Suspense>
       </template>
 
@@ -22,9 +22,9 @@
 
   <div>
     <t-image-viewer ref="imageViewer"
-                    v-model:index="detailViewShowIndex"
-                    v-model:visible="detailVisible"
-                    :images="detailImages"
+                    v-model:index="detailViewStore.detailViewShowIndex"
+                    v-model:visible="detailViewStore.detailVisible"
+                    :images="detailViewStore.detailImages"
                     :onClose="onDetailViewClosed"
                     :onIndexChange="onDetailViewIndexChange"
     >
@@ -34,37 +34,40 @@
 </template>
 
 <script lang="ts" setup>
-import {getPicIds, getPics} from "@/api/photos";
-import {photoFilterStore} from '@/store';
+import {getPicIds} from "@/api/photos";
+import {detailViewModuleStore, photoFilterStore, photoModuleStore} from '@/store';
 import {onMounted, ref} from "vue";
 import {onKeyStroke} from '@vueuse/core';
-import AsyncLock from 'async-lock';
 import PhotoItem from './PhotoItem.vue'
-
+import {selectModuleStore} from "@/store/modules/select-module";
 
 const gridItems = ref(10);
-const selectedIndex = ref(0);
-const detailVisible = ref(false);
-const detailViewShowIndex = ref(0);
-const detailImages = ref([]);
 const imageViewer = ref(null);
+const photoStore = photoModuleStore();
+const selectStore = selectModuleStore();
+const detailViewStore = detailViewModuleStore();
+const store = photoFilterStore();
+const scroller = ref(null);
+const photogrid = ref(null);
 
-let list = (await getPicIds()).data;
+
+photoStore.idList = (await getPicIds()).data;
 let oldWidth = 0;
 
 console.log("Setting up photo table...............");
 
-onKeyStroke('Enter', (e) => {
-  if (list == null || selectedIndex.value < 0 || selectedIndex.value > list.length - 1) return;
-  showDetailView(list[selectedIndex.value], selectedIndex.value);
+
+onKeyStroke('Enter', async (e) => {
+  if (selectStore.selectedIndex < 0 || selectStore.selectedIndex > photoStore.idList.length - 1) return;
+  await detailViewStore.showDetailView(selectStore.selectedIndex);
 })
 onKeyStroke('ArrowLeft', (e) => {
-  if (detailVisible.value) return;
+  if (detailViewStore.detailVisible) return;
   changeSelectedIndex(-1);
   e.preventDefault();
 })
 onKeyStroke('ArrowRight', (e) => {
-  if (detailVisible.value) return;
+  if (detailViewStore.detailVisible) return;
   changeSelectedIndex(1);
   e.preventDefault();
 })
@@ -78,24 +81,9 @@ onKeyStroke('ArrowDown', (e) => {
 })
 
 
-function showDetailView(item, index) {
-  detailImages.value.length = 0;
-  detailViewShowIndex.value = 0;
-  if (index > 0) {
-    detailImages.value.push("/cos/small/" + list[index - 1].name);
-    detailViewShowIndex.value = 1;
-  }
-  detailImages.value.push("/cos/small/" + list[index].name);
-  if (index < list.length - 1) {
-    detailImages.value.push("/cos/small/" + list[index + 1].name);
-  }
-  detailVisible.value = true;
-  selectedIndex.value = index;
-}
-
 function onDetailViewClosed() {
-  console.log('detail view closed:' + selectedIndex.value);
-  scroller.value.scrollToItem(selectedIndex.value);
+  console.log('detail view closed:' + selectStore.selectedIndex);
+  scroller.value.scrollToItem(selectStore.selectedIndex);
 }
 
 function onDetailViewIndexChange(index, context) {
@@ -103,54 +91,24 @@ function onDetailViewIndexChange(index, context) {
   changeSelectedIndex(delta);
 }
 
-function changeSelectedIndex(delta: number) {
-  console.log("from " + selectedIndex.value + " with delta " + delta);
-  let nextIndex = selectedIndex.value + delta;
+async function changeSelectedIndex(delta: number) {
+  console.log("from " + selectStore.selectedIndex + " with delta " + delta);
+  let nextIndex = selectStore.selectedIndex + delta;
   if (nextIndex < 0) nextIndex = 0;
-  if (nextIndex > list.length - 1) nextIndex = list.length - 1;
+  if (nextIndex > photoStore.idList.length - 1) nextIndex = photoStore.idList.length - 1;
   console.log("changed to " + nextIndex);
 
-  if (detailVisible.value)
-    showDetailView(list[nextIndex], nextIndex);
+  if (detailViewStore.detailVisible)
+    await detailViewStore.showDetailView(nextIndex);
   else {
-    selectedIndex.value = nextIndex;
+    selectStore.selectedIndex = nextIndex;
     const start = scroller.value.getScroll().start;
     const end = scroller.value.getScroll().end;
     const row = Math.floor(nextIndex / gridItems.value);
     console.log('start ' + start + ' end ' + end + ' row start ' + row * 206 + ' row end ' + (row + 1) * 206);
     if (row * 206 - 300 < start || (row + 1) * 206 - 300 > end)
-      scroller.value.scrollToItem(selectedIndex.value);
+      scroller.value.scrollToItem(selectStore.selectedIndex);
   }
-}
-
-async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, visibleEndIndex) {
-  // const AsyncLock = require('async-lock');
-  const lock = new AsyncLock();
-
-  lock.acquire('scrollUpdate', async function () {
-
-    // TODO: 展示大图时，左右切换，页面会有抖动
-    var hasUnloaded = false;
-    for (let i = viewStartIndex; i <= viewEndIndex; i++) {
-      if (list[i] == null) continue;
-      if (list[i].name == null) {
-        hasUnloaded = true;
-        break;
-      }
-    }
-    console.log("view start " + viewStartIndex + " - " + viewEndIndex + " visiable " +
-      visibleStartIndex + " - " + visibleEndIndex + " has unload " + hasUnloaded);
-    if (hasUnloaded) {
-      const result = (await getPics(viewStartIndex, Math.max(viewEndIndex - viewStartIndex, 100)));
-      const loadData = result.data;
-      list.length = result.totalRows;
-      for (let i = 0; i < loadData.length; i++) {
-        Object.assign(list[i + viewStartIndex], loadData[i]);
-      }
-      console.log('fetch end' + viewEndIndex);
-    }
-  });
-  // console.log(list);
 }
 
 function calcGridItems() {
@@ -164,9 +122,6 @@ function onResize() {
   oldWidth = photogrid.value.clientWidth;
 }
 
-const store = photoFilterStore();
-const scroller = ref(null);
-
 store.$onAction(async ({
                          name, // action 名称
                          store, // store 实例，类似 `someStore`
@@ -177,10 +132,11 @@ store.$onAction(async ({
   after(async (result) => {
     console.log('store changed... ' + result);
     let newList = (await getPicIds()).data;
-    list.length = newList.length;
-    window.document.title = "My Photo Manager(" + list.length + ")";
+    selectStore.selectedIndex = 0;
+    photoStore.idList.length = newList.length;
+    window.document.title = "My Photo Manager(" + photoStore.idList.length + ")";
     for (let i = 0; i < newList.length; i++) {
-      list[i] = newList[i];
+      photoStore.idList[i] = newList[i];
     }
 
     if (scroller.value != null) {
@@ -189,8 +145,6 @@ store.$onAction(async ({
     }
   })
 });
-const photogrid = ref(null);
-
 
 onMounted(async () => {
   gridItems.value = calcGridItems();
