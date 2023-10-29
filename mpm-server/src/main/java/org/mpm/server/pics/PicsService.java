@@ -7,6 +7,7 @@ import com.drew.metadata.exif.GpsDirectory;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.COSObject;
 import com.qcloud.cos.model.CopyObjectRequest;
+import com.qcloud.cos.model.GetObjectRequest;
 import com.qcloud.cos.model.ObjectMetadata;
 import com.qcloud.cos.model.ciModel.common.ImageProcessRequest;
 import com.qcloud.cos.model.ciModel.common.MediaInputObject;
@@ -26,12 +27,19 @@ import com.qcloud.cos.model.ciModel.snapshot.SnapshotRequest;
 import com.qcloud.cos.model.ciModel.template.MediaListTemplateResponse;
 import com.qcloud.cos.model.ciModel.template.MediaTemplateRequest;
 import com.qcloud.cos.model.ciModel.template.MediaTemplateResponse;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityBlockPicture;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityMeta;
 import org.mpm.server.entity.EntityPhoto;
-import org.mpm.server.remote.CosRemoteService;
 import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
@@ -47,14 +55,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 @Service
 @Slf4j
 public class PicsService {
@@ -63,7 +63,6 @@ public class PicsService {
     private static final String VIDEO = "video";
     final Dao dao;
     final COSClient cosClient;
-    final CosRemoteService cosRemoteService;
     @Autowired
     GisService gisService;
 
@@ -74,10 +73,9 @@ public class PicsService {
     @Value("${smallphoto.format:}")
     String smallFormat;
 
-    public PicsService(Dao dao, COSClient cosClient, CosRemoteService cosRemoteService) {
+    public PicsService(Dao dao, COSClient cosClient) {
         this.dao = dao;
         this.cosClient = cosClient;
-        this.cosRemoteService = cosRemoteService;
     }
 
     public int count(boolean trashed) {
@@ -335,7 +333,7 @@ public class PicsService {
     void setInfosFromCos(String key, EntityPhoto photo) {
         setImageInfo(key, photo);
 
-        Map exifInfo = cosRemoteService.getExifInfo(key);
+        Map exifInfo = getExifInfo(key);
         if (exifInfo.get("error") != null) {
             return;
         }
@@ -356,7 +354,7 @@ public class PicsService {
 
     private void setImageInfo(String key, EntityPhoto photo) {
         try {
-            Map imageInfo = cosRemoteService.getImageInfo(key);
+            Map imageInfo = getImageInfo(key);
             photo.setWidth(MyUtils.parseInt(imageInfo.get("width"), 0));
             photo.setHeight(MyUtils.parseInt(imageInfo.get("height"), 0));
         } catch (Exception e) {
@@ -463,5 +461,21 @@ public class PicsService {
         dao.updateIgnoreNull(photo);
         generateSmallPic(key, photo.getName());
         return "ok";
+    }
+
+    public Map getImageInfo(String key) throws IOException {
+        return getCosWithRule(key, "imageInfo");
+    }
+
+    private Map getCosWithRule(String key, String rule) {
+        GetObjectRequest getObj = new GetObjectRequest(bucket, key);
+        getObj.putCustomQueryParameter(rule, null);
+        COSObject object = cosClient.getObject(getObj);
+
+        return (Map) Json.fromJson(Streams.utf8r(object.getObjectContent()));
+    }
+
+    public Map getExifInfo(String key) {
+        return getCosWithRule(key, "exif");
     }
 }
