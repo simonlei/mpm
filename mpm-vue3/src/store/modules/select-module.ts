@@ -10,7 +10,7 @@ export const selectModuleStore = defineStore('selectModule', {
     clearSelect() {
       // 暂时没用
       this.selectedPhotoIds = [];
-      this.selectedIndex = null;
+      this.selectedIndex = 0;
     },
     selectIndex(index: number) {
       this.selectedPhotoIds = [index];

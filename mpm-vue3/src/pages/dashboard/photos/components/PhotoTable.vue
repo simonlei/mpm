@@ -46,7 +46,7 @@ const imageViewer = ref(null);
 const photoStore = photoModuleStore();
 const selectStore = selectModuleStore();
 const detailViewStore = detailViewModuleStore();
-const store = photoFilterStore();
+const filterStore = photoFilterStore();
 const scroller = ref(null);
 const photogrid = ref(null);
 
@@ -100,15 +100,15 @@ async function changeSelectedIndex(delta: number) {
 
   if (detailViewStore.detailVisible)
     await detailViewStore.showDetailView(nextIndex);
-  else {
-    selectStore.selectedIndex = nextIndex;
-    const start = scroller.value.getScroll().start;
-    const end = scroller.value.getScroll().end;
-    const row = Math.floor(nextIndex / gridItems.value);
-    console.log('start ' + start + ' end ' + end + ' row start ' + row * 206 + ' row end ' + (row + 1) * 206);
-    if (row * 206 - 300 < start || (row + 1) * 206 - 300 > end)
-      scroller.value.scrollToItem(selectStore.selectedIndex);
-  }
+
+  selectStore.selectedIndex = nextIndex;
+  const start = scroller.value.getScroll().start;
+  const end = scroller.value.getScroll().end;
+  const row = Math.floor(nextIndex / gridItems.value);
+  console.log('start ' + start + ' end ' + end + ' row start ' + row * 156 + ' row end ' + (row + 1) * 156);
+  if (row * 156 < start || (row + 1) * 156 > end)
+    scroller.value.scrollToItem(selectStore.selectedIndex);
+
 }
 
 function calcGridItems() {
@@ -122,17 +122,17 @@ function onResize() {
   oldWidth = photogrid.value.clientWidth;
 }
 
-store.$onAction(async ({
-                         name, // action 名称
-                         store, // store 实例，类似 `someStore`
-                         args, // 传递给 action 的参数数组
-                         after, // 在 action 返回或解决后的钩子
-                         onError, // action 抛出或拒绝的钩子
-                       }) => {
+filterStore.$onAction(async ({
+                               name, // action 名称
+                               store, // store 实例，类似 `someStore`
+                               args, // 传递给 action 的参数数组
+                               after, // 在 action 返回或解决后的钩子
+                               onError, // action 抛出或拒绝的钩子
+                             }) => {
   after(async (result) => {
     console.log('store changed... ' + result);
     let newList = (await getPicIds()).data;
-    selectStore.selectedIndex = 0;
+    selectStore.clearSelect();
     photoStore.idList.length = newList.length;
     window.document.title = "My Photo Manager(" + photoStore.idList.length + ")";
     for (let i = 0; i < newList.length; i++) {
