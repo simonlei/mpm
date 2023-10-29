@@ -12,5 +12,6 @@ export * from './modules/user';
 export * from './modules/setting';
 export * from './modules/tabs-router';
 export * from './modules/photo-filter';
+export * from './modules/photo-module';
 
 export default store;

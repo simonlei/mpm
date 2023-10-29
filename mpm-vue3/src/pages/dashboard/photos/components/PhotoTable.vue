@@ -1,7 +1,6 @@
 <template>
   <div ref="photogrid">
-    <RecycleScroller :key="Date.now()"
-                     ref="scroller" :emit-update="true"
+    <RecycleScroller ref="scroller"
                      :grid-items="gridItems"
                      :item-size="156"
                      :itemSecondarySize="206"
@@ -13,15 +12,9 @@
                      @update="onScrollUpdate"
     >
       <template #default="{ item, index }">
-        <div
-          :style="{'border-width': selectedIndex == index ? '2px' : '0px','border-style': 'solid','border-color': 'blue'}">
-          <t-image :key="item.name" :src="/cos/ + item.thumb" fit='none' height="150"
-                   shape="round" width="200"
-                   @click="selectedIndex=index"
-                   v-on:dblclick="showDetailView(item,index)"
-          >
-          </t-image>
-        </div>
+        <Suspense>
+          <photo-item :id="item.id" :key="item.id" :index="index"/>
+        </Suspense>
       </template>
 
     </RecycleScroller>
@@ -44,7 +37,10 @@
 import {getPicIds, getPics} from "@/api/photos";
 import {photoFilterStore} from '@/store';
 import {onMounted, ref} from "vue";
-import {onKeyStroke} from '@vueuse/core'
+import {onKeyStroke} from '@vueuse/core';
+import AsyncLock from 'async-lock';
+import PhotoItem from './PhotoItem.vue'
+
 
 const gridItems = ref(10);
 const selectedIndex = ref(0);
@@ -118,30 +114,42 @@ function changeSelectedIndex(delta: number) {
     showDetailView(list[nextIndex], nextIndex);
   else {
     selectedIndex.value = nextIndex;
-    scroller.value.scrollToItem(selectedIndex.value);
+    const start = scroller.value.getScroll().start;
+    const end = scroller.value.getScroll().end;
+    const row = Math.floor(nextIndex / gridItems.value);
+    console.log('start ' + start + ' end ' + end + ' row start ' + row * 206 + ' row end ' + (row + 1) * 206);
+    if (row * 206 - 300 < start || (row + 1) * 206 - 300 > end)
+      scroller.value.scrollToItem(selectedIndex.value);
   }
 }
 
 async function onScrollUpdate(viewStartIndex, viewEndIndex, visibleStartIndex, visibleEndIndex) {
-  // TODO: 展示大图时，左右切换，页面会有抖动
-  var hasUnloaded = false;
-  for (let i = viewStartIndex; i <= viewEndIndex; i++) {
-    if (list[i] == null) continue;
-    if (list[i].name == null) {
-      hasUnloaded = true;
-      break;
+  // const AsyncLock = require('async-lock');
+  const lock = new AsyncLock();
+
+  lock.acquire('scrollUpdate', async function () {
+
+    // TODO: 展示大图时，左右切换，页面会有抖动
+    var hasUnloaded = false;
+    for (let i = viewStartIndex; i <= viewEndIndex; i++) {
+      if (list[i] == null) continue;
+      if (list[i].name == null) {
+        hasUnloaded = true;
+        break;
+      }
     }
-  }
-  console.log("view start " + viewStartIndex + " - " + viewEndIndex + " visiable " +
-    visibleStartIndex + " - " + visibleEndIndex + " has unload " + hasUnloaded);
-  if (hasUnloaded) {
-    const result = (await getPics(viewStartIndex, Math.max(viewEndIndex - viewStartIndex, 100)));
-    const loadData = result.data;
-    list.length = result.totalRows;
-    for (let i = 0; i < loadData.length; i++) {
-      Object.assign(list[i + viewStartIndex], loadData[i]);
+    console.log("view start " + viewStartIndex + " - " + viewEndIndex + " visiable " +
+      visibleStartIndex + " - " + visibleEndIndex + " has unload " + hasUnloaded);
+    if (hasUnloaded) {
+      const result = (await getPics(viewStartIndex, Math.max(viewEndIndex - viewStartIndex, 100)));
+      const loadData = result.data;
+      list.length = result.totalRows;
+      for (let i = 0; i < loadData.length; i++) {
+        Object.assign(list[i + viewStartIndex], loadData[i]);
+      }
+      console.log('fetch end' + viewEndIndex);
     }
-  }
+  });
   // console.log(list);
 }
 
