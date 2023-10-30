@@ -7,6 +7,9 @@
       <!-- My Photo Manager(1111) [ ] 跳转 []只看星标 []只看视频 [tags dropdown] [排序（时间、大小、导入时间、宽度、高度] 回收站(1) 地图模式 上传照片 -->
       <template #operations>
         <div class="operations-container">
+          <!--
+          <t-input-number :label="'跳转至'" v-model:value="selectStore.lastSelectedIndex" align="center" theme="normal" :onEnter="jumpTo" />
+          -->
           <!-- 搜索框 -->
           <search v-if="layout !== 'side'" :layout="layout" />
 
@@ -56,6 +59,7 @@ import type { MenuRoute } from '@/types/interface';
 
 import Search from './Search.vue';
 import MenuContent from './MenuContent.vue';
+import {selectModuleStore} from "@/store/modules/select-module";
 
 const props = defineProps({
   theme: {
@@ -90,6 +94,7 @@ const props = defineProps({
 
 const router = useRouter();
 const settingStore = useSettingStore();
+const selectStore = selectModuleStore();
 
 const toggleSettingPanel = () => {
   settingStore.updateConfig({
@@ -126,6 +131,10 @@ const handleLogout = () => {
 
 const navToGitHub = () => {
   window.open('https://github.com/simonlei/mpm');
+};
+
+const jumpTo = (value:number) => {
+  selectStore.selectIndex(value, false ,false);
 };
 </script>
 <style lang="less" scoped>

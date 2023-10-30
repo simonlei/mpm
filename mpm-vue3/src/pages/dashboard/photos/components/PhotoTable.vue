@@ -13,8 +13,9 @@
       <template #default="{ item, index }">
         <Suspense>
           <photo-item :id="item.id" :key="item.id" :index="index"
-                      :style="{'border-width': selectStore.selectedIndexes.indexOf(index)>=0 ? '2px' : '0px','border-style': 'solid','border-color': 'blue'}"/>
+                      :style="{'border-width': selectStore.isSelected(index) ? '2px' : '0px','border-style': 'solid','border-color': 'blue'}"/>
         </Suspense>
+        =={{ index }}==
       </template>
 
     </RecycleScroller>
@@ -37,7 +38,7 @@
 import {getPicIds} from "@/api/photos";
 import {detailViewModuleStore, photoFilterStore, photoModuleStore} from '@/store';
 import {onMounted, ref} from "vue";
-import {onKeyStroke} from '@vueuse/core';
+import {onKeyStroke, useActiveElement} from '@vueuse/core';
 import PhotoItem from './PhotoItem.vue'
 import {selectModuleStore} from "@/store/modules/select-module";
 
@@ -55,29 +56,35 @@ photoStore.idList = (await getPicIds()).data;
 let oldWidth = 0;
 
 console.log("Setting up photo table...............");
-
+const activeElement = useActiveElement()
+const notUsingInput = () => {
+  // console.log(activeElement.value?.tagName);
+  return activeElement.value?.tagName != 'INPUT'
+    && activeElement.value?.tagName != 'TEXTAREA';
+}
 
 onKeyStroke('Enter', async (e) => {
   if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
-  await detailViewStore.showDetailView(selectStore.lastSelectedIndex);
+  if (notUsingInput())
+    await detailViewStore.showDetailView(selectStore.lastSelectedIndex);
 })
 onKeyStroke('ArrowLeft', (e) => {
   if (detailViewStore.detailVisible) return;
-  changeSelectedIndex(-1, e.shiftKey);
-  e.preventDefault();
+  if (notUsingInput())
+    changeSelectedIndex(-1, e.shiftKey);
 })
 onKeyStroke('ArrowRight', (e) => {
   if (detailViewStore.detailVisible) return;
-  changeSelectedIndex(1, e.shiftKey);
-  e.preventDefault();
+  if (notUsingInput())
+    changeSelectedIndex(1, e.shiftKey);
 })
 onKeyStroke('ArrowUp', (e) => {
-  changeSelectedIndex(-gridItems.value, e.shiftKey);
-  e.preventDefault();
+  if (notUsingInput())
+    changeSelectedIndex(-gridItems.value, e.shiftKey);
 })
 onKeyStroke('ArrowDown', (e) => {
-  changeSelectedIndex(gridItems.value, e.shiftKey);
-  e.preventDefault();
+  if (notUsingInput())
+    changeSelectedIndex(gridItems.value, e.shiftKey);
 })
 
 
@@ -102,14 +109,6 @@ async function changeSelectedIndex(delta: number, shiftKey: boolean) {
     await detailViewStore.showDetailView(nextIndex);
 
   selectStore.selectIndex(nextIndex, false, shiftKey);
-
-  const start = scroller.value.getScroll().start;
-  const end = scroller.value.getScroll().end;
-  const row = Math.floor(nextIndex / gridItems.value);
-  console.log('start ' + start + ' end ' + end + ' row start ' + row * 156 + ' row end ' + (row + 1) * 156);
-  if (row * 156 < start || (row + 1) * 156 > end)
-    scroller.value.scrollToItem(selectStore.lastSelectedIndex);
-
 }
 
 function calcGridItems() {
@@ -133,7 +132,7 @@ filterStore.$onAction(async ({
   after(async (result) => {
     console.log('store changed... ' + result);
     let newList = (await getPicIds()).data;
-    selectStore.clearSelect();
+    // selectStore.clearSelect();
     photoStore.idList.length = newList.length;
     window.document.title = "My Photo Manager(" + photoStore.idList.length + ")";
     for (let i = 0; i < newList.length; i++) {
@@ -143,6 +142,19 @@ filterStore.$onAction(async ({
     if (scroller.value != null) {
       scroller.value.updateVisibleItems(true);
       scroller.value.scrollToPosition(0);
+    }
+  })
+});
+
+selectStore.$onAction(async ({after}) => {
+  after(async (result) => {
+    if (selectStore.lastSelectedIndex == null || selectStore.lastSelectedIndex < 0) return;
+    const start = scroller.value.getScroll().start;
+    const end = scroller.value.getScroll().end;
+    const row = Math.floor(selectStore.lastSelectedIndex / gridItems.value);
+    console.log('start ' + start + ' end ' + end + ' row start ' + row * 156 + ' row end ' + (row + 1) * 156);
+    if (row * 156 < start || (row + 1) * 156 > end) {
+      scroller.value.scrollToItem(selectStore.lastSelectedIndex);
     }
   })
 });
