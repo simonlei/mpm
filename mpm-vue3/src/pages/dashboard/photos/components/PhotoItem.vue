@@ -3,14 +3,12 @@
     <t-image :key="photo.name" :alt="''+index" :src="/cos/ + photo.thumb" fit='none'
              height="100" shape="round"
              width="200"
-             @click="clicked"
              v-on:dblclick="dblClicked"
+             @click.exact="clicked"
+             @click.meta.exact="metaClicked"
+             @click.shift.exact="shiftClicked"
     >
     </t-image>
-    <!--
-
-    {{ id }} {{ index }} {{ photo.name }}
-    -->
   </div>
 </template>
 <script lang="ts" setup>
@@ -27,7 +25,15 @@ const photo = ref();
 photo.value = await store.getPhotoById(props.id, props.index);
 
 function clicked() {
-  selectStore.selectedIndex = props.index;
+  selectStore.selectIndex(props.index, false, false);
+}
+
+function metaClicked() {
+  selectStore.selectIndex(props.index, true, false);
+}
+
+function shiftClicked() {
+  selectStore.selectIndex(props.index, false, true);
 }
 
 function dblClicked() {

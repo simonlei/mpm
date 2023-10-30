@@ -29,7 +29,7 @@ export const detailViewModuleStore = defineStore('detailViewModule', {
         this.detailImages.push("/cos/small/" + (await getPhotoItem(index + 1)).name);
       }
       this.detailVisible = true;
-      selectStore.selectedIndex = index;
+      selectStore.selectIndex(index, false, false);
     }
   },
 });
