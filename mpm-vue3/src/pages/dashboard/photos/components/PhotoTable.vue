@@ -13,7 +13,7 @@
       <template #default="{ item, index }">
         <Suspense>
           <photo-item :id="item.id" :key="item.id" :index="index"
-                      :style="{'border-width': selectStore.selectedIndex == index ? '2px' : '0px','border-style': 'solid','border-color': 'blue'}"/>
+                      :style="{'border-width': selectStore.selectedIndexes.indexOf(index)>=0 ? '2px' : '0px','border-style': 'solid','border-color': 'blue'}"/>
         </Suspense>
       </template>
 
@@ -58,42 +58,42 @@ console.log("Setting up photo table...............");
 
 
 onKeyStroke('Enter', async (e) => {
-  if (selectStore.selectedIndex < 0 || selectStore.selectedIndex > photoStore.idList.length - 1) return;
-  await detailViewStore.showDetailView(selectStore.selectedIndex);
+  if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
+  await detailViewStore.showDetailView(selectStore.lastSelectedIndex);
 })
 onKeyStroke('ArrowLeft', (e) => {
   if (detailViewStore.detailVisible) return;
-  changeSelectedIndex(-1);
+  changeSelectedIndex(-1, e.shiftKey);
   e.preventDefault();
 })
 onKeyStroke('ArrowRight', (e) => {
   if (detailViewStore.detailVisible) return;
-  changeSelectedIndex(1);
+  changeSelectedIndex(1, e.shiftKey);
   e.preventDefault();
 })
 onKeyStroke('ArrowUp', (e) => {
-  changeSelectedIndex(-gridItems.value);
+  changeSelectedIndex(-gridItems.value, e.shiftKey);
   e.preventDefault();
 })
 onKeyStroke('ArrowDown', (e) => {
-  changeSelectedIndex(gridItems.value);
+  changeSelectedIndex(gridItems.value, e.shiftKey);
   e.preventDefault();
 })
 
 
 function onDetailViewClosed() {
-  console.log('detail view closed:' + selectStore.selectedIndex);
-  scroller.value.scrollToItem(selectStore.selectedIndex);
+  console.log('detail view closed:' + selectStore.lastSelectedIndex);
+  scroller.value.scrollToItem(selectStore.lastSelectedIndex);
 }
 
 function onDetailViewIndexChange(index, context) {
   let delta = context.trigger == 'prev' ? -1 : context.trigger == 'next' ? 1 : 0;
-  changeSelectedIndex(delta);
+  changeSelectedIndex(delta, false);
 }
 
-async function changeSelectedIndex(delta: number) {
-  console.log("from " + selectStore.selectedIndex + " with delta " + delta);
-  let nextIndex = selectStore.selectedIndex + delta;
+async function changeSelectedIndex(delta: number, shiftKey: boolean) {
+  console.log("from " + selectStore.lastSelectedIndex + " with delta " + delta);
+  let nextIndex = selectStore.lastSelectedIndex + delta;
   if (nextIndex < 0) nextIndex = 0;
   if (nextIndex > photoStore.idList.length - 1) nextIndex = photoStore.idList.length - 1;
   console.log("changed to " + nextIndex);
@@ -101,13 +101,14 @@ async function changeSelectedIndex(delta: number) {
   if (detailViewStore.detailVisible)
     await detailViewStore.showDetailView(nextIndex);
 
-  selectStore.selectedIndex = nextIndex;
+  selectStore.selectIndex(nextIndex, false, shiftKey);
+
   const start = scroller.value.getScroll().start;
   const end = scroller.value.getScroll().end;
   const row = Math.floor(nextIndex / gridItems.value);
   console.log('start ' + start + ' end ' + end + ' row start ' + row * 156 + ' row end ' + (row + 1) * 156);
   if (row * 156 < start || (row + 1) * 156 > end)
-    scroller.value.scrollToItem(selectStore.selectedIndex);
+    scroller.value.scrollToItem(selectStore.lastSelectedIndex);
 
 }
 
