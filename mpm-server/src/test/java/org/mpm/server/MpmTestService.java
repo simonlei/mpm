@@ -14,8 +14,8 @@ public class MpmTestService {
     @Test
     public void testNull() {
         Integer v = null;
-        boolean b1 = v == new Integer(-1);
-        boolean b12 = Lang.equals(v, new Integer(-1));
+        boolean b1 = v == Integer.valueOf(-1);
+        boolean b12 = Lang.equals(v, Integer.valueOf(-1));
 
         boolean b22 = Lang.equals(v, -1);
         assertThrows(NullPointerException.class, () -> {
