@@ -8,8 +8,10 @@
       <template #operations>
         <div class="operations-container">
 
-          <t-input-number v-model:value="selectStore.lastSelectedIndex" :label="'跳转至'"
-                          :onEnter="jumpTo" align="center" theme="normal"/>
+          <t-tooltip content="跳转至指定位置，按回车确定" placement="bottom">
+            <t-input-number v-model:value="selectStore.lastSelectedIndex" :label="'跳转至'"
+                            :onEnter="jumpTo" align="center" theme="normal"/>
+          </t-tooltip>
 
           <!-- 搜索框 -->
           <search v-if="layout !== 'side'" :layout="layout"/>
@@ -139,9 +141,10 @@ const navToGitHub = () => {
   window.open('https://github.com/simonlei/mpm');
 };
 
-const jumpTo = (value: number) => {
+const jumpTo = (value: number, context) => {
   selectStore.selectIndex(value, false, false);
-  // todo: 去掉当前焦点
+  context.e.target.blur();
+  context.e.stopPropagation();
 };
 </script>
 <style lang="less" scoped>
