@@ -12,22 +12,26 @@
 import {getPicsDateList} from "@/api/photos";
 import {TreeNodeValue} from "tdesign-vue-next";
 import {photoFilterStore} from '@/store';
+import {ref} from "vue";
 
-const store = photoFilterStore();
-store.path = null;
+const filterStore = photoFilterStore();
+filterStore.path = null;
 
-const TREE_DATA = await getPicsDateList();
-// console.log("getPicsDateList result is "+TREE_DATA);
-
+let TREE_DATA = ref(await getPicsDateList(filterStore.trashed));
 const KEYSX = {value: 'id', label: 'title', children: 'months'};
 
-// console.log(KEYSX);
+filterStore.$onAction(async ({after}) => {
+  after(async (result) => {
+    TREE_DATA.value = await getPicsDateList(filterStore.trashed);
+    console.log('data ' + TREE_DATA);
+  })
+});
 
 function treeActive(value: Array<TreeNodeValue>) {
   console.log(value);
   let newDateKey = '' + value[0];
-  if (store.dateKey != newDateKey) {
-    store.change({dateKey: newDateKey});
+  if (filterStore.dateKey != newDateKey) {
+    filterStore.change({dateKey: newDateKey});
   }
 }
 

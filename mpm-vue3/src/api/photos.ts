@@ -8,17 +8,30 @@ const Api = {
   PicsDateList: '/getPicsDate',
   PicsFolderList: '/getFoldersData',
   PicsList: '/getPics',
+  PicsCount: '/getCount',
 };
 
-export function getPicsDateList() {
-  return request.post<PhotosDate []>({
-    url: Api.PicsDateList,
+export function getPicsCount(trashed: boolean) {
+  return request.post<number>({
+    url: Api.PicsCount,
+    data: {
+      trashed: trashed,
+    },
   });
 }
 
-export function getPicsFolderList(parentId: number) {
+export function getPicsDateList(trashed: boolean) {
+  return request.post<PhotosDate []>({
+    url: Api.PicsDateList,
+    data: {
+      trashed: trashed
+    }
+  });
+}
+
+export function getPicsFolderList(parentId: number, trashed: boolean) {
   const store = photoFilterStore();
-  let req = {parentId: parentId};
+  let req = {parentId: parentId, trashed: trashed};
   Object.assign(req, store);
 
   return request.post<PhotosFolder []>({

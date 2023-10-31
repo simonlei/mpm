@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import {getPicIds} from "@/api/photos";
+import {getPicIds, getPicsCount} from "@/api/photos";
 import {detailViewModuleStore, photoFilterStore, photoModuleStore} from '@/store';
 import {onMounted, ref} from "vue";
 import {onKeyStroke, useActiveElement} from '@vueuse/core';
@@ -122,28 +122,14 @@ function onResize() {
   oldWidth = photogrid.value.clientWidth;
 }
 
-filterStore.$onAction(async ({
-                               name, // action 名称
-                               store, // store 实例，类似 `someStore`
-                               args, // 传递给 action 的参数数组
-                               after, // 在 action 返回或解决后的钩子
-                               onError, // action 抛出或拒绝的钩子
-                             }) => {
+filterStore.$onAction(async ({after}) => {
   after(async (result) => {
     console.log('store changed... ' + result);
     let newList = (await getPicIds()).data;
-    // selectStore.clearSelect();
     photoStore.idList = newList;
-    //photoStore.idList.length = newList.length;
     window.document.title = "My Photo Manager(" + photoStore.idList.length + ")";
-    //for (let i = 0; i < newList.length; i++) {
-//      photoStore.idList[i] = newList[i];
-//    }
-
-    if (scroller.value != null) {
-      // scroller.value.updateVisibleItems(true);
-      // scroller.value.scrollToPosition(0);
-    }
+    let otherCount = await getPicsCount(!filterStore.trashed);
+    photoStore.otherCount = otherCount;
   })
 });
 

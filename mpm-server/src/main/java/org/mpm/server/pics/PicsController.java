@@ -79,8 +79,8 @@ public class PicsController {
      */
 
     @PostMapping("/api/getCount")
-    public int count(@RequestBody boolean trashed) {
-        return picsService.count(trashed);
+    public int count(@RequestBody Map map) {
+        return picsService.count((Boolean) map.get("trashed"));
     }
 
     @PostMapping("/api/getParentPathsForPhoto")

@@ -12,7 +12,7 @@
             <t-input-number v-model:value="selectStore.lastSelectedIndex" :label="'跳转至'"
                             :onEnter="jumpTo" align="center" theme="normal"/>
           </t-tooltip>
-
+          <switch-trash-button/>
           <!-- 搜索框 -->
           <search v-if="layout !== 'side'" :layout="layout"/>
 
@@ -68,6 +68,7 @@ import type {MenuRoute} from '@/types/interface';
 import Search from './Search.vue';
 import MenuContent from './MenuContent.vue';
 import {selectModuleStore} from "@/store/modules/select-module";
+import SwitchTrashButton from "@/layouts/components/SwitchTrashButton.vue";
 
 const props = defineProps({
   theme: {
