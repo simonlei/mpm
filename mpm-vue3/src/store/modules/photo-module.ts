@@ -1,6 +1,7 @@
 import {defineStore} from 'pinia';
 import {Photo} from "@/api/model/photos";
 import {getPics} from "@/api/photos";
+import {selectModuleStore} from "@/store/modules/select-module";
 
 export const photoModuleStore = defineStore('photoModule', {
   state: () => ({
@@ -49,6 +50,16 @@ export const photoModuleStore = defineStore('photoModule', {
 
     },
   },
-  actions: {},
+  actions: {
+    deleteSelectedPhotos: () => {
+      const selectStore = selectModuleStore();
+
+      let selectedIndexes = selectStore.selectedIndexes;
+      let indexes = [...selectedIndexes].sort();
+      for (let i = 0; i < indexes.length; i++) {
+        console.log(indexes[i]);
+      }
+    }
+  },
   persist: false,
 });

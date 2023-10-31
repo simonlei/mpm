@@ -63,6 +63,10 @@ const notUsingInput = () => {
     && activeElement.value?.tagName != 'TEXTAREA';
 }
 
+onKeyStroke('d', async (e) => {
+  if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
+  if (notUsingInput()) photoStore.deleteSelectedPhotos();
+})
 onKeyStroke('Enter', async (e) => {
   if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
   if (notUsingInput())

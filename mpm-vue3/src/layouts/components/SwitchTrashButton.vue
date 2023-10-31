@@ -23,7 +23,8 @@ function switchTrash() {
 <style lang="less" scoped>
 
 .t-button2 {
-  min-width: 80px;
+  min-width: 120px;
+  max-width: 200px;
 }
 
 </style>
