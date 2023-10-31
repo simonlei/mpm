@@ -1,45 +1,51 @@
 <template>
   <div :class="layoutCls">
-    <t-head-menu :class="menuCls" :theme="theme" expand-type="popup" :value="active">
+    <t-head-menu :class="menuCls" :theme="theme" :value="active" expand-type="popup">
       <template v-if="layout !== 'side'" #default>
-        <menu-content class="header-menu" :nav-data="menu" />
+        <menu-content :nav-data="menu" class="header-menu"/>
       </template>
       <!-- My Photo Manager(1111) [ ] 跳转 []只看星标 []只看视频 [tags dropdown] [排序（时间、大小、导入时间、宽度、高度] 回收站(1) 地图模式 上传照片 -->
       <template #operations>
         <div class="operations-container">
-          <!--
-          <t-input-number :label="'跳转至'" v-model:value="selectStore.lastSelectedIndex" align="center" theme="normal" :onEnter="jumpTo" />
-          -->
-          <!-- 搜索框 -->
-          <search v-if="layout !== 'side'" :layout="layout" />
 
-          <t-tooltip placement="bottom" content="代码仓库">
-            <t-button theme="default" shape="square" variant="text" @click="navToGitHub">
-              <t-icon name="logo-github" />
+          <t-input-number v-model:value="selectStore.lastSelectedIndex" :label="'跳转至'"
+                          :onEnter="jumpTo" align="center" theme="normal"/>
+
+          <!-- 搜索框 -->
+          <search v-if="layout !== 'side'" :layout="layout"/>
+
+          <t-tooltip content="代码仓库" placement="bottom">
+            <t-button shape="square" theme="default" variant="text" @click="navToGitHub">
+              <t-icon name="logo-github"/>
             </t-button>
           </t-tooltip>
           <t-dropdown :min-column-width="135" trigger="click">
             <template #dropdown>
               <t-dropdown-menu>
-                <t-dropdown-item class="operations-dropdown-container-item" @click="handleNav('/user/index')">
-                  <t-icon name="user-circle"></t-icon>个人中心
+                <t-dropdown-item class="operations-dropdown-container-item"
+                                 @click="handleNav('/user/index')">
+                  <t-icon name="user-circle"></t-icon>
+                  个人中心
                 </t-dropdown-item>
                 <t-dropdown-item class="operations-dropdown-container-item" @click="handleLogout">
-                  <t-icon name="poweroff"></t-icon>退出登录
+                  <t-icon name="poweroff"></t-icon>
+                  退出登录
                 </t-dropdown-item>
               </t-dropdown-menu>
             </template>
             <t-button class="header-user-btn" theme="default" variant="text">
               <template #icon>
-                <t-icon class="header-user-avatar" name="user-circle" />
+                <t-icon class="header-user-avatar" name="user-circle"/>
               </template>
               <div class="header-user-account">Tencent</div>
-              <template #suffix><t-icon name="chevron-down" /></template>
+              <template #suffix>
+                <t-icon name="chevron-down"/>
+              </template>
             </t-button>
           </t-dropdown>
-          <t-tooltip placement="bottom" content="系统设置">
-            <t-button theme="default" shape="square" variant="text" @click="toggleSettingPanel">
-              <t-icon name="setting" />
+          <t-tooltip content="系统设置" placement="bottom">
+            <t-button shape="square" theme="default" variant="text" @click="toggleSettingPanel">
+              <t-icon name="setting"/>
             </t-button>
           </t-tooltip>
         </div>
@@ -48,14 +54,14 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { computed } from 'vue';
-import type { PropType } from 'vue';
-import { useRouter } from 'vue-router';
-import { useSettingStore } from '@/store';
-import { getActive } from '@/router';
-import { prefix } from '@/config/global';
-import type { MenuRoute } from '@/types/interface';
+<script lang="ts" setup>
+import type {PropType} from 'vue';
+import {computed} from 'vue';
+import {useRouter} from 'vue-router';
+import {useSettingStore} from '@/store';
+import {getActive} from '@/router';
+import {prefix} from '@/config/global';
+import type {MenuRoute} from '@/types/interface';
 
 import Search from './Search.vue';
 import MenuContent from './MenuContent.vue';
@@ -107,7 +113,7 @@ const active = computed(() => getActive());
 const layoutCls = computed(() => [`${prefix}-header-layout`]);
 
 const menuCls = computed(() => {
-  const { isFixed, layout, isCompact } = props;
+  const {isFixed, layout, isCompact} = props;
   return [
     {
       [`${prefix}-header-menu`]: !isFixed,
@@ -125,7 +131,7 @@ const handleNav = (url) => {
 const handleLogout = () => {
   router.push({
     path: '/login',
-    query: { redirect: encodeURIComponent(router.currentRoute.value.fullPath) },
+    query: {redirect: encodeURIComponent(router.currentRoute.value.fullPath)},
   });
 };
 
@@ -133,8 +139,9 @@ const navToGitHub = () => {
   window.open('https://github.com/simonlei/mpm');
 };
 
-const jumpTo = (value:number) => {
-  selectStore.selectIndex(value, false ,false);
+const jumpTo = (value: number) => {
+  selectStore.selectIndex(value, false, false);
+  // todo: 去掉当前焦点
 };
 </script>
 <style lang="less" scoped>
@@ -150,6 +157,7 @@ const jumpTo = (value:number) => {
       z-index: 10;
       width: auto;
       transition: all 0.3s;
+
       &-compact {
         left: 64px;
       }
@@ -161,6 +169,7 @@ const jumpTo = (value:number) => {
     display: inline-flex;
   }
 }
+
 .header-menu {
   flex: 1 1 1;
   display: inline-flex;
@@ -184,6 +193,7 @@ const jumpTo = (value:number) => {
 
   .t-button {
     margin: 0 8px;
+
     &.header-user-btn {
       margin: 0;
     }
@@ -191,6 +201,7 @@ const jumpTo = (value:number) => {
 
   .t-icon {
     font-size: 20px;
+
     &.general {
       margin-right: 16px;
     }
@@ -218,6 +229,7 @@ const jumpTo = (value:number) => {
   .t-logo {
     width: 100%;
     height: 100%;
+
     &:hover {
       cursor: pointer;
     }
@@ -232,6 +244,7 @@ const jumpTo = (value:number) => {
   display: inline-flex;
   align-items: center;
   color: var(--td-text-color-primary);
+
   .t-icon {
     margin-left: 4px;
     font-size: 16px;
@@ -247,15 +260,19 @@ const jumpTo = (value:number) => {
     color: var(--td-text-color-primary);
   }
 }
+
 .t-menu--dark {
   .t-head-menu__inner {
     border-bottom: 1px solid var(--td-gray-color-10);
   }
+
   .header-user-account {
     color: rgba(255, 255, 255, 0.55);
   }
+
   .t-button {
     --ripple-color: var(--td-gray-color-10) !important;
+
     &:hover {
       background: var(--td-gray-color-12) !important;
     }
@@ -276,6 +293,7 @@ const jumpTo = (value:number) => {
       display: flex;
       justify-content: center;
     }
+
     .t-dropdown__item__content__text {
       display: flex;
       align-items: center;
@@ -287,6 +305,7 @@ const jumpTo = (value:number) => {
     width: 100%;
     margin-bottom: 0px;
   }
+
   &:last-child {
     :deep(.t-dropdown__item) {
       margin-bottom: 8px;

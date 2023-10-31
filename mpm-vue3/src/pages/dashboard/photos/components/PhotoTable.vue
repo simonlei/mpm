@@ -10,7 +10,7 @@
                      page-mode
                      @resize="onResize"
     >
-      <template #default="{ item, index }">
+      <template v-slot="{ item, index }">
         <Suspense>
           <photo-item :id="item.id" :key="item.id" :index="index"
                       :style="{'border-width': selectStore.isSelected(index) ? '2px' : '0px','border-style': 'solid','border-color': 'blue'}"/>
@@ -133,18 +133,20 @@ filterStore.$onAction(async ({
     console.log('store changed... ' + result);
     let newList = (await getPicIds()).data;
     // selectStore.clearSelect();
-    photoStore.idList.length = newList.length;
+    photoStore.idList = newList;
+    //photoStore.idList.length = newList.length;
     window.document.title = "My Photo Manager(" + photoStore.idList.length + ")";
-    for (let i = 0; i < newList.length; i++) {
-      photoStore.idList[i] = newList[i];
-    }
+    //for (let i = 0; i < newList.length; i++) {
+//      photoStore.idList[i] = newList[i];
+//    }
 
     if (scroller.value != null) {
-      scroller.value.updateVisibleItems(true);
-      scroller.value.scrollToPosition(0);
+      // scroller.value.updateVisibleItems(true);
+      // scroller.value.scrollToPosition(0);
     }
   })
 });
+
 
 selectStore.$onAction(async ({after}) => {
   after(async (result) => {
@@ -158,6 +160,7 @@ selectStore.$onAction(async ({after}) => {
     }
   })
 });
+
 
 onMounted(async () => {
   gridItems.value = calcGridItems();

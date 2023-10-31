@@ -3,7 +3,7 @@ import {defineStore} from 'pinia';
 export const selectModuleStore = defineStore('selectModule', {
   state: () => ({
     selectedIndexes: [],
-    lastSelectedIndex: 0,
+    lastSelectedIndex: -1,
   }),
   getters: {
     isSelected: (state) => {
@@ -17,7 +17,7 @@ export const selectModuleStore = defineStore('selectModule', {
   actions: {
     clearSelect() {
       this.selectedIndexes = [];
-      this.lastSelectedIndex = 0;
+      this.lastSelectedIndex = -1;
     },
     selectIndex(index: number, metaKey: boolean, shiftKey: boolean) {
       if (this.lastSelectedIndex == null) this.lastSelectedIndex = -1;
