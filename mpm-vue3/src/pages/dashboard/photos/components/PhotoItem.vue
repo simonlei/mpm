@@ -9,7 +9,6 @@
              @click.shift.exact="shiftClicked"
     >
     </t-image>
-    --{{ index }}--
   </div>
 </template>
 <script lang="ts" setup>

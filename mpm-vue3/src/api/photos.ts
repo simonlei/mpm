@@ -9,7 +9,16 @@ const Api = {
   PicsFolderList: '/getFoldersData',
   PicsList: '/getPics',
   PicsCount: '/getCount',
+  TrashPhotos: '/trashPhotos',
 };
+
+export function trashPhotos(photoNames: String[]) {
+  console.log(photoNames);
+  return request.post<number>({
+    url: Api.TrashPhotos,
+    data: photoNames,
+  });
+}
 
 export function getPicsCount(trashed: boolean) {
   return request.post<number>({

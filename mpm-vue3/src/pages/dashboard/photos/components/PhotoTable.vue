@@ -15,7 +15,6 @@
           <photo-item :id="item.id" :key="item.id" :index="index"
                       :style="{'border-width': selectStore.isSelected(index) ? '2px' : '0px','border-style': 'solid','border-color': 'blue'}"/>
         </Suspense>
-        =={{ index }}==
       </template>
 
     </RecycleScroller>
@@ -126,16 +125,22 @@ function onResize() {
   oldWidth = photogrid.value.clientWidth;
 }
 
-filterStore.$onAction(async ({after}) => {
-  after(async (result) => {
-    console.log('store changed... ' + result);
-    let newList = (await getPicIds()).data;
-    photoStore.idList = newList;
-    window.document.title = "My Photo Manager(" + photoStore.idList.length + ")";
-    let otherCount = await getPicsCount(!filterStore.trashed);
-    photoStore.otherCount = otherCount;
-  })
-});
+filterStore.$onAction(photosChanged());
+
+function photosChanged() {
+  return async ({after}) => {
+    after(async (result) => {
+      console.log('store changed... ' + result);
+      let newList = (await getPicIds()).data;
+      photoStore.idList = newList;
+      window.document.title = "My Photo Manager(" + photoStore.idList.length + ")";
+      let otherCount = await getPicsCount(!filterStore.trashed);
+      photoStore.otherCount = otherCount;
+    })
+  };
+}
+
+photoStore.$onAction(photosChanged());
 
 
 selectStore.$onAction(async ({after}) => {
