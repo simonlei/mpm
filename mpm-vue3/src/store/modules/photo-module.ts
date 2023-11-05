@@ -36,7 +36,7 @@ export const photoModuleStore = defineStore('photoModule', {
       }
 
       return async (id, index) => {
-        // console.log('id ' + id + ' index ' + index);
+        console.log('id ' + id + ' index ' + index);
         while (state.picsMap.get(id) == null) {
           if (isLoading(index)) {
             await sleep(50);
@@ -63,17 +63,14 @@ export const photoModuleStore = defineStore('photoModule', {
           names.push(item.name);
       });
       await trashPhotos(names);
-      
 
-      /*
       let indexes = [...selectedIndexes].sort();
       for (let i = indexes.length - 1; i >= 0; i--) {
         this.idList.splice(indexes[i], 1);
         console.log(indexes[i]);
       }
-
-       */
-
+      const index = Math.min(this.idList.length - 1, selectStore.lastSelectedIndex);
+      selectStore.selectIndex(index, false, false);
     }
   },
   persist: false,

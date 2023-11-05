@@ -64,7 +64,13 @@ const notUsingInput = () => {
 
 onKeyStroke('d', async (e) => {
   if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
-  if (notUsingInput()) photoStore.deleteSelectedPhotos();
+  if (notUsingInput()) {
+    await photoStore.deleteSelectedPhotos();
+    if (detailViewStore.detailVisible) {
+      await detailViewStore.showDetailView(selectStore.lastSelectedIndex);
+      
+    }
+  }
 })
 onKeyStroke('Enter', async (e) => {
   if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
