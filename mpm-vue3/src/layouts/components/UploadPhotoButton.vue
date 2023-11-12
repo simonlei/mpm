@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {onMounted, ref} from "vue";
 import {uploadPhoto} from "@/api/photos";
+import {photoFilterStore} from "@/store";
 
 let uploadx;
 let progressVisible = ref(false);
@@ -30,6 +31,8 @@ const uploadFiles = async () => {
     progressPercent.value = i / length;
   }
   progressVisible.value = false;
+  let filterStore = photoFilterStore();
+  filterStore.clear();
 };
 
 </script>
