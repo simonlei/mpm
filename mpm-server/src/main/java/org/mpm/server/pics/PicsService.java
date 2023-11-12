@@ -9,6 +9,8 @@ import com.qcloud.cos.model.COSObject;
 import com.qcloud.cos.model.CopyObjectRequest;
 import com.qcloud.cos.model.GetObjectRequest;
 import com.qcloud.cos.model.ObjectMetadata;
+import com.qcloud.cos.model.PutObjectRequest;
+import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.common.ImageProcessRequest;
 import com.qcloud.cos.model.ciModel.common.MediaInputObject;
 import com.qcloud.cos.model.ciModel.common.MediaOutputObject;
@@ -28,6 +30,7 @@ import com.qcloud.cos.model.ciModel.template.MediaListTemplateResponse;
 import com.qcloud.cos.model.ciModel.template.MediaTemplateRequest;
 import com.qcloud.cos.model.ciModel.template.MediaTemplateResponse;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -82,26 +85,13 @@ public class PicsService {
         return dao.count(EntityPhoto.class, Cnd.where("trashed", "=", trashed));
     }
 
-    public EntityPhoto savePhotoInDb(EntityFile parent, String key, String name, long date) {
-        File tmpFile = null;
-        try {
-            tmpFile = File.createTempFile(name, "" + Math.random());
-            String contentType = saveCosFile(key, tmpFile);
-            tmpFile.setLastModified(date);
-            if (contentType.contains("video")) {
-                return saveVideo(tmpFile, key, Files.getMajorName(name));
-            } else {
-                return saveImage(tmpFile, key, Files.getMajorName(name));
-            }
-        } catch (Exception e) {
-            log.error("Can't save file " + key, e);
-        } finally {
-            if (tmpFile != null) {
-                tmpFile.delete();
-            }
+    public EntityPhoto savePhotoInDb(String key, String name, long date, String contentType, File tmpFile) {
+        tmpFile.setLastModified(date);
+        if (contentType.contains("video")) {
+            return saveVideo(tmpFile, key, Files.getMajorName(name));
+        } else {
+            return saveImage(tmpFile, key, Files.getMajorName(name));
         }
-
-        return null;
     }
 
     public String saveCosFile(String key, File tmpFile) throws FileNotFoundException {
@@ -477,5 +467,14 @@ public class PicsService {
 
     public Map getExifInfo(String key) {
         return getCosWithRule(key, "exif");
+    }
+
+    public void uploadFile(String key, String contentType, File file) throws FileNotFoundException {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType(contentType);
+        metadata.setContentLength(file.length());
+        PutObjectRequest request = new PutObjectRequest(bucket, key, new FileInputStream(file), metadata);
+        PutObjectResult putObjectResult = cosClient.putObject(request);
+        log.info("upload result : {}", putObjectResult);
     }
 }

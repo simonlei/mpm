@@ -1,10 +1,10 @@
 package org.mpm.server.pics;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileNotFoundException;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -13,8 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.mpm.server.BaseTest;
-import org.mpm.server.entity.EntityMeta;
-import org.mpm.server.pics.PhotoImportService.UploadFileSchema;
 import org.nutz.dao.Dao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,26 +35,12 @@ public class PhotoImportServiceTest extends BaseTest {
     public void testImportPhoto() throws FileNotFoundException {
         Mockito.when(picsService.saveCosFile(Mockito.any(), Mockito.any()))
                 .thenAnswer((Answer<String>) invocation -> "image/jpeg");
-        String key = photoImportService.uploadFile(
-                UploadFileSchema.builder().key("upload/1616940995641_tmpupload/七上1025义工/IMG_004.jpg")
-                        .data("").err(null).build());
+        String key = photoImportService.uploadFile("upload/1616940995641_tmpupload/七上1025义工/IMG_004.jpg",
+                new Date(), null, null);
         // upload/1616940995641_tmpupload/IMG_001.jpg
         log.info("Key is " + key);
-        key = photoImportService.uploadFile(
-                UploadFileSchema.builder().key("upload/1616940995641_tmpupload/IMG_001.jpg")
-                        .data("").err(null).build());
+        key = photoImportService.uploadFile("upload/1616940995641_tmpupload/IMG_001.jpg", new Date(), null, null);
         log.info("Key is " + key);
-    }
-
-    @Test
-    void testErrorImport() {
-        int before = dao.count(EntityMeta.class);
-        try {
-            photoImportService.uploadFile(UploadFileSchema.builder().err("Here is an error").build());
-        } catch (Exception e) {
-
-        }
-        assertEquals(1, dao.count(EntityMeta.class) - before);
     }
 
     @Test

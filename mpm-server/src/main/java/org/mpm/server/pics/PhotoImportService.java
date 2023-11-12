@@ -1,21 +1,26 @@
 package org.mpm.server.pics;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityMeta;
 import org.mpm.server.entity.EntityPhoto;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
-import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Slf4j
@@ -26,16 +31,36 @@ public class PhotoImportService {
     @Autowired
     PicsService picsService;
 
-    @PostMapping("/uploadFile")
-    public String uploadFile(@RequestBody UploadFileSchema upload) {
-        String key = upload.key;
-        log.info("Key is " + key);
-        if (Lang.isNotEmpty(upload.err)) {
-            log.info("Error {} when upload {}, with data {} ", upload.err, key, upload.data);
+
+    @PostMapping("/api/uploadPhoto")
+    public int uploadPhoto(@RequestParam("file") MultipartFile file,
+            @RequestParam("lastModified") String lastModified,
+            @RequestParam("batchId") String batchId) throws IOException {
+        Date date = new Date(Long.valueOf(lastModified));
+        log.info("total files {} with {}", file.getSize(), date);
+        String key = "upload/" + batchId + "_" + file.getOriginalFilename();
+        File tmpFile = null;
+        try {
+            tmpFile = File.createTempFile("tmp", "" + Math.random());
+            Streams.copy(file.getInputStream(), new FileOutputStream(tmpFile), true);
+            String contentType = file.getContentType();
+            picsService.uploadFile(key, contentType, tmpFile);
+            uploadFile(key, date, contentType, tmpFile);
+        } catch (Exception e) {
+            log.error("Can't upload file:" + key, e);
             dao.insert(EntityMeta.builder().key("Error_Log_" + key)
-                    .value(Strings.cutStr(2000, upload.err, "..."))
+                    .value(Strings.cutStr(2000, e.getMessage(), "..."))
                     .build());
+        } finally {
+            if (tmpFile != null) {
+                tmpFile.delete();
+            }
         }
+        return 0;
+    }
+
+    public String uploadFile(String key, Date date, String contentType, File tmpFile) {
+        log.info("Key is " + key);
         // upload/1616851720630_tmpupload/七上1025义工/IMG_002.jpg
         String[] paths = key.split("\\/");
         String path = "/" + paths[1];
@@ -50,7 +75,7 @@ public class PhotoImportService {
             }
         }
         String name = paths[paths.length - 1];
-        EntityPhoto photo = picsService.savePhotoInDb(parent, key, name, upload.date);
+        EntityPhoto photo = picsService.savePhotoInDb(key, name, date.getTime(), contentType, tmpFile);
         if (photo != null) {
             EntityFile file = existOrCreate(parent, path + "/" + name, name, false);
             file.setPhotoId(photo.getId());

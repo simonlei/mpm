@@ -10,7 +10,26 @@ const Api = {
   PicsList: '/getPics',
   PicsCount: '/getCount',
   TrashPhotos: '/trashPhotos',
+  UploadPhoto: '/uploadPhoto',
 };
+
+
+export function uploadPhoto(batchId: number, photo: File) {
+  let formData = new FormData();
+
+  formData.append("file", photo);
+  formData.append("lastModified", '' + photo.lastModified);
+  formData.append("batchId", '' + batchId);
+
+  return request.post<number>({
+    headers: {
+      "Content-Type": "multipart/form-data"
+    },
+
+    url: Api.UploadPhoto,
+    data: formData,
+  });
+}
 
 export function trashPhotos(photoNames: String[]) {
   console.log(photoNames);
