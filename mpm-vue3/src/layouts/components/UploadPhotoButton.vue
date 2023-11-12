@@ -2,6 +2,7 @@
 import {onMounted, ref} from "vue";
 import {uploadPhoto} from "@/api/photos";
 import {photoFilterStore} from "@/store";
+import {NotifyPlugin} from "tdesign-vue-next";
 
 let uploadx;
 let progressVisible = ref(false);
@@ -20,10 +21,12 @@ const uploadFiles = async () => {
   const length = uploadx.files.length;
   progressLabel.value = "上传中... 0/" + length;
   const batchId = Date.now();
+  let count = 0;
   for (let i = 0; i < length; i++) {
     let file = uploadx.files[i];
     if (file.type.startsWith("image") || file.type.startsWith("video")) {
       const data = await uploadPhoto(batchId, file);
+      count++;
     }
     // update progress
     console.log("upload {} finished", i);
@@ -33,6 +36,7 @@ const uploadFiles = async () => {
   progressVisible.value = false;
   let filterStore = photoFilterStore();
   filterStore.clear();
+  await NotifyPlugin.success({title: '完成', content: '已成功上传 ' + count + ' 张照片'})
 };
 
 </script>
