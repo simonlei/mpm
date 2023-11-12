@@ -16,13 +16,8 @@
           <!-- 搜索框 -->
           <search v-if="layout !== 'side'" :layout="layout"/>
 
-          <t-tooltip content="上传照片" placement="bottom">
-            <input id="uploadx" directory hidden="true" type="file" webkitdirectory
-                   @change="uploadFiles"/>
-            <t-button shape="square" theme="default" variant="text" @click="uploadx.click()">
-              <t-icon name="upload"/>
-            </t-button>
-          </t-tooltip>
+          <upload-photo-button/>
+
           <t-tooltip content="代码仓库" placement="bottom">
             <t-button shape="square" theme="default" variant="text" @click="navToGitHub">
               <t-icon name="logo-github"/>
@@ -66,7 +61,7 @@
 
 <script lang="ts" setup>
 import type {PropType} from 'vue';
-import {computed, onMounted} from 'vue';
+import {computed} from 'vue';
 import {useRouter} from 'vue-router';
 import {useSettingStore} from '@/store';
 import {getActive} from '@/router';
@@ -77,7 +72,7 @@ import Search from './Search.vue';
 import MenuContent from './MenuContent.vue';
 import {selectModuleStore} from "@/store/modules/select-module";
 import SwitchTrashButton from "@/layouts/components/SwitchTrashButton.vue";
-import {uploadPhoto} from "@/api/photos";
+import UploadPhotoButton from "@/layouts/components/UploadPhotoButton.vue";
 
 const props = defineProps({
   theme: {
@@ -113,27 +108,6 @@ const props = defineProps({
 const router = useRouter();
 const settingStore = useSettingStore();
 const selectStore = selectModuleStore();
-var uploadx;
-
-onMounted(() => {
-  uploadx = document.getElementById("uploadx");
-  console.log('uploadx is ' + uploadx);
-});
-
-const uploadFiles = async () => {
-  console.log(uploadx.files);
-  // TODO: 这里改成线程池，同时多个上传
-  const length = uploadx.files.length;
-  const batchId = Date.now();
-  for (let i = 0; i < length; i++) {
-    let file = uploadx.files[i];
-    if (file.type.startsWith("image") || file.type.startsWith("video")) {
-      const data = await uploadPhoto(batchId, file);
-    }
-    // update progress
-    console.log("upload {} finished", i);
-  }
-};
 
 const toggleSettingPanel = () => {
   settingStore.updateConfig({
