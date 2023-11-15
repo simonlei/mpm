@@ -4,7 +4,7 @@
       <template v-if="layout !== 'side'" #default>
         <menu-content :nav-data="menu" class="header-menu"/>
       </template>
-      <!-- My Photo Manager(1111) [ ] 跳转 []只看星标 []只看视频 [tags dropdown] [排序（时间、大小、导入时间、宽度、高度] 回收站(1) 地图模式 上传照片 -->
+      <!-- My Photo Manager(1111) [ ] 跳转 []只看星标 []只看视频 [tags dropdown] [排序（c] 回收站(1) 地图模式 上传照片 -->
       <template #operations>
         <div class="operations-container">
 
@@ -12,6 +12,7 @@
             <t-input-number v-model:value="selectStore.lastSelectedIndex" :label="'跳转至'"
                             :onEnter="jumpTo" align="center" theme="normal"/>
           </t-tooltip>
+          <OrderSelector/>
           <switch-trash-button/>
           <!-- 搜索框 -->
           <search v-if="layout !== 'side'" :layout="layout"/>
@@ -73,6 +74,7 @@ import MenuContent from './MenuContent.vue';
 import {selectModuleStore} from "@/store/modules/select-module";
 import SwitchTrashButton from "@/layouts/components/SwitchTrashButton.vue";
 import UploadPhotoButton from "@/layouts/components/UploadPhotoButton.vue";
+import OrderSelector from "@/layouts/components/OrderSelector.vue";
 
 const props = defineProps({
   theme: {

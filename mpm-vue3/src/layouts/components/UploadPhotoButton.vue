@@ -35,7 +35,7 @@ const uploadFiles = async () => {
   }
   progressVisible.value = false;
   let filterStore = photoFilterStore();
-  filterStore.clear();
+  filterStore.$reset();
   await NotifyPlugin.success({title: '完成', content: '已成功上传 ' + count + ' 张照片'})
 };
 
