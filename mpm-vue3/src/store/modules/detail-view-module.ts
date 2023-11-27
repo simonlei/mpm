@@ -13,6 +13,7 @@ export const detailViewModuleStore = defineStore('detailViewModule', {
     detailViewShowIndex: 0,
     detailVisible: false,
     detailImages: [],
+    detailTitle: "",
   }),
   actions: {
     async showDetailView(index: number) {
@@ -30,7 +31,15 @@ export const detailViewModuleStore = defineStore('detailViewModule', {
         this.detailViewShowIndex = 1;
       }
       console.log("1 " + this.detailImages);
-      this.detailImages.push("/cos/small/" + (await getPhotoItem(index)).name);
+      let currentPhoto = await getPhotoItem(index);
+      this.detailTitle = `大小: ${currentPhoto.size}\n宽度: ${currentPhoto.width}px\n高度: ${currentPhoto.height}px`
+        + `描述：${currentPhoto.description}\n`
+        + (currentPhoto.tags == null ? "" : `标签：${currentPhoto.tags}\n`)
+        + (currentPhoto.address == null ? "" : `地址：${currentPhoto.address}\n`)
+        + `时间 ${currentPhoto.takendate}`
+      // TODO: 完善size和时间，以及格式
+      // + `时间：${DateFormat('y/M/d').format(takenDate)}`;`;
+      this.detailImages.push("/cos/small/" + currentPhoto.name);
       console.log("2 " + this.detailImages);
       if (index < photoStore.idList.length - 1) {
         this.detailImages.push("/cos/small/" + (await getPhotoItem(index + 1)).name);

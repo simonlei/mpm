@@ -44,7 +44,7 @@ export const selectModuleStore = defineStore('selectModule', {
     async changeSelectedIndex(delta: number, shiftKey: boolean) {
       const detailViewStore = detailViewModuleStore();
       const photoStore = photoModuleStore();
-      
+
       console.log("from " + this.lastSelectedIndex + " with delta " + delta);
       let nextIndex = this.lastSelectedIndex + delta;
       if (nextIndex < 0) nextIndex = 0;
