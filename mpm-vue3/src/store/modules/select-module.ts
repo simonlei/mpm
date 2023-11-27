@@ -1,4 +1,5 @@
 import {defineStore} from 'pinia';
+import {detailViewModuleStore, photoModuleStore} from "@/store";
 
 export const selectModuleStore = defineStore('selectModule', {
   state: () => ({
@@ -39,6 +40,21 @@ export const selectModuleStore = defineStore('selectModule', {
         selectedIndexes.add(index);
         this.lastSelectedIndex = index;
       }
+    },
+    async changeSelectedIndex(delta: number, shiftKey: boolean) {
+      const detailViewStore = detailViewModuleStore();
+      const photoStore = photoModuleStore();
+      
+      console.log("from " + this.lastSelectedIndex + " with delta " + delta);
+      let nextIndex = this.lastSelectedIndex + delta;
+      if (nextIndex < 0) nextIndex = 0;
+      if (nextIndex > photoStore.idList.length - 1) nextIndex = photoStore.idList.length - 1;
+      console.log("changed to " + nextIndex);
+
+      if (detailViewStore.detailVisible)
+        await detailViewStore.showDetailView(nextIndex);
+
+      this.selectIndex(nextIndex, false, shiftKey);
     }
   },
   persist: {

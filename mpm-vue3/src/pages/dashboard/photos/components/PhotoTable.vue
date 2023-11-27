@@ -21,14 +21,7 @@
   </div>
 
   <div>
-    <t-image-viewer ref="imageViewer"
-                    v-model:index="detailViewStore.detailViewShowIndex"
-                    v-model:visible="detailViewStore.detailVisible"
-                    :images="detailViewStore.detailImages"
-                    :onClose="onDetailViewClosed"
-                    :onIndexChange="onDetailViewIndexChange"
-    >
-    </t-image-viewer>
+    <PhotoViewer/>
   </div>
 
 </template>
@@ -40,9 +33,9 @@ import {onMounted, ref} from "vue";
 import {onKeyStroke, useActiveElement} from '@vueuse/core';
 import PhotoItem from './PhotoItem.vue'
 import {selectModuleStore} from "@/store/modules/select-module";
+import PhotoViewer from "@/pages/dashboard/photos/components/PhotoViewer.vue";
 
 const gridItems = ref(10);
-const imageViewer = ref(null);
 const photoStore = photoModuleStore();
 const selectStore = selectModuleStore();
 const detailViewStore = detailViewModuleStore();
@@ -68,7 +61,6 @@ onKeyStroke('d', async (e) => {
     await photoStore.deleteSelectedPhotos();
     if (detailViewStore.detailVisible) {
       await detailViewStore.showDetailView(selectStore.lastSelectedIndex);
-      
     }
   }
 })
@@ -80,45 +72,21 @@ onKeyStroke('Enter', async (e) => {
 onKeyStroke('ArrowLeft', (e) => {
   if (detailViewStore.detailVisible) return;
   if (notUsingInput())
-    changeSelectedIndex(-1, e.shiftKey);
+    selectStore.changeSelectedIndex(-1, e.shiftKey);
 })
 onKeyStroke('ArrowRight', (e) => {
   if (detailViewStore.detailVisible) return;
   if (notUsingInput())
-    changeSelectedIndex(1, e.shiftKey);
+    selectStore.changeSelectedIndex(1, e.shiftKey);
 })
 onKeyStroke('ArrowUp', (e) => {
   if (notUsingInput())
-    changeSelectedIndex(-gridItems.value, e.shiftKey);
+    selectStore.changeSelectedIndex(-gridItems.value, e.shiftKey);
 })
 onKeyStroke('ArrowDown', (e) => {
   if (notUsingInput())
-    changeSelectedIndex(gridItems.value, e.shiftKey);
+    selectStore.changeSelectedIndex(gridItems.value, e.shiftKey);
 })
-
-
-function onDetailViewClosed() {
-  console.log('detail view closed:' + selectStore.lastSelectedIndex);
-  scroller.value.scrollToItem(selectStore.lastSelectedIndex);
-}
-
-function onDetailViewIndexChange(index, context) {
-  let delta = context.trigger == 'prev' ? -1 : context.trigger == 'next' ? 1 : 0;
-  changeSelectedIndex(delta, false);
-}
-
-async function changeSelectedIndex(delta: number, shiftKey: boolean) {
-  console.log("from " + selectStore.lastSelectedIndex + " with delta " + delta);
-  let nextIndex = selectStore.lastSelectedIndex + delta;
-  if (nextIndex < 0) nextIndex = 0;
-  if (nextIndex > photoStore.idList.length - 1) nextIndex = photoStore.idList.length - 1;
-  console.log("changed to " + nextIndex);
-
-  if (detailViewStore.detailVisible)
-    await detailViewStore.showDetailView(nextIndex);
-
-  selectStore.selectIndex(nextIndex, false, shiftKey);
-}
 
 function calcGridItems() {
   console.log("width:" + photogrid.value.clientWidth);
@@ -134,7 +102,8 @@ function onResize() {
 filterStore.$onAction(photosChanged());
 
 function photosChanged() {
-  return async ({after}) => {
+  return async ({name, store, args, after}) => {
+    console.log('onAction store ' + store + ' name ' + name + ' args ' + args);
     after(async (result) => {
       console.log('store changed... ' + result);
       let newList = (await getPicIds()).data;
@@ -145,6 +114,7 @@ function photosChanged() {
     })
   };
 }
+
 
 photoStore.$onAction(photosChanged());
 

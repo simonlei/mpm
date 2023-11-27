@@ -36,7 +36,7 @@ export const photoModuleStore = defineStore('photoModule', {
       }
 
       return async (id, index) => {
-        console.log('id ' + id + ' index ' + index);
+        // console.log('id ' + id + ' index ' + index);
         while (state.picsMap.get(id) == null) {
           if (isLoading(index)) {
             await sleep(50);

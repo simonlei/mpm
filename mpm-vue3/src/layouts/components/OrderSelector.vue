@@ -17,7 +17,7 @@ const options = [{
 }, {
   label: '宽度逆序', value: '-width'
 }, {
-  label: '宽度逆序', value: 'width'
+  label: '宽度顺序', value: 'width'
 }, {
   label: '高度逆序', value: '-height'
 }, {
