@@ -12,9 +12,21 @@ function onDetailViewIndexChange(index, context) {
   selectStore.changeSelectedIndex(delta, false);
 }
 
+function getCurrentSmallUrl() {
+
+  return detailViewStore.currentPhoto == null ? "" : "/cos/small/" + detailViewStore.currentPhoto.name;
+}
+
 </script>
 
 <template>
+  <t-dialog ref="imageViewer" v-model:visible="detailViewStore.detailVisible" :close-btn="false"
+            :footer="false" :header="false" placement="center">
+    <t-image :key="detailViewStore.currentPhoto.name+'-small'"
+             :src="getCurrentSmallUrl()"
+    />
+  </t-dialog>
+  <!--
   <t-image-viewer ref="imageViewer"
                   v-model:index="detailViewStore.detailViewShowIndex"
                   v-model:visible="detailViewStore.detailVisible"
@@ -23,6 +35,7 @@ function onDetailViewIndexChange(index, context) {
                   :title="detailViewStore.detailTitle"
   >
   </t-image-viewer>
+  -->
 </template>
 
 <style lang="less" scoped>

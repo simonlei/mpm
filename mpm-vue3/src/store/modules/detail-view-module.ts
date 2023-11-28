@@ -14,6 +14,7 @@ export const detailViewModuleStore = defineStore('detailViewModule', {
     detailVisible: false,
     detailImages: [],
     detailTitle: "",
+    currentPhoto: null,
   }),
   actions: {
     async showDetailView(index: number) {
@@ -27,19 +28,20 @@ export const detailViewModuleStore = defineStore('detailViewModule', {
       console.log("before " + this.detailImages);
       this.detailViewShowIndex = 0;
       if (index > 0) {
-        this.detailImages.push("/cos/small/" + (await getPhotoItem(index - 1)).name);
+        this.detailImages.push("c" + (await getPhotoItem(index - 1)).name);
         this.detailViewShowIndex = 1;
       }
       console.log("1 " + this.detailImages);
-      let currentPhoto = await getPhotoItem(index);
-      this.detailTitle = `大小: ${currentPhoto.size}\n宽度: ${currentPhoto.width}px\n高度: ${currentPhoto.height}px`
-        + `描述：${currentPhoto.description}\n`
-        + (currentPhoto.tags == null ? "" : `标签：${currentPhoto.tags}\n`)
-        + (currentPhoto.address == null ? "" : `地址：${currentPhoto.address}\n`)
-        + `时间 ${currentPhoto.takendate}`
+      this.currentPhoto = await getPhotoItem(index);
+      let photo = this.currentPhoto;
+      this.detailTitle = `大小: ${photo.size}\n宽度: ${photo.width}px\n高度: ${photo.height}px`
+        + `描述：${photo.description}\n`
+        + (photo.tags == null ? "" : `标签：${photo.tags}\n`)
+        + (photo.address == null ? "" : `地址：${photo.address}\n`)
+        + `时间 ${photo.takendate}`
       // TODO: 完善size和时间，以及格式
       // + `时间：${DateFormat('y/M/d').format(takenDate)}`;`;
-      this.detailImages.push("/cos/small/" + currentPhoto.name);
+      this.detailImages.push("/cos/small/" + photo.name);
       console.log("2 " + this.detailImages);
       if (index < photoStore.idList.length - 1) {
         this.detailImages.push("/cos/small/" + (await getPhotoItem(index + 1)).name);

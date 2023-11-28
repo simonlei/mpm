@@ -70,12 +70,10 @@ onKeyStroke('Enter', async (e) => {
     await detailViewStore.showDetailView(selectStore.lastSelectedIndex);
 })
 onKeyStroke('ArrowLeft', (e) => {
-  if (detailViewStore.detailVisible) return;
   if (notUsingInput())
     selectStore.changeSelectedIndex(-1, e.shiftKey);
 })
 onKeyStroke('ArrowRight', (e) => {
-  if (detailViewStore.detailVisible) return;
   if (notUsingInput())
     selectStore.changeSelectedIndex(1, e.shiftKey);
 })
