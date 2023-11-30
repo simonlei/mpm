@@ -33,7 +33,7 @@ import {onMounted, ref} from "vue";
 import {onKeyStroke, useActiveElement} from '@vueuse/core';
 import PhotoItem from './PhotoItem.vue'
 import {selectModuleStore} from "@/store/modules/select-module";
-import PhotoViewer from "@/pages/dashboard/photos/components/PhotoViewer.vue";
+import PhotoViewer from "@/pages/dashboard/photos/components/PhotoDetailViewer.vue";
 
 const gridItems = ref(10);
 const photoStore = photoModuleStore();

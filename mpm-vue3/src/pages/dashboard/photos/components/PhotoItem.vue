@@ -1,20 +1,26 @@
 <template>
   <div>
-    <t-image :key="photo.name" :alt="''+index" :src="/cos/ + photo.thumb" fit='none'
-             height="100" shape="round"
-             width="200"
-             v-on:dblclick="dblClicked"
-             @click.exact="clicked"
-             @click.meta.exact="metaClicked"
-             @click.shift.exact="shiftClicked"
-    >
-    </t-image>
+    <t-popup placement="right-bottom" show-arrow>
+      <t-image :key="photo.name" :alt="''+index" :src="/cos/ + photo.thumb" fit='none'
+               height="100" shape="round"
+               width="200"
+               v-on:dblclick="dblClicked"
+               @click.exact="clicked"
+               @click.meta.exact="metaClicked"
+               @click.shift.exact="shiftClicked"
+      >
+      </t-image>
+      <template #content>
+        <photo-describe-table v-model:photo="photo"/>
+      </template>
+    </t-popup>
   </div>
 </template>
 <script lang="ts" setup>
 import {detailViewModuleStore, photoModuleStore} from "@/store";
 import {ref} from "vue";
 import {selectModuleStore} from "@/store/modules/select-module";
+import PhotoDescribeTable from "@/pages/dashboard/photos/components/PhotoDescribeTable.vue";
 
 const props = defineProps({id: Number, index: Number})
 const store = photoModuleStore();

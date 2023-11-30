@@ -1,6 +1,6 @@
 <template>
   <div :class="layoutCls">
-    <t-head-menu :class="menuCls" :theme="theme" :value="active" expand-type="popup">
+    <t-head-menu :class="menuCls" :theme="'dark'" :value="active" expand-type="popup">
       <template v-if="layout !== 'side'" #default>
         <menu-content :nav-data="menu" class="header-menu"/>
       </template>
