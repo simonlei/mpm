@@ -32,7 +32,7 @@ function makeData(photo: Photo) {
   return d;
 }
 
-const data = [
+const data = photo == null ? [] : [
   {k: '大小', v: filesize(photo.size)},
   {k: '宽度', v: photo.width},
   {k: '高度', v: photo.height},
