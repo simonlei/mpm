@@ -14,6 +14,7 @@
           </t-tooltip>
           <OrderSelector/>
           <switch-trash-button/>
+          <empty-trash-button/>
           <!-- 搜索框 -->
           <search v-if="layout !== 'side'" :layout="layout"/>
 
@@ -75,6 +76,7 @@ import {selectModuleStore} from "@/store/modules/select-module";
 import SwitchTrashButton from "@/layouts/components/SwitchTrashButton.vue";
 import UploadPhotoButton from "@/layouts/components/UploadPhotoButton.vue";
 import OrderSelector from "@/layouts/components/OrderSelector.vue";
+import EmptyTrashButton from "@/layouts/components/EmptyTrashButton.vue";
 
 const props = defineProps({
   theme: {

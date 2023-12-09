@@ -45,6 +45,8 @@ const photogrid = ref(null);
 
 
 photoStore.idList = (await getPicIds()).data;
+photoStore.otherCount = await getPicsCount(!filterStore.trashed);
+
 let oldWidth = 0;
 
 console.log("Setting up photo table...............");

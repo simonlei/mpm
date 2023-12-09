@@ -13,9 +13,11 @@ function switchTrash() {
 
 <template>
   <t-tooltip content="切换回收站状态" placement="bottom">
-    <t-button class="t-button2" shape="square" theme="default" variant="text" width="1200"
+    <t-button :content="(filterStore.trashed ? '正常照片(' : '回收站(')+photoStore.otherCount+')'"
+              class="t-button2" shape="square"
+              theme="default"
+              variant="text"
               @click="switchTrash">
-      回收站({{ photoStore.otherCount }})
     </t-button>
   </t-tooltip>
 </template>

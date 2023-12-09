@@ -40,3 +40,17 @@ export function getPhotoDetails(photo: Photo): String {
 export interface PhotoCountResult {
   count: number;
 }
+
+export interface TaskProgress {
+  count: number;
+  total: number;
+  progress: number;
+}
+
+export interface TaskId {
+  taskId: string;
+}
+
+export interface TaskProgressResult {
+  data: TaskProgress;
+}

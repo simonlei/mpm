@@ -23,6 +23,7 @@ import org.nutz.dao.util.cri.SimpleCriteria;
 import org.nutz.json.Json;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
+import org.nutz.lang.util.NutMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -109,10 +110,10 @@ public class PicsController {
     }
 
     @PostMapping("/api/emptyTrash")
-    public String emptyTrash() {
+    public NutMap emptyTrash() {
         String taskId = ProgressController.addTask(emptyTask);
         new Thread(emptyTask).start();
-        return taskId;
+        return NutMap.NEW().setv("taskId", taskId);
     }
 
     @PostMapping("/api/updateImage")
