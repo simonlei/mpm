@@ -1,7 +1,7 @@
 <template>
   <div>
-    <t-tree :data="TREE_DATA" :keys="KEYSX" :load="load" :onActive="treeActive"
-            activable
+    <t-tree :data="TREE_DATA" :expand-level="1" :keys="KEYSX" :load="load"
+            :onActive="treeActive" activable
             expand-on-click-node hover></t-tree>
   </div>
 
@@ -17,10 +17,19 @@ import {ref} from "vue";
 const filterStore = photoFilterStore();
 filterStore.dateKey = null;
 
-const TREE_DATA = ref(await getPicsFolderList(null, filterStore.trashed));
-TREE_DATA.value.forEach((value) => value.children = true);
+const root = {id: '', title: '全部', children: []};
+
+async function getFolderTreeWithRoot() {
+  let photosFolders = await getPicsFolderList(null, filterStore.trashed);
+  photosFolders.forEach((value) => value.children = true);
+  root.children = photosFolders;
+  return [root];
+}
+
+const TREE_DATA = ref(await getFolderTreeWithRoot());
 
 const KEYSX = {value: 'id', label: 'title'};
+let beforeIsTrashed = filterStore.trashed;
 
 function treeActive(value: Array<TreeNodeValue>, context) {
   console.log('tree active ' + value);
@@ -33,8 +42,12 @@ function treeActive(value: Array<TreeNodeValue>, context) {
 
 filterStore.$onAction(async ({after}) => {
   after(async (result) => {
-    TREE_DATA.value = await getPicsFolderList(null, filterStore.trashed);
-    console.log('data ' + TREE_DATA);
+    if (beforeIsTrashed != filterStore.trashed) {
+      beforeIsTrashed = filterStore.trashed;
+
+      TREE_DATA.value = await getFolderTreeWithRoot();
+      console.log('data ' + TREE_DATA);
+    }
   })
 });
 

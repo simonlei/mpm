@@ -1,7 +1,7 @@
 <template>
   <div>
-    <t-tree :data="TREE_DATA" :keys="KEYSX" :onActive="treeActive" activable
-            expand-on-click-node
+    <t-tree :data="TREE_DATA" :expand-level="1" :keys="KEYSX" :onActive="treeActive"
+            activable expand-on-click-node
             hover></t-tree>
   </div>
 
@@ -16,14 +16,25 @@ import {ref} from "vue";
 
 const filterStore = photoFilterStore();
 filterStore.path = null;
+const root = {id: '', title: '全部', months: []};
 
-let TREE_DATA = ref(await getPicsDateList(filterStore.trashed));
+async function loadDateTreeWithRoot() {
+  let photosDates = await getPicsDateList(filterStore.trashed);
+  root.months = photosDates;
+  return [root];
+}
+
+let TREE_DATA = ref(await loadDateTreeWithRoot());
 const KEYSX = {value: 'id', label: 'title', children: 'months'};
+let beforeIsTrashed = filterStore.trashed;
 
 filterStore.$onAction(async ({after}) => {
   after(async (result) => {
-    TREE_DATA.value = await getPicsDateList(filterStore.trashed);
-    console.log('data ' + TREE_DATA);
+    if (beforeIsTrashed != filterStore.trashed) {
+      beforeIsTrashed = filterStore.trashed;
+      TREE_DATA.value = await loadDateTreeWithRoot();
+      console.log('data ' + TREE_DATA);
+    }
   })
 });
 
