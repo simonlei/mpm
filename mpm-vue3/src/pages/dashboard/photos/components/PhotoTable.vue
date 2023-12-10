@@ -29,8 +29,8 @@
 <script lang="ts" setup>
 import {getPicIds, getPicsCount} from "@/api/photos";
 import {detailViewModuleStore, photoFilterStore, photoModuleStore} from '@/store';
-import {onMounted, ref} from "vue";
-import {onKeyStroke, useActiveElement} from '@vueuse/core';
+import {onActivated, onDeactivated, onMounted, onUnmounted, ref} from "vue";
+import {onKeyStroke, useActiveElement, useElementVisibility} from '@vueuse/core';
 import PhotoItem from './PhotoItem.vue'
 import {selectModuleStore} from "@/store/modules/select-module";
 import PhotoViewer from "@/pages/dashboard/photos/components/PhotoDetailViewer.vue";
@@ -49,44 +49,6 @@ photoStore.otherCount = await getPicsCount(!filterStore.trashed);
 
 let oldWidth = 0;
 
-console.log("Setting up photo table...............");
-const activeElement = useActiveElement()
-const notUsingInput = () => {
-  // console.log(activeElement.value?.tagName);
-  return activeElement.value?.tagName != 'INPUT'
-    && activeElement.value?.tagName != 'TEXTAREA';
-}
-
-onKeyStroke('d', async (e) => {
-  if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
-  if (notUsingInput()) {
-    await photoStore.deleteSelectedPhotos();
-    if (detailViewStore.detailVisible) {
-      await detailViewStore.showDetailView(selectStore.lastSelectedIndex);
-    }
-  }
-})
-onKeyStroke('Enter', async (e) => {
-  if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
-  if (notUsingInput())
-    await detailViewStore.showDetailView(selectStore.lastSelectedIndex);
-})
-onKeyStroke('ArrowLeft', (e) => {
-  if (notUsingInput())
-    selectStore.changeSelectedIndex(-1, e.shiftKey);
-})
-onKeyStroke('ArrowRight', (e) => {
-  if (notUsingInput())
-    selectStore.changeSelectedIndex(1, e.shiftKey);
-})
-onKeyStroke('ArrowUp', (e) => {
-  if (notUsingInput())
-    selectStore.changeSelectedIndex(-gridItems.value, e.shiftKey);
-})
-onKeyStroke('ArrowDown', (e) => {
-  if (notUsingInput())
-    selectStore.changeSelectedIndex(gridItems.value, e.shiftKey);
-})
 
 function calcGridItems() {
   console.log("width:" + photogrid.value.clientWidth);
@@ -132,11 +94,76 @@ selectStore.$onAction(async ({after}) => {
   })
 });
 
+let key1: any;
+let key2: any;
+let key3: any;
+let key4: any;
+let key5: any;
+let key6: any;
 
 onMounted(async () => {
   gridItems.value = calcGridItems();
   console.log("grid items:" + gridItems.value);
+  console.log("Setting up photo table...............");
+  const activeElement = useActiveElement()
+  const notUsingInput = () => {
+    console.log(activeElement.value?.tagName);
+    return keyAction && useElementVisibility(photogrid) && activeElement.value?.tagName != 'INPUT'
+      && activeElement.value?.tagName != 'TEXTAREA';
+  }
+
+  key1 = onKeyStroke('d', async (e) => {
+    if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
+    if (notUsingInput()) {
+      await photoStore.deleteSelectedPhotos();
+      if (detailViewStore.detailVisible) {
+        await detailViewStore.showDetailView(selectStore.lastSelectedIndex);
+      }
+    }
+  });
+  key2 = onKeyStroke('Enter', async (e) => {
+    if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
+    if (notUsingInput())
+      await detailViewStore.showDetailView(selectStore.lastSelectedIndex);
+  });
+  key3 = onKeyStroke('ArrowLeft', (e) => {
+    if (notUsingInput())
+      selectStore.changeSelectedIndex(-1, e.shiftKey);
+  });
+  key4 = onKeyStroke('ArrowRight', (e) => {
+    if (notUsingInput())
+      selectStore.changeSelectedIndex(1, e.shiftKey);
+  });
+  key5 = onKeyStroke('ArrowUp', (e) => {
+    if (notUsingInput())
+      selectStore.changeSelectedIndex(-gridItems.value, e.shiftKey);
+  });
+  key6 = onKeyStroke('ArrowDown', (e) => {
+    if (notUsingInput())
+      selectStore.changeSelectedIndex(gridItems.value, e.shiftKey);
+  });
+
 });
+let keyAction = true;
+
+onDeactivated(() => {
+  console.log("do not actived");
+  keyAction = false;
+});
+onActivated(() => {
+  keyAction = true;
+});
+
+onUnmounted(() => {
+  console.log("unmounted.......");
+  key1();
+  key2();
+  key3();
+  key4();
+  key5();
+  key6();
+});
+
 </script>
 
 <script lang="ts">
