@@ -12,7 +12,33 @@
             <t-input-number v-model:value="selectStore.lastSelectedIndex" :label="'跳转至'"
                             :onEnter="jumpTo" align="center" theme="normal"/>
           </t-tooltip>
-          <OrderSelector/>
+          <t-dropdown trigger="click">
+            <template #dropdown>
+              <t-dropdown-menu>
+                <t-dropdown-item class="operations-dropdown-container-item">
+                  <template #content>
+                    <video-only-checkbox/>
+                  </template>
+                </t-dropdown-item>
+                <t-dropdown-item class="operations-dropdown-container-item">
+                  <template #content>
+                    <star-only-checkbox/>
+                  </template>
+                </t-dropdown-item>
+              </t-dropdown-menu>
+            </template>
+            <t-button class="header-user-btn" theme="default" variant="text">
+              <template #icon>
+                <t-icon class="header-user-avatar" name="filter"/>
+              </template>
+              <template #suffix>
+                <t-icon name="chevron-down"/>
+              </template>
+            </t-button>
+          </t-dropdown>
+
+
+          <order-selector/>
           <switch-trash-button/>
           <empty-trash-button/>
           <!-- 搜索框 -->
@@ -77,6 +103,8 @@ import SwitchTrashButton from "@/layouts/components/SwitchTrashButton.vue";
 import UploadPhotoButton from "@/layouts/components/UploadPhotoButton.vue";
 import OrderSelector from "@/layouts/components/OrderSelector.vue";
 import EmptyTrashButton from "@/layouts/components/EmptyTrashButton.vue";
+import VideoOnlyCheckbox from "@/layouts/components/VideoOnlyCheckbox.vue";
+import StarOnlyCheckbox from "@/layouts/components/StarOnlyCheckbox.vue";
 
 const props = defineProps({
   theme: {

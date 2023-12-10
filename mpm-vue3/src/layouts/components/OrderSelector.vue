@@ -38,7 +38,7 @@ function handleChange(value) {
     :options="options"
     clearable
     placeholder="-请选择-"
-    style="width: 200px; display: inline-block; margin-right: 20px"
+    style="width: 150px; display: inline-block"
     @change="handleChange"
   />
 
