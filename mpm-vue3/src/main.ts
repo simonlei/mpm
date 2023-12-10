@@ -5,7 +5,7 @@ import 'tdesign-vue-next/es/style/index.css';
 import VueVirtualScroller from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import customVideo from 'vue-video-xg';
-import "vue-video-xg/style.css"; //引入样式
+import "vue-video-xg/lib/style.css"; //引入样式
 import {store} from './store';
 import router from './router';
 import '@/style/index.less';
