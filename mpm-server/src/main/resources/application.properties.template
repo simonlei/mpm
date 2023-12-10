@@ -19,4 +19,5 @@ spring.jackson.time-zone=GMT+8
 spring.jackson.locale=zh_CN
 # 默认相同格式
 # smallphoto.format=webp
-spring.servlet.multipart.max-file-size=100MB
+spring.servlet.multipart.max-file-size=1000MB
+spring.servlet.multipart.max-request-size=1000MB
