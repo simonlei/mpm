@@ -1,5 +1,5 @@
 import {request} from '@/utils/request';
-import type {PhotosResult, TaskProgress} from './model/photos';
+import type {PhotosResult, TaskId, TaskProgress} from './model/photos';
 import type {PhotosDate} from './model/photosDate';
 import {photoFilterStore} from '@/store';
 import {PhotosFolder} from "@/api/model/photosFolder";
@@ -20,7 +20,7 @@ export function getTaskProgress(taskId: string) {
 }
 
 export function emptyTrash() {
-  return request.post<s>({url: Api.EmptyTrash});
+  return request.post<TaskId>({url: Api.EmptyTrash});
 }
 
 export function uploadPhoto(batchId: number, photo: File) {
