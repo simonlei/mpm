@@ -28,11 +28,9 @@ detailViewStore.$subscribe((mutation, state) => {
                  :key="detailViewStore.currentPhotoName+'-small'"
                  :src="detailViewStore.currentPhotoSmallUrl"
         />
-        <customVideo v-else
-                     :key="detailViewStore.currentPhotoName+'-video'"
-                     :src="`/cos/video_t/${detailViewStore.currentPhoto?.name}.mp4`"
-                     :videoConfig="config"
-                     width="800px"
+        <vue3VideoPlay v-else
+                       poster="https://cdn.jsdelivr.net/gh/xdlumia/files/video-play/ironMan.jpg"
+                       v-bind="config"
         />
       </t-content>
       <t-aside width="300px">
