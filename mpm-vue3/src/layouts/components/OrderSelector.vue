@@ -32,16 +32,38 @@ function handleChange(value) {
 </script>
 
 <template>
-  <t-select
 
+  <t-radio-group v-model="filterStore.order" :options="options" @change="handleChange">
+
+  </t-radio-group>
+  <!--
+  <t-radio-group default-value="-takenDate" variant="default-filled">
+    <t-radio-button value="-takenDate">时间逆序</t-radio-button>
+    <t-radio-button value="takenDate">时间顺序</t-radio-button>
+    <t-radio-button value="-size">大小逆序</t-radio-button>
+    <t-radio-button value="size">大小顺序</t-radio-button>
+    <t-radio-button value="-id">导入时间逆序</t-radio-button>
+    <t-radio-button value="id">导入时间顺序</t-radio-button>
+    <t-radio-button value="-width">宽度逆序</t-radio-button>
+    <t-radio-button value="width">宽度顺序</t-radio-button>
+    <t-radio-button value="-height">高度逆序</t-radio-button>
+    <t-radio-button value="height">高度顺序</t-radio-button>
+  </t-radio-group>
+
+  <t-select
     v-model="filterStore.order"
     :options="options"
-    clearable
-    placeholder="-请选择-"
-    style="width: 150px; display: inline-block"
+    :showArrow="false"
+    borderless
+    style="width: 40px; display: inline-block"
     @change="handleChange"
-  />
-
+  >
+    <template #valueDisplay>&nbsp;</template>
+    <template #prefixIcon>
+      <t-icon name="order-descending" style="margin-right: 8px"/>
+    </template>
+  </t-select>
+-->
 </template>
 
 <style lang="less" scoped>

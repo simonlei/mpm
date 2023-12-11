@@ -245,8 +245,9 @@
 - [ ] bug: 如果takenDate是null，那么就用当天的日期
 - [ ] bug: cos 版本和 万象版本不一致导致video不正常
 - [ ] bug: tile会复用，要删掉不必要的视频标签
-- [ ] 视频进度条
+- [x] 视频进度条
 - [x] 上传到cos增加progress dialog
+- [ ] 关闭详情时暂停播放视频
 
 ## 需求池
 

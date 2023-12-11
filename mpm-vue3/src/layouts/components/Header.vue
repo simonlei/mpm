@@ -37,8 +37,27 @@
             </t-button>
           </t-dropdown>
 
+          <t-dropdown trigger="click">
+            <template #dropdown>
+              <t-dropdown-menu :maxColumnWidth="150">
+                <t-dropdown-item class="operations-dropdown-container-item">
+                  <template #content>
+                    <order-selector/>
+                  </template>
+                </t-dropdown-item>
+              </t-dropdown-menu>
+            </template>
+            <t-button class="header-user-btn" theme="default" variant="text">
+              <template #icon>
+                <t-icon class="header-user-avatar" name="order-descending"/>
+              </template>
+              <template #suffix>
+                <t-icon name="chevron-down"/>
+              </template>
+            </t-button>
+          </t-dropdown>
 
-          <order-selector/>
+
           <switch-trash-button/>
           <empty-trash-button/>
           <!-- 搜索框 -->
