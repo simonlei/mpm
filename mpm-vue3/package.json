@@ -23,6 +23,7 @@
     "dayjs": "^1.10.6",
     "echarts": "~5.1.2",
     "filesize": "^10.1.0",
+    "format-duration": "^3.0.2",
     "lodash": "^4.17.21",
     "nprogress": "^0.2.0",
     "pinia": "^2.0.11",
