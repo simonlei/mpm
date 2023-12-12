@@ -10,7 +10,7 @@
                @click.shift.exact="shiftClicked"
       >
         <template #overlay-content>
-          <Tag v-if="photo.mediatype=='video'"
+          <t-tag v-if="photo.mediatype=='video'"
                :style="{ position: 'absolute', right: '8px', bottom: '8px', borderRadius: '3px' }"
                shape="mark"
                theme="primary"
@@ -18,7 +18,7 @@
           >
             <t-icon name="play-circle"/>
             {{ formatDuration(photo.duration * 1000) }}
-          </Tag>
+          </t-tag>
         </template>
       </t-image>
       <template #content>

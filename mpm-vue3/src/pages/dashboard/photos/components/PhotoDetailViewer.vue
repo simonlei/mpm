@@ -5,6 +5,7 @@ import PhotoDescribeTable from "@/pages/dashboard/photos/components/PhotoDescrib
 
 const imageViewer = ref(null);
 const detailViewStore = detailViewModuleStore();
+const videoPlayer = ref(null);
 
 const config = ref({
   src: `/cos/video_t/${detailViewStore.currentPhoto?.name}.mp4`,
@@ -14,6 +15,9 @@ detailViewStore.$subscribe((mutation, state) => {
   const photo = state.currentPhoto;
   config.value.src = `/cos/video_t/${photo?.name}.mp4`;
   config.value.poster = `/cos/small/${photo?.name}`;
+  if ( !state.detailVisible) {
+    videoPlayer.value.pause();
+  }
 });
 
 </script>
@@ -28,7 +32,7 @@ detailViewStore.$subscribe((mutation, state) => {
                  :key="detailViewStore.currentPhotoName+'-small'"
                  :src="detailViewStore.currentPhotoSmallUrl"
         />
-        <vue3VideoPlay v-else
+        <vue3VideoPlay v-else ref="videoPlayer"
                        poster="https://cdn.jsdelivr.net/gh/xdlumia/files/video-play/ironMan.jpg"
                        v-bind="config"
         />
