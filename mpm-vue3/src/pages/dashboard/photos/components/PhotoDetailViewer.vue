@@ -16,7 +16,7 @@ detailViewStore.$subscribe((mutation, state) => {
   config.value.src = `/cos/video_t/${photo?.name}.mp4`;
   config.value.poster = `/cos/small/${photo?.name}`;
   if ( !state.detailVisible) {
-    videoPlayer.value.pause();
+    videoPlayer.value?.pause();
   }
 });
 
