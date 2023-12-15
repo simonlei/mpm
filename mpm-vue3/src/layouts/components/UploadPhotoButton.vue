@@ -32,7 +32,7 @@ let q = async.queue(async function (task, callback) {
 async function updatingProgress() {
   console.log("upload {} finished", count);
   progressLabel.value = "上传中... " + count + "/" + total;
-  progressPercent.value = count / total;
+  progressPercent.value = count / total * 100;
   if (count == total) {
     progressVisible.value = false;
     let filterStore = photoFilterStore();
