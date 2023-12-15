@@ -33,7 +33,7 @@
         <dependency>
             <groupId>com.qcloud</groupId>
             <artifactId>cos_api</artifactId>
-            <version>5.6.167</version>
+            <version>5.6.191</version>
         </dependency>
         <dependency>
             <groupId>com.tencent.cloud</groupId>
@@ -44,7 +44,7 @@
         <dependency>
             <artifactId>mysql-connector-java</artifactId>
             <groupId>mysql</groupId>
-            <version>8.0.28</version>
+            <version>8.0.33</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.drewnoakes/metadata-extractor -->
         <dependency>
@@ -67,7 +67,7 @@
         <dependency>
             <artifactId>druid</artifactId>
             <groupId>com.alibaba</groupId>
-            <version>1.1.22</version>
+            <version>1.2.16</version>
         </dependency>
         <dependency>
             <groupId>de.taimos</groupId>

@@ -6,14 +6,13 @@ import com.qcloud.cos.ClientConfig;
 import com.qcloud.cos.auth.BasicCOSCredentials;
 import com.qcloud.cos.auth.COSCredentials;
 import com.qcloud.cos.region.Region;
+import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.nutz.dao.Dao;
 import org.nutz.dao.impl.NutDao;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.sql.DataSource;
 
 @Configuration
 @Slf4j
@@ -40,8 +39,8 @@ public class BeanFactory {
         log.info("cosClient config:" + secretId + ":" + secretKey);
         COSCredentials cred = new BasicCOSCredentials(secretId, secretKey);
         ClientConfig clientConfig = new ClientConfig(new Region(region));
-        COSClient cosClient = new COSClient(cred, clientConfig);
-        return cosClient;
+        
+        return new COSClient(cred, clientConfig);
     }
 
     @Bean
