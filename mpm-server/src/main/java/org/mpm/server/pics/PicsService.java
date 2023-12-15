@@ -304,8 +304,11 @@ public class PicsService {
                 Cnd.where("md5", "=", md5).and("sha1", "=", sha1).and("size", "=", file.length()));
         if (existPhoto != null) {
             log.info("与图片 " + existPhoto.getId() + " 重复，file " + key + " 被抛弃！");
-            existPhoto.setDescription(existPhoto.getDescription() + "\n" + name);
-            dao.updateIgnoreNull(existPhoto);
+            String description = existPhoto.getDescription() == null ? "" : existPhoto.getDescription();
+            if (!description.contains(name)) {
+                existPhoto.setDescription(description + "\n" + name);
+                dao.updateIgnoreNull(existPhoto);
+            }
             cosClient.deleteObject(bucket, key);
         }
         return existPhoto;

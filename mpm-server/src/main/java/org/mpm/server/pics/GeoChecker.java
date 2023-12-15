@@ -1,5 +1,9 @@
 package org.mpm.server.pics;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityMeta;
 import org.mpm.server.entity.EntityPhoto;
@@ -7,12 +11,9 @@ import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.dao.pager.Pager;
 import org.nutz.dao.util.cri.Exps;
+import org.nutz.lang.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -109,5 +110,44 @@ public class GeoChecker {
         }
         meta.setValue("" + lastId);
         dao.insertOrUpdate(meta);
+    }
+
+    public void clearDuplicateDescs() {
+        EntityMeta meta = dao.fetch(EntityMeta.class, "lastDuplicateDescsCheckId");
+        long lastId = meta == null ? 0 : Long.parseLong(meta.getValue());
+        // get first 200
+        List<EntityPhoto> photos = dao.query(EntityPhoto.class, Cnd.where("id", ">", lastId)
+                .orderBy("id", "asc"), new Pager(1, 200));
+        for (EntityPhoto p : photos) {
+            try {
+                p.setDescription(removeDuplicate(p.getDescription()));
+                dao.updateIgnoreNull(p);
+            } catch (Exception e) {
+                log.error("Can't clear duplicate desc, photo:" + p.getId(), e);
+            }
+            lastId = p.getId();
+        }
+        if (meta == null) {
+            meta = EntityMeta.builder().key("lastDuplicateDescsCheckId").build();
+        }
+        meta.setValue("" + lastId);
+        dao.insertOrUpdate(meta);
+        log.info("lastDuplicateDescsCheckId {}", lastId);
+    }
+
+    String removeDuplicate(String desc) {
+        if (desc == null) {
+            return "";
+        }
+        String[] strings = desc.split("\n");
+        List<String> newDescList = new ArrayList<>();
+        for (String s : strings) {
+            s = s.trim();
+            if (Strings.isBlank(s) || newDescList.contains(s)) {
+                continue;
+            }
+            newDescList.add(s);
+        }
+        return String.join("\n", newDescList);
     }
 }
