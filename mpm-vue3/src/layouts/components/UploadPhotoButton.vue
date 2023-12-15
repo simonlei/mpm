@@ -3,6 +3,7 @@ import {onMounted, ref} from "vue";
 import {uploadPhoto} from "@/api/photos";
 import {photoFilterStore} from "@/store";
 import {NotifyPlugin} from "tdesign-vue-next";
+import async from "async";
 
 let uploadx;
 let progressVisible = ref(false);
@@ -14,29 +15,56 @@ onMounted(() => {
   console.log('uploadx is ' + uploadx);
 });
 
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+let count = 0;
+let total = 0;
+
+let q = async.queue(async function (task, callback) {
+  await uploadPhoto(task.batchId, task.file);
+  count++;
+  callback();
+}, 10);
+
+async function updatingProgress() {
+  console.log("upload {} finished", count);
+  progressLabel.value = "上传中... " + count + "/" + total;
+  progressPercent.value = count / total;
+  if (count == total) {
+    progressVisible.value = false;
+    let filterStore = photoFilterStore();
+    filterStore.$reset();
+    await NotifyPlugin.success({
+      title: '完成',
+      content: '已成功上传 ' + count + ' 张照片'
+    });
+  }
+}
+
+console.log(" type of " + (typeof updatingProgress));
+
 const uploadFiles = async () => {
+  count = 0;
   progressVisible.value = true;
   console.log(uploadx.files);
-  // TODO: 这里改成线程池，同时多个上传
-  const length = uploadx.files.length;
-  progressLabel.value = "上传中... 0/" + length;
+  total = uploadx.files.length;
+
+  progressLabel.value = "上传中... 0/" + total;
   const batchId = Date.now();
-  let count = 0;
-  for (let i = 0; i < length; i++) {
+
+  for (let i = 0; i < uploadx.files.length; i++) {
     let file = uploadx.files[i];
     if (file.type.startsWith("image") || file.type.startsWith("video")) {
-      const data = await uploadPhoto(batchId, file);
-      count++;
+      q.push({batchId: batchId, file: file}, function (err) {
+        updatingProgress();
+      });
+    } else {
+      total--;
     }
-    // update progress
-    console.log("upload {} finished", i);
-    progressLabel.value = "上传中... " + i + "/" + length;
-    progressPercent.value = i / length;
   }
-  progressVisible.value = false;
-  let filterStore = photoFilterStore();
-  filterStore.$reset();
-  await NotifyPlugin.success({title: '完成', content: '已成功上传 ' + count + ' 张照片'})
 };
 
 </script>
