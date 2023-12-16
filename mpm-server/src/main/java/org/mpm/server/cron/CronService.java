@@ -4,7 +4,6 @@ import org.mpm.server.pics.GeoChecker;
 import org.mpm.server.pics.GisService;
 import org.mpm.server.pics.PicsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,7 +29,7 @@ public class CronService {
         }
     }
 
-    @Scheduled(fixedDelay = 5000)
+    // @Scheduled(fixedDelay = 5000)
     void checkPhotoDates() {
         /*
          geoChecker.checkPhotoDates();

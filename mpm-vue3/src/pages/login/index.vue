@@ -9,11 +9,13 @@
         </div>
       </div>
 
-      <login v-if="type === 'login'" />
-      <tdesign-setting />
+      <login v-if="type === 'login'"/>
+      <tdesign-setting/>
     </div>
 
-    <footer class="copyright">Copyright @ 2021-2022 Tencent. All Rights Reserved</footer>
+    <footer class="copyright">Copyright @ 2021-{{ new Date().getFullYear() }} MPM. All Rights
+      Reserved
+    </footer>
   </div>
 </template>
 <script lang="ts">
@@ -21,8 +23,8 @@ export default {
   name: 'LoginIndex',
 };
 </script>
-<script setup lang="ts">
-import { ref } from 'vue';
+<script lang="ts" setup>
+import {ref} from 'vue';
 
 import Login from './components/Login.vue';
 import TdesignSetting from '@/layouts/setting.vue';

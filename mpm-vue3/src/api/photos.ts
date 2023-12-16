@@ -13,7 +13,12 @@ const Api = {
   UploadPhoto: '/uploadPhoto',
   EmptyTrash: '/emptyTrash',
   TaskProgress: '/getProgress/',
+  SwitchTrashFolder: '/switchTrashFolder',
 };
+
+export function switchTrashFolder(to: boolean, path: string) {
+  return request.post<number>({url: Api.SwitchTrashFolder, data: {to: to, path: path}});
+}
 
 export function getTaskProgress(taskId: string) {
   return request.get<TaskProgress>({url: Api.TaskProgress + taskId});

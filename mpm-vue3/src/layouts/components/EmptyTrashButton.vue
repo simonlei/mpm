@@ -28,7 +28,7 @@ async function doEmptyTrash() {
 
 <template>
   <t-popconfirm content="清空后照片无法找回！确认清空回收站吗？" @confirm="doEmptyTrash">
-    <t-button v-if="filterStore.trashed">清空回收站</t-button>
+    <t-button v-if="filterStore.trashed" theme="default" variant="text">清空回收站</t-button>
   </t-popconfirm>
 
   <t-dialog v-model:visible="progressVisible" :close-btn="false" :close-on-esc-keydown="false"
