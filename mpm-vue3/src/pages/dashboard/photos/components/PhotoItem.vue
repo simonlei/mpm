@@ -1,30 +1,32 @@
 <template>
   <div>
-    <t-popup placement="right-bottom" show-arrow>
-      <t-image :key="photo.name" :alt="''+index" :src="/cos/ + photo.thumb" fit='none'
-               height="100" shape="round"
-               width="200"
-               v-on:dblclick="dblClicked"
-               @click.exact="clicked"
-               @click.meta.exact="metaClicked"
-               @click.shift.exact="shiftClicked"
-      >
-        <template #overlay-content>
-          <t-tag v-if="photo.mediatype=='video'"
-               :style="{ position: 'absolute', right: '8px', bottom: '8px', borderRadius: '3px' }"
-               shape="mark"
-               theme="primary"
-               variant="light"
-          >
-            <t-icon name="play-circle"/>
-            {{ formatDuration(photo.duration * 1000) }}
-          </t-tag>
+    <photo-item-context-menu>
+      <t-popup placement="right-bottom" show-arrow>
+        <t-image :key="photo.name" :alt="''+index" :src="/cos/ + photo.thumb" fit='none'
+                 height="100" shape="round"
+                 width="200"
+                 v-on:dblclick="dblClicked"
+                 @click.exact="clicked"
+                 @click.meta.exact="metaClicked"
+                 @click.shift.exact="shiftClicked"
+        >
+          <template #overlay-content>
+            <t-tag v-if="photo.mediatype=='video'"
+                   :style="{ position: 'absolute', right: '8px', bottom: '8px', borderRadius: '3px' }"
+                   shape="mark"
+                   theme="primary"
+                   variant="light"
+            >
+              <t-icon name="play-circle"/>
+              {{ formatDuration(photo.duration * 1000) }}
+            </t-tag>
+          </template>
+        </t-image>
+        <template #content>
+          <photo-describe-table v-model:photo="photo"/>
         </template>
-      </t-image>
-      <template #content>
-        <photo-describe-table v-model:photo="photo"/>
-      </template>
-    </t-popup>
+      </t-popup>
+    </photo-item-context-menu>
   </div>
 </template>
 <script lang="ts" setup>
@@ -33,6 +35,7 @@ import {ref} from "vue";
 import {selectModuleStore} from "@/store/modules/select-module";
 import PhotoDescribeTable from "@/pages/dashboard/photos/components/PhotoDescribeTable.vue";
 import formatDuration from "format-duration";
+import PhotoItemContextMenu from "@/pages/dashboard/photos/components/PhotoItemContextMenu.vue";
 
 const props = defineProps({id: Number, index: Number})
 const store = photoModuleStore();
