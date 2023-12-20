@@ -1,7 +1,7 @@
 <template>
   <div>
 
-    <t-tree :data="TREE_DATA" :expand-level="1" :keys="KEYSX" :load="load"
+    <t-tree ref="tree" :data="TREE_DATA" :expand-level="1" :keys="KEYSX" :load="load"
             :onActive="treeActive" activable
             expand-on-click-node hover>
       <template #label="{ node }">
@@ -24,6 +24,8 @@ const filterStore = photoFilterStore();
 filterStore.dateKey = null;
 
 const root = {id: '', title: '全部', children: []};
+const KEYSX = {value: 'path', label: 'title'};
+const tree = ref(null);
 
 async function getFolderTreeWithRoot() {
   let photosFolders = await getPicsFolderList(null, filterStore.trashed);
@@ -34,7 +36,6 @@ async function getFolderTreeWithRoot() {
 
 let TREE_DATA = ref(await getFolderTreeWithRoot());
 
-const KEYSX = {value: 'id', label: 'title'};
 let beforeIsTrashed = filterStore.trashed;
 
 function treeActive(value: Array<TreeNodeValue>, context) {
@@ -54,11 +55,15 @@ filterStore.$onAction(async ({after}) => {
       TREE_DATA.value = await getFolderTreeWithRoot();
       console.log('data ' + TREE_DATA);
     }
+    const node = tree.value.getItem(filterStore.path)
+    if (node != null) {
+      tree.value.setItem(node.value, {actived: true});
+    }
   })
 });
 
 async function load(node) {
-  return await getPicsFolderList(node.value, filterStore.trashed);
+  return await getPicsFolderList(node.data.id, filterStore.trashed);
 }
 
 </script>

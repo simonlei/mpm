@@ -10,7 +10,9 @@ import '@/style/index.less';
 import './permission';
 import App from './App.vue';
 import vue3videoPlay from "vue3-video-play-fix"; // 引入组件
-import "vue3-video-play-fix/dist/style.css"; // 引入css
+import "vue3-video-play-fix/dist/style.css";
+import ContextMenu from "@imengyu/vue3-context-menu"; // 引入css
+import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
 
 
 const app = createApp(App);
@@ -20,5 +22,6 @@ app.use(store);
 app.use(router);
 app.use(VueVirtualScroller);
 app.use(vue3videoPlay);
+app.use(ContextMenu);
 
 app.mount('#app');

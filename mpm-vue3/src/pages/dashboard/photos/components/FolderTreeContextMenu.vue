@@ -2,6 +2,7 @@
 import {switchTrashFolder} from "@/api/photos";
 import {photoFilterStore} from "@/store";
 import {DialogPlugin, MessagePlugin} from "tdesign-vue-next";
+import ContextMenu from "@imengyu/vue3-context-menu";
 
 const props = defineProps({node: null});
 defineEmits(['update:node']);
@@ -29,22 +30,54 @@ async function deleteSelectedFolder(value: string) {
   confirmDia.show();
 }
 
+async function onContextMenu(e: MouseEvent) {
+  //prevent the browser's default menu
+  e.preventDefault();
+  await filterStore.change({path: props.node.data.path});
+
+  //show our menu
+  ContextMenu.showContextMenu({
+    x: e.x,
+    y: e.y,
+    items: [
+      {
+        label: "修改目录下所有照片时间...",
+        onClick: () => {
+          alert("You click a menu item");
+        }
+      },
+      {
+        label: "修改目录下所有照片GIS信息...",
+        onClick: () => {
+          alert("You click a menu item");
+        }
+      },
+      {
+        label: `${filterStore.trashed ? '恢复目录' : '删除目录'}`,
+        onClick: () =>
+          deleteSelectedFolder(props.node.data.path)
+      },
+      {
+        label: "移动目录至...",
+        onClick: () => {
+          alert("You click a menu item");
+        }
+      },
+      {
+        label: "合并目录至...",
+        onClick: () => {
+          alert("You click a menu item");
+        }
+      },
+    ]
+  });
+}
+
+
 </script>
 
 <template>
-  <t-dropdown :max-column-width="250" trigger="context-menu">
-    <div>{{ node.label }}</div>
-    <t-dropdown-menu>
-      <t-dropdown-item content="修改目录下所有照片时间..."></t-dropdown-item>
-      <t-dropdown-item content="修改目录下所有照片GIS信息..."></t-dropdown-item>
-      <t-dropdown-item :content="filterStore.trashed ? '恢复目录' : '删除目录'"
-                       @click="deleteSelectedFolder(node.data.path)">
-      </t-dropdown-item>
-      <t-dropdown-item content="移动目录至..."></t-dropdown-item>
-      <t-dropdown-item content="合并目录至..."></t-dropdown-item>
-    </t-dropdown-menu>
-  </t-dropdown>
-
+  <div @contextmenu="onContextMenu($event)">{{ node.label }}</div>
 </template>
 
 <style lang="less" scoped>
