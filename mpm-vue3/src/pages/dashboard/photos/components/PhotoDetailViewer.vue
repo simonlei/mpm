@@ -15,7 +15,7 @@ detailViewStore.$subscribe((mutation, state) => {
   const photo = state.currentPhoto;
   config.value.src = `/cos/video_t/${photo?.name}.mp4`;
   config.value.poster = `/cos/small/${photo?.name}`;
-  if ( !state.detailVisible) {
+  if (!state.detailVisible) {
     videoPlayer.value?.pause();
   }
 });
@@ -24,7 +24,7 @@ detailViewStore.$subscribe((mutation, state) => {
 
 <template>
   <t-dialog ref="imageViewer" v-model:visible="detailViewStore.detailVisible" :close-btn="false"
-            :footer="false" :header="false" placement="center" width="1000px">
+            :footer="false" :header="false" attach="body" placement="center" width="1000px">
     <t-layout>
 
       <t-content v-if="detailViewStore.currentPhoto!=null">

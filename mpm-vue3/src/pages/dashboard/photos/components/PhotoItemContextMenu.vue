@@ -2,21 +2,19 @@
 
 import {selectModuleStore} from "@/store/modules/select-module";
 import {MessagePlugin} from "tdesign-vue-next";
-import {ref} from "vue";
+import {dialogsStore} from "@/store";
 
 const selectModule = selectModuleStore();
-const dateSelectDialog = ref(null);
-let dateSelectDialogVisible = ref(false);
+const dlgStore = dialogsStore();
 
 function changePhotoDate() {
   if (selectModule.lastSelectedIndex == -1) {
     MessagePlugin.warning('请选中照片后再试');
     return;
   }
-  //dateSelectDialog.show();
-  dateSelectDialogVisible.value = true;
-  console.log("dialog " + dateSelectDialog);
+  dlgStore.datePickerDlg = true;
 }
+
 
 </script>
 
@@ -34,14 +32,6 @@ function changePhotoDate() {
       -->
     </t-dropdown-menu>
   </t-dropdown>
-
-  <t-dialog ref="dateSelectDialog" v-model:visible="dateSelectDialogVisible" header="请选择日期"
-            height="300px"
-            width="300px">
-    hello...
-    <t-button>xzxx</t-button>
-    <t-date-picker allowInput/>
-  </t-dialog>
 </template>
 
 <style lang="less" scoped>
