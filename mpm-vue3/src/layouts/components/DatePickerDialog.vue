@@ -5,6 +5,7 @@ import {ref} from "vue";
 
 const dlgStore = dialogsStore();
 const datePicker = ref(null);
+let selectedDate = null;
 
 function close() {
   dlgStore.datePickerDlg = false;
@@ -13,7 +14,11 @@ function close() {
 
 function confirm() {
   dlgStore.datePickerDlg = false;
-  dlgStore.datePicked = datePicker.value.value;
+  dlgStore.datePicked = selectedDate;
+}
+
+function dateChange(value, context) {
+  selectedDate = value;
 }
 
 </script>
@@ -23,7 +28,7 @@ function confirm() {
             :visible="dlgStore.datePickerDlg"
             attach="body"
             header="请选择日期">
-    <t-date-picker ref="datePicker"></t-date-picker>
+    <t-date-picker ref="datePicker" @change="dateChange"></t-date-picker>
   </t-dialog>
 </template>
 

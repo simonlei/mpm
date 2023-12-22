@@ -13,6 +13,10 @@ function changePhotoDate() {
     return;
   }
   dlgStore.datePickerDlg = true;
+  dlgStore.whenDateConfirmed((selectedDate: string) => {
+    console.log("Picked date is {}", selectedDate);
+  })
+
 }
 
 
