@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {switchTrashFolder, updateFolderDate} from "@/api/photos";
+import {switchTrashFolder, updateFolderDate, updateFolderGis} from "@/api/photos";
 import {dialogsStore, photoFilterStore} from "@/store";
 import {DialogPlugin, MessagePlugin, NotifyPlugin} from "tdesign-vue-next";
 import ContextMenu from "@imengyu/vue3-context-menu";
@@ -38,8 +38,20 @@ function changeDateInFolder() {
     const count = await updateFolderDate(props.node.data.path, selectedDate);
     NotifyPlugin.info({title: `已设置目录下${count}张照片拍摄时间至 ${selectedDate}`});
   })
+}
 
-  return undefined;
+function changeGisInFolder() {
+  dlgStore.textInputTitle = '请输入纬度,经度，例如 22.57765,113.9504277778';
+  dlgStore.textInputDlg = true;
+  dlgStore.whenInputConfirmed(async (inputValue: string) => {
+    const values = inputValue.split(',');
+    if (values == null || values.length != 2) {
+      MessagePlugin.error('请按照 纬度,经度 模式来输入');
+    } else {
+      const count = await updateFolderGis(props.node.data.path, values[0], values[1]);
+      NotifyPlugin.info({title: `已设置目录下${count}张照片拍摄时间至 ${inputValue}`});
+    }
+  });
 }
 
 async function onContextMenu(e: MouseEvent) {
@@ -58,9 +70,7 @@ async function onContextMenu(e: MouseEvent) {
       },
       {
         label: "修改目录下所有照片GIS信息...",
-        onClick: () => {
-          alert("You click a menu item");
-        }
+        onClick: () => changeGisInFolder(),
       },
       {
         label: `${filterStore.trashed ? '恢复目录' : '删除目录'}`,

@@ -28,19 +28,14 @@ function changePhotoGis() {
   dlgStore.textInputTitle = '请输入纬度,经度，例如 22.57765,113.9504277778';
   dlgStore.textInputDlg = true;
   dlgStore.whenInputConfirmed((inputValue: string) => {
-    // TODO: split and set
     const values = inputValue.split(',');
     if (values == null || values.length != 2) {
       MessagePlugin.error('请按照 纬度,经度 模式来输入');
     } else {
       photoModule.updateSelectedPhotos(
         {'latitude': values[0], 'longitude': values[1]}, ` GIS信息到 ${inputValue}`);
-
     }
-
-
-    // photoModule.updateSelectedPhotos({"takenDate": selectedDate}, ` 拍摄时间到 ${selectedDate}`);
-    console.log("input value is {}", inputValue);
+    // console.log("input value is {}", inputValue);
   });
 
 }

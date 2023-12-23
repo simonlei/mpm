@@ -16,7 +16,15 @@ const Api = {
   SwitchTrashFolder: '/switchTrashFolder',
   UpdatePhoto: '/updateImage',
   UpdateFolderDate: '/updateFolderDate',
+  UpdateFolderGis: '/updateFolderGis',
 };
+
+export function updateFolderGis(path: string, latitude: string, longitude: string) {
+  return request.post<number>({
+    url: Api.UpdateFolderGis,
+    data: {path: path, latitude: latitude, longitude: longitude},
+  });
+}
 
 export function updateFolderDate(path: string, toDate: string) {
   return request.post<number>({url: Api.UpdateFolderDate, data: {path: path, toDate: toDate}});
