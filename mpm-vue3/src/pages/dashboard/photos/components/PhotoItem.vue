@@ -7,8 +7,11 @@
                  width="200"
                  v-on:dblclick="dblClicked"
                  @click.exact="clicked"
+                 @click.right.exact="rightClicked"
                  @click.meta.exact="metaClicked"
+                 @click.right.meta.exact="metaClicked"
                  @click.shift.exact="shiftClicked"
+                 @click.right.shift.exact="shiftClicked"
         >
           <template #overlay-content>
             <t-tag v-if="photo.mediatype=='video'"
@@ -47,6 +50,12 @@ photo.value = await store.getPhotoById(props.id, props.index);
 
 function clicked() {
   selectStore.selectIndex(props.index, false, false);
+}
+
+function rightClicked() {
+  // 如果没选中则选中，否则不做动作
+  if (!selectStore.isSelected(props.index))
+    selectStore.selectIndex(props.index, false, false);
 }
 
 function metaClicked() {

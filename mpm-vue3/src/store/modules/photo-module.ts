@@ -1,7 +1,8 @@
 import {defineStore} from 'pinia';
 import {Photo} from "@/api/model/photos";
-import {getPics, trashPhotos} from "@/api/photos";
+import {getPics, trashPhotos, updatePhoto} from "@/api/photos";
 import {selectModuleStore} from "@/store/modules/select-module";
+import {NotifyPlugin} from "tdesign-vue-next";
 
 export const photoModuleStore = defineStore('photoModule', {
   state: () => ({
@@ -71,7 +72,20 @@ export const photoModuleStore = defineStore('photoModule', {
       }
       const index = Math.min(this.idList.length - 1, selectStore.lastSelectedIndex);
       selectStore.selectIndex(index, false, false);
-    }
+    },
+    updateSelectedPhotos(properties: {}, reason: string) {
+      const selectStore = selectModuleStore();
+      selectStore.selectedIndexes.forEach(async (number) => {
+        let item = this.picsMap.get(this.idList[number].id);
+        if (item != null) {
+          const result = await updatePhoto(item, properties);
+          this.picsMap.set(this.idList[number].id, result);
+          NotifyPlugin.info({title: `已修改照片 ${reason}`});
+        }
+      });
+
+    },
+
   },
   persist: false,
 });

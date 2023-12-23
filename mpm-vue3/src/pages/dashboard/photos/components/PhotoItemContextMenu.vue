@@ -2,9 +2,10 @@
 
 import {selectModuleStore} from "@/store/modules/select-module";
 import {MessagePlugin} from "tdesign-vue-next";
-import {dialogsStore} from "@/store";
+import {dialogsStore, photoModuleStore} from "@/store";
 
 const selectModule = selectModuleStore();
+const photoModule = photoModuleStore();
 const dlgStore = dialogsStore();
 
 function changePhotoDate() {
@@ -14,7 +15,8 @@ function changePhotoDate() {
   }
   dlgStore.datePickerDlg = true;
   dlgStore.whenDateConfirmed((selectedDate: string) => {
-    console.log("Picked date is {}", selectedDate);
+    photoModule.updateSelectedPhotos({"takenDate": selectedDate}, ` 拍摄时间到 ${selectedDate}`);
+    // console.log("Picked date is {}", selectedDate);
   })
 
 }

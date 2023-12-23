@@ -1,5 +1,5 @@
 import {request} from '@/utils/request';
-import type {PhotosResult, TaskId, TaskProgress} from './model/photos';
+import type {Photo, PhotosResult, TaskId, TaskProgress} from './model/photos';
 import type {PhotosDate} from './model/photosDate';
 import {photoFilterStore} from '@/store';
 import {PhotosFolder} from "@/api/model/photosFolder";
@@ -14,7 +14,13 @@ const Api = {
   EmptyTrash: '/emptyTrash',
   TaskProgress: '/getProgress/',
   SwitchTrashFolder: '/switchTrashFolder',
+  UpdatePhoto: '/updateImage',
 };
+
+export function updatePhoto(photo: Photo, properties: {}) {
+  Object.assign(properties, {id: photo.id});
+  return request.post<Photo>({url: Api.UpdatePhoto, data: properties});
+}
 
 export function switchTrashFolder(to: boolean, path: string) {
   return request.post<number>({url: Api.SwitchTrashFolder, data: {to: to, path: path}});
