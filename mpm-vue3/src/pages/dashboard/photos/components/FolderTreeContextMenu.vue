@@ -1,10 +1,12 @@
 <script lang="ts" setup>
-import {switchTrashFolder} from "@/api/photos";
-import {photoFilterStore} from "@/store";
-import {DialogPlugin, MessagePlugin} from "tdesign-vue-next";
+import {switchTrashFolder, updateFolderDate} from "@/api/photos";
+import {dialogsStore, photoFilterStore} from "@/store";
+import {DialogPlugin, MessagePlugin, NotifyPlugin} from "tdesign-vue-next";
 import ContextMenu from "@imengyu/vue3-context-menu";
 
 const props = defineProps({node: null});
+const dlgStore = dialogsStore();
+
 defineEmits(['update:node']);
 const filterStore = photoFilterStore();
 
@@ -30,6 +32,16 @@ async function deleteSelectedFolder(value: string) {
   confirmDia.show();
 }
 
+function changeDateInFolder() {
+  dlgStore.datePickerDlg = true;
+  dlgStore.whenDateConfirmed(async (selectedDate: string) => {
+    const count = await updateFolderDate(props.node.data.path, selectedDate);
+    NotifyPlugin.info({title: `已设置目录下${count}张照片拍摄时间至 ${selectedDate}`});
+  })
+
+  return undefined;
+}
+
 async function onContextMenu(e: MouseEvent) {
   //prevent the browser's default menu
   e.preventDefault();
@@ -42,9 +54,7 @@ async function onContextMenu(e: MouseEvent) {
     items: [
       {
         label: "修改目录下所有照片时间...",
-        onClick: () => {
-          alert("You click a menu item");
-        }
+        onClick: () => changeDateInFolder(),
       },
       {
         label: "修改目录下所有照片GIS信息...",

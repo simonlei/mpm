@@ -15,7 +15,12 @@ const Api = {
   TaskProgress: '/getProgress/',
   SwitchTrashFolder: '/switchTrashFolder',
   UpdatePhoto: '/updateImage',
+  UpdateFolderDate: '/updateFolderDate',
 };
+
+export function updateFolderDate(path: string, toDate: string) {
+  return request.post<number>({url: Api.UpdateFolderDate, data: {path: path, toDate: toDate}});
+}
 
 export function updatePhoto(photo: Photo, properties: {}) {
   Object.assign(properties, {id: photo.id});
