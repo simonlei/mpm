@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 
 import {filesize} from "filesize";
-import {Photo} from "@/api/model/photos";
+import useClipboard from "vue-clipboard3";
+import {MessagePlugin} from "tdesign-vue-next";
+import {ref} from "vue";
 
 const props = defineProps({photo: null});
 defineEmits(['update:photo']);
@@ -9,43 +11,38 @@ defineEmits(['update:photo']);
 const columns = [{colKey: "k", width: "60px"}, {colKey: "v", width: "200px"}];
 let photo = props.photo;
 
-function makeData(photo: Photo) {
+const data = ref([]);
 
-  let d = [];
-  console.log('photo is ' + photo);
-  if (photo != null) {
-    d.push([
-      {k: '大小', v: filesize(photo.size)},
-      {k: '宽度', v: photo.width},
-      {k: '高度', v: photo.height},
-      {k: '描述', v: photo.description},
-      {k: '时间', v: photo.takendate}
-    ]);
-    if (photo.tags != null) {
-      d.push({k: '标签', v: photo.tags});
-    }
-    if (photo.address != null) {
-      d.push({k: '地址', v: photo.address});
-    }
+if (photo != null) {
+  data.value.push({k: '大小', v: filesize(photo.size)});
+  data.value.push({k: '宽度', v: photo.width});
+  data.value.push({k: '高度', v: photo.height});
+  data.value.push({k: '描述', v: photo.description});
+  data.value.push({k: '时间', v: photo.takendate});
+
+  if (photo.tags != null) {
+    data.value.push({k: '标签', v: photo.tags});
   }
-  console.log('data is ' + d);
-  return d;
+  if (photo.address != null) {
+    data.value.push({k: '地址', v: photo.address});
+  }
 }
 
-const data = photo == null ? [] : [
-  {k: '大小', v: filesize(photo.size)},
-  {k: '宽度', v: photo.width},
-  {k: '高度', v: photo.height},
-  {k: '描述', v: photo.description},
-  {k: '时间', v: photo.takendate},
-  {k: '地址', v: photo.address},
-  {k: '标签', v: photo.tags},
-];
+function copyGisLocation() {
+  const {toClipboard} = useClipboard();
+
+  toClipboard(`${photo?.latitude},${photo?.longitude}`)
+  .then(() => {
+    MessagePlugin.closeAll();
+    MessagePlugin.success('复制GIS位置成功');
+  })
+}
 
 </script>
 
 <template>
-  <t-base-table :columns="columns"
+  <t-base-table :key="photo?.id"
+                :columns="columns"
                 :data="data"
                 :show-header=false
                 bordered
@@ -53,6 +50,7 @@ const data = photo == null ? [] : [
                 stripe
                 table-content-width="260px"
   ></t-base-table>
+  <t-button v-if="photo?.latitude!=null" @click="copyGisLocation">复制GIS位置</t-button>
 </template>
 
 <style lang="less" scoped>

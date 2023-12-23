@@ -18,9 +18,7 @@ function changePhotoDate() {
     photoModule.updateSelectedPhotos({"takenDate": selectedDate}, ` 拍摄时间到 ${selectedDate}`);
     // console.log("Picked date is {}", selectedDate);
   })
-
 }
-
 
 </script>
 
@@ -30,7 +28,9 @@ function changePhotoDate() {
     <t-dropdown-menu>
       <t-dropdown-item content="修改选中照片的时间" @click="changePhotoDate"></t-dropdown-item>
       <t-dropdown-item content="修改选中照片的描述信息"></t-dropdown-item>
-      <t-dropdown-item content="拷贝选中照片的GIS信息"></t-dropdown-item>
+      <!--
+      <t-dropdown-item content="拷贝选中照片的GIS信息" @click="copyPhotoGis"></t-dropdown-item>
+      -->
       <t-dropdown-item content="修改选中照片的GIS信息"></t-dropdown-item>
       <t-dropdown-item content="修改选中照片的标签"></t-dropdown-item>
       <!--
