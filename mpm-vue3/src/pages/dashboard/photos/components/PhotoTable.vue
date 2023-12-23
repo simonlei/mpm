@@ -24,6 +24,7 @@
     <PhotoViewer/>
   </div>
   <date-picker-dialog/>
+  <text-input-dialog/>
 
 </template>
 
@@ -36,6 +37,7 @@ import PhotoItem from './PhotoItem.vue'
 import {selectModuleStore} from "@/store/modules/select-module";
 import PhotoViewer from "@/pages/dashboard/photos/components/PhotoDetailViewer.vue";
 import DatePickerDialog from "@/layouts/components/DatePickerDialog.vue";
+import TextInputDialog from "@/layouts/components/TextInputDialog.vue";
 
 const gridItems = ref(10);
 const photoStore = photoModuleStore();

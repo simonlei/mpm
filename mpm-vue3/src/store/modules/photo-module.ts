@@ -73,17 +73,20 @@ export const photoModuleStore = defineStore('photoModule', {
       const index = Math.min(this.idList.length - 1, selectStore.lastSelectedIndex);
       selectStore.selectIndex(index, false, false);
     },
-    updateSelectedPhotos(properties: {}, reason: string) {
+    async updateSelectedPhotos(properties: {}, reason: string) {
       const selectStore = selectModuleStore();
-      selectStore.selectedIndexes.forEach(async (number) => {
+      for (const number of selectStore.selectedIndexes) {
         let item = this.picsMap.get(this.idList[number].id);
         if (item != null) {
           const result = await updatePhoto(item, properties);
-          this.picsMap.set(this.idList[number].id, result);
+          console.log('result is {}', result);
+          // Object.assign(this.idList[number], result);
+          // TODO: refresh the table
+          // this.picsMap.set(this.idList[number].id, result);
           NotifyPlugin.info({title: `已修改照片 ${reason}`});
         }
-      });
-
+      }
+      console.log('action finished');
     },
 
   },

@@ -20,6 +20,31 @@ function changePhotoDate() {
   })
 }
 
+function changePhotoGis() {
+  if (selectModule.lastSelectedIndex == -1) {
+    MessagePlugin.warning('请选中照片后再试');
+    return;
+  }
+  dlgStore.textInputTitle = '请输入纬度,经度，例如 22.57765,113.9504277778';
+  dlgStore.textInputDlg = true;
+  dlgStore.whenInputConfirmed((inputValue: string) => {
+    // TODO: split and set
+    const values = inputValue.split(',');
+    if (values == null || values.length != 2) {
+      MessagePlugin.error('请按照 纬度,经度 模式来输入');
+    } else {
+      photoModule.updateSelectedPhotos(
+        {'latitude': values[0], 'longitude': values[1]}, ` GIS信息到 ${inputValue}`);
+
+    }
+
+
+    // photoModule.updateSelectedPhotos({"takenDate": selectedDate}, ` 拍摄时间到 ${selectedDate}`);
+    console.log("input value is {}", inputValue);
+  });
+
+}
+
 </script>
 
 <template>
@@ -28,10 +53,7 @@ function changePhotoDate() {
     <t-dropdown-menu>
       <t-dropdown-item content="修改选中照片的时间" @click="changePhotoDate"></t-dropdown-item>
       <t-dropdown-item content="修改选中照片的描述信息"></t-dropdown-item>
-      <!--
-      <t-dropdown-item content="拷贝选中照片的GIS信息" @click="copyPhotoGis"></t-dropdown-item>
-      -->
-      <t-dropdown-item content="修改选中照片的GIS信息"></t-dropdown-item>
+      <t-dropdown-item content="修改选中照片的GIS信息" @click="changePhotoGis"></t-dropdown-item>
       <t-dropdown-item content="修改选中照片的标签"></t-dropdown-item>
       <!--
       <t-dropdown-item content="跳转到文件夹"></t-dropdown-item>
