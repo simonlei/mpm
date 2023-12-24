@@ -56,6 +56,7 @@
               </template>
             </t-button>
           </t-dropdown>
+          <key-board-listener/>
 
 
           <switch-trash-button/>
@@ -124,6 +125,7 @@ import OrderSelector from "@/layouts/components/OrderSelector.vue";
 import EmptyTrashButton from "@/layouts/components/EmptyTrashButton.vue";
 import VideoOnlyCheckbox from "@/layouts/components/VideoOnlyCheckbox.vue";
 import StarOnlyCheckbox from "@/layouts/components/StarOnlyCheckbox.vue";
+import KeyBoardListener from "@/pages/dashboard/photos/components/KeyBoardListener.vue";
 
 const props = defineProps({
   theme: {

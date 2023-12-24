@@ -10,6 +10,7 @@ export const photoModuleStore = defineStore('photoModule', {
     picsMap: new Map<number, Photo>(),
     loadingIndex: [],
     otherCount: 0,
+    gridItems: 10,
   }),
   getters: {
     getPhotoById: (state) => {
