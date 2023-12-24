@@ -81,6 +81,7 @@ export const photoModuleStore = defineStore('photoModule', {
         if (item != null) {
           const result = await updatePhoto(item, properties);
           console.log('result is {}', result);
+          Object.assign(item, result);
           NotifyPlugin.info({title: `已修改照片 ${reason}`});
         }
       }

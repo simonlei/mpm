@@ -20,19 +20,34 @@ detailViewStore.$subscribe((mutation, state) => {
   }
 });
 
+function getRotate() {
+  return (detailViewStore.currentPhoto.rotate + 360) % 360;
+}
+
+function getWidth() {
+  return window.innerWidth;
+}
+
+function getHeight() {
+  return window.innerHeight;
+}
+
 </script>
 
 <template>
   <t-dialog ref="imageViewer" v-model:visible="detailViewStore.detailVisible" :close-btn="false"
-            :footer="false" :header="false" attach="body" placement="center" width="1000px">
+            :footer="false" :header="false" :height="getHeight()" :width="getWidth()"
+            attach="body" placement="center">
     <t-layout>
 
       <t-content v-if="detailViewStore.currentPhoto!=null">
         <t-image v-if="detailViewStore.currentPhoto.mediatype=='photo'"
                  :key="detailViewStore.currentPhotoName+'-small'"
                  :src="detailViewStore.currentPhotoSmallUrl"
+                 :style="{ transform: 'rotate('+ getRotate() +'deg)'}"
         />
         <vue3VideoPlay v-else ref="videoPlayer"
+                       :style="{ transform: 'rotate('+ detailViewStore.currentPhoto.rotate +'deg)'}"
                        poster="https://cdn.jsdelivr.net/gh/xdlumia/files/video-play/ironMan.jpg"
                        v-bind="config"
         />
