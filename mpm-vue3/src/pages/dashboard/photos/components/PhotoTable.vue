@@ -30,8 +30,8 @@
 
 <script lang="ts" setup>
 import {getPicIds, getPicsCount} from "@/api/photos";
-import {detailViewModuleStore, photoFilterStore, photoModuleStore} from '@/store';
-import {onActivated, onDeactivated, onMounted, onUnmounted, ref} from "vue";
+import {photoFilterStore, photoModuleStore} from '@/store';
+import {onMounted, ref} from "vue";
 import PhotoItem from './PhotoItem.vue'
 import {selectModuleStore} from "@/store/modules/select-module";
 import PhotoViewer from "@/pages/dashboard/photos/components/PhotoDetailViewer.vue";
@@ -40,20 +40,17 @@ import TextInputDialog from "@/layouts/components/TextInputDialog.vue";
 
 const photoStore = photoModuleStore();
 const selectStore = selectModuleStore();
-const detailViewStore = detailViewModuleStore();
 const filterStore = photoFilterStore();
 const scroller = ref(null);
 const photogrid = ref(null);
-
 
 photoStore.idList = (await getPicIds()).data;
 photoStore.otherCount = await getPicsCount(!filterStore.trashed);
 
 let oldWidth = 0;
 
-
 function calcGridItems() {
-  console.log("width:" + photogrid.value.clientWidth);
+  // console.log("width:" + photogrid.value.clientWidth);
   return Math.floor((photogrid.value.clientWidth + 5) / (200 + 6));
 }
 
@@ -79,9 +76,7 @@ function photosChanged() {
   };
 }
 
-
 photoStore.$onAction(photosChanged());
-
 
 selectStore.$onAction(async ({after}) => {
   after(async (result) => {
@@ -98,20 +93,6 @@ selectStore.$onAction(async ({after}) => {
 
 onMounted(async () => {
   photoStore.gridItems = calcGridItems();
-
-});
-let keyAction = true;
-
-onDeactivated(() => {
-  console.log("do not actived");
-  keyAction = false;
-});
-onActivated(() => {
-  keyAction = true;
-});
-
-onUnmounted(() => {
-  console.log("unmounted.......");
 });
 
 </script>

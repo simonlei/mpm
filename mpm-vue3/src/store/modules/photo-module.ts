@@ -81,15 +81,23 @@ export const photoModuleStore = defineStore('photoModule', {
         if (item != null) {
           const result = await updatePhoto(item, properties);
           console.log('result is {}', result);
-          // Object.assign(this.idList[number], result);
-          // TODO: refresh the table
-          // this.picsMap.set(this.idList[number].id, result);
           NotifyPlugin.info({title: `已修改照片 ${reason}`});
         }
       }
       console.log('action finished');
     },
-
+    async rotateSelectedPhotos() {
+      const selectStore = selectModuleStore();
+      for (const number of selectStore.selectedIndexes) {
+        let item = this.picsMap.get(this.idList[number].id);
+        if (item != null) {
+          let rotate = (item.rotate + 90) % 360;
+          const result = await updatePhoto(item, {'rotate': rotate});
+          console.log('result is {}', result);
+          Object.assign(item, result);
+        }
+      }
+    },
   },
   persist: false,
 });

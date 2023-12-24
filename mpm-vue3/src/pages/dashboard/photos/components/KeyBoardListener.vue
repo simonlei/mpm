@@ -30,6 +30,15 @@ onMounted(() => {
       }
     }
   });
+  onKeyStroke('r', async (e) => {
+    if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
+    if (notUsingInput()) {
+      await photoStore.rotateSelectedPhotos();
+      if (detailViewStore.detailVisible) {
+        await detailViewStore.showDetailView(selectStore.lastSelectedIndex);
+      }
+    }
+  });
   onKeyStroke('Enter', async (e) => {
     if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
     if (notUsingInput())
