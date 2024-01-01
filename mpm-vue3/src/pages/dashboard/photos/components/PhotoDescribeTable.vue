@@ -4,6 +4,7 @@ import {filesize} from "filesize";
 import useClipboard from "vue-clipboard3";
 import {MessagePlugin} from "tdesign-vue-next";
 import {ref} from "vue";
+import {updatePhoto} from "@/api/photos";
 
 const props = defineProps({photo: null});
 defineEmits(['update:photo']);
@@ -38,6 +39,13 @@ function copyGisLocation() {
   })
 }
 
+async function rotatePhoto() {
+  let rotate = (photo.rotate + 90) % 360;
+  const result = await updatePhoto(photo, {'rotate': rotate});
+  console.log('result is {}', result);
+  Object.assign(photo, result);
+}
+
 </script>
 
 <template>
@@ -50,7 +58,11 @@ function copyGisLocation() {
                 stripe
                 table-content-width="260px"
   ></t-base-table>
-  <t-button v-if="photo?.latitude!=null" @click="copyGisLocation">复制GIS位置</t-button>
+  <t-button v-if="photo?.latitude!=null" variant="outline" @click="copyGisLocation">复制GIS位置
+  </t-button>
+  <t-button variant="outline" @click="rotatePhoto">
+    右转 90 度
+  </t-button>
 </template>
 
 <style lang="less" scoped>

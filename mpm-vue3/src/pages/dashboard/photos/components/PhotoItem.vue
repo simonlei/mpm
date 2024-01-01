@@ -41,12 +41,12 @@ import formatDuration from "format-duration";
 import PhotoItemContextMenu from "@/pages/dashboard/photos/components/PhotoItemContextMenu.vue";
 
 const props = defineProps({id: Number, index: Number})
-const store = photoModuleStore();
+const photoStore = photoModuleStore();
 const selectStore = selectModuleStore();
 const detailViewStore = detailViewModuleStore();
 
 const photo = ref();
-photo.value = await store.getPhotoById(props.id, props.index);
+photo.value = await photoStore.getPhotoById(props.id, props.index);
 
 function clicked() {
   selectStore.selectIndex(props.index, false, false);

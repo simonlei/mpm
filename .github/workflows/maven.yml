@@ -55,6 +55,6 @@ jobs:
       with:
         context: docker
         push: true
-        tags: ghcr.io/${{ github.actor }}/mpm:2.1.${{ github.run_number }}
+        tags: ghcr.io/${{ github.actor }}/mpm:2.2.${{ github.run_number }}
             
 
