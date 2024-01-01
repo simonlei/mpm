@@ -66,7 +66,8 @@ function getPhotoHeight() {
   <t-dialog ref="imageViewer" v-model:visible="detailViewStore.detailVisible"
             :close-btn="false" :footer="false" :header="false"
             :width="getMinWidth()"
-            attach="body">
+            attach="body"
+            placement="center">
     <t-layout>
       <t-content v-if="detailViewStore.currentPhoto!=null">
         <t-image v-if="detailViewStore.currentPhoto.mediatype=='photo'"
