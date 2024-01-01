@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {detailViewModuleStore} from "@/store";
 import {ref} from "vue";
+import PhotoDescribeTable from "@/pages/dashboard/photos/components/PhotoDescribeTable.vue";
 
 const imageViewer = ref(null);
 const detailViewStore = detailViewModuleStore();
@@ -27,6 +28,12 @@ console.log('windows size {}  {}', window.innerWidth, window.innerHeight);
 
 function getWidth() {
   return window.innerWidth + 'px';
+}
+
+function getMinWidth() {
+  let photo = detailViewStore.currentPhoto;
+
+  return Math.min((photo?.rotate % 180 == 0 ? photo?.width : photo?.height) + 300, window.innerWidth);
 }
 
 function getHeight() {
@@ -56,59 +63,25 @@ function getPhotoHeight() {
 </script>
 
 <template>
-  <Teleport to="body">
-    <div v-if="detailViewStore.currentPhoto!=null"
-         :height="detailViewStore.currentPhoto.rotate % 180 ==0 ? getPhotoHeight() : getPhotoWidth()"
-         :style="{ transform: 'rotate('+ getRotate() +'deg)'}"
-         :width="detailViewStore.currentPhoto.rotate % 180 ==0 ? getPhotoWidth() : getPhotoHeight()"
-         class="mydialog"
-    >
-      <img v-if="detailViewStore.currentPhoto.mediatype=='photo'"
-           :key="detailViewStore.currentPhotoName+'-small'"
-           :height="getPhotoHeight()" :src="detailViewStore.currentPhotoSmallUrl"
-           :width="getPhotoWidth()"
-      />
-      <vue3VideoPlay v-else ref="videoPlayer"
-                     :style="{ transform: 'rotate('+ detailViewStore.currentPhoto.rotate +'deg)'}"
-                     poster="https://cdn.jsdelivr.net/gh/xdlumia/files/video-play/ironMan.jpg"
-                     v-bind="config"
-      />
-      <photo-describe-table :key="detailViewStore.currentPhotoName+'-detail'"
-                            v-model:photo="detailViewStore.currentPhoto"/>
-    </div>
-  </Teleport>
-  <!--
-  <t-dialog ref="imageViewer" v-model:visible="detailViewStore.detailVisible" :close-btn="false"
-            :footer="false" :header="false"
-            attach="body"
-            mode="full-screen">
+  <t-dialog ref="imageViewer" v-model:visible="detailViewStore.detailVisible"
+            :close-btn="false" :footer="false" :header="false"
+            :width="getMinWidth()"
+            attach="body">
     <t-layout>
-
       <t-content v-if="detailViewStore.currentPhoto!=null">
-        <div
-          :height="detailViewStore.currentPhoto.rotate % 180 ==0 ? getPhotoHeight() : getPhotoWidth()"
-          :style="{ transform: 'rotate('+ getRotate() +'deg)'}"
-          :width="detailViewStore.currentPhoto.rotate % 180 ==0 ? getPhotoWidth() : getPhotoHeight()">
-          <img v-if="detailViewStore.currentPhoto.mediatype=='photo'"
-               :key="detailViewStore.currentPhotoName+'-small'"
-               :height="getPhotoHeight()" :src="detailViewStore.currentPhotoSmallUrl"
-               :width="getPhotoWidth()"
-          />
-          <vue3VideoPlay v-else ref="videoPlayer"
-                         :style="{ transform: 'rotate('+ detailViewStore.currentPhoto.rotate +'deg)'}"
-                         poster="https://cdn.jsdelivr.net/gh/xdlumia/files/video-play/ironMan.jpg"
-                         v-bind="config"
-          />
-        </div>
+        <t-image v-if="detailViewStore.currentPhoto.mediatype=='photo'"
+                 :key="detailViewStore.currentPhotoName+'-small'"
+                 :src="detailViewStore.currentPhotoSmallUrl"
+        />
+        <!-- :style="{ transform: 'rotate('+ detailViewStore.currentPhoto.rotate +'deg)'}" -->
+        <vue3VideoPlay v-else ref="videoPlayer" v-bind="config"/>
       </t-content>
       <t-aside width="300px">
-        <photo-describe-table :key="detailViewStore.currentPhotoName+'-detail'"
-                              v-model:photo="detailViewStore.currentPhoto"/>
+        <PhotoDescribeTable :key="detailViewStore.currentPhotoName+'-detail'"
+                            v-model:photo="detailViewStore.currentPhoto"/>
       </t-aside>
-
     </t-layout>
   </t-dialog>
-  -->
 
 </template>
 

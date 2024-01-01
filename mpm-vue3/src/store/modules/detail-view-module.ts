@@ -20,7 +20,9 @@ export const detailViewModuleStore = defineStore('detailViewModule', {
       return this.currentPhoto?.name;
     },
     currentPhotoSmallUrl(): string {
-      return "/cos/small/" + this.currentPhoto?.name;
+      const rotate = (this.currentPhoto?.rotate + 360) % 360;
+
+      return "/cos/small/" + this.currentPhoto?.name + (rotate == 0 ? "" : "?imageMogr2/rotate/" + rotate);
     }
   },
   actions: {
