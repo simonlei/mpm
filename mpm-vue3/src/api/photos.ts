@@ -17,7 +17,15 @@ const Api = {
   UpdatePhoto: '/updateImage',
   UpdateFolderDate: '/updateFolderDate',
   UpdateFolderGis: '/updateFolderGis',
+  MoveFolder: '/moveFolder',
 };
+
+export function moveFolder(fromPath: string, toId: number, merge: boolean) {
+  return request.post({
+    url: Api.MoveFolder,
+    data: {fromPath: fromPath, toId: toId, merge: merge},
+  })
+}
 
 export function updateFolderGis(path: string, latitude: string, longitude: string) {
   return request.post<number>({

@@ -77,18 +77,6 @@ async function onContextMenu(e: MouseEvent) {
         onClick: () =>
           deleteSelectedFolder(props.node.data.path)
       },
-      {
-        label: "移动目录至...",
-        onClick: () => {
-          alert("You click a menu item");
-        }
-      },
-      {
-        label: "合并目录至...",
-        onClick: () => {
-          alert("You click a menu item");
-        }
-      },
     ]
   });
 }
