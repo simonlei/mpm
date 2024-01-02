@@ -36,28 +36,14 @@ function getMinWidth() {
   return Math.min((photo?.rotate % 180 == 0 ? photo?.width : photo?.height) + 300, window.innerWidth);
 }
 
-function getHeight() {
-  return window.innerHeight + 'px';
-}
-
-function getPhotoWidth() {
-  let screenWidth = window.innerWidth - 350;
+function getMinHeight() {
   let photo = detailViewStore.currentPhoto;
-  console.log('screen width is {}', screenWidth);
-  if (photo?.rotate % 180 != 90) return screenWidth;
 
-  let screenHeight = window.innerHeight - 120;
-  if (photo?.width / photo?.height > screenWidth / screenHeight) return screenWidth;
-  return photo?.width * screenHeight / photo?.height;
+  return Math.min((photo?.rotate % 180 == 0 ? photo?.height : photo?.width), window.innerHeight);
 }
 
-function getPhotoHeight() {
-  let screenHeight = window.innerHeight - 120;
-  let p = detailViewStore.currentPhoto;
-  if (p?.rotate % 180 != 90) return screenHeight;
-  let screenWidth = window.innerWidth - 350;
-  if (p?.width / p?.height < screenWidth / screenHeight) return screenHeight;
-  return p?.height * screenWidth / p?.width;
+function getImageStyle() {
+  return {width: `(${getMinWidth() - 300})px`, height: `${getMinHeight() - 200}px`};
 }
 
 </script>
@@ -73,6 +59,8 @@ function getPhotoHeight() {
         <t-image v-if="detailViewStore.currentPhoto.mediatype=='photo'"
                  :key="detailViewStore.currentPhotoName+'-small'"
                  :src="detailViewStore.currentPhotoSmallUrl"
+                 :style="getImageStyle()"
+                 fit="contain"
         />
         <!-- :style="{ transform: 'rotate('+ detailViewStore.currentPhoto.rotate +'deg)'}" -->
         <vue3VideoPlay v-else ref="videoPlayer" v-bind="config"/>
