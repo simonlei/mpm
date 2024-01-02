@@ -5,7 +5,13 @@ import useClipboard from "vue-clipboard3";
 import {MessagePlugin} from "tdesign-vue-next";
 import {ref} from "vue";
 import {updatePhoto} from "@/api/photos";
-import {LocationIcon, RotateIcon, StarFilledIcon, StarIcon} from "tdesign-icons-vue-next";
+import {
+  DownloadIcon,
+  LocationIcon,
+  RotateIcon,
+  StarFilledIcon,
+  StarIcon
+} from "tdesign-icons-vue-next";
 
 const props = defineProps({photo: null});
 defineEmits(['update:photo']);
@@ -69,13 +75,16 @@ async function starPhoto() {
     <t-space>
       <t-button shape="circle" variant="outline" @click="starPhoto">
         <template #icon>
-          <star-filled-icon v-if="photo.star"/>
+          <star-filled-icon v-if="photo?.star"/>
           <star-icon v-else/>
         </template>
       </t-button>
 
       <t-button shape="circle" variant="outline" @click="rotatePhoto">
         <rotate-icon slot="icon"/>
+      </t-button>
+      <t-button :href="'/cos/origin/'+photo?.name" shape="circle" target="_blank" variant="outline">
+        <download-icon slot="icon"/>
       </t-button>
       <t-popup content="复制当前 GIS 位置信息" trigger="hover">
         <t-button v-if="photo?.latitude!=null" shape="circle" variant="outline"
