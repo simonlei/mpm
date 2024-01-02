@@ -8,6 +8,9 @@ export const dialogsStore = defineStore('dialogsStore', {
       textInputDlg: false,
       textInputTitle: '',
       textInputValue: null,
+      textAreaDlg: false,
+      textAreaTitle: '',
+      textAreaValue: null,
     }
   },
   getters: {},
@@ -29,6 +32,17 @@ export const dialogsStore = defineStore('dialogsStore', {
           if (state.textInputValue != null) {
             // console.log("Picked date is {}", state.textInputValue);
             callback(state.textInputValue);
+          }
+          unsubscribe();
+        }
+      });
+    },
+    whenTextAreaConfirmed(callback) {
+      const unsubscribe = this.$subscribe((mutation, state) => {
+        if (!state.textAreaDlg) {
+          if (state.textAreaValue != null) {
+            // console.log("Picked date is {}", state.textInputValue);
+            callback(state.textAreaValue);
           }
           unsubscribe();
         }

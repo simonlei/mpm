@@ -25,7 +25,7 @@
   </div>
   <date-picker-dialog/>
   <text-input-dialog/>
-
+  <text-area-dialog/>
 </template>
 
 <script lang="ts" setup>
@@ -37,6 +37,7 @@ import {selectModuleStore} from "@/store/modules/select-module";
 import PhotoViewer from "@/pages/dashboard/photos/components/PhotoDetailViewer.vue";
 import DatePickerDialog from "@/layouts/components/DatePickerDialog.vue";
 import TextInputDialog from "@/layouts/components/TextInputDialog.vue";
+import TextAreaDialog from "@/layouts/components/TextAreaDialog.vue";
 
 const photoStore = photoModuleStore();
 const selectStore = selectModuleStore();

@@ -37,7 +37,18 @@ function changePhotoGis() {
     }
     // console.log("input value is {}", inputValue);
   });
+}
 
+function changePhotoDesc() {
+  if (selectModule.lastSelectedIndex == -1) {
+    MessagePlugin.warning('请选中照片后再试');
+    return;
+  }
+  dlgStore.textAreaTitle = '请输入描述信息';
+  dlgStore.textAreaDlg = true;
+  dlgStore.whenTextAreaConfirmed((inputValue: string) => {
+    photoModule.updateSelectedPhotos({'description': inputValue}, ` 描述信息到 ${inputValue}`);
+  });
 }
 
 </script>
@@ -47,7 +58,7 @@ function changePhotoGis() {
     <slot></slot>
     <t-dropdown-menu>
       <t-dropdown-item content="修改选中照片的时间" @click="changePhotoDate"></t-dropdown-item>
-      <t-dropdown-item content="修改选中照片的描述信息"></t-dropdown-item>
+      <t-dropdown-item content="修改选中照片的描述信息" @click="changePhotoDesc"></t-dropdown-item>
       <t-dropdown-item content="修改选中照片的GIS信息" @click="changePhotoGis"></t-dropdown-item>
       <t-dropdown-item content="修改选中照片的标签"></t-dropdown-item>
       <!--
