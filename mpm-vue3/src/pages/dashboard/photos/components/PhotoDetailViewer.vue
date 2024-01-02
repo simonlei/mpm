@@ -39,7 +39,7 @@ function getMinWidth() {
 function getMinHeight() {
   let photo = detailViewStore.currentPhoto;
 
-  return Math.min((photo?.rotate % 180 == 0 ? photo?.height : photo?.width), window.innerHeight);
+  return Math.min((photo?.rotate % 180 == 0 ? photo?.height : photo?.width) + 200, window.innerHeight);
 }
 
 function getImageStyle() {
