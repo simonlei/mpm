@@ -5,6 +5,7 @@ import useClipboard from "vue-clipboard3";
 import {MessagePlugin} from "tdesign-vue-next";
 import {ref} from "vue";
 import {updatePhoto} from "@/api/photos";
+import {LocationIcon, RotateIcon, StarFilledIcon, StarIcon} from "tdesign-icons-vue-next";
 
 const props = defineProps({photo: null});
 defineEmits(['update:photo']);
@@ -46,23 +47,44 @@ async function rotatePhoto() {
   Object.assign(photo, result);
 }
 
+async function starPhoto() {
+  const result = await updatePhoto(photo, {'star': !photo.star});
+  console.log('result is {}', result);
+  Object.assign(photo, result);
+}
+
 </script>
 
 <template>
-  <t-base-table :key="photo?.id"
-                :columns="columns"
-                :data="data"
-                :show-header=false
-                bordered
-                row-key="index"
-                stripe
-                table-content-width="260px"
-  ></t-base-table>
-  <t-button v-if="photo?.latitude!=null" variant="outline" @click="copyGisLocation">复制GIS位置
-  </t-button>
-  <t-button variant="outline" @click="rotatePhoto">
-    右转 90 度
-  </t-button>
+  <t-space direction="vertical">
+    <t-base-table :key="photo?.id"
+                  :columns="columns"
+                  :data="data"
+                  :show-header=false
+                  bordered
+                  row-key="index"
+                  stripe
+                  table-content-width="260px"
+    ></t-base-table>
+    <t-space>
+      <t-button shape="circle" variant="outline" @click="starPhoto">
+        <template #icon>
+          <star-filled-icon v-if="photo.star"/>
+          <star-icon v-else/>
+        </template>
+      </t-button>
+
+      <t-button shape="circle" variant="outline" @click="rotatePhoto">
+        <rotate-icon slot="icon"/>
+      </t-button>
+      <t-popup content="复制当前 GIS 位置信息" trigger="hover">
+        <t-button v-if="photo?.latitude!=null" shape="circle" variant="outline"
+                  @click="copyGisLocation">
+          <location-icon slot="icon"/>
+        </t-button>
+      </t-popup>
+    </t-space>
+  </t-space>
 </template>
 
 <style lang="less" scoped>
