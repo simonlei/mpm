@@ -19,7 +19,7 @@ filterStore.path = null;
 const root = {id: '', title: '全部', months: []};
 
 async function loadDateTreeWithRoot() {
-  let photosDates = await getPicsDateList(filterStore.trashed);
+  let photosDates = await getPicsDateList(filterStore.trashed, filterStore.star);
   root.months = photosDates;
   return [root];
 }
@@ -30,7 +30,8 @@ let beforeIsTrashed = filterStore.trashed;
 
 filterStore.$onAction(async ({after}) => {
   after(async (result) => {
-    if (beforeIsTrashed != filterStore.trashed) {
+    console.log("filter change result {}", result);
+    if (result['dateKey'] == null) {
       beforeIsTrashed = filterStore.trashed;
       TREE_DATA.value = await loadDateTreeWithRoot();
       console.log('data ' + TREE_DATA);

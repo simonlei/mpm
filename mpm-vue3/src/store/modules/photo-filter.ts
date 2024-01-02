@@ -16,6 +16,7 @@ export const photoFilterStore = defineStore('photoFilter', {
   actions: {
     change(values: {}) {
       Object.assign(this, values);
+      return values;
     },
   },
   persist: true,

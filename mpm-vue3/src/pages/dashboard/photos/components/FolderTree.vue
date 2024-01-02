@@ -28,7 +28,7 @@ const KEYSX = {value: 'path', label: 'title'};
 const tree = ref(null);
 
 async function getFolderTreeWithRoot() {
-  let photosFolders = await getPicsFolderList(null, filterStore.trashed);
+  let photosFolders = await getPicsFolderList(null, filterStore.trashed, filterStore.star);
   photosFolders.forEach((value) => value.children = true);
   root.children = photosFolders;
   return [root];
@@ -49,7 +49,8 @@ function treeActive(value: Array<TreeNodeValue>, context) {
 
 filterStore.$onAction(async ({after}) => {
   after(async (result) => {
-    if (beforeIsTrashed != filterStore.trashed || filterStore.path == '') {
+    console.log("filter change result {}, {}", result, result['path']);
+    if (result['path'] == null || filterStore.path == '') {
       beforeIsTrashed = filterStore.trashed;
 
       TREE_DATA.value = await getFolderTreeWithRoot();
@@ -63,7 +64,7 @@ filterStore.$onAction(async ({after}) => {
 });
 
 async function load(node) {
-  return await getPicsFolderList(node.data.id, filterStore.trashed);
+  return await getPicsFolderList(node.data.id, filterStore.trashed, filterStore.star);
 }
 
 </script>

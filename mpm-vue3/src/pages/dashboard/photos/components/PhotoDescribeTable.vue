@@ -62,38 +62,42 @@ async function starPhoto() {
 </script>
 
 <template>
-  <t-space direction="vertical">
-    <t-base-table :key="photo?.id"
-                  :columns="columns"
-                  :data="data"
-                  :show-header=false
-                  bordered
-                  row-key="index"
-                  stripe
-                  table-content-width="260px"
-    ></t-base-table>
-    <t-space>
-      <t-button shape="circle" variant="outline" @click="starPhoto">
-        <template #icon>
-          <star-filled-icon v-if="photo?.star"/>
-          <star-icon v-else/>
-        </template>
-      </t-button>
-
-      <t-button shape="circle" variant="outline" @click="rotatePhoto">
-        <rotate-icon slot="icon"/>
-      </t-button>
-      <t-button :href="'/cos/origin/'+photo?.name" shape="circle" target="_blank" variant="outline">
-        <download-icon slot="icon"/>
-      </t-button>
-      <t-popup content="复制当前 GIS 位置信息" trigger="hover">
-        <t-button v-if="photo?.latitude!=null" shape="circle" variant="outline"
-                  @click="copyGisLocation">
-          <location-icon slot="icon"/>
+  <t-layout>
+    <t-content>
+      <t-base-table :key="photo?.id"
+                    :columns="columns"
+                    :data="data"
+                    :show-header=false
+                    bordered
+                    row-key="index"
+                    stripe
+      ></t-base-table>
+    </t-content>
+    <t-footer>
+      <t-space>
+        <t-button shape="circle" variant="outline" @click="starPhoto">
+          <template #icon>
+            <star-filled-icon v-if="photo?.star"/>
+            <star-icon v-else/>
+          </template>
         </t-button>
-      </t-popup>
-    </t-space>
-  </t-space>
+
+        <t-button shape="circle" variant="outline" @click="rotatePhoto">
+          <rotate-icon slot="icon"/>
+        </t-button>
+        <t-button :href="'/cos/origin/'+photo?.name" shape="circle" target="_blank"
+                  variant="outline">
+          <download-icon slot="icon"/>
+        </t-button>
+        <t-popup content="复制当前 GIS 位置信息" trigger="hover">
+          <t-button v-if="photo?.latitude!=null" shape="circle" variant="outline"
+                    @click="copyGisLocation">
+            <location-icon slot="icon"/>
+          </t-button>
+        </t-popup>
+      </t-space>
+    </t-footer>
+  </t-layout>
 </template>
 
 <style lang="less" scoped>

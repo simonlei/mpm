@@ -1,7 +1,7 @@
 <template>
   <div>
     <photo-item-context-menu>
-      <t-popup placement="right-bottom" show-arrow>
+      <t-popup :overlay-style="{ maxWidth: '300px' }" placement="right-bottom" show-arrow>
         <t-image :key="photo.name" :alt="''+index" :src="/cos/ + photo.thumb" fit='none'
                  height="100" shape="round"
                  width="200"
@@ -27,7 +27,9 @@
           </template>
         </t-image>
         <template #content>
-          <photo-describe-table v-model:photo="photo"/>
+          <div width="300px">
+            <photo-describe-table v-model:photo="photo"/>
+          </div>
         </template>
       </t-popup>
     </photo-item-context-menu>
