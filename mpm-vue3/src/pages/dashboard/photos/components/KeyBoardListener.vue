@@ -4,6 +4,8 @@ import {onMounted} from "vue";
 import {onKeyStroke, useActiveElement} from "@vueuse/core";
 import {detailViewModuleStore, photoModuleStore} from "@/store";
 import {selectModuleStore} from "@/store/modules/select-module";
+import {copyImageToClipboard} from "copy-image-clipboard";
+import {MessagePlugin} from "tdesign-vue-next";
 
 const photoStore = photoModuleStore();
 const selectStore = selectModuleStore();
@@ -20,7 +22,18 @@ onMounted(() => {
     console.log(activeElement.value?.tagName);
     return activeElement.value?.tagName != 'INPUT' && activeElement.value?.tagName != 'TEXTAREA';
   }
-
+  onKeyStroke('c', (e) => {
+    if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
+    if (notUsingInput()) {
+      let index = selectStore.lastSelectedIndex;
+      photoStore.getPhotoById(photoStore.idList[index].id, index).then(photo => {
+        let imageSource = '/cos/small/' + photo.name;
+        copyImageToClipboard(imageSource);
+        MessagePlugin.closeAll();
+        MessagePlugin.success('复制图片成功');
+      });
+    }
+  });
   onKeyStroke('d', async (e) => {
     if (selectStore.lastSelectedIndex < 0 || selectStore.lastSelectedIndex > photoStore.idList.length - 1) return;
     if (notUsingInput()) {
