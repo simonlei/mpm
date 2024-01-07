@@ -293,7 +293,7 @@ public class PicsController {
 
     private void addTagCriteria(String tag, SimpleCriteria cnd) {
         if (tag != null) {
-            cnd.where().and(new Static(" concat(',',tags,',') like '%," + tag + ",%"));
+            cnd.where().and(new Static(" concat(',',tags,',') like '%," + tag + ",%'"));
         }
     }
 
