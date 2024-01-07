@@ -25,6 +25,13 @@
                     <star-only-checkbox/>
                   </template>
                 </t-dropdown-item>
+                <t-dropdown-item class="operations-dropdown-container-item">
+                  <template #content>
+                    <Suspense>
+                      <tag-filter-select/>
+                    </Suspense>
+                  </template>
+                </t-dropdown-item>
               </t-dropdown-menu>
             </template>
             <t-button class="header-user-btn" theme="default" variant="text">
@@ -126,6 +133,7 @@ import EmptyTrashButton from "@/layouts/components/EmptyTrashButton.vue";
 import VideoOnlyCheckbox from "@/layouts/components/VideoOnlyCheckbox.vue";
 import StarOnlyCheckbox from "@/layouts/components/StarOnlyCheckbox.vue";
 import KeyBoardListener from "@/pages/dashboard/photos/components/KeyBoardListener.vue";
+import TagFilterSelect from "@/layouts/components/TagFilterSelect.vue";
 
 const props = defineProps({
   theme: {
