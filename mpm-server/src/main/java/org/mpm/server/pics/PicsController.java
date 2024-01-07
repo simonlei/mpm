@@ -20,6 +20,7 @@ import org.nutz.dao.entity.Record;
 import org.nutz.dao.sql.Criteria;
 import org.nutz.dao.sql.Sql;
 import org.nutz.dao.util.cri.SimpleCriteria;
+import org.nutz.dao.util.cri.Static;
 import org.nutz.json.Json;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
@@ -292,7 +293,7 @@ public class PicsController {
 
     private void addTagCriteria(String tag, SimpleCriteria cnd) {
         if (tag != null) {
-            cnd.where().and("tags", "like", "%" + tag + "%");
+            cnd.where().and(new Static(" concat(',',tags,',') like '%," + tag + ",%"));
         }
     }
 

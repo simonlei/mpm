@@ -18,7 +18,14 @@ const Api = {
   UpdateFolderDate: '/updateFolderDate',
   UpdateFolderGis: '/updateFolderGis',
   MoveFolder: '/moveFolder',
+  GetAllTags: '/getAllTags',
 };
+
+export function getAllTags() {
+  return request.post<string[]>({
+    url: Api.GetAllTags,
+  })
+}
 
 export function moveFolder(fromPath: string, toId: number, merge: boolean) {
   return request.post({
