@@ -21,6 +21,12 @@ export default [
         component: () => import('@/pages/dashboard/photos/index2.vue'),
         meta: {title: '按相册查看'},
       },
+      {
+        path: 'map',
+        name: 'PhotoByMap',
+        component: () => import('@/pages/dashboard/photos/indexMap.vue'),
+        meta: {title: '按地图查看'},
+      },
     ],
   },
 ];

@@ -19,7 +19,14 @@ const Api = {
   UpdateFolderGis: '/updateFolderGis',
   MoveFolder: '/moveFolder',
   GetAllTags: '/getAllTags',
+  LoadMarkers: '/loadMarkers',
 };
+
+export function loadMarkers() {
+  return request.post<Photo[]>({
+    url: Api.LoadMarkers,
+  })
+}
 
 export function getAllTags() {
   return request.post<string[]>({
