@@ -21,19 +21,10 @@
       :pointRadius="20"
       @select="featureSelected"
     >
-      <!-- style of the marked selected from the cluster items after first click on the cluster itself -->
-      <ol-style>
-        <ol-style-icon :scale="0.05" :src="markerIcon"></ol-style-icon>
-      </ol-style>
     </ol-interaction-clusterselect>
 
     <ol-animated-clusterlayer :animationDuration="500" :distance="40">
-      <ol-source-vector ref="vectorsource">
-        <ol-feature v-for="m in markers" :key="m.id">
-          <ol-geom-point
-            :coordinates="[m.longitude, m.latitude]"
-          ></ol-geom-point>
-        </ol-feature>
+      <ol-source-vector ref="vectorsource" :features="features">
       </ol-source-vector>
 
       <ol-style :overrideStyleFunction="overrideStyleFunction">
@@ -60,17 +51,27 @@
 
 
 <script lang="ts" setup>
-import {ref} from "vue";
-import {Circle, Fill, Stroke, Style} from "ol/style";
-
-import markerIcon from "@/assets/marker.png";
+import {computed, ref} from "vue";
+import {Circle, Fill, Icon, Stroke, Style} from "ol/style";
 import {loadMarkers} from "@/api/photos";
+import {Feature} from "ol";
+import {Point} from "ol/geom";
 
 const center = ref([107, 31]);
 const projection = ref("EPSG:4326");
 const zoom = ref(5);
 const rotation = ref(0);
-const markers = await loadMarkers();
+let markers = await loadMarkers();
+
+const features = computed(() => {
+
+  return markers.map((photo, index) => {
+    return new Feature({
+      geometry: new Point([photo.longitude, photo.latitude]),
+      photo: photo,
+    });
+  });
+});
 
 // style of the "artificial" item markers and lines connected to the cluster base after first click on the cluster -->
 const featureStyle = () => {
@@ -103,14 +104,24 @@ const overrideStyleFunction = (feature, style) => {
   const radius = Math.max(8, Math.min(size, 20));
   const dash = (2 * Math.PI * radius) / 6;
   const calculatedDash = [0, dash, dash, dash, dash, dash, dash];
+  console.log('feature, ', clusteredFeatures[0]);
 
+  const icon = new Icon({image: new Image(), src: '/cos/' + clusteredFeatures[0].thumb});
+
+  style.setImage(icon);
+
+  /*
+
+  style.getImage().src = '/cos/' + clusteredFeatures[0].thumb;
   style.getImage().getStroke().setLineDash(dash);
   style.getImage().getStroke().setColor("rgba(" + color + ",0.5)");
   style.getImage().getStroke().setLineDash(calculatedDash);
   style.getImage().getFill().setColor("rgba(" + color + ",1)");
 
   style.getImage().setRadius(radius);
+  // style.setImageStyle(new Icon({src: markerIcon}))
 
+   */
   style.getText().setText(size.toString());
 };
 
