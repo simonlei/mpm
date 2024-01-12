@@ -21,6 +21,8 @@
       :pointRadius="20"
       @select="featureSelected"
     >
+      <ol-style :overrideStyleFunction="overrideStyleFunction">
+      </ol-style>
     </ol-interaction-clusterselect>
 
     <ol-animated-clusterlayer :animationDuration="500" :distance="40">
@@ -104,10 +106,14 @@ const overrideStyleFunction = (feature, style) => {
   const radius = Math.max(8, Math.min(size, 20));
   const dash = (2 * Math.PI * radius) / 6;
   const calculatedDash = [0, dash, dash, dash, dash, dash, dash];
-  console.log('feature, ', clusteredFeatures[0]);
+  // console.log(clusteredFeatures[0].values_.photo);
 
-  const icon = new Icon({image: new Image(), src: '/cos/' + clusteredFeatures[0].thumb});
-
+  const icon = new Icon({
+    src: '/cos/' + clusteredFeatures[0].values_.photo?.thumb,
+    width: 100,
+    height: 100
+  });
+  console.log(icon);
   style.setImage(icon);
 
   /*
@@ -125,9 +131,6 @@ const overrideStyleFunction = (feature, style) => {
   style.getText().setText(size.toString());
 };
 
-const getRandomInRange = (from, to, fixed) => {
-  return (Math.random() * (to - from) + from).toFixed(fixed) * 1;
-};
 
 const featureSelected = (event) => {
   console.log(event);
