@@ -26,7 +26,7 @@
       </ol-style>
     </ol-interaction-clusterselect>
 
-    <ol-animated-clusterlayer :animationDuration="500" :distance="200">
+    <ol-animated-clusterlayer :animationDuration="500" :distance="200" :minimal-distance="200">
       <ol-source-vector ref="vectorsource" :features="features">
       </ol-source-vector>
 
@@ -55,7 +55,7 @@ const projection = ref("EPSG:4326");
 const zoom = ref(5);
 const rotation = ref(0);
 let markers = await loadMarkers();
-const backgroundStroke = new Stroke({lineCap: 'round'});
+console.log('markers count: {}', markers.length);
 
 const features = computed(() => {
 
@@ -66,6 +66,8 @@ const features = computed(() => {
     });
   });
 });
+console.log('features length is {} ', features.value.length);
+
 
 // style of the "artificial" item markers and lines connected to the cluster base after first click on the cluster -->
 const featureStyle = (feature) => {

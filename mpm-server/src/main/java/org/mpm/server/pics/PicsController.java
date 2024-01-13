@@ -161,8 +161,10 @@ public class PicsController {
     @PostMapping("/api/loadMarkers")
     public List loadMarkers() {
         Sql sql = Sqls.create("""
-                select id,name, latitude, longitude
-                from t_photos where latitude is not null and trashed=false""").setCallback(Sqls.callback.records());
+                        select id, name, latitude, longitude, rotate
+                        from t_photos where latitude is not null and trashed=false
+                        """)
+                .setCallback(Sqls.callback.records());
         dao.execute(sql);
         return sql.getList(Record.class);
     }
