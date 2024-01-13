@@ -24,7 +24,7 @@ export default [
       {
         path: 'map',
         name: 'PhotoByMap',
-        component: () => import('@/pages/dashboard/photos/indexMap.vue'),
+        component: () => import('@/pages/dashboard/photos/index3.vue'),
         meta: {title: '按地图查看'},
       },
     ],

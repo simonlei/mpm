@@ -1,4 +1,4 @@
-import { useRoute, createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
+import {createRouter, createWebHashHistory, RouteRecordRaw, useRoute} from 'vue-router';
 import uniq from 'lodash/uniq';
 
 // 自动导入modules文件夹下所有ts文件
@@ -47,11 +47,11 @@ export const getRoutesExpanded = () => {
     }
     if (item.children && item.children.length > 0) {
       item.children
-        .filter((child) => child.meta && child.meta.expanded)
-        .forEach((child: RouteRecordRaw) => {
-          expandedRoutes.push(item.path);
-          expandedRoutes.push(`${item.path}/${child.path}`);
-        });
+      .filter((child) => child.meta && child.meta.expanded)
+      .forEach((child: RouteRecordRaw) => {
+        expandedRoutes.push(item.path);
+        expandedRoutes.push(`${item.path}/${child.path}`);
+      });
     }
   });
   return uniq(expandedRoutes);
@@ -59,14 +59,15 @@ export const getRoutesExpanded = () => {
 
 export const getActive = (maxLevel = 3): string => {
   const route = useRoute();
-  if (!route.path) {
-    return '';
+  if (route == null) {
+    console.log('route is null');
+    return null;
   }
   return route.path
-    .split('/')
-    .filter((_item: string, index: number) => index <= maxLevel && index > 0)
-    .map((item: string) => `/${item}`)
-    .join('');
+  .split('/')
+  .filter((_item: string, index: number) => index <= maxLevel && index > 0)
+  .map((item: string) => `/${item}`)
+  .join('');
 };
 
 const router = createRouter({

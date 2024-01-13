@@ -26,7 +26,7 @@ import PhotoTable from "./components/PhotoTable.vue"
 <script lang="ts">
 
 export default {
-  name: 'PhotosByDate',
+  name: 'PhotoByDate',
 };
 </script>
 
