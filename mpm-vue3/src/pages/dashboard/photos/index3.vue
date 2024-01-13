@@ -1,12 +1,7 @@
 <template>
   <div style="height:100%; width:100%">
     <Suspense>
-      <template #fallback>
-        Loading...
-      </template>
-      <template #default>
-        <photo-map></photo-map>
-      </template>
+      <photo-map></photo-map>
     </Suspense>
   </div>
 </template>

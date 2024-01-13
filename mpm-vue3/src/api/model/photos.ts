@@ -37,6 +37,14 @@ export function getPhotoDetails(photo: Photo): String {
     + `时间 ${photo.takendate}`;
 }
 
+export function getPhotoThumb(photo: Photo): String {
+  if (photo.rotate == 3600) {
+    return "small/" + photo.name + "/thumb";
+  }
+  let rotate = (360 + photo.rotate) % 360;
+  return "small/" + photo.name + "/thumb" + rotate;
+}
+
 export interface PhotoCountResult {
   count: number;
 }

@@ -160,10 +160,11 @@ public class PicsController {
 
     @PostMapping("/api/loadMarkers")
     public List loadMarkers() {
-        Sql sql = Sqls.create("select id,name, latitude, longitude, width, height, rotate, takenDate"
-                + " from t_photos where latitude is not null and trashed=false").setCallback(Sqls.callback.records());
+        Sql sql = Sqls.create("""
+                select id,name, latitude, longitude
+                from t_photos where latitude is not null and trashed=false""").setCallback(Sqls.callback.records());
         dao.execute(sql);
-        return addThumbField(sql.getList(Record.class));
+        return sql.getList(Record.class);
     }
 
     @PostMapping("/api/getPics")

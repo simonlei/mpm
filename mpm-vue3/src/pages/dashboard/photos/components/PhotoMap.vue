@@ -48,6 +48,7 @@ import {Circle, Fill, Icon, Stroke, Style} from "ol/style";
 import {loadMarkers} from "@/api/photos";
 import {Feature} from "ol";
 import {Point} from "ol/geom";
+import {getPhotoThumb} from "@/api/model/photos";
 
 const center = ref([107, 31]);
 const projection = ref("EPSG:4326");
@@ -91,7 +92,7 @@ const featureStyle = (feature) => {
       }),
     ];
   const icon = new Icon({
-    src: '/cos/' + clusteredFeatures[0].values_.photo?.thumb,
+    src: '/cos/' + getPhotoThumb(clusteredFeatures[0].values_.photo),
     width: 100,
     height: 100
   });
@@ -105,7 +106,7 @@ const overrideStyleFunction = (feature, style) => {
   const size = clusteredFeatures.length;
 
   const icon = new Icon({
-    src: '/cos/' + clusteredFeatures[0].values_.photo?.thumb,
+    src: '/cos/' + getPhotoThumb(clusteredFeatures[0].values_.photo),
     width: 100,
     height: 100
   });
