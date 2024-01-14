@@ -16,17 +16,18 @@
       <ol-source-osm/>
     </ol-tile-layer>
 
-    <ol-interaction-clusterselect
-      :featureStyle="featureStyle"
-      :multi="true"
-      :pointRadius="100"
-      @select="featureSelected"
+    <ol-interaction-clusterselect ref="clusterSelect"
+                                  :featureStyle="featureStyle"
+                                  :maxObjects="10"
+                                  :multi="false"
+                                  :pointRadius="100"
+                                  @select="featureSelected"
     >
       <ol-style :overrideStyleFunction="overrideStyleFunction">
       </ol-style>
     </ol-interaction-clusterselect>
 
-    <ol-animated-clusterlayer :animationDuration="500" :distance="200" :minimal-distance="200">
+    <ol-animated-clusterlayer :animationDuration="500" :distance="300" :minimal-distance="300">
       <ol-source-vector ref="vectorsource" :features="features">
       </ol-source-vector>
 
@@ -68,9 +69,14 @@ const features = computed(() => {
 });
 console.log('features length is {} ', features.value.length);
 
+const clusterSelect = ref(null);
+console.log(clusterSelect.value);
 
+let count = 0;
 // style of the "artificial" item markers and lines connected to the cluster base after first click on the cluster -->
 const featureStyle = (feature) => {
+  count++;
+  console.log('feature style..', feature, count);
   let clusteredFeatures = feature.get("features");
   // console.log('feature style', clusteredFeatures);
   if (clusteredFeatures == null || clusteredFeatures.length == 0)
@@ -95,8 +101,8 @@ const featureStyle = (feature) => {
     ];
   const icon = new Icon({
     src: '/cos/' + getPhotoThumb(clusteredFeatures[0].values_.photo),
-    width: 100,
-    height: 100
+    width: 160,
+    height: 120
   });
   // console.log(icon);
   return new Style({image: icon});
@@ -109,8 +115,8 @@ const overrideStyleFunction = (feature, style) => {
 
   const icon = new Icon({
     src: '/cos/' + getPhotoThumb(clusteredFeatures[0].values_.photo),
-    width: 100,
-    height: 100
+    width: 160,
+    height: 120
   });
   style.setImage(icon);
   style.getText()?.setText(size.toString());
@@ -118,7 +124,7 @@ const overrideStyleFunction = (feature, style) => {
 
 
 const featureSelected = (event) => {
-  // console.log(event);
+  console.log(event, clusterSelect.value);
   if (event.selected.length == 0 || event.deselected.length == 0) return;
   let clusteredFeatures = event.selected[0].get("features");
   // console.log(clusteredFeatures[0].get("photo"));
