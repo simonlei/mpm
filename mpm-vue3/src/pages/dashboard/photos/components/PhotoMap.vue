@@ -28,7 +28,8 @@
     </ol-interaction-clusterselect>
 
     <ol-animated-clusterlayer :animationDuration="500" :distance="300" :minimal-distance="300">
-      <ol-source-vector ref="vectorsource" :features="features">
+      <ol-source-vector :format="new format.GeoJSON()"
+                        url="/geo_json_api/loadMarkersGeoJson">
       </ol-source-vector>
 
       <ol-style :overrideStyleFunction="overrideStyleFunction">
@@ -44,19 +45,18 @@
 
 
 <script lang="ts" setup>
-import {computed, ref} from "vue";
+import {inject, ref} from "vue";
 import {Circle, Fill, Icon, Stroke, Style} from "ol/style";
-import {loadMarkers} from "@/api/photos";
-import {Feature} from "ol";
-import {Point} from "ol/geom";
-import {getPhotoThumb} from "@/api/model/photos";
+
+const format = inject("ol-format");
 
 const center = ref([107, 31]);
 const projection = ref("EPSG:4326");
 const zoom = ref(5);
 const rotation = ref(0);
-let markers = await loadMarkers();
-console.log('markers count: {}', markers.length);
+/* let markers = await loadMarkers();
+ console.log('markers count: {}', markers.length);
+
 
 const features = computed(() => {
 
@@ -68,7 +68,7 @@ const features = computed(() => {
   });
 });
 console.log('features length is {} ', features.value.length);
-
+*/
 const clusterSelect = ref(null);
 console.log(clusterSelect.value);
 
@@ -76,7 +76,7 @@ let count = 0;
 // style of the "artificial" item markers and lines connected to the cluster base after first click on the cluster -->
 const featureStyle = (feature) => {
   count++;
-  console.log('feature style..', feature, count);
+  // console.log('feature style..', feature, count);
   let clusteredFeatures = feature.get("features");
   // console.log('feature style', clusteredFeatures);
   if (clusteredFeatures == null || clusteredFeatures.length == 0)
@@ -100,7 +100,7 @@ const featureStyle = (feature) => {
       }),
     ];
   const icon = new Icon({
-    src: '/cos/' + getPhotoThumb(clusteredFeatures[0].values_.photo),
+    src: '/cos/' + getThumb(clusteredFeatures[0].values_),
     width: 160,
     height: 120
   });
@@ -109,12 +109,21 @@ const featureStyle = (feature) => {
 
 };
 
+function getThumb(props: {}): String {
+  if (props['rotate'] == 3600) {
+    return "small/" + props['name'] + "/thumb";
+  }
+  let rotate = (360 + props['rotate']) % 360;
+  return "small/" + props['name'] + "/thumb" + rotate;
+}
+
 const overrideStyleFunction = (feature, style) => {
   const clusteredFeatures = feature.get("features");
+  // console.log(feature);
   const size = clusteredFeatures.length;
 
   const icon = new Icon({
-    src: '/cos/' + getPhotoThumb(clusteredFeatures[0].values_.photo),
+    src: '/cos/' + getThumb(clusteredFeatures[0].values_),
     width: 160,
     height: 120
   });
@@ -128,7 +137,7 @@ const featureSelected = (event) => {
   if (event.selected.length == 0 || event.deselected.length == 0) return;
   let clusteredFeatures = event.selected[0].get("features");
   // console.log(clusteredFeatures[0].get("photo"));
-  window.open('/cos/origin/' + clusteredFeatures[0].get("photo").name, '_blank');
+  window.open('/cos/origin/' + clusteredFeatures[0].get("name"), '_blank');
 };
 
 </script>

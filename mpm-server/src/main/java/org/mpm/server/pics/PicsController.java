@@ -158,6 +158,20 @@ public class PicsController {
         return MyUtils.parseLong("" + getPics(req.condition).get("r"), 1L) - 1;
     }
 
+    @GetMapping("/geo_json_api/loadMarkersGeoJson")
+    public NutMap loadMarkersGeoJson() {
+        List<Record> markers = loadMarkers();
+        List<NutMap> features = new ArrayList<>();
+        for (Record r : markers) {
+            NutMap feature = new NutMap();
+            NutMap geometry = new NutMap().setv("type", "Point")
+                    .setv("coordinates", Lang.list(r.getDouble("longitude"), r.getDouble("latitude")));
+            feature.setv("type", "Feature").setv("properties", r).setv("geometry", geometry);
+            features.add(feature);
+        }
+        return new NutMap().setv("type", "FeatureCollection").setv("features", features);
+    }
+
     @PostMapping("/api/loadMarkers")
     public List loadMarkers() {
         Sql sql = Sqls.create("""
