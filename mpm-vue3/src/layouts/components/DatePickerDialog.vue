@@ -14,11 +14,6 @@ function close() {
 
 function confirm() {
   dlgStore.datePickerDlg = false;
-  dlgStore.datePicked = selectedDate;
-}
-
-function dateChange(value, context) {
-  selectedDate = value;
 }
 
 </script>
@@ -28,7 +23,8 @@ function dateChange(value, context) {
             :visible="dlgStore.datePickerDlg"
             attach="body"
             header="请选择日期">
-    <t-date-picker ref="datePicker" :allow-input="true" @change="dateChange"></t-date-picker>
+    <t-date-picker ref="datePicker" v-model:value="dlgStore.datePicked"
+                   :allow-input="true"></t-date-picker>
   </t-dialog>
 </template>
 

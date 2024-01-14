@@ -13,11 +13,15 @@ function changePhotoDate() {
     MessagePlugin.warning('请选中照片后再试');
     return;
   }
-  dlgStore.datePickerDlg = true;
-  dlgStore.whenDateConfirmed((selectedDate: string) => {
-    photoModule.updateSelectedPhotos({"takenDate": selectedDate}, ` 拍摄时间到 ${selectedDate}`);
-    // console.log("Picked date is {}", selectedDate);
-  })
+
+  let index = selectModule.lastSelectedIndex;
+  photoModule.getPhotoById(photoModule.idList[index].id, index).then(photo => {
+    dlgStore.datePicked = photo.takendate;
+    dlgStore.datePickerDlg = true;
+    dlgStore.whenDateConfirmed((selectedDate: string) => {
+      photoModule.updateSelectedPhotos({"takenDate": selectedDate}, ` 拍摄时间到 ${selectedDate}`);
+    });
+  });
 }
 
 function changePhotoGis() {
