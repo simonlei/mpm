@@ -28,7 +28,7 @@ function dateChange(value, context) {
             :visible="dlgStore.datePickerDlg"
             attach="body"
             header="请选择日期">
-    <t-date-picker ref="datePicker" @change="dateChange"></t-date-picker>
+    <t-date-picker ref="datePicker" :allow-input="true" @change="dateChange"></t-date-picker>
   </t-dialog>
 </template>
 
