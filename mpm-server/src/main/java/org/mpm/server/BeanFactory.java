@@ -6,6 +6,8 @@ import com.qcloud.cos.ClientConfig;
 import com.qcloud.cos.auth.BasicCOSCredentials;
 import com.qcloud.cos.auth.COSCredentials;
 import com.qcloud.cos.region.Region;
+import com.tencentcloudapi.common.Credential;
+import com.tencentcloudapi.iai.v20200303.IaiClient;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.nutz.dao.Dao;
@@ -39,8 +41,14 @@ public class BeanFactory {
         log.info("cosClient config:" + secretId + ":" + secretKey);
         COSCredentials cred = new BasicCOSCredentials(secretId, secretKey);
         ClientConfig clientConfig = new ClientConfig(new Region(region));
-        
+
         return new COSClient(cred, clientConfig);
+    }
+
+    @Bean
+    public IaiClient getIaiClient() {
+        Credential credential = new Credential(secretId, secretKey);
+        return new IaiClient(credential, region);
     }
 
     @Bean

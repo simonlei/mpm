@@ -5,11 +5,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.mpm.server.entity.EntityMeta;
+import org.mpm.server.cron.PhotoTaskScanner;
 import org.mpm.server.entity.EntityPhoto;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
-import org.nutz.dao.pager.Pager;
 import org.nutz.dao.util.cri.Exps;
 import org.nutz.lang.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,27 +22,12 @@ public class GeoChecker {
     Dao dao;
     @Autowired
     PicsService picsService;
+    @Autowired
+    PhotoTaskScanner photoTaskScanner;
 
     public void checkPhotoGeos() {
-        EntityMeta meta = dao.fetch(EntityMeta.class, "lastCheckId");
-        long lastId = meta == null ? 0 : Long.parseLong(meta.getValue());
-        // get first 20
-        List<EntityPhoto> photos = dao.query(EntityPhoto.class, Cnd.where("id", ">", lastId)
-                .and(Exps.isNull("latitude")).and("mediaType", "=", "photo")
-                .orderBy("id", "asc"), new Pager(1, 20));
-        for (EntityPhoto p : photos) {
-            try {
-                checkPhoto(p);
-            } catch (Exception e) {
-                log.error("Can't check photo:" + p.getId(), e);
-            }
-            lastId = p.getId();
-        }
-        if (meta == null) {
-            meta = EntityMeta.builder().key("lastCheckId").build();
-        }
-        meta.setValue("" + lastId);
-        dao.insertOrUpdate(meta);
+        photoTaskScanner.scanPhotoDoTask("lastCheckId",
+                this::checkPhoto, 20, true, Cnd.where("mediaType", "=", "photo").and(Exps.isNull("latitude")));
     }
 
     private void checkPhoto(EntityPhoto p) throws IOException {
@@ -67,72 +51,23 @@ public class GeoChecker {
     }
 
     public void checkPhotoDates() {
-        EntityMeta meta = dao.fetch(EntityMeta.class, "lastDateCheckId");
-        long lastId = meta == null ? 0 : Long.parseLong(meta.getValue());
-        // get first 20
-        List<EntityPhoto> photos = dao.query(EntityPhoto.class, Cnd.where("id", ">", lastId)
-                .and("mediaType", "=", "photo")
-                .orderBy("id", "asc"), new Pager(1, 20));
-        for (EntityPhoto p : photos) {
-            try {
-                picsService.setInfosFromCos("origin/" + p.getName(), p);
-                dao.updateIgnoreNull(p);
-            } catch (Exception e) {
-                log.error("Can't check photo date:" + p.getId(), e);
-            }
-            lastId = p.getId();
-        }
-        if (meta == null) {
-            meta = EntityMeta.builder().key("lastDateCheckId").build();
-        }
-        meta.setValue("" + lastId);
-        dao.insertOrUpdate(meta);
+        photoTaskScanner.scanPhotoDoTask("lastDateCheckId", (p) -> {
+            picsService.setInfosFromCos("origin/" + p.getName(), p);
+            dao.updateIgnoreNull(p);
+        }, 20, true, Cnd.where("mediaType", "=", "photo"));
     }
 
     public void generateSmallPhotos() {
-        EntityMeta meta = dao.fetch(EntityMeta.class, "lastRegenerateSmallPhotosCheckId");
-        long lastId = meta == null ? 0 : Long.parseLong(meta.getValue());
-        // get first 200
-        List<EntityPhoto> photos = dao.query(EntityPhoto.class, Cnd.where("id", ">", lastId)
-                .and("mediaType", "=", "photo")
-                .orderBy("id", "asc"), new Pager(1, 200));
-        for (EntityPhoto p : photos) {
-            try {
-                picsService.generateSmallPic("origin/" + p.getName(), p.getName());
-                // dao.updateIgnoreNull(p);
-            } catch (Exception e) {
-                log.error("Can't generate small photo:" + p.getId(), e);
-            }
-            lastId = p.getId();
-        }
-        if (meta == null) {
-            meta = EntityMeta.builder().key("lastRegenerateSmallPhotosCheckId").build();
-        }
-        meta.setValue("" + lastId);
-        dao.insertOrUpdate(meta);
+        photoTaskScanner.scanPhotoDoTask("lastRegenerateSmallPhotosCheckId", (p) -> {
+            picsService.generateSmallPic("origin/" + p.getName(), p.getName());
+        }, 200, true, Cnd.where("mediaType", "=", "photo"));
     }
 
     public void clearDuplicateDescs() {
-        EntityMeta meta = dao.fetch(EntityMeta.class, "lastDuplicateDescsCheckId");
-        long lastId = meta == null ? 0 : Long.parseLong(meta.getValue());
-        // get first 200
-        List<EntityPhoto> photos = dao.query(EntityPhoto.class, Cnd.where("id", ">", lastId)
-                .orderBy("id", "asc"), new Pager(1, 200));
-        for (EntityPhoto p : photos) {
-            try {
-                p.setDescription(removeDuplicate(p.getDescription()));
-                dao.updateIgnoreNull(p);
-            } catch (Exception e) {
-                log.error("Can't clear duplicate desc, photo:" + p.getId(), e);
-            }
-            lastId = p.getId();
-        }
-        if (meta == null) {
-            meta = EntityMeta.builder().key("lastDuplicateDescsCheckId").build();
-        }
-        meta.setValue("" + lastId);
-        dao.insertOrUpdate(meta);
-        log.info("lastDuplicateDescsCheckId {}", lastId);
+        photoTaskScanner.scanPhotoDoTask("lastDuplicateDescsCheckId", (p) -> {
+            p.setDescription(removeDuplicate(p.getDescription()));
+            dao.updateIgnoreNull(p);
+        }, 200, true, null);
     }
 
     String removeDuplicate(String desc) {
