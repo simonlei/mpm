@@ -25,7 +25,7 @@ public class EntityFace {
      */
     String faceId;
     /**
-     * 初始的时候，personId 和 photoId 是一样的
+     * personId = photo.id + face.id
      */
-    Long personId;
+    String personId;
 }

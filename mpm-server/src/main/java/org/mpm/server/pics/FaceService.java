@@ -57,15 +57,20 @@ public class FaceService {
         }, 100, false, null);
     }
 
-    private void detectFaceIn(EntityPhoto photo) throws TencentCloudSDKException {
+    void detectFaceIn(EntityPhoto photo) throws TencentCloudSDKException {
         FaceInfo[] faceInfos = detectFacesInPhoto(photo);
         if (faceInfos == null || faceInfos.length == 0) {
             return;
         }
-        dao.clear(EntityPhotoFaceInfo.class, Cnd.where("photo_id", "=", photo.getId()));
+        dao.clear(EntityPhotoFaceInfo.class, Cnd.where("photoId", "=", photo.getId()));
         for (FaceInfo faceInfo : faceInfos) {
-            EntityPhotoFaceInfo info = recordFaceInfo(photo, faceInfo);
-            addFaceToGroup(photo, info);
+            try {
+                EntityPhotoFaceInfo info = recordFaceInfo(photo, faceInfo);
+                addFaceToGroup(photo, info);
+            } catch (Exception e) {
+                log.info("can't add face {}x{}x{}x{} to group, photo: {}", faceInfo.getWidth(), faceInfo.getHeight(),
+                        faceInfo.getX(), faceInfo.getY(), photo.getId(), e);
+            }
         }
     }
 
@@ -73,19 +78,23 @@ public class FaceService {
         CreatePersonRequest req = new CreatePersonRequest();
         req.setGroupId(getGroupName());
         req.setImage(getImage(photo, faceInfo));
-        req.setPersonId("" + photo.getId());
-        req.setPersonName("" + photo.getId());
+        // 一张照片里面可能有多个 face，所以 person id 应该是photo.id+faceInfo.id
+        String personId = photo.getId() + "-" + faceInfo.getId();
+        req.setPersonId(personId);
+        req.setPersonName(personId);
         req.setUniquePersonControl(1L);
+        req.setNeedRotateDetection(1L);
         CreatePersonResponse createPersonResponse = iaiClient.CreatePerson(req);
         String faceId = createPersonResponse.getFaceId();
         String similarPersonId = createPersonResponse.getSimilarPersonId();
+        log.info("face info {} 's similar person id {} ", photo.getName(), similarPersonId);
         EntityFace face;
         if (Strings.isBlank(similarPersonId)) {
             // create new face
-            face = EntityFace.builder().faceId(faceId).personId(photo.getId()).build();
+            face = EntityFace.builder().faceId(faceId).personId(personId).build();
             face = dao.insert(face, true, false, false);
         } else {
-            face = dao.fetch(EntityFace.class, Cnd.where("person_id", "=", similarPersonId));
+            face = dao.fetch(EntityFace.class, Cnd.where("personId", "=", similarPersonId));
         }
         faceInfo.setFaceId(face.getId());
         dao.updateIgnoreNull(faceInfo);
@@ -104,6 +113,7 @@ public class FaceService {
         DetectFaceRequest detectFaceRequest = new DetectFaceRequest();
         detectFaceRequest.setImage(image);
         detectFaceRequest.setMaxFaceNum(10L);
+        detectFaceRequest.setNeedRotateDetection(1L);
         DetectFaceResponse detectFaceResponse = iaiClient.DetectFace(detectFaceRequest);
         return detectFaceResponse.getFaceInfos();
     }
@@ -125,13 +135,14 @@ public class FaceService {
         return Base64.encodeAsString(Streams.readBytesAndClose(object.getObjectContent()));
     }
 
-    private void createFaceGroupIfNotExists() {
+    void createFaceGroupIfNotExists() {
         try {
             CreateGroupRequest req = new CreateGroupRequest();
             req.setGroupId(getGroupName());
             req.setGroupName(getGroupName());
             iaiClient.CreateGroup(req);
         } catch (Exception e) {
+            log.error("Can't create face group", e);
             // do nothing.
         }
     }
