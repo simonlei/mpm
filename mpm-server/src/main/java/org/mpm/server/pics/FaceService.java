@@ -74,7 +74,8 @@ public class FaceService {
         dao.clear(EntityPhotoFaceInfo.class, Cnd.where("photoId", "=", photo.getId()));
         for (FaceInfo faceInfo : faceInfos) {
             try {
-                if (faceInfo.getWidth() < 64 || faceInfo.getHeight() < 64) {
+                if (faceInfo.getWidth() <= 64 || faceInfo.getHeight() <= 64
+                        || faceInfo.getX() < 0 || faceInfo.getY() < 0) {
                     continue;
                 }
                 EntityPhotoFaceInfo info = recordFaceInfo(photo, faceInfo);
