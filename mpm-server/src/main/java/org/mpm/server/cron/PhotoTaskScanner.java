@@ -25,19 +25,21 @@ public class PhotoTaskScanner {
             List<EntityPhoto> photos = dao.query(EntityPhoto.class, Cnd.where("id", ">", lastId)
                     .and(cnd == null ? new Static("1=1") : cnd.where())
                     .orderBy("id", "asc"), new Pager(1, pageSize));
+            if (photos.isEmpty()) {
+                return;
+            }
             for (EntityPhoto p : photos) {
                 try {
                     task.dealPhoto(p);
                 } catch (Exception e) {
                     if (ignoreError) {
                         log.error("Task {} can't deal with photo {}", taskName, p.getId());
-                        lastId = p.getId();
-                        saveMeta(taskName, meta, lastId);
                     } else {
                         throw e;
                     }
                 }
-
+                lastId = p.getId();
+                saveMeta(taskName, meta, lastId);
             }
             log.info("{} {}", taskName, lastId);
         } catch (Exception e) {

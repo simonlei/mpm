@@ -12,6 +12,7 @@ import com.tencentcloudapi.iai.v20200303.models.CreatePersonResponse;
 import com.tencentcloudapi.iai.v20200303.models.DetectFaceRequest;
 import com.tencentcloudapi.iai.v20200303.models.DetectFaceResponse;
 import com.tencentcloudapi.iai.v20200303.models.FaceInfo;
+import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.mpm.server.cron.PhotoTaskScanner;
@@ -20,6 +21,7 @@ import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.entity.EntityPhotoFaceInfo;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
+import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,18 +45,25 @@ public class FaceService {
     @Autowired
     COSClient cosClient;
 
+    @PostConstruct
+    public void init() {
+        createFaceGroupIfNotExists();
+    }
+
+
     /**
      * Detect faces in image.
      */
     public void detectFaces() {
-        createFaceGroupIfNotExists();
         photoTaskScanner.scanPhotoDoTask("lastCheckDetectedFaces", photo -> {
             try {
                 detectFaceIn(photo);
             } catch (Exception e) {
-                log.error("Can't detect face, photo:" + photo.getId(), e);
+                if (!Lang.equals("图片中没有人脸。", e.getMessage())) {
+                    log.error("Can't detect face, photo:" + photo.getId(), e);
+                }
             }
-        }, 100, false, null);
+        }, 100, true, null);
     }
 
     void detectFaceIn(EntityPhoto photo) throws TencentCloudSDKException {
@@ -65,11 +74,17 @@ public class FaceService {
         dao.clear(EntityPhotoFaceInfo.class, Cnd.where("photoId", "=", photo.getId()));
         for (FaceInfo faceInfo : faceInfos) {
             try {
+                if (faceInfo.getWidth() < 64 || faceInfo.getHeight() < 64) {
+                    continue;
+                }
                 EntityPhotoFaceInfo info = recordFaceInfo(photo, faceInfo);
                 addFaceToGroup(photo, info);
             } catch (Exception e) {
-                log.info("can't add face {}x{}x{}x{} to group, photo: {}", faceInfo.getWidth(), faceInfo.getHeight(),
-                        faceInfo.getX(), faceInfo.getY(), photo.getId(), e);
+                if (!Lang.equals("图片中没有人脸。", e.getMessage())) {
+                    log.info("can't add face {}x{}x{}x{} to group, photo: {}",
+                            faceInfo.getWidth(), faceInfo.getHeight(),
+                            faceInfo.getX(), faceInfo.getY(), photo.getId(), e);
+                }
             }
         }
     }
@@ -142,8 +157,8 @@ public class FaceService {
             req.setGroupName(getGroupName());
             iaiClient.CreateGroup(req);
         } catch (Exception e) {
-            log.error("Can't create face group", e);
             // do nothing.
+            // log.error("Can't create face group", e);
         }
     }
 
