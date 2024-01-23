@@ -62,3 +62,10 @@ export interface TaskId {
 export interface TaskProgressResult {
   data: TaskProgress;
 }
+
+export interface FaceInfo {
+  personId: string;
+  faceId: number;
+  name: string;
+  count: number;
+}

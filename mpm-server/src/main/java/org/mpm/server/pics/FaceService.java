@@ -12,6 +12,7 @@ import com.tencentcloudapi.iai.v20200303.models.CreatePersonResponse;
 import com.tencentcloudapi.iai.v20200303.models.DetectFaceRequest;
 import com.tencentcloudapi.iai.v20200303.models.DetectFaceResponse;
 import com.tencentcloudapi.iai.v20200303.models.FaceInfo;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -19,11 +20,15 @@ import org.mpm.server.cron.PhotoTaskScanner;
 import org.mpm.server.entity.EntityFace;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.entity.EntityPhotoFaceInfo;
+import org.mpm.server.util.DaoUtil;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
+import org.nutz.dao.Sqls;
+import org.nutz.dao.sql.Sql;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
+import org.nutz.lang.util.NutMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -138,6 +143,11 @@ public class FaceService {
      * 如果face为空，则从cos上获取整个图片，否则 cut 一下
      */
     private String getImage(EntityPhoto photo, EntityPhotoFaceInfo face) {
+        COSObject object = getFaceFromCos(photo, face);
+        return Base64.encodeAsString(Streams.readBytesAndClose(object.getObjectContent()));
+    }
+
+    private COSObject getFaceFromCos(EntityPhoto photo, EntityPhotoFaceInfo face) {
         GetObjectRequest objectRequest = new GetObjectRequest(bucket, "/small/" + photo.getName());
         String param = "imageMogr2/format/jpeg";
         if (face != null) {
@@ -148,7 +158,7 @@ public class FaceService {
         }
         objectRequest.putCustomQueryParameter(param, null);
         COSObject object = cosClient.getObject(objectRequest);
-        return Base64.encodeAsString(Streams.readBytesAndClose(object.getObjectContent()));
+        return object;
     }
 
     void createFaceGroupIfNotExists() {
@@ -166,5 +176,24 @@ public class FaceService {
     @NotNull
     private String getGroupName() {
         return "faceGroup" + (isDev ? "-dev" : "");
+    }
+
+    public List<NutMap> getFaces() {
+        Sql sql = Sqls.create("""
+                select personId, i.faceId, name, count(*) as count
+                from photo_face_info i
+                left join t_face on t_face.id=i.faceId
+                where personId is not null
+                group by faceId order by count(*) desc
+                limit 500
+                """);
+        return DaoUtil.fetchMaps(dao, sql);
+    }
+
+    public Object getFaceImg(int id) {
+        EntityPhotoFaceInfo face = dao.fetch(EntityPhotoFaceInfo.class, Cnd.where("faceId", "=", id));
+        EntityPhoto photo = dao.fetch(EntityPhoto.class, Cnd.where("id", "=", face.getPhotoId()));
+        COSObject faceFromCos = getFaceFromCos(photo, face);
+        return Streams.readBytesAndClose(faceFromCos.getObjectContent());
     }
 }

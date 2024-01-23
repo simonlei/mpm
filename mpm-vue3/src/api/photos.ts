@@ -1,5 +1,5 @@
 import {request} from '@/utils/request';
-import type {Photo, PhotosResult, TaskId, TaskProgress} from './model/photos';
+import {FaceInfo, Photo, PhotosResult, TaskId, TaskProgress} from './model/photos';
 import type {PhotosDate} from './model/photosDate';
 import {photoFilterStore} from '@/store';
 import {PhotosFolder} from "@/api/model/photosFolder";
@@ -20,7 +20,12 @@ const Api = {
   MoveFolder: '/moveFolder',
   GetAllTags: '/getAllTags',
   LoadMarkers: '/loadMarkers',
+  GetFaces: '/getFaces',
 };
+
+export function getFaces() {
+  return request.post<FaceInfo[]>({url: Api.GetFaces});
+}
 
 export function loadMarkers() {
   return request.post<Photo[]>({

@@ -27,6 +27,12 @@ export default [
         component: () => import('@/pages/dashboard/photos/index3.vue'),
         meta: {title: '按地图查看'},
       },
+      {
+        path: 'face',
+        name: 'PhotoByFace',
+        component: () => import('@/pages/dashboard/photos/index4.vue'),
+        meta: {title: '按人脸查看'},
+      },
     ],
   },
 ];
