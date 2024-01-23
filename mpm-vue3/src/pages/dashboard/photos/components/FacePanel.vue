@@ -21,25 +21,31 @@ const options = [
 const clickHandler = (data) => {
   MessagePlugin.success(`选中【${data.content}】`);
 };
+
+function getPanelStyle() {
+  return {height: `${window.innerHeight - 100}px`, overflow: "auto"};
+}
 </script>
 
 <template>
-  <t-card v-for="face in faces" :key="face.faceId" :bordered="true"
-          :content="face.name == null ? '未命名': face.name"
-          :shadow="true" :title="''+face.count">
-    <template #avatar>
-      <t-avatar :image="'/get_face_img/'+face.faceId" shape="round" size="64px"></t-avatar>
-    </template>
-    <template #actions>
-      <t-dropdown :min-column-width="112" :options="options" @click="clickHandler">
-        <div class="tdesign-demo-dropdown-trigger">
-          <t-button shape="square" variant="text">
-            <more-icon/>
-          </t-button>
-        </div>
-      </t-dropdown>
-    </template>
-  </t-card>
+  <div :style="getPanelStyle()" class="narrow-scrollbar">
+    <t-card v-for="face in faces" :key="face.faceId" :bordered="true"
+            :content="(face.name == null ? '未命名': face.name) + '('+face.count+')'"
+            :shadow="true" title="">
+      <template #avatar>
+        <t-avatar :image="'/get_face_img/'+face.faceId" shape="round" size="64px"></t-avatar>
+      </template>
+      <template #actions>
+        <t-dropdown :min-column-width="112" :options="options" @click="clickHandler">
+          <div class="tdesign-demo-dropdown-trigger">
+            <t-button shape="square" variant="text">
+              <more-icon/>
+            </t-button>
+          </div>
+        </t-dropdown>
+      </template>
+    </t-card>
+  </div>
 </template>
 
 <style lang="less" scoped>
