@@ -21,7 +21,12 @@ const Api = {
   GetAllTags: '/getAllTags',
   LoadMarkers: '/loadMarkers',
   GetFaces: '/getFaces',
+  UpdateFace: '/updateFace',
 };
+
+export function updateFace(face: FaceInfo) {
+  return request.post({url: Api.UpdateFace, data: face});
+}
 
 export function getFaces() {
   return request.post<FaceInfo[]>({url: Api.GetFaces});

@@ -1,11 +1,8 @@
 <script lang="ts" setup>
 
 import {dialogsStore} from "@/store";
-import {ref} from "vue";
 
 const dlgStore = dialogsStore();
-const input = ref(null);
-let inputValue = null;
 
 function close() {
   dlgStore.textInputValue = null;
@@ -13,12 +10,7 @@ function close() {
 }
 
 function confirm() {
-  dlgStore.textInputValue = inputValue;
   dlgStore.textInputDlg = false;
-}
-
-function valueChanged(value, context) {
-  inputValue = value;
 }
 
 </script>
@@ -28,7 +20,7 @@ function valueChanged(value, context) {
             :on-confirm="confirm"
             :visible="dlgStore.textInputDlg"
             attach="body">
-    <t-input ref="input" @change="valueChanged"></t-input>
+    <t-input v-model:value="dlgStore.textInputValue"></t-input>
   </t-dialog>
 </template>
 

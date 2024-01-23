@@ -20,6 +20,7 @@ import org.mpm.server.cron.PhotoTaskScanner;
 import org.mpm.server.entity.EntityFace;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.entity.EntityPhotoFaceInfo;
+import org.mpm.server.pics.FaceController.FaceUpdateParam;
 import org.mpm.server.util.DaoUtil;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
@@ -191,9 +192,20 @@ public class FaceService {
     }
 
     public Object getFaceImg(int id) {
-        EntityPhotoFaceInfo face = dao.fetch(EntityPhotoFaceInfo.class, Cnd.where("faceId", "=", id));
+        EntityPhotoFaceInfo face = dao.fetch(EntityPhotoFaceInfo.class,
+                Cnd.where("faceId", "=", id).orderBy("height", "desc"));
         EntityPhoto photo = dao.fetch(EntityPhoto.class, Cnd.where("id", "=", face.getPhotoId()));
         COSObject faceFromCos = getFaceFromCos(photo, face);
         return Streams.readBytesAndClose(faceFromCos.getObjectContent());
+    }
+
+    public boolean updateFace(FaceUpdateParam face) {
+        EntityFace entityFace = dao.fetch(EntityFace.class, face.faceId);
+        if (entityFace == null) {
+            return false;
+        }
+        entityFace.setName(face.getName());
+        dao.update(entityFace);
+        return true;
     }
 }

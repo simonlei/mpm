@@ -1,25 +1,43 @@
 <script lang="ts" setup>
 
-import {getFaces} from "@/api/photos";
-import {MessagePlugin} from "tdesign-vue-next";
+import {getFaces, updateFace} from "@/api/photos";
 import {MoreIcon} from "tdesign-icons-vue-next";
+import {dialogsStore} from "@/store";
 
 const faces = await getFaces();
-console.log("faces is", faces);
 
-const options = [
-  {
-    content: '操作一',
-    value: 1,
-  },
-  {
-    content: '操作二',
-    value: 2,
-  },
-];
+// console.log("faces is", faces);
 
-const clickHandler = (data) => {
-  MessagePlugin.success(`选中【${data.content}】`);
+function getOptions(face) {
+  return [
+    {
+      content: '修改名字',
+      value: 1,
+      face: face,
+    },
+    {
+      content: '操作二',
+      value: 2,
+      face: face,
+    },
+  ];
+}
+
+const dlgStore = dialogsStore();
+
+const clickHandler = (data, e) => {
+  if (data.value == 1) {
+    console.log('face name', data.face.name);
+    dlgStore.textInputTitle = '请输入对应的人名';
+    dlgStore.textInputValue = data.face.name;
+    dlgStore.textInputDlg = true;
+    dlgStore.whenInputConfirmed((inputValue: string) => {
+      data.face.name = inputValue;
+      updateFace(data.face);
+    });
+  }
+  console.log('click', data, e);
+  // MessagePlugin.success(`选中【${data.content}】`);
 };
 
 function getPanelStyle() {
@@ -36,7 +54,7 @@ function getPanelStyle() {
         <t-avatar :image="'/get_face_img/'+face.faceId" shape="round" size="64px"></t-avatar>
       </template>
       <template #actions>
-        <t-dropdown :min-column-width="112" :options="options" @click="clickHandler">
+        <t-dropdown :min-column-width="112" :options="getOptions(face)" @click="clickHandler">
           <div class="tdesign-demo-dropdown-trigger">
             <t-button shape="square" variant="text">
               <more-icon/>
