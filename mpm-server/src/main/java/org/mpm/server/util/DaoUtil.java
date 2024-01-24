@@ -58,6 +58,12 @@ public class DaoUtil {
         return s.getList(NutMap.class);
     }
 
+    public static List<Record> fetchRecords(Dao dao, Sql s) {
+        s.setCallback(Sqls.callback.records());
+        dao.execute(s);
+        return s.getList(Record.class);
+    }
+
     public static List<NutMap> fetchMaps(Dao dao, Sql s) {
         s.setCallback(Sqls.callback.maps());
         dao.execute(s);

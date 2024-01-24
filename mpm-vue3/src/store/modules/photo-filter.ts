@@ -10,6 +10,7 @@ export const photoFilterStore = defineStore('photoFilter', {
       dateKey: null,
       path: null,
       tag: null,
+      faceId: null,
     }
   },
   getters: {},

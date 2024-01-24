@@ -2,9 +2,12 @@
 
 import {getFaces, updateFace} from "@/api/photos";
 import {MoreIcon} from "tdesign-icons-vue-next";
-import {dialogsStore} from "@/store";
+import {dialogsStore, photoFilterStore} from "@/store";
+import {ref} from "vue";
 
-const faces = await getFaces();
+const faces = ref(await getFaces());
+const filterStore = photoFilterStore();
+const dlgStore = dialogsStore();
 
 // console.log("faces is", faces);
 
@@ -23,11 +26,8 @@ function getOptions(face) {
   ];
 }
 
-const dlgStore = dialogsStore();
-
-const clickHandler = (data, e) => {
+const clickHandler = (data) => {
   if (data.value == 1) {
-    console.log('face name', data.face.name);
     dlgStore.textInputTitle = '请输入对应的人名';
     dlgStore.textInputValue = data.face.name;
     dlgStore.textInputDlg = true;
@@ -36,7 +36,6 @@ const clickHandler = (data, e) => {
       updateFace(data.face);
     });
   }
-  console.log('click', data, e);
   // MessagePlugin.success(`选中【${data.content}】`);
 };
 
@@ -51,7 +50,8 @@ function getPanelStyle() {
             :content="(face.name == null ? '未命名': face.name) + '('+face.count+')'"
             :shadow="true" title="">
       <template #avatar>
-        <t-avatar :image="'/get_face_img/'+face.faceId" shape="round" size="64px"></t-avatar>
+        <t-avatar :image="'/get_face_img/'+face.faceId" shape="round" size="64px"
+                  @click="filterStore.change({faceId:face.faceId})"></t-avatar>
       </template>
       <template #actions>
         <t-dropdown :min-column-width="112" :options="getOptions(face)" @click="clickHandler">

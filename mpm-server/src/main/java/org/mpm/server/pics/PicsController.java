@@ -10,7 +10,6 @@ import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.progress.ProgressController;
 import org.mpm.server.util.DaoUtil;
-import org.mpm.server.util.ExplicitPager;
 import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Chain;
 import org.nutz.dao.Cnd;
@@ -192,70 +191,56 @@ public class PicsController {
         String filePath = req.path;
         req.idOnly = req.idOnly != null && req.idOnly;
         int start = req.getStart() == null ? 0 : req.getStart();
-        int end = start + (req.getSize() == null ? 75 : req.getSize());
+        int size = req.getSize() == null ? 75 : req.getSize();
         String sortedBy = req.order == null ? "id" : req.order;
         boolean desc = sortedBy.startsWith("-");
         sortedBy = desc ? sortedBy.substring(1) : sortedBy;
-        List<Record> photos = new ArrayList<>();
-        List ids = new ArrayList();
 
-        int totalRows;
-        // TODO: 要重构
+        Sql sql = Sqls.create("""
+                select $fields from t_photos
+                $join
+                $condition
+                $limit
+                """);
+        String joinSql = Strings.isBlank(filePath) ? "" : "inner join t_files on t_photos.id = t_files.photoId ";
+        sql.setVar("join", joinSql);
+        Cnd cnd = Cnd.where("trashed", "=", trashed);
         if (Strings.isNotBlank(filePath)) {
-            String joinSql = "inner join t_files on t_photos.id = t_files.photoId ";
-            SimpleCriteria cnd = new SimpleCriteria(joinSql);
-            cnd.where().and("t_files.path", "like", filePath + "%")
-                    .and("trashed", "=", trashed);
+            cnd.and("t_files.path", "like", filePath + "%");
+        }
+        addStarCriteria(star, cnd.getCri());
+        addVideoCriteria(req.getVideo(), cnd.getCri());
+        addTagCriteria(req.getTag(), cnd.getCri());
+        cnd = addDateCondition(req, cnd);
 
-            addStarCriteria(star, cnd);
-            addVideoCriteria(req.getVideo(), cnd);
-            addTagCriteria(req.getTag(), cnd);
+        if (req.idRank == null) {
+            sql.setVar("fields", "count(distinct t_photos.id) as c");
+            Long totalRows = (Long) DaoUtil.fetchOne(dao, sql, "c");
 
-            totalRows = (int) dao.fetch("t_photos", cnd, "count(distinct t_photos.id) as c").getLong("c");
-            if (req.idRank == null) {
-                cnd.setPager(new ExplicitPager(start, end - start));
-                cnd.orderBy(sortedBy, desc ? "desc" : "asc");
-                // ...
-                if (req.idOnly) {
-                    ids = DaoUtil.fetchMaps(dao, "select distinct t_photos.id," + sortedBy + " from t_photos " + cnd);
-                } else {
-                    photos = dao.query("t_photos", cnd, null, "distinct t_photos.*");
-                }
-            } else {
-                Sql sql = Sqls.create("select id, r from ("
-                        + " select distinct t_photos.id, rank() over (order by $sortedBy $desc) as r from t_photos "
-                        + "     $condition "
-                        + " ) t where id=@id");
-                sql.setVar("sortedBy", sortedBy).setVar("desc", desc ? "desc" : "asc")
-                        .setParam("id", req.idRank).setCondition(cnd);
-                sql.setCallback(Sqls.callback.map());
-                log.info("Sql is " + sql.toString());
-                dao.execute(sql);
-                return (Map) sql.getResult();
-            }
-        } else {
-            Cnd cnd = Cnd.where("trashed", "=", trashed);
-            cnd = addDateCondition(req, cnd);
-            addStarCriteria(star, cnd.getCri());
-            addVideoCriteria(req.getVideo(), cnd.getCri());
-            addTagCriteria(req.getTag(), cnd.getCri());
-
-            totalRows = dao.count(EntityPhoto.class, cnd);
-            cnd.limit(new ExplicitPager(start, end - start));
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
-            // ...
-            if (req.idOnly) {
-                ids = DaoUtil.fetchMaps(dao, "select t_photos.id from t_photos " + cnd);
-            } else {
-                photos = dao.query("t_photos", cnd);
-            }
+            sql.setVar("fields", req.idOnly ? "distinct t_photos.id" : "distinct t_photos.*");
+            sql.setCondition(cnd);
+            sql.setVar("limit", req.idOnly ? "" : " limit " + start + ", " + size);
+            log.info("sql is " + sql.toPreparedStatement());
+            List<Record> records = DaoUtil.fetchRecords(dao, sql);
+
+            return Lang.map("totalRows", totalRows).setv("startRow", start)
+                    .setv("endRow", start + records.size()).setv("data", req.idOnly ? records : addThumbField(records));
+        } else {
+            sql = Sqls.create("""
+                    select id, r from (
+                        select distinct t_photos.id, rank() over (order by $sortedBy $desc) as r
+                        from t_photos
+                        $condition) t
+                    where id=@id
+                    """);
+            sql.setVar("sortedBy", sortedBy).setVar("desc", desc ? "desc" : "asc")
+                    .setParam("id", req.idRank).setCondition(cnd);
+            sql.setCallback(Sqls.callback.map());
+            log.info("Sql is " + sql);
+            dao.execute(sql);
+            return (Map) sql.getResult();
         }
-        if (req.idOnly) {
-            return Lang.map("totalRows", totalRows).setv("startRow", 0)
-                    .setv("endRow", ids.size()).setv("data", ids);
-        }
-        return Lang.map("totalRows", totalRows).setv("startRow", start)
-                .setv("endRow", start + photos.size()).setv("data", addThumbField(photos));
     }
 
     private Cnd addDateCondition(GetPicsRequest req, Cnd cnd) {
@@ -341,5 +326,6 @@ public class PicsController {
         Long idRank;
         String tag;
         Boolean idOnly;
+        Integer faceId;
     }
 }
