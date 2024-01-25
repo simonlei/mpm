@@ -28,4 +28,5 @@ public class EntityFace {
      * personId = photo.id + face.id
      */
     String personId;
+    Long selectedFace;
 }

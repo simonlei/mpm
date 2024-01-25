@@ -20,3 +20,6 @@ create table t_face
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
+
+alter table t_face
+    add column selectedFace bigint DEFAULT NULL COMMENT '选择用的头像，默认是空，用最大的头像';

@@ -12,18 +12,19 @@ const dlgStore = dialogsStore();
 // console.log("faces is", faces);
 
 function getOptions(face) {
-  return [
-    {
-      content: '修改名字',
-      value: 1,
-      face: face,
-    },
-    {
-      content: '操作二',
-      value: 2,
-      face: face,
-    },
-  ];
+  return [{
+    content: '修改名字',
+    value: 1,
+    face: face,
+  }, {
+    content: '合并人脸至...',
+    value: 2,
+    face: face,
+  }, {
+    content: '删除人脸',
+    value: 3,
+    face: face,
+  },];
 }
 
 const clickHandler = (data) => {
@@ -35,6 +36,8 @@ const clickHandler = (data) => {
       data.face.name = inputValue;
       updateFace(data.face);
     });
+  } else if (data.value == 2) {
+
   }
   // MessagePlugin.success(`选中【${data.content}】`);
 };

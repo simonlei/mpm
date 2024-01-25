@@ -64,8 +64,9 @@ export interface TaskProgressResult {
 }
 
 export interface FaceInfo {
-  personId: string;
+  personId?: string;
   faceId: number;
-  name: string;
-  count: number;
+  name?: string;
+  count?: number;
+  selectedPhotoFace?: number;
 }

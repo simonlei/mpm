@@ -4,16 +4,19 @@ import {filesize} from "filesize";
 import useClipboard from "vue-clipboard3";
 import {MessagePlugin} from "tdesign-vue-next";
 import {ref} from "vue";
-import {updatePhoto} from "@/api/photos";
+import {updateFace, updatePhoto} from "@/api/photos";
 import {
   DownloadIcon,
+  HappyIcon,
   LocationIcon,
   RotateIcon,
   StarFilledIcon,
   StarIcon
 } from "tdesign-icons-vue-next";
 import PhotoTagInput from "@/layouts/components/PhotoTagInput.vue";
+import {photoFilterStore} from "@/store";
 
+const filterStore = photoFilterStore();
 const props = defineProps({photo: null});
 defineEmits(['update:photo']);
 
@@ -60,6 +63,12 @@ async function starPhoto() {
   Object.assign(photo, result);
 }
 
+async function setDefaultFace() {
+  const result = await updateFace({faceId: filterStore.faceId, selectedPhotoFace: photo.id});
+  console.log('result is {}', result);
+  MessagePlugin.success('设置人脸成功');
+}
+
 </script>
 
 <template>
@@ -95,6 +104,12 @@ async function starPhoto() {
             <t-button v-if="photo?.latitude!=null" shape="circle" variant="outline"
                       @click="copyGisLocation">
               <location-icon slot="icon"/>
+            </t-button>
+          </t-popup>
+          <t-popup content="设置当前为默认人脸" trigger="hover">
+            <t-button v-if="filterStore.faceId!=null" shape="circle" variant="outline"
+                      @click="setDefaultFace">
+              <happy-icon slot="icon"/>
             </t-button>
           </t-popup>
         </t-space>

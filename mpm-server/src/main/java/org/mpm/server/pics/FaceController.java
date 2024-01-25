@@ -41,5 +41,6 @@ public class FaceController {
 
         int faceId;
         String name;
+        Long selectedPhotoFace;
     }
 }

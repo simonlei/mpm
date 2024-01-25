@@ -192,10 +192,14 @@ public class FaceService {
     }
 
     public Object getFaceImg(int id) {
-        EntityPhotoFaceInfo face = dao.fetch(EntityPhotoFaceInfo.class,
-                Cnd.where("faceId", "=", id).orderBy("height", "desc"));
-        EntityPhoto photo = dao.fetch(EntityPhoto.class, Cnd.where("id", "=", face.getPhotoId()));
-        COSObject faceFromCos = getFaceFromCos(photo, face);
+        EntityFace face = dao.fetch(EntityFace.class, id);
+
+        EntityPhotoFaceInfo faceInfo = dao.fetch(EntityPhotoFaceInfo.class,
+                face.getSelectedFace() == null ?
+                        Cnd.where("faceId", "=", id).orderBy("height", "desc")
+                        : Cnd.where("id", "=", face.getSelectedFace()));
+        EntityPhoto photo = dao.fetch(EntityPhoto.class, Cnd.where("id", "=", faceInfo.getPhotoId()));
+        COSObject faceFromCos = getFaceFromCos(photo, faceInfo);
         return Streams.readBytesAndClose(faceFromCos.getObjectContent());
     }
 
@@ -205,7 +209,13 @@ public class FaceService {
             return false;
         }
         entityFace.setName(face.getName());
-        dao.update(entityFace);
+        if (face.getSelectedPhotoFace() != null) {
+            // 设置对应的图片当中的人脸来当做默认人脸
+            EntityPhotoFaceInfo faceInfo = dao.fetch(EntityPhotoFaceInfo.class,
+                    Cnd.where("photoId", "=", face.getSelectedPhotoFace()).and("faceId", "=", face.getFaceId()));
+            entityFace.setSelectedFace(faceInfo.getId());
+        }
+        dao.updateIgnoreNull(entityFace);
         return true;
     }
 }
