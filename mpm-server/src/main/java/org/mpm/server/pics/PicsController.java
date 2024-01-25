@@ -202,12 +202,17 @@ public class PicsController {
                 $condition
                 $limit
                 """);
-        String joinSql = Strings.isBlank(filePath) ? "" : "inner join t_files on t_photos.id = t_files.photoId ";
-        sql.setVar("join", joinSql);
+        String joinSql = "";
         Cnd cnd = Cnd.where("trashed", "=", trashed);
         if (Strings.isNotBlank(filePath)) {
+            joinSql = "inner join t_files on t_photos.id = t_files.photoId ";
             cnd.and("t_files.path", "like", filePath + "%");
         }
+        if (req.faceId != null) {
+            joinSql = "inner join photo_face_info f on t_photos.id=f.photoId ";
+            cnd.and("f.faceId", "=", req.faceId);
+        }
+        sql.setVar("join", joinSql);
         addStarCriteria(star, cnd.getCri());
         addVideoCriteria(req.getVideo(), cnd.getCri());
         addTagCriteria(req.getTag(), cnd.getCri());

@@ -12,10 +12,11 @@
 import {getPicsDateList} from "@/api/photos";
 import {TreeNodeValue} from "tdesign-vue-next";
 import {photoFilterStore} from '@/store';
-import {ref} from "vue";
+import {onActivated, ref} from "vue";
 
 const filterStore = photoFilterStore();
 filterStore.path = null;
+filterStore.faceId = null;
 const root = {id: '', title: '全部', months: []};
 
 async function loadDateTreeWithRoot() {
@@ -46,6 +47,13 @@ function treeActive(value: Array<TreeNodeValue>) {
     filterStore.change({dateKey: newDateKey});
   }
 }
+
+onActivated(() => {
+  console.log('hello......date active');
+  filterStore.path = null;
+  filterStore.faceId = null;
+});
+
 
 </script>
 

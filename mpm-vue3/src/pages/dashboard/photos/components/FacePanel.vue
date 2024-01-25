@@ -3,7 +3,7 @@
 import {getFaces, updateFace} from "@/api/photos";
 import {MoreIcon} from "tdesign-icons-vue-next";
 import {dialogsStore, photoFilterStore} from "@/store";
-import {ref} from "vue";
+import {onActivated, ref} from "vue";
 
 const faces = ref(await getFaces());
 const filterStore = photoFilterStore();
@@ -42,6 +42,12 @@ const clickHandler = (data) => {
 function getPanelStyle() {
   return {height: `${window.innerHeight - 100}px`, overflow: "auto"};
 }
+
+onActivated(() => {
+  console.log('hello......face active');
+  filterStore.path = null;
+  filterStore.dateKey = null;
+});
 </script>
 
 <template>
