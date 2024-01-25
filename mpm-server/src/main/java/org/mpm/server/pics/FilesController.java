@@ -29,20 +29,19 @@ public class FilesController {
     @PostMapping("/api/getFoldersData")
     public List<Record> getFoldersData(@RequestBody FoldersDataRequest req) {
         Long parentId = req.parentId;
-        Sql s = Sqls.create("select f.id, f.path, concat(f.name,'(',count(distinct p.id),')') title from t_files f  "
-                + " left join t_files fp on fp.path like concat(f.path, '%')"
-                + " left join t_photos p  on fp.photoId=p.id"
-                + " where f.isFolder=true and"
-                + (parentId == null ? " f.parentId is null " : " f.parentId=@parentId")
-                + " and p.trashed=@trashed "
-                + (req.star == null ? "" : " and p.star=@star ")
-                + " group by f.id"
-                + " order by "
+        Sql s = Sqls.create("""
+                select f.id, f.path, concat(f.name,'(',count(distinct p.id),')') title
+                from t_files f
+                left join t_files fp on fp.path like concat(f.path, '%')
+                left join t_photos p  on fp.photoId=p.id
+                where f.isFolder=true and $parentIdCnd
+                and p.trashed=@trashed $starCnd
+                group by f.id
+                order by"""
                 + (parentId == null ? " f.id" : " f.name"));
         s.setParam("trashed", req.trashed).setParam("parentId", parentId);
-        if (req.star != null) {
-            s.setParam("star", req.star);
-        }
+        s.setVar("parentIdCnd", parentId == null ? " f.parentId is null " : " f.parentId=@parentId");
+        s.setVar("starCnd", (req.star == null || !req.star) ? "" : " and p.star=true ");
         log.info(s.toString());
         s.setCallback(Sqls.callback.records());
         dao.execute(s);
