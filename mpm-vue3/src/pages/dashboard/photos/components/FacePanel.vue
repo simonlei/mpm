@@ -59,8 +59,10 @@ onActivated(() => {
             :content="(face.name == null ? '未命名': face.name) + '('+face.count+')'"
             :shadow="true" title="">
       <template #avatar>
-        <t-avatar :image="'/get_face_img/'+face.faceId" shape="round" size="64px"
-                  @click="filterStore.change({faceId:face.faceId})"></t-avatar>
+        <t-avatar
+          :image="'/get_face_img/'+face.faceId + '/' + (face.selectedFace==null?-1:face.selectedFace)"
+          shape="round" size="64px"
+          @click="filterStore.change({faceId:face.faceId})"></t-avatar>
       </template>
       <template #actions>
         <t-dropdown :min-column-width="112" :options="getOptions(face)" @click="clickHandler">

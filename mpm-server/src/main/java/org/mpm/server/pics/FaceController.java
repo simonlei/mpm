@@ -1,6 +1,7 @@
 package org.mpm.server.pics;
 
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import lombok.Data;
 import org.nutz.lang.util.NutMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ public class FaceController {
 
     @Autowired
     FaceService faceService;
+    @Autowired
+    HttpServletResponse response;
 
     @PostMapping("/api/getFaces")
     public List<NutMap> getFaces() {
@@ -30,10 +33,13 @@ public class FaceController {
         return faceService.updateFace(face);
     }
 
-    @GetMapping(value = "/get_face_img/{id}", produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(value = "/get_face_img/{id}/{photoId}", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public Object getFaceImg(@PathVariable("id") int id) {
-        return faceService.getFaceImg(id);
+    public Object getFaceImg(@PathVariable("id") int id, @PathVariable("photoId") Long photoId) {
+        response.setHeader("Cache-Control", "max-age=31536000");
+        byte[] faceImg = faceService.getFaceImg(id, photoId);
+        response.setHeader("content-length", "" + faceImg.length);
+        return faceImg;
     }
 
     @Data
@@ -41,6 +47,6 @@ public class FaceController {
 
         int faceId;
         String name;
-        Long selectedPhotoFace;
+        Long selectedFace;
     }
 }

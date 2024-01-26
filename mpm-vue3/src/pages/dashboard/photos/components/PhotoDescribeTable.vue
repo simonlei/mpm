@@ -64,9 +64,10 @@ async function starPhoto() {
 }
 
 async function setDefaultFace() {
-  const result = await updateFace({faceId: filterStore.faceId, selectedPhotoFace: photo.id});
+  const result = await updateFace({faceId: filterStore.faceId, selectedFace: photo.id});
   console.log('result is {}', result);
   MessagePlugin.success('设置人脸成功');
+  // todo: 刷新头像
 }
 
 </script>

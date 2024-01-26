@@ -181,23 +181,20 @@ public class FaceService {
 
     public List<NutMap> getFaces() {
         Sql sql = Sqls.create("""
-                select personId, i.faceId, name, count(*) as count
+                select personId, i.faceId, name, selectedFace, count(*) as count
                 from photo_face_info i
                 left join t_face on t_face.id=i.faceId
                 where personId is not null
                 group by faceId order by count(*) desc
-                limit 500
+                limit 100
                 """);
         return DaoUtil.fetchMaps(dao, sql);
     }
 
-    public Object getFaceImg(int id) {
-        EntityFace face = dao.fetch(EntityFace.class, id);
-
+    public byte[] getFaceImg(int id, Long photoId) {
         EntityPhotoFaceInfo faceInfo = dao.fetch(EntityPhotoFaceInfo.class,
-                face.getSelectedFace() == null ?
-                        Cnd.where("faceId", "=", id).orderBy("height", "desc")
-                        : Cnd.where("id", "=", face.getSelectedFace()));
+                photoId < 0 ? Cnd.where("faceId", "=", id).orderBy("height", "desc")
+                        : Cnd.where("id", "=", photoId));
         EntityPhoto photo = dao.fetch(EntityPhoto.class, Cnd.where("id", "=", faceInfo.getPhotoId()));
         COSObject faceFromCos = getFaceFromCos(photo, faceInfo);
         return Streams.readBytesAndClose(faceFromCos.getObjectContent());
@@ -209,10 +206,10 @@ public class FaceService {
             return false;
         }
         entityFace.setName(face.getName());
-        if (face.getSelectedPhotoFace() != null) {
+        if (face.getSelectedFace() != null) {
             // 设置对应的图片当中的人脸来当做默认人脸
             EntityPhotoFaceInfo faceInfo = dao.fetch(EntityPhotoFaceInfo.class,
-                    Cnd.where("photoId", "=", face.getSelectedPhotoFace()).and("faceId", "=", face.getFaceId()));
+                    Cnd.where("photoId", "=", face.getSelectedFace()).and("faceId", "=", face.getFaceId()));
             entityFace.setSelectedFace(faceInfo.getId());
         }
         dao.updateIgnoreNull(entityFace);

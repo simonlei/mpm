@@ -68,5 +68,5 @@ export interface FaceInfo {
   faceId: number;
   name?: string;
   count?: number;
-  selectedPhotoFace?: number;
+  selectedFace?: number;
 }
