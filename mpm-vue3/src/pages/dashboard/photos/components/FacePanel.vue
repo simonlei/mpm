@@ -36,7 +36,7 @@ const clickHandler = (data) => {
     dlgStore.textInputDlg = true;
     dlgStore.whenInputConfirmed((inputValue: string) => {
       data.face.name = inputValue;
-      updateFace(data.face);
+      updateFace({faceId: data.face.faceId, name: inputValue});
     });
   } else if (data.value == 2) {
 

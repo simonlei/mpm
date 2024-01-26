@@ -32,6 +32,12 @@ My Photo Manager，个人相册管理
 3. 使用 docker run  --net=host --name mpm -v /home/simon/config:/config -v /home/simon/logs:/logs -d ghcr.io/simonlei/mpm:xxx 来启动docker镜像
 4. 浏览器访问 application.properties 配置的端口
 
+## mysql 可能的问题
+
+``` references column 'photohome.t_photos.takenDate' which is not in SELECT list```
+
+那么需要把 sql-mode 当中的 ONLY_FULL_GROUP_BY 去掉
+
 ## Release:
 
 [RELEASE 情况](RELEASE.md)
