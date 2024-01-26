@@ -3,11 +3,13 @@
 import {getFaces, updateFace} from "@/api/photos";
 import {MoreIcon} from "tdesign-icons-vue-next";
 import {dialogsStore, photoFilterStore} from "@/store";
-import {onActivated, ref} from "vue";
+import {onActivated} from "vue";
+import {faceModule} from "@/store/modules/face-module";
 
-const faces = ref(await getFaces());
 const filterStore = photoFilterStore();
+const faceStore = faceModule();
 const dlgStore = dialogsStore();
+faceStore.faces = await getFaces();
 
 // console.log("faces is", faces);
 
@@ -55,7 +57,7 @@ onActivated(() => {
 
 <template>
   <div :style="getPanelStyle()" class="narrow-scrollbar">
-    <t-card v-for="face in faces" :key="face.faceId" :bordered="true"
+    <t-card v-for="face in faceStore.faces" :key="face.faceId" :bordered="true"
             :content="(face.name == null ? '未命名': face.name) + '('+face.count+')'"
             :shadow="true" title="">
       <template #avatar>

@@ -15,6 +15,7 @@ import {
 } from "tdesign-icons-vue-next";
 import PhotoTagInput from "@/layouts/components/PhotoTagInput.vue";
 import {photoFilterStore} from "@/store";
+import {faceModule} from "@/store/modules/face-module";
 
 const filterStore = photoFilterStore();
 const props = defineProps({photo: null});
@@ -66,8 +67,9 @@ async function starPhoto() {
 async function setDefaultFace() {
   const result = await updateFace({faceId: filterStore.faceId, selectedFace: photo.id});
   console.log('result is {}', result);
+  const faceStore = faceModule();
+  await faceStore.changeSelectedFace();
   MessagePlugin.success('设置人脸成功');
-  // todo: 刷新头像
 }
 
 </script>
