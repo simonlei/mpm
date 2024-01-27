@@ -12,7 +12,7 @@
 import {getPicsDateList} from "@/api/photos";
 import {TreeNodeValue} from "tdesign-vue-next";
 import {photoFilterStore} from '@/store';
-import {onActivated, ref} from "vue";
+import {ref} from "vue";
 
 const filterStore = photoFilterStore();
 filterStore.path = null;
@@ -44,16 +44,9 @@ function treeActive(value: Array<TreeNodeValue>) {
   console.log(value);
   let newDateKey = '' + value[0];
   if (filterStore.dateKey != newDateKey) {
-    filterStore.change({dateKey: newDateKey});
+    filterStore.change({path: null, faceId: null, dateKey: newDateKey});
   }
 }
-
-onActivated(() => {
-  console.log('hello......date active');
-  filterStore.path = null;
-  filterStore.faceId = null;
-});
-
 
 </script>
 

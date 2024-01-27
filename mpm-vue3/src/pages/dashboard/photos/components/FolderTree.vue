@@ -18,10 +18,11 @@
 import {getPicsFolderList, moveFolder} from "@/api/photos";
 import {DialogPlugin, TreeNodeValue} from "tdesign-vue-next";
 import {photoFilterStore} from '@/store';
-import {onActivated, ref} from "vue";
+import {ref} from "vue";
 import FolderTreeContextMenu from "@/pages/dashboard/photos/components/FolderTreeContextMenu.vue";
 
 const filterStore = photoFilterStore();
+filterStore.faceId = null;
 filterStore.dateKey = null;
 
 const root = {id: '-1', title: '全部', children: []};
@@ -72,7 +73,7 @@ function treeActive(value: Array<TreeNodeValue>, context) {
   let newPath = context.node.data.path;
   console.log('path ' + newPath);
   if (filterStore.path != newPath) {
-    filterStore.change({path: newPath});
+    filterStore.change({faceId: null, dateKey: null, path: newPath});
   }
 }
 
@@ -96,12 +97,6 @@ filterStore.$onAction(async ({after}) => {
 async function load(node) {
   return await getPicsFolderList(node.data.id, filterStore.trashed, filterStore.star);
 }
-
-onActivated(() => {
-  console.log('hello......file tree active');
-  filterStore.faceId = null;
-  filterStore.dateKey = null;
-});
 
 </script>
 
