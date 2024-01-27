@@ -21,8 +21,14 @@ const Api = {
   GetAllTags: '/getAllTags',
   LoadMarkers: '/loadMarkers',
   GetFaces: '/getFaces',
+  GetFacesWithName: '/getFacesWithName',
   UpdateFace: '/updateFace',
+  MergeFace: '/mergeFace',
 };
+
+export function mergeFace(from: number, to: number) {
+  return request.post({url: Api.MergeFace, data: {from: from, to: to}});
+}
 
 export function updateFace(face: FaceInfo) {
   return request.post({url: Api.UpdateFace, data: face});
@@ -30,6 +36,10 @@ export function updateFace(face: FaceInfo) {
 
 export function getFaces() {
   return request.post<FaceInfo[]>({url: Api.GetFaces});
+}
+
+export function getFacesWithName() {
+  return request.post<FaceInfo[]>({url: Api.GetFacesWithName});
 }
 
 export function loadMarkers() {

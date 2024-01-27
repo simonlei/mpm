@@ -30,6 +30,7 @@ import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.NutMap;
+import org.nutz.trans.Trans;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -205,11 +206,12 @@ public class FaceService {
      * 扩大当前人脸的周边
      */
     private void getWiderFace(EntityPhoto photo, EntityPhotoFaceInfo faceInfo) {
-        int pad = Double.valueOf((faceInfo.getWidth() + faceInfo.getHeight()) * 0.15).intValue();
-        long x = faceInfo.getX() - pad;
-        long y = faceInfo.getY() - pad;
-        long w = x + faceInfo.getWidth() + 2 * pad;
-        long h = y + faceInfo.getHeight() + 2 * pad;
+        long padX = Double.valueOf(faceInfo.getWidth() * 0.3).longValue();
+        long padY = Double.valueOf(faceInfo.getHeight() * 0.3).longValue();
+        long x = faceInfo.getX() - padX;
+        long y = faceInfo.getY() - padY;
+        long w = x + faceInfo.getWidth() + 2 * padX;
+        long h = y + faceInfo.getHeight() + 2 * padY;
         long x2 = 0;
         long y2 = 0;
         long w2 = photo.getWidth();
@@ -234,6 +236,20 @@ public class FaceService {
             entityFace.setSelectedFace(faceInfo.getId());
         }
         dao.updateIgnoreNull(entityFace);
+        return true;
+    }
+
+    public List<NutMap> getFacesWithName() {
+        return DaoUtil.fetchMaps(dao, "select id as faceId, name from t_face where name is not null");
+    }
+
+    public Boolean mergeFace(Long from, Long to) {
+        Trans.exec(() -> {
+            dao.execute(Sqls.create("delete from t_face where id=@from").setParam("from", from));
+            dao.execute(Sqls.create("update photo_face_info set faceId=@to where faceId=@from")
+                    .setParam("from", from)
+                    .setParam("to", to));
+        });
         return true;
     }
 }

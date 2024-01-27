@@ -28,6 +28,16 @@ public class FaceController {
         return faceService.getFaces();
     }
 
+    @PostMapping("/api/getFacesWithName")
+    public List<NutMap> getFacesWithName() {
+        return faceService.getFacesWithName();
+    }
+
+    @PostMapping("/api/mergeFace")
+    public Boolean mergeFace(@RequestBody MergeFaceParam param) {
+        return faceService.mergeFace(param.from, param.to);
+    }
+
     @PostMapping("/api/updateFace")
     public boolean updateFace(@RequestBody FaceUpdateParam face) {
         return faceService.updateFace(face);
@@ -48,5 +58,12 @@ public class FaceController {
         int faceId;
         String name;
         Long selectedFace;
+    }
+
+    @Data
+    public static class MergeFaceParam {
+
+        Long from;
+        Long to;
     }
 }
