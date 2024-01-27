@@ -205,7 +205,7 @@ public class FaceService {
      * 扩大当前人脸的周边
      */
     private void getWiderFace(EntityPhoto photo, EntityPhotoFaceInfo faceInfo) {
-        int pad = 20;
+        int pad = Double.valueOf((faceInfo.getWidth() + faceInfo.getHeight()) * 0.15).intValue();
         long x = faceInfo.getX() - pad;
         long y = faceInfo.getY() - pad;
         long w = x + faceInfo.getWidth() + 2 * pad;
