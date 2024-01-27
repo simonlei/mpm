@@ -196,8 +196,29 @@ public class FaceService {
                 photoId < 0 ? Cnd.where("faceId", "=", id).orderBy("height", "desc")
                         : Cnd.where("id", "=", photoId));
         EntityPhoto photo = dao.fetch(EntityPhoto.class, Cnd.where("id", "=", faceInfo.getPhotoId()));
+        getWiderFace(photo, faceInfo);
         COSObject faceFromCos = getFaceFromCos(photo, faceInfo);
         return Streams.readBytesAndClose(faceFromCos.getObjectContent());
+    }
+
+    /**
+     * 扩大当前人脸的周边
+     */
+    private void getWiderFace(EntityPhoto photo, EntityPhotoFaceInfo faceInfo) {
+        int pad = 20;
+        long x = faceInfo.getX() - pad;
+        long y = faceInfo.getY() - pad;
+        long w = x + faceInfo.getWidth() + 2 * pad;
+        long h = y + faceInfo.getHeight() + 2 * pad;
+        long x2 = 0;
+        long y2 = 0;
+        long w2 = photo.getWidth();
+        long h2 = photo.getHeight();
+
+        faceInfo.setX(Math.max(x, x2));
+        faceInfo.setY(Math.max(y, y2));
+        faceInfo.setWidth(Math.min(w, w2) - faceInfo.getX());
+        faceInfo.setHeight(Math.min(h, h2) - faceInfo.getY());
     }
 
     public boolean updateFace(FaceUpdateParam face) {
