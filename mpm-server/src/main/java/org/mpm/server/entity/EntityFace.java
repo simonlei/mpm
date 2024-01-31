@@ -29,4 +29,6 @@ public class EntityFace {
      */
     String personId;
     Long selectedFace;
+    Boolean hidden;
+    Boolean collected;
 }

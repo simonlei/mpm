@@ -69,4 +69,5 @@ export interface FaceInfo {
   name?: string;
   count?: number;
   selectedFace?: number;
+  hidden?: boolean;
 }

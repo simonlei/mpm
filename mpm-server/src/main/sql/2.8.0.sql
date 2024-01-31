@@ -23,3 +23,9 @@ create table t_face
 
 alter table t_face
     add column selectedFace bigint DEFAULT NULL COMMENT '选择用的头像，默认是空，用最大的头像';
+
+alter table t_face
+    add column collected int DEFAULT 0 COMMENT '是否收藏';
+
+alter table t_face
+    add column hidden int DEFAULT 0 COMMENT '是否隐藏';

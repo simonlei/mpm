@@ -31,7 +31,7 @@ function getOptions(face) {
     value: 2,
     face: face,
   }, {
-    content: '删除人脸',
+    content: '隐藏人脸',
     value: 3,
     face: face,
   },];
@@ -50,6 +50,11 @@ const clickHandler = async (data) => {
     currentFace.value = data.face.faceId;
     names.value = await getFacesWithName();
     showNameSelectDlg.value = true;
+  } else if (data.value == 3) {
+    updateFace({faceId: data.face.faceId, hidden: true}).then(async () => {
+      faceStore.faces = await getFaces();
+      MessagePlugin.success(`已隐藏选中的人脸`);
+    });
   }
   // MessagePlugin.success(`选中【${data.content}】`);
 };

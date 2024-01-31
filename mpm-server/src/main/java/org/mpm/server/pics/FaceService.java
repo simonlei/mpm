@@ -187,7 +187,7 @@ public class FaceService {
                 select personId, i.faceId, name, selectedFace, count(*) as count
                 from photo_face_info i
                 left join t_face on t_face.id=i.faceId
-                where personId is not null
+                where personId is not null and t_face.hidden=false
                 group by faceId order by count(*) desc
                 limit 100
                 """);
@@ -236,6 +236,9 @@ public class FaceService {
             EntityPhotoFaceInfo faceInfo = dao.fetch(EntityPhotoFaceInfo.class,
                     Cnd.where("photoId", "=", face.getSelectedFace()).and("faceId", "=", face.getFaceId()));
             entityFace.setSelectedFace(faceInfo.getId());
+        }
+        if (face.getHidden() != null) {
+            entityFace.setHidden(face.getHidden());
         }
         dao.updateIgnoreNull(entityFace);
         return true;

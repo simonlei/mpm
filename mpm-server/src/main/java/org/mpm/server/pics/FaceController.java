@@ -59,6 +59,7 @@ public class FaceController {
         int faceId;
         String name;
         Long selectedFace;
+        Boolean hidden;
     }
 
     @Data
