@@ -86,7 +86,7 @@ function confirmDlg() {
             :bordered="face.faceId == filterStore.faceId"
             :shadow="true"
             :subtitle="'('+face.count+')'"
-            :title="(face.name == null ? '未命名': face.name)" title="">
+            :title="(face.name == null ? '未命名': face.name)">
       <template #avatar>
         <t-avatar
           :image="'/get_face_img/'+face.faceId + '/' + (face.selectedFace==null?-1:face.selectedFace)"
