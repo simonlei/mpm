@@ -1,5 +1,6 @@
 package org.mpm.server.pics;
 
+import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import lombok.Data;
@@ -34,7 +35,7 @@ public class FaceController {
     }
 
     @PostMapping("/api/mergeFace")
-    public Boolean mergeFace(@RequestBody MergeFaceParam param) {
+    public Boolean mergeFace(@RequestBody MergeFaceParam param) throws TencentCloudSDKException {
         return faceService.mergeFace(param.from, param.to);
     }
 

@@ -9,6 +9,8 @@ import com.tencentcloudapi.iai.v20200303.IaiClient;
 import com.tencentcloudapi.iai.v20200303.models.CreateGroupRequest;
 import com.tencentcloudapi.iai.v20200303.models.CreatePersonRequest;
 import com.tencentcloudapi.iai.v20200303.models.CreatePersonResponse;
+import com.tencentcloudapi.iai.v20200303.models.DeletePersonFromGroupRequest;
+import com.tencentcloudapi.iai.v20200303.models.DeletePersonFromGroupResponse;
 import com.tencentcloudapi.iai.v20200303.models.DetectFaceRequest;
 import com.tencentcloudapi.iai.v20200303.models.DetectFaceResponse;
 import com.tencentcloudapi.iai.v20200303.models.FaceInfo;
@@ -243,7 +245,14 @@ public class FaceService {
         return DaoUtil.fetchMaps(dao, "select id as faceId, name from t_face where name is not null");
     }
 
-    public Boolean mergeFace(Long from, Long to) {
+    public Boolean mergeFace(Long from, Long to) throws TencentCloudSDKException {
+        // 这里也要把腾讯云上的 face 给删掉
+        DeletePersonFromGroupRequest req = new DeletePersonFromGroupRequest();
+        req.setGroupId(getGroupName());
+        EntityFace face = dao.fetch(EntityFace.class, from);
+        req.setPersonId(face.getPersonId());
+        DeletePersonFromGroupResponse resp = iaiClient.DeletePersonFromGroup(req);
+        log.info("Delete person from group response:{}", resp);
         Trans.exec(() -> {
             dao.execute(Sqls.create("delete from t_face where id=@from").setParam("from", from));
             dao.execute(Sqls.create("update photo_face_info set faceId=@to where faceId=@from")
