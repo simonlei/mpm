@@ -113,13 +113,13 @@ public class FaceService {
         String faceId = createPersonResponse.getFaceId();
         String similarPersonId = createPersonResponse.getSimilarPersonId();
         log.info("face info {} 's similar person id {} ", photo.getName(), similarPersonId);
-        EntityFace face;
-        if (Strings.isBlank(similarPersonId)) {
+        // 有可能 entity face 被删除了的情况，这时要创建新的 face
+        EntityFace face = Strings.isBlank(similarPersonId) ? null
+                : dao.fetch(EntityFace.class, Cnd.where("personId", "=", similarPersonId));
+        if (face == null) {
             // create new face
             face = EntityFace.builder().faceId(faceId).personId(personId).build();
             face = dao.insert(face, true, false, false);
-        } else {
-            face = dao.fetch(EntityFace.class, Cnd.where("personId", "=", similarPersonId));
         }
         faceInfo.setFaceId(face.getId());
         dao.updateIgnoreNull(faceInfo);

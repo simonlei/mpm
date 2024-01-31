@@ -8,6 +8,9 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
+                    <!--
+                    <compilerArgument>-Xlint:unchecked</compilerArgument>
+                    -->
                     <source>17</source>
                     <target>17</target>
                 </configuration>
@@ -42,9 +45,9 @@
         </dependency>
 
         <dependency>
-            <artifactId>mysql-connector-java</artifactId>
-            <groupId>mysql</groupId>
-            <version>8.0.33</version>
+            <artifactId>mysql-connector-j</artifactId>
+            <groupId>com.mysql</groupId>
+            <version>8.2.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.drewnoakes/metadata-extractor -->
         <dependency>

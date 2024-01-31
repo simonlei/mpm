@@ -37,7 +37,7 @@ public class IaiTest {
         detectFaceRequest.setImage(Base64.encodeAsString(Streams.readBytesAndClose(object.getObjectContent())));
         detectFaceRequest.setMaxFaceNum(10L);
         DetectFaceResponse detectFaceResponse = iaiClient.DetectFace(detectFaceRequest);
-        HashMap result = new HashMap();
+        HashMap<String, String> result = new HashMap<>();
         detectFaceResponse.toMap(result, "");
         log.info("result: {}", result);
     }
