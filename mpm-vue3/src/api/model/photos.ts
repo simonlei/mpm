@@ -70,4 +70,5 @@ export interface FaceInfo {
   count?: number;
   selectedFace?: number;
   hidden?: boolean;
+  collected?: boolean;
 }

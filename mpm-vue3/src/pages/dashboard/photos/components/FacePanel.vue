@@ -1,7 +1,14 @@
 <script lang="ts" setup>
 
 import {getFaces, getFacesWithName, mergeFace, updateFace} from "@/api/photos";
-import {MoreIcon} from "tdesign-icons-vue-next";
+import {
+  HeartFilledIcon,
+  HeartIcon,
+  MoreIcon,
+  ShareIcon,
+  UserInvisibleIcon,
+  UserVisibleIcon
+} from "tdesign-icons-vue-next";
 import {dialogsStore, photoFilterStore} from "@/store";
 import {faceModule} from "@/store/modules/face-module";
 import {FaceInfo} from "@/api/model/photos";
@@ -30,10 +37,6 @@ function getOptions(face) {
     content: '合并人脸至...',
     value: 2,
     face: face,
-  }, {
-    content: '隐藏人脸',
-    value: 3,
-    face: face,
   },];
 }
 
@@ -50,11 +53,6 @@ const clickHandler = async (data) => {
     currentFace.value = data.face.faceId;
     names.value = await getFacesWithName();
     showNameSelectDlg.value = true;
-  } else if (data.value == 3) {
-    updateFace({faceId: data.face.faceId, hidden: true}).then(async () => {
-      faceStore.faces = await getFaces();
-      MessagePlugin.success(`已隐藏选中的人脸`);
-    });
   }
   // MessagePlugin.success(`选中【${data.content}】`);
 };
@@ -65,6 +63,18 @@ function getPanelStyle() {
 
 function changeFace(face: FaceInfo) {
   filterStore.change({dateKey: null, path: null, faceId: face.faceId});
+}
+
+function revertFaceCollected(face: FaceInfo) {
+  updateFace({faceId: face.faceId, collected: !face.collected}).then(async () => {
+    faceStore.faces = await getFaces();
+  });
+}
+
+function revertFaceHidden(face: FaceInfo) {
+  updateFace({faceId: face.faceId, hidden: !face.hidden}).then(async () => {
+    faceStore.faces = await getFaces();
+  });
 }
 
 function closeDlg() {
@@ -103,6 +113,19 @@ function confirmDlg() {
             </t-button>
           </div>
         </t-dropdown>
+      </template>
+      <template #footer>
+        <t-button shape="square" variant="text" @click="revertFaceCollected(face)">
+          <heart-filled-icon v-if="face.collected"/>
+          <heart-icon v-else/>
+        </t-button>
+        <t-button shape="square" variant="text" @click="revertFaceHidden(face)">
+          <user-invisible-icon v-if="face.hidden"/>
+          <user-visible-icon v-else/>
+        </t-button>
+        <t-button shape="square" variant="text">
+          <share-icon/>
+        </t-button>
       </template>
     </t-card>
   </div>

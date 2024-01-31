@@ -184,11 +184,12 @@ public class FaceService {
 
     public List<NutMap> getFaces() {
         Sql sql = Sqls.create("""
-                select personId, i.faceId, name, selectedFace, count(*) as count
+                select personId, i.faceId, name, selectedFace, collected, hidden, count(*) as count
                 from photo_face_info i
                 left join t_face on t_face.id=i.faceId
                 where personId is not null and t_face.hidden=false
-                group by faceId order by count(*) desc
+                group by faceId
+                order by collected desc, count(*) desc
                 limit 100
                 """);
         return DaoUtil.fetchMaps(dao, sql);
@@ -239,6 +240,9 @@ public class FaceService {
         }
         if (face.getHidden() != null) {
             entityFace.setHidden(face.getHidden());
+        }
+        if (face.getCollected() != null) {
+            entityFace.setCollected(face.getCollected());
         }
         dao.updateIgnoreNull(entityFace);
         return true;

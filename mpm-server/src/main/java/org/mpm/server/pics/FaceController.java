@@ -60,6 +60,7 @@ public class FaceController {
         String name;
         Long selectedFace;
         Boolean hidden;
+        Boolean collected;
     }
 
     @Data
