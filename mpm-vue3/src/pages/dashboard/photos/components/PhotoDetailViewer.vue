@@ -54,8 +54,7 @@ const renderFaceCircles = () => {
     return null;
   }
 }
-
-
+const theImg = ref(null);
 </script>
 
 <template>
@@ -68,6 +67,7 @@ const renderFaceCircles = () => {
       <t-content v-if="detailViewStore.currentPhoto!=null">
         <t-image v-if="detailViewStore.currentPhoto.mediatype=='photo'"
                  :key="detailViewStore.currentPhotoName+'-small'"
+                 ref="theImg"
                  :src="detailViewStore.currentPhotoSmallUrl"
                  :style="getImageStyle()"
                  fit="contain"
@@ -75,7 +75,8 @@ const renderFaceCircles = () => {
         >
           <template #overlayContent>
             <PhotoFaceCircle :key="detailViewStore.currentPhotoName"
-                             v-model:photo="detailViewStore.currentPhoto"/>
+                             v-model:photo="detailViewStore.currentPhoto"
+                             v-model:theImg="theImg"/>
           </template>
         </t-image>
         <!-- :style="{ transform: 'rotate('+ detailViewStore.currentPhoto.rotate +'deg)'}" -->

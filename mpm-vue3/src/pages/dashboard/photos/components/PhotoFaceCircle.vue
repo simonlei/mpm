@@ -4,12 +4,19 @@ import {PrintIcon} from "tdesign-icons-vue-next";
 import {faceModule} from "@/store/modules/face-module";
 import {getFacesForPhoto} from "@/api/photos";
 
-const props = defineProps({photo: null});
-defineEmits(['update:photo']);
+const photo = defineModel('photo', {type: Object});
+const theImg = defineModel('theImg', {type: Object});
 
 const faceStore = faceModule();
-faceStore.photoFaces = await getFacesForPhoto(props.photo.id);
+faceStore.photoFaces = await getFacesForPhoto(photo.value.id);
 
+console.log('theImg ', theImg);
+if (theImg != null && theImg.value != null) {
+  // let rect = theImg.value.getBoundingClientRect();
+  // console.log(rect);
+  console.log('the value', theImg.value.$el.getBoundingClientRect());
+  // get width and height, then calc the real x,y,w,h
+}
 </script>
 
 <template>
