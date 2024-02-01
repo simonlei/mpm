@@ -45,7 +45,7 @@ function getMinHeight() {
 }
 
 function getImageStyle() {
-  return {width: `(${getMinWidth() - 300})px`, height: `${getMinHeight() - 200}px`};
+  return {width: `${getMinWidth() - 300}px`, height: `${getMinHeight() - 200}px`};
 }
 
 const renderFaceCircles = () => {
