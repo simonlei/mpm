@@ -4,6 +4,7 @@ import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import lombok.Data;
+import org.mpm.server.util.IdParam;
 import org.nutz.lang.util.NutMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -32,6 +33,11 @@ public class FaceController {
     @PostMapping("/api/getFacesWithName")
     public List<NutMap> getFacesWithName() {
         return faceService.getFacesWithName();
+    }
+
+    @PostMapping("/api/getFacesForPhoto")
+    public List<NutMap> getFacesForPhoto(@RequestBody IdParam param) {
+        return faceService.getFacesForPhoto(param.getId());
     }
 
     @PostMapping("/api/mergeFace")

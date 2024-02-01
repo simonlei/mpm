@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia';
-import {FaceInfo} from "@/api/model/photos";
+import {FaceInfo, PhotoFace} from "@/api/model/photos";
 import {getFaces} from "@/api/photos";
 
 export const faceModule = defineStore('faceModule',
@@ -8,6 +8,8 @@ export const faceModule = defineStore('faceModule',
       return {
         faces: [] as FaceInfo[],
         showHidden: false,
+        circleFace: false,
+        photoFaces: [] as PhotoFace[],
       }
     },
     getters: {},
@@ -16,5 +18,5 @@ export const faceModule = defineStore('faceModule',
         this.faces = await getFaces();
       },
     },
-    persist: true,
+    persist: false,
   });

@@ -1,5 +1,5 @@
 import {request} from '@/utils/request';
-import {FaceInfo, Photo, PhotosResult, TaskId, TaskProgress} from './model/photos';
+import {FaceInfo, Photo, PhotoFace, PhotosResult, TaskId, TaskProgress} from './model/photos';
 import type {PhotosDate} from './model/photosDate';
 import {photoFilterStore} from '@/store';
 import {PhotosFolder} from "@/api/model/photosFolder";
@@ -25,7 +25,12 @@ const Api = {
   GetFacesWithName: '/getFacesWithName',
   UpdateFace: '/updateFace',
   MergeFace: '/mergeFace',
+  GetFacesForPhoto: '/getFacesForPhoto',
 };
+
+export function getFacesForPhoto(id: number) {
+  return request.post<PhotoFace[]>({url: Api.GetFacesForPhoto, data: {id: id}});
+}
 
 export function mergeFace(from: number, to: number) {
   return request.post({url: Api.MergeFace, data: {from: from, to: to}});

@@ -72,3 +72,12 @@ export interface FaceInfo {
   hidden?: boolean;
   collected?: boolean;
 }
+
+export interface PhotoFace {
+  faceId: number;
+  name: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}

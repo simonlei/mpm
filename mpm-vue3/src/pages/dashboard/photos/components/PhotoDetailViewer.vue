@@ -2,6 +2,8 @@
 import {detailViewModuleStore} from "@/store";
 import {ref} from "vue";
 import PhotoDescribeTable from "@/pages/dashboard/photos/components/PhotoDescribeTable.vue";
+import {faceModule} from "@/store/modules/face-module";
+import PhotoFaceCircle from "@/pages/dashboard/photos/components/PhotoFaceCircle.vue";
 
 const imageViewer = ref(null);
 const detailViewStore = detailViewModuleStore();
@@ -46,6 +48,14 @@ function getImageStyle() {
   return {width: `(${getMinWidth() - 300})px`, height: `${getMinHeight() - 200}px`};
 }
 
+const renderFaceCircles = () => {
+  const faceStore = faceModule();
+  if (!faceStore.circleFace) {
+    return null;
+  }
+}
+
+
 </script>
 
 <template>
@@ -61,7 +71,13 @@ function getImageStyle() {
                  :src="detailViewStore.currentPhotoSmallUrl"
                  :style="getImageStyle()"
                  fit="contain"
-        />
+                 overlay-trigger="always"
+        >
+          <template #overlayContent>
+            <PhotoFaceCircle :key="detailViewStore.currentPhotoName"
+                             v-model:photo="detailViewStore.currentPhoto"/>
+          </template>
+        </t-image>
         <!-- :style="{ transform: 'rotate('+ detailViewStore.currentPhoto.rotate +'deg)'}" -->
         <vue3VideoPlay v-else ref="videoPlayer" v-bind="config"/>
       </t-content>

@@ -14,6 +14,7 @@ import com.tencentcloudapi.iai.v20200303.models.DeletePersonFromGroupResponse;
 import com.tencentcloudapi.iai.v20200303.models.DetectFaceRequest;
 import com.tencentcloudapi.iai.v20200303.models.DetectFaceResponse;
 import com.tencentcloudapi.iai.v20200303.models.FaceInfo;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -269,5 +270,17 @@ public class FaceService {
                     .setParam("to", to));
         });
         return true;
+    }
+
+    public List<NutMap> getFacesForPhoto(Long id) {
+        if (id == null) {
+            return new ArrayList<>();
+        }
+        return DaoUtil.fetchMaps(dao, """
+                select pf.faceId, x, y, width, height, name
+                from photo_face_info pf
+                inner join t_face f on f.id=pf.faceId
+                where pf.photoId=
+                """ + id);
     }
 }
