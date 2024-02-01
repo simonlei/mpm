@@ -1,7 +1,7 @@
 git pull
-cd app
+cd mpm-vue3
 # install flutter first https://snapcraft.io/install/flutter/centos, after install, flutter at /snap/bin
-flutter build web --dart-define=remote_addr=
+npm run build
 cd ../mpm-server
 cp ../../config/application.properties src/main/resources
 mvn clean package -DskipTests
@@ -12,7 +12,7 @@ mkdir -p bak
 mv `ls -1 mpm-server-*.jar | head -n1` bak/mpm.jar.`date "+%Y.%m.%d"`
 mv web bak/web.`date "+%Y.%m.%d"`
 mv ../mpm/mpm-server/target/mpm-server-*.jar .
-cp -R ../mpm/app/build/web/ web
+cp -R ../mpm/mpm-vue3/dist/ web
 # start jetty
 java -jar `ls -1 mpm-server-*.jar | head -n1` > nohup.log &
 #nohup java -Djetty.http.port=27277 -DSTOP.PORT=27077 -DSTOP.KEY=stop123 -jar start.jar  > nohup.log &
