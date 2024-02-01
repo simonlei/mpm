@@ -25,8 +25,8 @@ public class FaceController {
     HttpServletResponse response;
 
     @PostMapping("/api/getFaces")
-    public List<NutMap> getFaces() {
-        return faceService.getFaces();
+    public List<NutMap> getFaces(@RequestBody FaceGetParam param) {
+        return faceService.getFaces(param.showHidden);
     }
 
     @PostMapping("/api/getFacesWithName")
@@ -51,6 +51,12 @@ public class FaceController {
         byte[] faceImg = faceService.getFaceImg(id, photoId);
         response.setHeader("content-length", "" + faceImg.length);
         return faceImg;
+    }
+
+    @Data
+    public static class FaceGetParam {
+
+        Boolean showHidden;
     }
 
     @Data

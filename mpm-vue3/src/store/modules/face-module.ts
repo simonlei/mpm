@@ -7,6 +7,7 @@ export const faceModule = defineStore('faceModule',
     state: () => {
       return {
         faces: [] as FaceInfo[],
+        showHidden: false,
       }
     },
     getters: {},

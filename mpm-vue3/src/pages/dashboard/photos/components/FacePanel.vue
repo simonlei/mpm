@@ -78,55 +78,69 @@ function confirmDlg() {
   });
 }
 
+function changeShowHidden() {
+  faceStore.showHidden = !faceStore.showHidden;
+  faceStore.changeSelectedFace();
+}
+
 </script>
 
 <template>
-  <div :style="getPanelStyle()" class="narrow-scrollbar">
-    <t-card v-for="face in faceStore.faces" :key="face.faceId"
-            :bordered="face.faceId == filterStore.faceId"
-            :shadow="true"
-            :subtitle="'('+face.count+')'"
-            :title="(face.name == null ? '未命名': face.name)">
-      <template #avatar>
-        <t-avatar
-          :image="'/get_face_img/'+face.faceId + '/' + (face.selectedFace==null?-1:face.selectedFace)"
-          shape="round" size="64px"
-          @click="changeFace(face)"></t-avatar>
-      </template>
-      <template #footer>
-        <t-row :align="'middle'" justify="center" style="gap: 1px">
-          <t-col flex="auto" style="display: inline-flex; justify-content: center">
-            <t-button :style="{ 'margin': '1px' }" shape="square" variant="text"
-                      @click="changeFaceName(face)">
-              <user-checked-icon/>
-            </t-button>
-          </t-col>
-          <t-col flex="auto" style="display: inline-flex; justify-content: center">
-            <t-button :style="{ 'margin': '1px' }" shape="square" variant="text"
-                      @click="revertFaceCollected(face)">
-              <heart-filled-icon v-if="face.collected"/>
-              <heart-icon v-else/>
-            </t-button>
-          </t-col>
-          <t-col flex="auto" style="display: inline-flex; justify-content: center">
-            <t-popconfirm :content="'请确认' + (face.hidden ? '展示' : '隐藏') + '人脸？'"
-                          @confirm="revertFaceHidden(face)">
-              <t-button :style="{ 'margin': '1px' }" shape="square" variant="text">
-                <user-invisible-icon v-if="face.hidden"/>
-                <user-visible-icon v-else/>
-              </t-button>
-            </t-popconfirm>
-          </t-col>
-          <t-col flex="auto" style="display: inline-flex; justify-content: center">
-            <t-button :style="{ 'margin': '1px' }" shape="square" variant="text"
-                      @click="showMergeFaceDlg(face)">
-              <git-merge-icon/>
-            </t-button>
-          </t-col>
-        </t-row>
-      </template>
-    </t-card>
-  </div>
+  <t-layout>
+    <t-header>
+      <t-checkbox :checked="faceStore.showHidden" @change="changeShowHidden">查看隐藏人脸
+      </t-checkbox>
+      <t-checkbox>圈人</t-checkbox>
+    </t-header>
+    <t-content>
+      <div :style="getPanelStyle()" class="narrow-scrollbar">
+        <t-card v-for="face in faceStore.faces" :key="face.faceId"
+                :bordered="face.faceId == filterStore.faceId"
+                :shadow="true"
+                :subtitle="'('+face.count+')'"
+                :title="(face.name == null ? '未命名': face.name)">
+          <template #avatar>
+            <t-avatar
+              :image="'/get_face_img/'+face.faceId + '/' + (face.selectedFace==null?-1:face.selectedFace)"
+              shape="round" size="64px"
+              @click="changeFace(face)"></t-avatar>
+          </template>
+          <template #footer>
+            <t-row :align="'middle'" justify="center" style="gap: 1px">
+              <t-col flex="auto" style="display: inline-flex; justify-content: center">
+                <t-button :style="{ 'margin': '1px' }" shape="square" variant="text"
+                          @click="changeFaceName(face)">
+                  <user-checked-icon/>
+                </t-button>
+              </t-col>
+              <t-col flex="auto" style="display: inline-flex; justify-content: center">
+                <t-button :style="{ 'margin': '1px' }" shape="square" variant="text"
+                          @click="revertFaceCollected(face)">
+                  <heart-filled-icon v-if="face.collected"/>
+                  <heart-icon v-else/>
+                </t-button>
+              </t-col>
+              <t-col flex="auto" style="display: inline-flex; justify-content: center">
+                <t-popconfirm :content="'请确认' + (face.hidden ? '展示' : '隐藏') + '人脸？'"
+                              @confirm="revertFaceHidden(face)">
+                  <t-button :style="{ 'margin': '1px' }" shape="square" variant="text">
+                    <user-invisible-icon v-if="face.hidden"/>
+                    <user-visible-icon v-else/>
+                  </t-button>
+                </t-popconfirm>
+              </t-col>
+              <t-col flex="auto" style="display: inline-flex; justify-content: center">
+                <t-button :style="{ 'margin': '1px' }" shape="square" variant="text"
+                          @click="showMergeFaceDlg(face)">
+                  <git-merge-icon/>
+                </t-button>
+              </t-col>
+            </t-row>
+          </template>
+        </t-card>
+      </div>
+    </t-content>
+  </t-layout>
 
   <t-dialog :confirm-on-enter="true" :on-close="closeDlg" :on-confirm="confirmDlg"
             :visible="showNameSelectDlg"

@@ -3,6 +3,7 @@ import {FaceInfo, Photo, PhotosResult, TaskId, TaskProgress} from './model/photo
 import type {PhotosDate} from './model/photosDate';
 import {photoFilterStore} from '@/store';
 import {PhotosFolder} from "@/api/model/photosFolder";
+import {faceModule} from "@/store/modules/face-module";
 
 const Api = {
   PicsDateList: '/getPicsDate',
@@ -35,7 +36,9 @@ export function updateFace(face: FaceInfo) {
 }
 
 export function getFaces() {
-  return request.post<FaceInfo[]>({url: Api.GetFaces});
+  const faceStore = faceModule();
+
+  return request.post<FaceInfo[]>({url: Api.GetFaces, data: {showHidden: faceStore.showHidden}});
 }
 
 export function getFacesWithName() {
