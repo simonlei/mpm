@@ -43,6 +43,7 @@ import org.mpm.server.entity.EntityBlockPicture;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityMeta;
 import org.mpm.server.entity.EntityPhoto;
+import org.mpm.server.entity.EntityPhotoFaceInfo;
 import org.mpm.server.util.MyUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
@@ -414,6 +415,7 @@ public class PicsService {
                 dao.insert(blackList);
                 dao.delete(photo);
                 dao.clear(EntityFile.class, Cnd.where("photoId", "=", photo.getId()));
+                dao.clear(EntityPhotoFaceInfo.class, Cnd.where("photoId", "=", photo.getId()));
             } catch (Throwable e) {
                 log.error("Can't real delete photo.", e);
             }
