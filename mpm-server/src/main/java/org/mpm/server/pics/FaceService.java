@@ -148,7 +148,9 @@ public class FaceService {
      * 如果face为空，则从cos上获取整个图片，否则 cut 一下
      */
     private String getImage(EntityPhoto photo, EntityPhotoFaceInfo face) {
-        COSObject object = getFaceFromCos(photo, face);
+        EntityPhotoFaceInfo faceInfo = face.toBuilder().build();
+        getWiderFace(photo, faceInfo);
+        COSObject object = getFaceFromCos(photo, faceInfo);
         return Base64.encodeAsString(Streams.readBytesAndClose(object.getObjectContent()));
     }
 
