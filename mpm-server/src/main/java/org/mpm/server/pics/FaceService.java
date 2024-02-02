@@ -190,7 +190,7 @@ public class FaceService {
                 left join t_face on t_face.id=i.faceId
                 where personId is not null $showHidden
                 group by faceId
-                order by collected desc, count(*) desc
+                order by collected desc, count(*) desc, i.faceId
                 limit 100
                 """);
         sql.setVar("showHidden", showHidden ? "" : "and t_face.hidden=false");
@@ -252,7 +252,13 @@ public class FaceService {
     }
 
     public List<NutMap> getFacesWithName() {
-        return DaoUtil.fetchMaps(dao, "select id as faceId, name from t_face where name is not null");
+        return DaoUtil.fetchMaps(dao, """
+                select t_face.id as faceId, name
+                from t_face
+                left join photo_face_info p on p.faceId=t_face.id
+                where name is not null
+                group by t_face.id
+                order by count(*) desc""");
     }
 
     public Boolean mergeFace(Long from, Long to) throws TencentCloudSDKException {

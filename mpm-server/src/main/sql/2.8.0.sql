@@ -29,3 +29,5 @@ alter table t_face
 
 alter table t_face
     add column hidden int DEFAULT 0 COMMENT '是否隐藏';
+
+alter table photo_face_info add index faceId(faceId);
