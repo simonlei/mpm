@@ -4,7 +4,7 @@ import {filesize} from "filesize";
 import useClipboard from "vue-clipboard3";
 import {MessagePlugin} from "tdesign-vue-next";
 import {ref} from "vue";
-import {updateFace, updatePhoto} from "@/api/photos";
+import {getFacesForPhoto, rescanFace, updateFace, updatePhoto} from "@/api/photos";
 import {
   DownloadIcon,
   FaceRetouchingIcon,
@@ -12,7 +12,8 @@ import {
   LocationIcon,
   RotateIcon,
   StarFilledIcon,
-  StarIcon
+  StarIcon,
+  UserSearchIcon
 } from "tdesign-icons-vue-next";
 import PhotoTagInput from "@/layouts/components/PhotoTagInput.vue";
 import {detailViewModuleStore, photoFilterStore} from "@/store";
@@ -79,6 +80,14 @@ function changeCircleFace() {
   faceStore.circleFace = !faceStore.circleFace;
 }
 
+function rescanFaceInPhoto() {
+  rescanFace(photo.id).then(async () => {
+    console.log("rescan face done.");
+    faceStore.photoFaces = await getFacesForPhoto(photo.id);
+    MessagePlugin.success('重新扫描人脸成功');
+  });
+}
+
 </script>
 
 <template>
@@ -122,10 +131,18 @@ function changeCircleFace() {
               <happy-icon slot="icon"/>
             </t-button>
           </t-popup>
+        </t-space>
+        <t-space>
           <t-popup v-if="detailViewStore.detailVisible" content="圈人" trigger="hover">
             <t-button shape="circle" variant="outline"
                       @click="changeCircleFace">
               <face-retouching-icon slot="icon"/>
+            </t-button>
+          </t-popup>
+          <t-popup v-if="detailViewStore.detailVisible" content="重新识别人脸" trigger="hover">
+            <t-button shape="circle" variant="outline"
+                      @click="rescanFaceInPhoto">
+              <user-search-icon slot="icon"/>
             </t-button>
           </t-popup>
         </t-space>

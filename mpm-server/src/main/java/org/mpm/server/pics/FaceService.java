@@ -148,9 +148,7 @@ public class FaceService {
      * 如果face为空，则从cos上获取整个图片，否则 cut 一下
      */
     private String getImage(EntityPhoto photo, EntityPhotoFaceInfo face) {
-        EntityPhotoFaceInfo faceInfo = face.toBuilder().build();
-        getWiderFace(photo, faceInfo);
-        COSObject object = getFaceFromCos(photo, faceInfo);
+        COSObject object = getFaceFromCos(photo, face);
         return Base64.encodeAsString(Streams.readBytesAndClose(object.getObjectContent()));
     }
 
@@ -158,14 +156,16 @@ public class FaceService {
         GetObjectRequest objectRequest = new GetObjectRequest(bucket, "/small/" + photo.getName());
         String param = "imageMogr2/format/jpeg";
         if (face != null) {
-            param = "imageMogr2/cut/" + face.getWidth()
-                    + "x" + face.getHeight()
-                    + "x" + face.getX()
-                    + "x" + face.getY() + "|" + param;
+            EntityPhotoFaceInfo faceInfo = face.toBuilder().build();
+            getWiderFace(photo, faceInfo);
+
+            param = "imageMogr2/cut/" + faceInfo.getWidth()
+                    + "x" + faceInfo.getHeight()
+                    + "x" + faceInfo.getX()
+                    + "x" + faceInfo.getY() + "|" + param;
         }
         objectRequest.putCustomQueryParameter(param, null);
-        COSObject object = cosClient.getObject(objectRequest);
-        return object;
+        return cosClient.getObject(objectRequest);
     }
 
     void createFaceGroupIfNotExists() {
@@ -297,5 +297,10 @@ public class FaceService {
             return 0;
         }
         return dao.delete(EntityPhotoFaceInfo.class, id);
+    }
+
+    public Boolean rescanFace(Long id) throws TencentCloudSDKException {
+        detectFaceIn(dao.fetch(EntityPhoto.class, id));
+        return true;
     }
 }

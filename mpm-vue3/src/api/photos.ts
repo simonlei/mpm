@@ -27,7 +27,12 @@ const Api = {
   MergeFace: '/mergeFace',
   GetFacesForPhoto: '/getFacesForPhoto',
   RemovePhotoFaceInfo: '/removePhotoFaceInfo',
+  RescanFace: '/rescanFace',
 };
+
+export function rescanFace(id: number) {
+  return request.post<number>({url: Api.RescanFace, data: {id: id}});
+}
 
 export function removePhotoFaceInfo(id: number) {
   return request.post<number>({url: Api.RemovePhotoFaceInfo, data: {id: id}});

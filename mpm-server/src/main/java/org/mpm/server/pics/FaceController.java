@@ -45,6 +45,11 @@ public class FaceController {
         return faceService.removePhotoFaceInfo(param.getId());
     }
 
+    @PostMapping("/api/rescanFace")
+    public Boolean rescanFace(@RequestBody IdParam param) throws TencentCloudSDKException {
+        return faceService.rescanFace(param.getId());
+    }
+
     @PostMapping("/api/mergeFace")
     public Boolean mergeFace(@RequestBody MergeFaceParam param) throws TencentCloudSDKException {
         return faceService.mergeFace(param.from, param.to);
