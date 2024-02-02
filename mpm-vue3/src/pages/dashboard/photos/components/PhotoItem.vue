@@ -42,13 +42,14 @@ import {selectModuleStore} from "@/store/modules/select-module";
 import PhotoDescribeTable from "@/pages/dashboard/photos/components/PhotoDescribeTable.vue";
 import formatDuration from "format-duration";
 import PhotoItemContextMenu from "@/pages/dashboard/photos/components/PhotoItemContextMenu.vue";
+import {Photo} from "@/api/model/photos";
 
 const props = defineProps({id: Number, index: Number})
 const photoStore = photoModuleStore();
 const selectStore = selectModuleStore();
 const detailViewStore = detailViewModuleStore();
 
-const photo = ref();
+const photo = ref(null as Photo);
 photo.value = await photoStore.getPhotoById(props.id, props.index);
 
 function clicked() {
