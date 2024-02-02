@@ -283,10 +283,17 @@ public class FaceService {
             return new ArrayList<>();
         }
         return DaoUtil.fetchMaps(dao, """
-                select pf.faceId, x, y, width, height, name
+                select pf.id, pf.faceId, x, y, width, height, name
                 from photo_face_info pf
                 inner join t_face f on f.id=pf.faceId
                 where pf.photoId=
                 """ + id);
+    }
+
+    public Integer removePhotoFaceInfo(Long id) {
+        if (id == null) {
+            return 0;
+        }
+        return dao.delete(EntityPhotoFaceInfo.class, id);
     }
 }

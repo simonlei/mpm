@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 
 import {faceModule} from "@/store/modules/face-module";
-import {getFacesForPhoto} from "@/api/photos";
+import {getFacesForPhoto, removePhotoFaceInfo} from "@/api/photos";
+import {DialogPlugin} from "tdesign-vue-next";
 
 const photo = defineModel('photo', {type: Object});
 const theImg = defineModel('theImg', {type: Object});
@@ -50,15 +51,35 @@ function calcFaceStyle(face) {
     borderRadius: '3px'
   };
 }
+
+function handleClose(index, face) {
+  const confirmDia = DialogPlugin({
+    header: '删除这个人脸？',
+    body: '确定删除当前人脸？',
+    confirmBtn: '确认',
+    cancelBtn: '取消',
+    onConfirm: ({e}) => {
+      console.log('confirm delete ', index, face);
+      faceStore.photoFaces.splice(index, 1);
+      removePhotoFaceInfo(face.id);
+      confirmDia.hide();
+    },
+    onClose: ({e, trigger}) => {
+      confirmDia.hide();
+    },
+  });
+}
 </script>
 
 <template>
   <div v-if="faceStore.photoFaces.length>0 && faceStore.circleFace">
-    <t-tag v-for="face in faceStore.photoFaces"
+    <t-tag v-for="(face,index) in faceStore.photoFaces"
+           :closable="true"
            :style="calcFaceStyle(face)"
            shape="mark"
            theme="primary"
            variant="outline"
+           @close="handleClose(index, face)"
     >
       {{ face.name == null ? '未命名' : face.name }}
     </t-tag>

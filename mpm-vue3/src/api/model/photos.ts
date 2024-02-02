@@ -74,6 +74,7 @@ export interface FaceInfo {
 }
 
 export interface PhotoFace {
+  id: number;
   faceId: number;
   name: string;
   x: number;

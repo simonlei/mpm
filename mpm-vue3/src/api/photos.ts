@@ -26,7 +26,12 @@ const Api = {
   UpdateFace: '/updateFace',
   MergeFace: '/mergeFace',
   GetFacesForPhoto: '/getFacesForPhoto',
+  RemovePhotoFaceInfo: '/removePhotoFaceInfo',
 };
+
+export function removePhotoFaceInfo(id: number) {
+  return request.post<number>({url: Api.RemovePhotoFaceInfo, data: {id: id}});
+}
 
 export function getFacesForPhoto(id: number) {
   return request.post<PhotoFace[]>({url: Api.GetFacesForPhoto, data: {id: id}});
