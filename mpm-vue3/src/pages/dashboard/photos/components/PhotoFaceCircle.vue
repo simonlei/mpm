@@ -24,8 +24,8 @@ function getRatioAndDelta() {
     const width = photo.value.width;
     const height = photo.value.height;
 
-    const smallWidth = Math.min((width / height > 2560 / 1440) ? 2560 : width / height * 1440, width);
-    const smallHeight = Math.min((width / height > 2560 / 1440) ? height / width * 2560 : 1440, height);
+    const smallWidth = (width / height > 2560 / 1440) ? 2560 : width / height * 1440;
+    const smallHeight = (width / height > 2560 / 1440) ? height / width * 2560 : 1440;
     const rect = theImg.value.$el.getBoundingClientRect();
     console.log("rect is ", rect);
     const realWidth = Math.min((smallWidth / smallHeight > rect.width / rect.height) ? rect.width : smallWidth / smallHeight * rect.height, rect.width);
