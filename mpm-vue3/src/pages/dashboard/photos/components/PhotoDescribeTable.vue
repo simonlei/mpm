@@ -7,6 +7,7 @@ import {ref} from "vue";
 import {updateFace, updatePhoto} from "@/api/photos";
 import {
   DownloadIcon,
+  FaceRetouchingIcon,
   HappyIcon,
   LocationIcon,
   RotateIcon,
@@ -14,10 +15,12 @@ import {
   StarIcon
 } from "tdesign-icons-vue-next";
 import PhotoTagInput from "@/layouts/components/PhotoTagInput.vue";
-import {photoFilterStore} from "@/store";
+import {detailViewModuleStore, photoFilterStore} from "@/store";
 import {faceModule} from "@/store/modules/face-module";
 
 const filterStore = photoFilterStore();
+const faceStore = faceModule();
+const detailViewStore = detailViewModuleStore();
 const props = defineProps({photo: null});
 defineEmits(['update:photo']);
 
@@ -72,6 +75,10 @@ async function setDefaultFace() {
   MessagePlugin.success('设置人脸成功');
 }
 
+function changeCircleFace() {
+  faceStore.circleFace = !faceStore.circleFace;
+}
+
 </script>
 
 <template>
@@ -113,6 +120,12 @@ async function setDefaultFace() {
             <t-button v-if="filterStore.faceId!=null" shape="circle" variant="outline"
                       @click="setDefaultFace">
               <happy-icon slot="icon"/>
+            </t-button>
+          </t-popup>
+          <t-popup content="圈人" trigger="hover">
+            <t-button v-if="detailViewStore.detailVisible" shape="circle" variant="outline"
+                      @click="changeCircleFace">
+              <face-retouching-icon slot="icon"/>
             </t-button>
           </t-popup>
         </t-space>

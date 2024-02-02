@@ -2,12 +2,13 @@
 import {detailViewModuleStore} from "@/store";
 import {ref} from "vue";
 import PhotoDescribeTable from "@/pages/dashboard/photos/components/PhotoDescribeTable.vue";
-import {faceModule} from "@/store/modules/face-module";
 import PhotoFaceCircle from "@/pages/dashboard/photos/components/PhotoFaceCircle.vue";
+import {faceModule} from "@/store/modules/face-module";
 
 const imageViewer = ref(null);
 const detailViewStore = detailViewModuleStore();
 const videoPlayer = ref(null);
+const faceStore = faceModule();
 
 const config = ref({
   src: `/cos/video_t/${detailViewStore.currentPhoto?.name}.mp4`,
@@ -18,19 +19,13 @@ detailViewStore.$subscribe((mutation, state) => {
   config.value.src = `/cos/video_t/${photo?.name}.mp4`;
   config.value.poster = `/cos/small/${photo?.name}`;
   if (!state.detailVisible) {
+    faceStore.circleFace = false;
     videoPlayer.value?.pause();
   }
 });
 
-function getRotate() {
-  return (detailViewStore.currentPhoto.rotate + 360) % 360;
-}
-
 console.log('windows size {}  {}', window.innerWidth, window.innerHeight);
 
-function getWidth() {
-  return window.innerWidth + 'px';
-}
 
 function getMinWidth() {
   let photo = detailViewStore.currentPhoto;
@@ -45,15 +40,9 @@ function getMinHeight() {
 }
 
 function getImageStyle() {
-  return {width: `${getMinWidth() - 300}px`, height: `${getMinHeight() - 200}px`};
+  return {width: `(${getMinWidth() - 300})px`, height: `${getMinHeight() - 200}px`};
 }
 
-const renderFaceCircles = () => {
-  const faceStore = faceModule();
-  if (!faceStore.circleFace) {
-    return null;
-  }
-}
 const theImg = ref(null);
 </script>
 

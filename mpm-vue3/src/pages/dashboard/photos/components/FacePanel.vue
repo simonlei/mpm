@@ -83,10 +83,6 @@ function changeShowHidden() {
   faceStore.changeSelectedFace();
 }
 
-function changeCircleFace() {
-  faceStore.circleFace = !faceStore.circleFace;
-}
-
 </script>
 
 <template>
@@ -94,7 +90,6 @@ function changeCircleFace() {
     <t-header>
       <t-checkbox :checked="faceStore.showHidden" @change="changeShowHidden">查看隐藏人脸
       </t-checkbox>
-      <t-checkbox :checked="faceStore.circleFace" @change="changeCircleFace">圈人</t-checkbox>
     </t-header>
     <t-content>
       <div :style="getPanelStyle()" class="narrow-scrollbar">
