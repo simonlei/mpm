@@ -110,20 +110,20 @@ function changeCircleFace() {
                     variant="outline">
             <download-icon slot="icon"/>
           </t-button>
-          <t-popup content="复制当前 GIS 位置信息" trigger="hover">
-            <t-button v-if="photo?.latitude!=null" shape="circle" variant="outline"
+          <t-popup v-if="photo?.latitude!=null" content="复制当前 GIS 位置信息" trigger="hover">
+            <t-button shape="circle" variant="outline"
                       @click="copyGisLocation">
               <location-icon slot="icon"/>
             </t-button>
           </t-popup>
-          <t-popup content="设置当前为默认人脸" trigger="hover">
-            <t-button v-if="filterStore.faceId!=null" shape="circle" variant="outline"
+          <t-popup v-if="filterStore.faceId!=null" content="设置当前为默认人脸" trigger="hover">
+            <t-button shape="circle" variant="outline"
                       @click="setDefaultFace">
               <happy-icon slot="icon"/>
             </t-button>
           </t-popup>
-          <t-popup content="圈人" trigger="hover">
-            <t-button v-if="detailViewStore.detailVisible" shape="circle" variant="outline"
+          <t-popup v-if="detailViewStore.detailVisible" content="圈人" trigger="hover">
+            <t-button shape="circle" variant="outline"
                       @click="changeCircleFace">
               <face-retouching-icon slot="icon"/>
             </t-button>

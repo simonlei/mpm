@@ -16,7 +16,7 @@ let deltaX = 0;
 let deltaY = 0;
 
 function getRatioAndDelta() {
-  if (theImg != null && theImg.value != null) {
+  if (theImg != null && theImg.value != null && theImg.value.$el != null) {
     // let rect = theImg.value.getBoundingClientRect();
     // console.log(rect);
     // small photo scale to 2560x1440
