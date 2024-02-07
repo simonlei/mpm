@@ -1,6 +1,11 @@
 <script lang="ts" setup>
 
 import {getFaces, getFacesWithName, mergeFace, updateFace} from "@/api/photos";
+import {dialogsStore, photoFilterStore} from "@/store";
+import {faceModule} from "@/store/modules/face-module";
+import {FaceInfo} from "@/api/model/photos";
+import {ref} from "vue";
+import {MessagePlugin} from "tdesign-vue-next";
 import {
   GitMergeIcon,
   HeartFilledIcon,
@@ -9,11 +14,6 @@ import {
   UserInvisibleIcon,
   UserVisibleIcon
 } from "tdesign-icons-vue-next";
-import {dialogsStore, photoFilterStore} from "@/store";
-import {faceModule} from "@/store/modules/face-module";
-import {FaceInfo} from "@/api/model/photos";
-import {ref} from "vue";
-import {MessagePlugin} from "tdesign-vue-next";
 
 const filterStore = photoFilterStore();
 const faceStore = faceModule();
@@ -86,60 +86,60 @@ function changeShowHidden() {
 </script>
 
 <template>
-  <t-layout>
-    <t-header>
+  <t-list :stripe="true" :style="getPanelStyle()" size="small">
+    <template #header>
       <t-checkbox :checked="faceStore.showHidden" @change="changeShowHidden">查看隐藏人脸
       </t-checkbox>
-    </t-header>
-    <t-content>
-      <div :style="getPanelStyle()" class="narrow-scrollbar">
-        <t-card v-for="face in faceStore.faces" :key="face.faceId"
-                :bordered="face.faceId == filterStore.faceId"
-                :shadow="true"
-                :subtitle="'('+face.count+')'"
-                :title="(face.name == null ? '未命名': face.name)">
-          <template #avatar>
-            <t-avatar
-              :image="'/get_face_img/'+face.faceId + '/' + (face.selectedFace==null?-1:face.selectedFace)"
-              shape="round" size="64px"
-              @click="changeFace(face)"></t-avatar>
-          </template>
-          <template #footer>
-            <t-row :align="'middle'" justify="center" style="gap: 1px">
-              <t-col flex="auto" style="display: inline-flex; justify-content: center">
-                <t-button :style="{ 'margin': '1px' }" shape="square" variant="text"
-                          @click="changeFaceName(face)">
-                  <user-checked-icon/>
+    </template>
+    <t-list-item v-for="(face,index) in faceStore.faces" :key="`stripe${index}`"
+                 class="small-list-item">
+      <t-card :key="face.faceId" :bordered="face.faceId == filterStore.faceId"
+              :shadow="true"
+              :subtitle="'('+face.count+')'"
+              :title="(face.name == null ? '未命名': face.name)">
+        <template #avatar>
+          <t-avatar
+            :image="'/get_face_img/'+face.faceId + '/' + (face.selectedFace==null?-1:face.selectedFace)"
+            shape="round" size="64px"
+            @click="changeFace(face)"></t-avatar>
+        </template>
+        <template #footer>
+          <t-row :align="'middle'" justify="center" style="gap: 1px">
+            <t-col flex="auto" style="display: inline-flex; justify-content: center">
+              <t-button :style="{ 'margin': '1px' }" shape="square" variant="text"
+                        @click="changeFaceName(face)">
+                <user-checked-icon/>
+              </t-button>
+            </t-col>
+            <t-col flex="auto" style="display: inline-flex; justify-content: center">
+              <t-button :style="{ 'margin': '1px' }" shape="square" variant="text"
+                        @click="revertFaceCollected(face)">
+                <heart-filled-icon v-if="face.collected"/>
+                <heart-icon v-else/>
+              </t-button>
+            </t-col>
+            <t-col flex="auto" style="display: inline-flex; justify-content: center">
+              <t-popconfirm :content="'请确认' + (face.hidden ? '展示' : '隐藏') + '人脸？'"
+                            @confirm="revertFaceHidden(face)">
+                <t-button :style="{ 'margin': '1px' }" shape="square" variant="text">
+                  <user-invisible-icon v-if="face.hidden"/>
+                  <user-visible-icon v-else/>
                 </t-button>
-              </t-col>
-              <t-col flex="auto" style="display: inline-flex; justify-content: center">
-                <t-button :style="{ 'margin': '1px' }" shape="square" variant="text"
-                          @click="revertFaceCollected(face)">
-                  <heart-filled-icon v-if="face.collected"/>
-                  <heart-icon v-else/>
-                </t-button>
-              </t-col>
-              <t-col flex="auto" style="display: inline-flex; justify-content: center">
-                <t-popconfirm :content="'请确认' + (face.hidden ? '展示' : '隐藏') + '人脸？'"
-                              @confirm="revertFaceHidden(face)">
-                  <t-button :style="{ 'margin': '1px' }" shape="square" variant="text">
-                    <user-invisible-icon v-if="face.hidden"/>
-                    <user-visible-icon v-else/>
-                  </t-button>
-                </t-popconfirm>
-              </t-col>
-              <t-col flex="auto" style="display: inline-flex; justify-content: center">
-                <t-button :style="{ 'margin': '1px' }" shape="square" variant="text"
-                          @click="showMergeFaceDlg(face)">
-                  <git-merge-icon/>
-                </t-button>
-              </t-col>
-            </t-row>
-          </template>
-        </t-card>
-      </div>
-    </t-content>
-  </t-layout>
+              </t-popconfirm>
+            </t-col>
+            <t-col flex="auto" style="display: inline-flex; justify-content: center">
+              <t-button :style="{ 'margin': '1px' }" shape="square" variant="text"
+                        @click="showMergeFaceDlg(face)">
+                <git-merge-icon/>
+              </t-button>
+            </t-col>
+          </t-row>
+        </template>
+      </t-card>
+
+    </t-list-item>
+
+  </t-list>
 
   <t-dialog :confirm-on-enter="true" :on-close="closeDlg" :on-confirm="confirmDlg"
             :visible="showNameSelectDlg"
@@ -154,5 +154,7 @@ function changeShowHidden() {
 </template>
 
 <style lang="less" scoped>
-
+.small-list-item {
+  padding: 1px 1px !important;
+}
 </style>
