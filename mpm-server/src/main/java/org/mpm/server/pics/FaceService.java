@@ -60,7 +60,6 @@ public class FaceService {
         createFaceGroupIfNotExists();
     }
 
-
     /**
      * Detect faces in image.
      */
@@ -185,19 +184,25 @@ public class FaceService {
         return "faceGroup" + (isDev ? "-dev" : "");
     }
 
-    public NutMap getFaces(Boolean showHidden, int page, int size) {
+    void setConditions(Boolean showHidden, String nameFilter, Sql sql) {
+        sql.setVar("showHidden", showHidden ? "" : "and t_face.hidden=false");
+        sql.setVar("filterName", Strings.isBlank(nameFilter) ? "" : "and name like '%" + nameFilter.trim() + "%'");
+    }
+
+    public NutMap getFaces(Boolean showHidden, int page, int size, String nameFilter) {
         String sqlStr = """
                 select personId, i.faceId, name, selectedFace, collected, hidden, count(*) as count
                 from photo_face_info i
                 left join t_face on t_face.id=i.faceId
-                where personId is not null $showHidden
+                where personId is not null $filterName $showHidden
                 group by faceId
                 order by collected desc, count(*) desc, i.faceId
                 """;
         Sql sql = Sqls.create("select count(*) c from (" + sqlStr + ") t");
-        sql.setVar("showHidden", showHidden ? "" : "and t_face.hidden=false");
+        setConditions(showHidden, nameFilter, sql);
         NutMap result = NutMap.NEW().setv("total", DaoUtil.fetchOne(dao, sql, "c"));
         sql = Sqls.create(sqlStr + " limit " + ((page - 1) * size) + "," + size);
+        setConditions(showHidden, nameFilter, sql);
         log.info("getFaces: {}", sql);
         return result.setv("faces", DaoUtil.fetchMaps(dao, sql));
     }

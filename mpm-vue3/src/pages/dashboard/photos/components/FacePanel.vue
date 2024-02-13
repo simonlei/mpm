@@ -10,6 +10,7 @@ import {
   GitMergeIcon,
   HeartFilledIcon,
   HeartIcon,
+  SearchIcon,
   UserCheckedIcon,
   UserInvisibleIcon,
   UserVisibleIcon
@@ -89,6 +90,12 @@ function onPageChange(pageInfo) {
   faceStore.changeSelectedFace();
 }
 
+function changeFilterName(value) {
+  console.log("filter value " + value);
+  faceStore.nameFilter = value;
+  faceStore.changeSelectedFace();
+}
+
 </script>
 
 <template>
@@ -96,6 +103,11 @@ function onPageChange(pageInfo) {
     <template #header>
       <t-checkbox :checked="faceStore.showHidden" @change="changeShowHidden">查看隐藏人脸
       </t-checkbox>
+      <t-input placeholder="输入名字过滤" @change="changeFilterName">
+        <template #suffixIcon>
+          <search-icon :style="{ cursor: 'pointer' }"/>
+        </template>
+      </t-input>
     </template>
     <t-list-item v-for="(face,index) in faceStore.faces" :key="`stripe${index}`"
                  class="small-list-item">

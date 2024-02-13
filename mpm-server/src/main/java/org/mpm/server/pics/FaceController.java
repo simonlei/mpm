@@ -29,7 +29,8 @@ public class FaceController {
     public NutMap getFaces(@RequestBody FaceGetParam param) {
         return faceService.getFaces(param.showHidden,
                 param.page == null ? 1 : param.page,
-                param.size == null ? 100 : param.size);
+                param.size == null ? 100 : param.size,
+                param.nameFilter);
     }
 
     @PostMapping("/api/getFacesWithName")
@@ -77,6 +78,7 @@ public class FaceController {
         Boolean showHidden;
         Integer page;
         Integer size;
+        String nameFilter;
     }
 
     @Data

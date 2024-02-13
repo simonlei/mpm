@@ -55,7 +55,12 @@ export function getFaces() {
 
   return request.post<{}>({
     url: Api.GetFaces,
-    data: {showHidden: faceStore.showHidden, page: faceStore.page, size: faceStore.size}
+    data: {
+      showHidden: faceStore.showHidden,
+      page: faceStore.page,
+      size: faceStore.size,
+      nameFilter: faceStore.nameFilter
+    }
   });
 }
 

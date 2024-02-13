@@ -13,6 +13,7 @@ export const faceModule = defineStore('faceModule',
         page: 1,
         size: 100,
         total: 0,
+        nameFilter: '',
       }
     },
     getters: {},
