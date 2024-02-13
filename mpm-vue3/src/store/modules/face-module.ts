@@ -10,12 +10,17 @@ export const faceModule = defineStore('faceModule',
         showHidden: false,
         circleFace: false,
         photoFaces: [] as PhotoFace[],
+        page: 1,
+        size: 100,
+        total: 0,
       }
     },
     getters: {},
     actions: {
       async changeSelectedFace() {
-        this.faces = await getFaces();
+        const result = await getFaces();
+        this.faces = result['faces'];
+        this.total = result['total'];
       },
     },
     persist: false,

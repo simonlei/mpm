@@ -185,19 +185,21 @@ public class FaceService {
         return "faceGroup" + (isDev ? "-dev" : "");
     }
 
-    public List<NutMap> getFaces(Boolean showHidden) {
-        Sql sql = Sqls.create("""
+    public NutMap getFaces(Boolean showHidden, int page, int size) {
+        String sqlStr = """
                 select personId, i.faceId, name, selectedFace, collected, hidden, count(*) as count
                 from photo_face_info i
                 left join t_face on t_face.id=i.faceId
                 where personId is not null $showHidden
                 group by faceId
                 order by collected desc, count(*) desc, i.faceId
-                limit 100
-                """);
+                """;
+        Sql sql = Sqls.create("select count(*) c from (" + sqlStr + ") t");
         sql.setVar("showHidden", showHidden ? "" : "and t_face.hidden=false");
+        NutMap result = NutMap.NEW().setv("total", DaoUtil.fetchOne(dao, sql, "c"));
+        sql = Sqls.create(sqlStr + " limit " + ((page - 1) * size) + "," + size);
         log.info("getFaces: {}", sql);
-        return DaoUtil.fetchMaps(dao, sql);
+        return result.setv("faces", DaoUtil.fetchMaps(dao, sql));
     }
 
     public byte[] getFaceImg(int id, Long photoId) {

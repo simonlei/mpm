@@ -53,7 +53,10 @@ export function updateFace(face: FaceInfo) {
 export function getFaces() {
   const faceStore = faceModule();
 
-  return request.post<FaceInfo[]>({url: Api.GetFaces, data: {showHidden: faceStore.showHidden}});
+  return request.post<{}>({
+    url: Api.GetFaces,
+    data: {showHidden: faceStore.showHidden, page: faceStore.page, size: faceStore.size}
+  });
 }
 
 export function getFacesWithName() {

@@ -26,8 +26,10 @@ public class FaceController {
     HttpServletResponse response;
 
     @PostMapping("/api/getFaces")
-    public List<NutMap> getFaces(@RequestBody FaceGetParam param) {
-        return faceService.getFaces(param.showHidden);
+    public NutMap getFaces(@RequestBody FaceGetParam param) {
+        return faceService.getFaces(param.showHidden,
+                param.page == null ? 1 : param.page,
+                param.size == null ? 100 : param.size);
     }
 
     @PostMapping("/api/getFacesWithName")
@@ -73,6 +75,8 @@ public class FaceController {
     public static class FaceGetParam {
 
         Boolean showHidden;
+        Integer page;
+        Integer size;
     }
 
     @Data

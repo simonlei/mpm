@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import {getFaces, getFacesWithName, mergeFace, updateFace} from "@/api/photos";
+import {getFacesWithName, mergeFace, updateFace} from "@/api/photos";
 import {dialogsStore, photoFilterStore} from "@/store";
 import {faceModule} from "@/store/modules/face-module";
 import {FaceInfo} from "@/api/model/photos";
@@ -20,7 +20,7 @@ const faceStore = faceModule();
 const dlgStore = dialogsStore();
 filterStore.path = null;
 filterStore.dateKey = null;
-faceStore.faces = await getFaces();
+faceStore.changeSelectedFace();
 const showNameSelectDlg = ref(false);
 const names = ref([] as FaceInfo[]);
 const selectedFaceId = ref(null as number);
@@ -54,13 +54,13 @@ function changeFace(face: FaceInfo) {
 
 function revertFaceCollected(face: FaceInfo) {
   updateFace({faceId: face.faceId, collected: !face.collected}).then(async () => {
-    faceStore.faces = await getFaces();
+    faceStore.changeSelectedFace();
   });
 }
 
 function revertFaceHidden(face: FaceInfo) {
   updateFace({faceId: face.faceId, hidden: !face.hidden}).then(async () => {
-    faceStore.faces = await getFaces();
+    faceStore.changeSelectedFace();
   });
 }
 
@@ -80,6 +80,12 @@ function confirmDlg() {
 
 function changeShowHidden() {
   faceStore.showHidden = !faceStore.showHidden;
+  faceStore.changeSelectedFace();
+}
+
+function onPageChange(pageInfo) {
+  console.log(pageInfo);
+  faceStore.page = pageInfo.current;
   faceStore.changeSelectedFace();
 }
 
@@ -136,9 +142,19 @@ function changeShowHidden() {
           </t-row>
         </template>
       </t-card>
-
     </t-list-item>
-
+    <template #footer>
+      <t-pagination
+        :page-size="faceStore.size"
+        :show-page-number="false"
+        :show-page-size="false"
+        :total="faceStore.total"
+        :total-content="false"
+        size="small"
+        theme="simple"
+        @change="onPageChange"
+      />
+    </template>
   </t-list>
 
   <t-dialog :confirm-on-enter="true" :on-close="closeDlg" :on-confirm="confirmDlg"
