@@ -4,7 +4,7 @@ import {faceModule} from "@/store/modules/face-module";
 import {getFacesForPhoto, removePhotoFaceInfo} from "@/api/photos";
 import {DialogPlugin} from "tdesign-vue-next";
 import {dialogsStore} from "@/store";
-import {changeFaceName} from "@/pages/dashboard/photos/components/FacePanel.vue";
+import {changeFaceName} from "@/pages/dashboard/photos/components/faceFunction";
 
 const photo = defineModel('photo', {type: Object});
 const theImg = defineModel('theImg', {type: Object});
