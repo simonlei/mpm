@@ -161,7 +161,7 @@ function changeFilterName(value) {
             :visible="showNameSelectDlg"
             attach="body"
             header="请选择要合并到的目标人名">
-    <t-select v-model:value="selectedFaceId">
+    <t-select v-model:value="selectedFaceId" :filterable="true">
       <t-option v-for="face in names" :key="face.faceId" :label="face.name" :value="face.faceId">
 
       </t-option>
