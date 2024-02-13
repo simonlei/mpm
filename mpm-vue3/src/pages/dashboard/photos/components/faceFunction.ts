@@ -12,9 +12,10 @@ export function changeFaceName(face: FaceInfo) {
 
   function realChangeName() {
     return (inputValue: string) => {
-      face.name = inputValue;
       updateFace({faceId: face.faceId, name: inputValue}).then((result: Boolean) => {
-        if (!result) {
+        if (result) {
+          face.name = inputValue;
+        } else {
           MessagePlugin.error("有重名的人存在，请更换名字再试");
           dlgStore.textInputDlg = true;
           dlgStore.whenInputConfirmed(realChangeName());
