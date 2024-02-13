@@ -3,11 +3,14 @@
 import {faceModule} from "@/store/modules/face-module";
 import {getFacesForPhoto, removePhotoFaceInfo} from "@/api/photos";
 import {DialogPlugin} from "tdesign-vue-next";
+import {dialogsStore} from "@/store";
+import {changeFaceName} from "@/pages/dashboard/photos/components/FacePanel.vue";
 
 const photo = defineModel('photo', {type: Object});
 const theImg = defineModel('theImg', {type: Object});
 
 const faceStore = faceModule();
+const dlgStore = dialogsStore();
 faceStore.photoFaces = await getFacesForPhoto(photo.value.id);
 
 console.log('theImg ', theImg);
@@ -69,6 +72,7 @@ function handleClose(index, face) {
     },
   });
 }
+
 </script>
 
 <template>
@@ -79,6 +83,7 @@ function handleClose(index, face) {
            shape="mark"
            theme="primary"
            variant="outline"
+           @click="changeFaceName(face)"
            @close="handleClose(index, face)"
     >
       {{ face.name == null ? '未命名' : face.name }}

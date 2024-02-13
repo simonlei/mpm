@@ -47,7 +47,7 @@ export function mergeFace(from: number, to: number) {
 }
 
 export function updateFace(face: FaceInfo) {
-  return request.post({url: Api.UpdateFace, data: face});
+  return request.post<Boolean>({url: Api.UpdateFace, data: face});
 }
 
 export function getFaces() {

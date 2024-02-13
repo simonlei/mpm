@@ -243,7 +243,13 @@ public class FaceService {
         if (entityFace == null) {
             return false;
         }
-        entityFace.setName(face.getName());
+        if (Strings.isNotBlank(face.getName())) {
+            EntityFace existName = dao.fetch(EntityFace.class, Cnd.where("name", "=", face.getName()));
+            if (existName != null) {
+                return false;
+            }
+            entityFace.setName(face.getName());
+        }
         if (face.getSelectedFace() != null) {
             // 设置对应的图片当中的人脸来当做默认人脸
             EntityPhotoFaceInfo faceInfo = dao.fetch(EntityPhotoFaceInfo.class,
