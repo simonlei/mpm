@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 
 import {selectModuleStore} from "@/store/modules/select-module";
-import {MessagePlugin} from "tdesign-vue-next";
+import {DialogPlugin, MessagePlugin} from "tdesign-vue-next";
 import {dialogsStore, photoModuleStore} from "@/store";
+import {gisDateClipboardStore} from "@/store/modules/gis-date-clipboard";
 
 const selectModule = selectModuleStore();
 const photoModule = photoModuleStore();
@@ -55,6 +56,25 @@ function changePhotoDesc() {
   });
 }
 
+const gisDateClipboard = gisDateClipboardStore();
+
+function changePhotoGisDate() {
+  const confirmDialog = DialogPlugin.confirm({
+    header: '确定应用 GIS 及时间信息？',
+    body: `GIS: ${gisDateClipboard.latitude}, ${gisDateClipboard.longitude}\n 时间：${gisDateClipboard.takendate}`,
+    confirmBtn: '确定',
+    onConfirm: async ({e}) => {
+      photoModule.updateSelectedPhotos(
+        {
+          'latitude': gisDateClipboard.latitude,
+          'longitude': gisDateClipboard.longitude,
+          'takendate': gisDateClipboard.takendate,
+        }, `已应用 GIS 和时间信息`);
+      confirmDialog.hide();
+    },
+  });
+}
+
 </script>
 
 <template>
@@ -64,7 +84,8 @@ function changePhotoDesc() {
       <t-dropdown-item content="修改选中照片的时间" @click="changePhotoDate"></t-dropdown-item>
       <t-dropdown-item content="修改选中照片的描述信息" @click="changePhotoDesc"></t-dropdown-item>
       <t-dropdown-item content="修改选中照片的GIS信息" @click="changePhotoGis"></t-dropdown-item>
-      <t-dropdown-item content="修改选中照片的标签"></t-dropdown-item>
+      <t-dropdown-item v-if="gisDateClipboard.latitude!=null" content="应用已复制的 GIS 及时间信息"
+                       @click="changePhotoGisDate"></t-dropdown-item>
       <!--
       <t-dropdown-item content="跳转到文件夹"></t-dropdown-item>
       -->

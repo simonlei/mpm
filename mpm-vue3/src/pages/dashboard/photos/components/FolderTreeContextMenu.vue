@@ -3,6 +3,7 @@ import {switchTrashFolder, updateFolderDate, updateFolderGis} from "@/api/photos
 import {dialogsStore, photoFilterStore} from "@/store";
 import {DialogPlugin, MessagePlugin, NotifyPlugin} from "tdesign-vue-next";
 import ContextMenu from "@imengyu/vue3-context-menu";
+import {gisDateClipboardStore} from "@/store/modules/gis-date-clipboard";
 
 const props = defineProps({node: null});
 const dlgStore = dialogsStore();
@@ -49,8 +50,26 @@ function changeGisInFolder() {
       MessagePlugin.error('请按照 纬度,经度 模式来输入');
     } else {
       const count = await updateFolderGis(props.node.data.path, values[0], values[1]);
-      NotifyPlugin.info({title: `已设置目录下${count}张照片拍摄时间至 ${inputValue}`});
+      NotifyPlugin.info({title: `已设置目录下${count}张照片GIS至 ${inputValue}`});
     }
+  });
+}
+
+const gisDateClipboard = gisDateClipboardStore();
+
+function changeGisAndDateInFolder() {
+  const confirmDialog = DialogPlugin.confirm({
+    header: '确定应用 GIS 及时间信息？',
+    body: `GIS: ${gisDateClipboard.latitude}, ${gisDateClipboard.longitude}\n 时间：${gisDateClipboard.takendate}`,
+    confirmBtn: '确定',
+    onConfirm: async ({e}) => {
+      let count = await updateFolderDate(props.node.data.path, gisDateClipboard.takendate.toString());
+      NotifyPlugin.info({title: `已设置目录下${count}张照片拍摄时间至 ${gisDateClipboard.takendate}`});
+      count = await updateFolderGis(props.node.data.path,
+        gisDateClipboard.latitude.toString(), gisDateClipboard.longitude.toString());
+      NotifyPlugin.info({title: `已设置目录下${count}张照片GIS至 ${gisDateClipboard.latitude},${gisDateClipboard.longitude}`});
+      confirmDialog.hide();
+    },
   });
 }
 
@@ -71,6 +90,10 @@ async function onContextMenu(e: MouseEvent) {
       {
         label: "修改目录下所有照片GIS信息...",
         onClick: () => changeGisInFolder(),
+      },
+      {
+        label: "应用已复制的 GIS 和时间信息到目录下所有照片",
+        onClick: () => changeGisAndDateInFolder(),
       },
       {
         label: `${filterStore.trashed ? '恢复目录' : '删除目录'}`,

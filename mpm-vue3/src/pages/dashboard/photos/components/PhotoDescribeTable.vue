@@ -18,10 +18,12 @@ import {
 import PhotoTagInput from "@/layouts/components/PhotoTagInput.vue";
 import {detailViewModuleStore, photoFilterStore} from "@/store";
 import {faceModule} from "@/store/modules/face-module";
+import {gisDateClipboardStore} from "@/store/modules/gis-date-clipboard";
 
 const filterStore = photoFilterStore();
 const faceStore = faceModule();
 const detailViewStore = detailViewModuleStore();
+const gisDateClipboard = gisDateClipboardStore();
 const props = defineProps({photo: null});
 defineEmits(['update:photo']);
 
@@ -47,11 +49,14 @@ if (photo != null) {
 
 function copyGisLocation() {
   const {toClipboard} = useClipboard();
+  gisDateClipboard.latitude = photo.latitude;
+  gisDateClipboard.longitude = photo.longitude;
+  gisDateClipboard.takendate = photo.takendate;
 
   toClipboard(`${photo?.latitude},${photo?.longitude}`)
   .then(() => {
     MessagePlugin.closeAll();
-    MessagePlugin.success('复制GIS位置成功');
+    MessagePlugin.success('复制GIS及日期成功');
   })
 }
 
@@ -119,7 +124,7 @@ function rescanFaceInPhoto() {
                     variant="outline">
             <download-icon slot="icon"/>
           </t-button>
-          <t-popup v-if="photo?.latitude!=null" content="复制当前 GIS 位置信息" trigger="hover">
+          <t-popup v-if="photo?.latitude!=null" content="复制当前 GIS及时间信息" trigger="hover">
             <t-button shape="circle" variant="outline"
                       @click="copyGisLocation">
               <location-icon slot="icon"/>
