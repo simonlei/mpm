@@ -1,13 +1,12 @@
 <template>
-  <password-editor :is-create="false" account="abc"/>
+  <password-editor :is-create="true" account="xx"/>
 </template>
 <script lang="ts">
 export default {
-  name: 'UserIndex',
+  name: 'CreateUser',
 };
 </script>
 <script lang="ts" setup>
-
 import PasswordEditor from "@/pages/user/PasswordEditor.vue";
 </script>
 

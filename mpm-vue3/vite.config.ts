@@ -12,6 +12,9 @@ const CWD = process.cwd();
 export default ({mode}: ConfigEnv): UserConfig => {
   const {VITE_BASE_URL} = loadEnv(mode, CWD);
   return {
+    define: {
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: true,
+    },
     base: VITE_BASE_URL,
     resolve: {
       alias: {
