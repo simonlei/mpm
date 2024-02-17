@@ -7,6 +7,7 @@ const props = defineProps({account: String, isCreate: Boolean})
 const form = ref(null);
 const formData = reactive({
   account: props.account,
+  isAdmin: false,
   password: '',
   rePassword: '',
 });
@@ -76,6 +77,9 @@ const rules: Record<string, FormRule[]> = {
           @validate="onValidate">
     <t-form-item label="用户名" name="account">
       <t-input v-model="formData.account" :disabled="!isCreate"></t-input>
+    </t-form-item>
+    <t-form-item label="是否管理员" name="isAdmin">
+      <t-checkbox v-model="formData.isAdmin"/>
     </t-form-item>
 
     <t-form-item help="请输入密码，长度至少 8 位" label="密码"

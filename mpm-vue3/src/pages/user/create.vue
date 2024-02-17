@@ -1,5 +1,7 @@
 <template>
-  <password-editor :is-create="true" account="xx"/>
+  <t-card :header-bordered="true" title="创建新用户">
+    <password-editor :is-create="true" account="xx"/>
+  </t-card>
 </template>
 <script lang="ts">
 export default {
