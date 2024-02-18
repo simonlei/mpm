@@ -1,6 +1,7 @@
 package org.mpm.server.user;
 
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Random;
 import lombok.extern.slf4j.Slf4j;
 import org.mpm.server.entity.EntityUser;
@@ -58,5 +59,23 @@ public class UserService {
         byte[] salt = new byte[16];
         RANDOM.nextBytes(salt);
         return Lang.fixedHexString(salt);
+    }
+
+    public List<EntityUser> loadUsers() {
+        return dao.query(EntityUser.class, Cnd.where("1", "=", "1"));
+    }
+
+    public Boolean deleteUser(Long id) {
+        return dao.delete(EntityUser.class, id) == 1;
+    }
+
+    public EntityUser loadUser(Long id) {
+        EntityUser user = dao.fetch(EntityUser.class, id);
+        if (user == null) {
+            return new EntityUser();
+        }
+        user.setSalt("");
+        user.setPasswd("");
+        return user;
     }
 }

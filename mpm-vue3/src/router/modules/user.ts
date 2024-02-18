@@ -21,6 +21,18 @@ export default [
         component: () => import('@/pages/user/create.vue'),
         meta: {title: '创建用户', roleCode: 'admin',},
       },
+      {
+        path: 'list',
+        name: 'ListUser',
+        component: () => import('@/pages/user/list.vue'),
+        meta: {title: '用户列表', roleCode: 'admin',},
+      },
+      {
+        path: 'edit/:id',
+        name: 'EditUser',
+        component: () => import('@/pages/user/edit.vue'),
+        meta: {title: '编辑用户', roleCode: 'admin',},
+      },
     ],
   },
 ];

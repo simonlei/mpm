@@ -5,6 +5,7 @@ import {checkPassword} from "@/api/users";
 
 export const useUserStore = defineStore('user', {
   state: () => ({
+    id: 0,
     account: '',
     name: '',
     isAdmin: false,
@@ -14,6 +15,7 @@ export const useUserStore = defineStore('user', {
     async login(account: string, password: string) {
       let loginUserInfo = await checkPassword(account, password);
       if (loginUserInfo != null) {
+        this.id = loginUserInfo.id;
         this.account = loginUserInfo.account;
         this.name = loginUserInfo.name;
         this.isAdmin = loginUserInfo.isAdmin;
