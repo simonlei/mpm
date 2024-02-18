@@ -1,37 +1,30 @@
-import { MessagePlugin } from 'tdesign-vue-next';
+import {MessagePlugin} from 'tdesign-vue-next';
 import NProgress from 'nprogress'; // progress bar
 import 'nprogress/nprogress.css'; // progress bar style
-
-import { getPermissionStore, getUserStore } from '@/store';
+import {getPermissionStore, getUserStore} from '@/store';
 import router from '@/router';
 
-NProgress.configure({ showSpinner: false });
+NProgress.configure({showSpinner: false});
 
 router.beforeEach(async (to, from, next) => {
   NProgress.start();
 
   const userStore = getUserStore();
   const permissionStore = getPermissionStore();
-  const { whiteListRouters } = permissionStore;
+  const {whiteListRouters} = permissionStore;
 
-  const { token } = userStore;
-  if (token) {
+  const {account, isAdmin} = userStore;
+  if (account != '') {
     if (to.path === '/login') {
       next();
       return;
     }
-
-    const { roles } = userStore;
-
-    if (roles && roles.length > 0) {
+    console.log('............. init route');
+    if (permissionStore.inited) {
       next();
     } else {
       try {
-        await userStore.getUserInfo();
-
-        const { roles } = userStore;
-
-        await permissionStore.initRoutes(roles);
+        await permissionStore.initRoutes(isAdmin);
 
         if (router.hasRoute(to.name)) {
           next();
@@ -42,7 +35,7 @@ router.beforeEach(async (to, from, next) => {
         MessagePlugin.error(error);
         next({
           path: '/login',
-          query: { redirect: encodeURIComponent(to.fullPath) },
+          query: {redirect: encodeURIComponent(to.fullPath)},
         });
         NProgress.done();
       }
@@ -54,7 +47,7 @@ router.beforeEach(async (to, from, next) => {
     } else {
       next({
         path: '/login',
-        query: { redirect: encodeURIComponent(to.fullPath) },
+        query: {redirect: encodeURIComponent(to.fullPath)},
       });
     }
     NProgress.done();

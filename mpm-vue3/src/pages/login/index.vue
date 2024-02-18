@@ -9,7 +9,7 @@
         </div>
       </div>
 
-      <login v-if="type === 'login'"/>
+      <login/>
       <tdesign-setting/>
     </div>
 
@@ -24,15 +24,10 @@ export default {
 };
 </script>
 <script lang="ts" setup>
-import {ref} from 'vue';
 
-import Login from './components/Login.vue';
+import Login from "@/pages/login/components/Login.vue";
 import TdesignSetting from '@/layouts/setting.vue';
 
-const type = ref('login');
-const switchType = (val: string) => {
-  type.value = val;
-};
 </script>
 
 <style lang="less" scoped>

@@ -19,7 +19,7 @@ export default [
         path: 'create',
         name: 'CreateUser',
         component: () => import('@/pages/user/create.vue'),
-        meta: {title: '创建用户'},
+        meta: {title: '创建用户', roleCode: 'admin',},
       },
     ],
   },

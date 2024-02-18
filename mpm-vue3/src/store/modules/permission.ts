@@ -1,19 +1,20 @@
-import { defineStore } from 'pinia';
-import { RouteRecordRaw } from 'vue-router';
-import router, { asyncRouterList } from '@/router';
-import { store } from '@/store';
+import {defineStore} from 'pinia';
+import {RouteRecordRaw} from 'vue-router';
+import router, {asyncRouterList} from '@/router';
+import {store} from '@/store';
 
-function filterPermissionsRouters(routes: Array<RouteRecordRaw>, roles: Array<unknown>) {
+function filterPermissionsRouters(routes: Array<RouteRecordRaw>) {
   const res = [];
   const removeRoutes = [];
   routes.forEach((route) => {
     const children = [];
     route.children?.forEach((childRouter) => {
       const roleCode = childRouter.meta?.roleCode || childRouter.name;
-      if (roles.indexOf(roleCode) !== -1) {
-        children.push(childRouter);
-      } else {
+      console.log('roleCode ', roleCode, childRouter);
+      if ('admin' == roleCode) { // 只有 roleCode == admin 的才需要 remove 掉
         removeRoutes.push(childRouter);
+      } else {
+        children.push(childRouter);
       }
     });
     if (children.length > 0) {
@@ -21,25 +22,27 @@ function filterPermissionsRouters(routes: Array<RouteRecordRaw>, roles: Array<un
       res.push(route);
     }
   });
-  return { accessedRouters: res, removeRoutes };
+  return {accessedRouters: res, removeRoutes};
 }
 
 export const usePermissionStore = defineStore('permission', {
   state: () => ({
+    inited: false,
     whiteListRouters: ['/login'],
     routers: [],
     removeRoutes: [],
   }),
   actions: {
-    async initRoutes(roles: Array<unknown>) {
+    async initRoutes(isAdmin: boolean) {
+      console.log('init routes');
       let accessedRouters = [];
 
       let removeRoutes = [];
       // special token
-      if (roles.includes('all')) {
+      if (isAdmin) {
         accessedRouters = asyncRouterList;
       } else {
-        const res = filterPermissionsRouters(asyncRouterList, roles);
+        const res = filterPermissionsRouters(asyncRouterList);
         accessedRouters = res.accessedRouters;
         removeRoutes = res.removeRoutes;
       }
@@ -52,8 +55,10 @@ export const usePermissionStore = defineStore('permission', {
           router.removeRoute(item.name);
         }
       });
+      this.inited = true;
     },
     async restore() {
+      this.inited = false;
       this.removeRoutes.forEach((item: RouteRecordRaw) => {
         router.addRoute(item);
       });

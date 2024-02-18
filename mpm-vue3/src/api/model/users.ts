@@ -1,7 +1,8 @@
 export interface User {
-  id: number;
+  id?: number;
   account: string;
   isAdmin: boolean;
   name: string;
-  faceId: number;
+  passwd?: string;
+  faceId?: number;
 }

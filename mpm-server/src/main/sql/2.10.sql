@@ -13,3 +13,5 @@ create table t_users
 
 insert into t_users ( account, name, salt, passwd, isAdmin)
 values( 'admin', 'admin', 'salt', 'F9A81477552594C79F2ABC3FC099DAA896A6E3A3590A55FFA392B6000412E80B', true);
+
+alter table t_users add unique index account(account);

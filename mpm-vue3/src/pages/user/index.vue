@@ -1,5 +1,6 @@
 <template>
-  <password-editor :is-create="false" account="abc"/>
+  <password-editor :id="userStore.id" :account="userStore.account" :is-admin="userStore.isAdmin"
+                   :is-create="false" :name="userStore.name"/>
 </template>
 <script lang="ts">
 export default {
@@ -9,6 +10,9 @@ export default {
 <script lang="ts" setup>
 
 import PasswordEditor from "@/pages/user/PasswordEditor.vue";
+import {useUserStore} from "@/store";
+
+const userStore = useUserStore();
 </script>
 
 <style lang="less" scoped>

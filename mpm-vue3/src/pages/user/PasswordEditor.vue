@@ -1,14 +1,22 @@
 <script lang="ts" setup>
 import {reactive, ref} from "vue";
 import {type FormRule, MessagePlugin} from "tdesign-vue-next";
+import {createOrUpdateUser} from "@/api/users";
 
-const props = defineProps({account: String, isCreate: Boolean})
+const props = defineProps({
+  id: Number,
+  account: String,
+  isCreate: Boolean,
+  name: String,
+  isAdmin: Boolean
+})
 
 const form = ref(null);
 const formData = reactive({
   account: props.account,
-  isAdmin: false,
-  password: '',
+  isAdmin: props.isAdmin,
+  name: props.name,
+  passwd: '',
   rePassword: '',
 });
 
@@ -19,7 +27,11 @@ const onReset = () => {
 const onSubmit = ({validateResult, firstError, e}) => {
   e.preventDefault();
   if (validateResult === true) {
-    MessagePlugin.success('提交成功');
+    createOrUpdateUser({...formData}).then(() => MessagePlugin.success('提交成功'))
+    .catch((ex) => {
+      console.log('error ', ex);
+      MessagePlugin.error('失败 ' + ex)
+    });
   } else {
     console.log('Validate Errors: ', firstError, validateResult);
     MessagePlugin.warning(firstError);
@@ -38,7 +50,7 @@ const rePassword = async (val) => {
   return {
     result: await new Promise<boolean>((resolve) => {
       const timer = setTimeout(() => {
-        resolve(formData.password === val);
+        resolve(formData.passwd === val);
         clearTimeout(timer);
       });
     }), message: '两次密码不一致',
@@ -57,15 +69,18 @@ const passwordValidator = (val) => {
 
 const rules: Record<string, FormRule[]> = {
   account: [
-    {required: true, message: '姓名必填', type: 'error'},
+    {required: true, message: '账号必填', type: 'error'},
     {min: 2, message: '至少需要两个字', type: 'error', trigger: 'blur'}
   ],
-  password: [
-    {required: true, message: '密码必填', type: 'error'},
+  name: [
+    {required: true, message: '姓名必填', type: 'error'},
+  ],
+  passwd: [
+    {required: props.isCreate, message: '密码必填', type: 'error'},
     {validator: passwordValidator}
   ],
   rePassword: [
-    {required: true, message: '密码必填', type: 'error'},
+    {required: false, message: '密码必填', type: 'error'},
     {validator: rePassword},
   ],
 };
@@ -75,16 +90,19 @@ const rules: Record<string, FormRule[]> = {
 <template>
   <t-form ref="form" :data="formData" :rules="rules" @reset="onReset" @submit="onSubmit"
           @validate="onValidate">
-    <t-form-item label="用户名" name="account">
+    <t-form-item label="登录名" name="account">
       <t-input v-model="formData.account" :disabled="!isCreate"></t-input>
+    </t-form-item>
+    <t-form-item label="中文名" name="name">
+      <t-input v-model="formData.name"></t-input>
     </t-form-item>
     <t-form-item label="是否管理员" name="isAdmin">
       <t-checkbox v-model="formData.isAdmin"/>
     </t-form-item>
 
     <t-form-item help="请输入密码，长度至少 8 位" label="密码"
-                 name="password">
-      <t-input v-model="formData.password" type="password"></t-input>
+                 name="passwd">
+      <t-input v-model="formData.passwd" type="password"></t-input>
     </t-form-item>
 
     <t-form-item help="确认密码，要保持一致" label="确认密码" name="rePassword">

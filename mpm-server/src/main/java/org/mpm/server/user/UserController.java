@@ -19,4 +19,9 @@ public class UserController {
     public EntityUser checkPassword(@RequestBody EntityUser checkUser) {
         return userService.checkPassword(checkUser.getAccount(), checkUser.getPasswd());
     }
+
+    @PostMapping("/api/createOrUpdateUser")
+    public Boolean createOrUpdateUser(@RequestBody EntityUser user) {
+        return userService.createOrUpdateUser(user);
+    }
 }

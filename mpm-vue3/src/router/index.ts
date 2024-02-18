@@ -18,6 +18,7 @@ Object.keys(modules).forEach((key) => {
 
 // 存放动态路由
 export const asyncRouterList: Array<RouteRecordRaw> = [...routeModuleList];
+console.log('async router list', asyncRouterList);
 
 // 存放固定的路由
 const defaultRouterList: Array<RouteRecordRaw> = [

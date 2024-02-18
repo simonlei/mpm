@@ -1,6 +1,6 @@
 <template>
   <t-card :header-bordered="true" title="创建新用户">
-    <password-editor :is-create="true" account="xx"/>
+    <password-editor :is-create="true"/>
   </t-card>
 </template>
 <script lang="ts">
