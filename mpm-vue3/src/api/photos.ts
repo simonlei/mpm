@@ -185,9 +185,18 @@ export function getPicIds() {
   const store = photoFilterStore();
   let req = {idOnly: true};
   Object.assign(req, store);
-
+  return fetch('/api/' + Api.PicsList, {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/json;charset=UTF-8"
+    },
+    body: JSON.stringify(req),
+  }).then(res => {
+    return res.json()
+  });
+  /*
   return request.post<PhotosResult>({
     url: Api.PicsList,
     data: req,
-  });
+  });*/
 }

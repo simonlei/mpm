@@ -45,7 +45,8 @@ const filterStore = photoFilterStore();
 const scroller = ref(null);
 const photogrid = ref(null);
 
-photoStore.idList = (await getPicIds()).data;
+photoStore.idList = (await getPicIds()).data.data;
+// console.log(photoStore.idList);
 photoStore.otherCount = await getPicsCount(!filterStore.trashed);
 
 let oldWidth = 0;
