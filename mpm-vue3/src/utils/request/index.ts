@@ -192,7 +192,7 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
           // 如果禁用，则重复请求时会取消当前请求
           ignoreCancelToken: true,
           // 是否携带token
-          withToken: true,
+          withToken: false,
           // 重试
           retry: {
             count: 0,

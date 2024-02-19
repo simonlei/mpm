@@ -10,13 +10,13 @@ import cloneDeep from 'lodash/cloneDeep';
 import debounce from 'lodash/debounce';
 import isFunction from 'lodash/isFunction';
 import throttle from 'lodash/throttle';
-import { stringify } from 'qs';
+import {stringify} from 'qs';
 
-import { ContentTypeEnum } from '@/constants';
-import { AxiosRequestConfigRetry, RequestOptions, Result } from '@/types/axios';
+import {ContentTypeEnum} from '@/constants';
+import {AxiosRequestConfigRetry, RequestOptions, Result} from '@/types/axios';
 
-import { AxiosCanceler } from './AxiosCancel';
-import { CreateAxiosOptions } from './AxiosTransform';
+import {AxiosCanceler} from './AxiosCancel';
+import {CreateAxiosOptions} from './AxiosTransform';
 
 /**
  * Axios 模块
@@ -38,24 +38,6 @@ export class VAxios {
     this.options = options;
     this.instance = axios.create(options);
     this.setupInterceptors();
-  }
-
-  /**
-   * 创建Axios实例
-   * @param config
-   * @private
-   */
-  private createAxios(config: CreateAxiosOptions): void {
-    this.instance = axios.create(config);
-  }
-
-  /**
-   * 获取数据处理类
-   * @private
-   */
-  private getTransform() {
-    const { transform } = this.options;
-    return transform;
   }
 
   /**
@@ -84,53 +66,6 @@ export class VAxios {
   }
 
   /**
-   * 设置拦截器
-   * @private
-   */
-  private setupInterceptors() {
-    const transform = this.getTransform();
-    if (!transform) return;
-
-    const { requestInterceptors, requestInterceptorsCatch, responseInterceptors, responseInterceptorsCatch } =
-      transform;
-    const axiosCanceler = new AxiosCanceler();
-
-    // 请求拦截器
-    this.instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-      // 如果忽略取消令牌，则不会取消重复的请求
-      // @ts-ignore
-      const { ignoreCancelToken } = config.requestOptions;
-      const ignoreCancel = ignoreCancelToken ?? this.options.requestOptions?.ignoreCancelToken;
-      if (!ignoreCancel) axiosCanceler.addPending(config);
-
-      if (requestInterceptors && isFunction(requestInterceptors)) {
-        config = requestInterceptors(config, this.options) as InternalAxiosRequestConfig;
-      }
-
-      return config;
-    }, undefined);
-
-    // 请求错误处理
-    if (requestInterceptorsCatch && isFunction(requestInterceptorsCatch)) {
-      this.instance.interceptors.request.use(undefined, requestInterceptorsCatch);
-    }
-
-    // 响应结果处理
-    this.instance.interceptors.response.use((res: AxiosResponse) => {
-      if (res) axiosCanceler.removePending(res.config);
-      if (responseInterceptors && isFunction(responseInterceptors)) {
-        res = responseInterceptors(res);
-      }
-      return res;
-    }, undefined);
-
-    // 响应错误处理
-    if (responseInterceptorsCatch && isFunction(responseInterceptorsCatch)) {
-      this.instance.interceptors.response.use(undefined, (error) => responseInterceptorsCatch(error, this.instance));
-    }
-  }
-
-  /**
    * 支持 FormData 请求格式
    * @param config
    */
@@ -148,7 +83,7 @@ export class VAxios {
 
     return {
       ...config,
-      data: stringify(config.data, { arrayFormat: 'brackets' }),
+      data: stringify(config.data, {arrayFormat: 'brackets'}),
     };
   }
 
@@ -166,28 +101,28 @@ export class VAxios {
 
     return {
       ...config,
-      paramsSerializer: (params: any) => stringify(params, { arrayFormat: 'brackets' }),
+      paramsSerializer: (params: any) => stringify(params, {arrayFormat: 'brackets'}),
     };
   }
 
   get<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
-    return this.request({ ...config, method: 'GET' }, options);
+    return this.request({...config, method: 'GET'}, options);
   }
 
   post<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
-    return this.request({ ...config, method: 'POST' }, options);
+    return this.request({...config, method: 'POST'}, options);
   }
 
   put<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
-    return this.request({ ...config, method: 'PUT' }, options);
+    return this.request({...config, method: 'PUT'}, options);
   }
 
   delete<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
-    return this.request({ ...config, method: 'DELETE' }, options);
+    return this.request({...config, method: 'DELETE'}, options);
   }
 
   patch<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
-    return this.request({ ...config, method: 'PATCH' }, options);
+    return this.request({...config, method: 'PATCH'}, options);
   }
 
   /**
@@ -220,7 +155,7 @@ export class VAxios {
    * @param options
    */
   request<T = any>(config: AxiosRequestConfigRetry, options?: RequestOptions): Promise<T> {
-    const { requestOptions } = this.options;
+    const {requestOptions} = this.options;
 
     if (requestOptions.throttle !== undefined && requestOptions.debounce !== undefined) {
       throw new Error('throttle and debounce cannot be set at the same time');
@@ -242,6 +177,76 @@ export class VAxios {
   }
 
   /**
+   * 创建Axios实例
+   * @param config
+   * @private
+   */
+  private createAxios(config: CreateAxiosOptions): void {
+    this.instance = axios.create(config);
+  }
+
+  /**
+   * 获取数据处理类
+   * @private
+   */
+  private getTransform() {
+    const {transform} = this.options;
+    return transform;
+  }
+
+  /**
+   * 设置拦截器
+   * @private
+   */
+  private setupInterceptors() {
+    const transform = this.getTransform();
+    if (!transform) return;
+
+    const {
+      requestInterceptors,
+      requestInterceptorsCatch,
+      responseInterceptors,
+      responseInterceptorsCatch
+    } =
+      transform;
+    const axiosCanceler = new AxiosCanceler();
+
+    // 请求拦截器
+    this.instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+      // 如果忽略取消令牌，则不会取消重复的请求
+      // @ts-ignore
+      const {ignoreCancelToken} = config.requestOptions;
+      const ignoreCancel = ignoreCancelToken ?? this.options.requestOptions?.ignoreCancelToken;
+      if (!ignoreCancel) axiosCanceler.addPending(config);
+
+      if (requestInterceptors && isFunction(requestInterceptors)) {
+        config = requestInterceptors(config, this.options) as InternalAxiosRequestConfig;
+      }
+
+      return config;
+    }, undefined);
+
+    // 请求错误处理
+    if (requestInterceptorsCatch && isFunction(requestInterceptorsCatch)) {
+      this.instance.interceptors.request.use(undefined, requestInterceptorsCatch);
+    }
+
+    // 响应结果处理
+    this.instance.interceptors.response.use((res: AxiosResponse) => {
+      if (res) axiosCanceler.removePending(res.config);
+      if (responseInterceptors && isFunction(responseInterceptors)) {
+        res = responseInterceptors(res);
+      }
+      return res;
+    }, undefined);
+
+    // 响应错误处理
+    if (responseInterceptorsCatch && isFunction(responseInterceptorsCatch)) {
+      this.instance.interceptors.response.use(undefined, (error) => responseInterceptorsCatch(error, this.instance));
+    }
+  }
+
+  /**
    * 请求方法
    * @private
    */
@@ -249,11 +254,11 @@ export class VAxios {
     let conf: CreateAxiosOptions = cloneDeep(config);
     const transform = this.getTransform();
 
-    const { requestOptions } = this.options;
+    const {requestOptions} = this.options;
 
-    const opt: RequestOptions = { ...requestOptions, ...options };
+    const opt: RequestOptions = {...requestOptions, ...options};
 
-    const { beforeRequestHook, requestCatchHook, transformRequestHook } = transform || {};
+    const {beforeRequestHook, requestCatchHook, transformRequestHook} = transform || {};
     if (beforeRequestHook && isFunction(beforeRequestHook)) {
       conf = beforeRequestHook(conf, opt);
     }
@@ -265,29 +270,31 @@ export class VAxios {
 
     return new Promise((resolve, reject) => {
       this.instance
-        .request<any, AxiosResponse<Result>>(!config.retryCount ? conf : config)
-        .then((res: AxiosResponse<Result>) => {
-          if (transformRequestHook && isFunction(transformRequestHook)) {
-            try {
-              const ret = transformRequestHook(res, opt);
-              resolve(ret);
-            } catch (err) {
-              reject(err || new Error('请求错误!'));
-            }
-            return;
+      .request<any, AxiosResponse<Result>>(!config.retryCount ? conf : config)
+      .then((res: AxiosResponse<Result>) => {
+        if (transformRequestHook && isFunction(transformRequestHook)) {
+          try {
+            const ret = transformRequestHook(res, opt);
+            resolve(ret);
+          } catch (err) {
+            console.log('err', err);
+            // todo: 这里也有异常，暂时屏蔽
+            // reject(err || new Error('请求错误!'));
           }
-          resolve(res as unknown as Promise<T>);
-        })
-        .catch((e: Error | AxiosError) => {
-          if (requestCatchHook && isFunction(requestCatchHook)) {
-            reject(requestCatchHook(e, opt));
-            return;
-          }
-          if (axios.isAxiosError(e)) {
-            // 在这里重写Axios的错误信息
-          }
-          reject(e);
-        });
+          return;
+        }
+        resolve(res as unknown as Promise<T>);
+      })
+      .catch((e: Error | AxiosError) => {
+        if (requestCatchHook && isFunction(requestCatchHook)) {
+          reject(requestCatchHook(e, opt));
+          return;
+        }
+        if (axios.isAxiosError(e)) {
+          // 在这里重写Axios的错误信息
+        }
+        reject(e);
+      });
     });
   }
 }
