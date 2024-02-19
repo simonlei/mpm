@@ -162,7 +162,7 @@ export function getPicsDateList(trashed: boolean, star: boolean) {
 export function getPicsFolderList(parentId: number, trashed: boolean, star: boolean) {
   const store = photoFilterStore();
   let req = {parentId: parentId, trashed: trashed, star: star};
-  Object.assign(req, store);
+  Object.assign(req, store.$state);
 
   return request.post<PhotosFolder []>({
     url: Api.PicsFolderList,
@@ -173,7 +173,7 @@ export function getPicsFolderList(parentId: number, trashed: boolean, star: bool
 export function getPics(start: number, size: number) {
   const store = photoFilterStore();
   let req = {start: start, size: size};
-  Object.assign(req, store);
+  Object.assign(req, store.$state);
 
   return request.post<PhotosResult>({
     url: Api.PicsList,
@@ -184,7 +184,8 @@ export function getPics(start: number, size: number) {
 export function getPicIds() {
   const store = photoFilterStore();
   let req = {idOnly: true};
-  Object.assign(req, store);
+  console.log(store.$state);
+  Object.assign(req, store.$state);
   return fetch('/api/' + Api.PicsList, {
     method: 'POST',
     headers: {
