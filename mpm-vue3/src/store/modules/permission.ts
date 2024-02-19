@@ -3,7 +3,7 @@ import {RouteRecordRaw} from 'vue-router';
 import router, {asyncRouterList} from '@/router';
 import {store} from '@/store';
 
-function filterPermissionsRouters(routes: Array<RouteRecordRaw>) {
+function filterPermissionsRouters(routes: Array<RouteRecordRaw>, isAdmin: Boolean) {
   const res = [];
   const removeRoutes = [];
   routes.forEach((route) => {
@@ -11,7 +11,8 @@ function filterPermissionsRouters(routes: Array<RouteRecordRaw>) {
     route.children?.forEach((childRouter) => {
       const roleCode = childRouter.meta?.roleCode || childRouter.name;
       console.log('roleCode ', roleCode, childRouter);
-      if ('admin' == roleCode) { // 只有 roleCode == admin 的才需要 remove 掉
+      if ((!isAdmin && ('admin' == roleCode))) {
+        // 只有 roleCode == admin 的才需要 remove 掉
         removeRoutes.push(childRouter);
       } else {
         children.push(childRouter);
@@ -38,14 +39,9 @@ export const usePermissionStore = defineStore('permission', {
       let accessedRouters = [];
 
       let removeRoutes = [];
-      // special token
-      if (isAdmin) {
-        accessedRouters = asyncRouterList;
-      } else {
-        const res = filterPermissionsRouters(asyncRouterList);
-        accessedRouters = res.accessedRouters;
-        removeRoutes = res.removeRoutes;
-      }
+      const res = filterPermissionsRouters(asyncRouterList, isAdmin);
+      accessedRouters = res.accessedRouters;
+      removeRoutes = res.removeRoutes;
 
       this.routers = accessedRouters;
       this.removeRoutes = removeRoutes;

@@ -2,6 +2,7 @@
 import {reactive, ref} from "vue";
 import {type FormRule, MessagePlugin} from "tdesign-vue-next";
 import {createOrUpdateUser} from "@/api/users";
+import {User} from "@/api/model/users";
 
 const props = defineProps({
   id: Number,
@@ -27,7 +28,10 @@ const onReset = () => {
 const onSubmit = ({validateResult, firstError, e}) => {
   e.preventDefault();
   if (validateResult === true) {
-    createOrUpdateUser({...formData}).then(() => MessagePlugin.success('提交成功'))
+    const user = {} as User;
+    Object.assign(user, formData);
+    if (props.id != null) user.id = props.id;
+    createOrUpdateUser(user).then(() => MessagePlugin.success('提交成功'))
     .catch((ex) => {
       console.log('error ', ex);
       MessagePlugin.error('失败 ' + ex)

@@ -28,7 +28,7 @@ loadUsers().then((users) => data.value = users);
 const router = useRouter();
 
 function editUser(row) {
-  router.push({path: `/edit/${row.id}`});
+  router.push({path: `/user/edit/${row.id}`});
 }
 
 function handleDeleteUser(row) {

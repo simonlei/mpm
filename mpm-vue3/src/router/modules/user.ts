@@ -31,7 +31,7 @@ export default [
         path: 'edit/:id',
         name: 'EditUser',
         component: () => import('@/pages/user/edit.vue'),
-        meta: {title: '编辑用户', roleCode: 'admin',},
+        meta: {title: '编辑用户', roleCode: 'admin', hidden: true},
       },
     ],
   },
