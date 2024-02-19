@@ -186,6 +186,7 @@ export function getPicIds() {
   let req = {idOnly: true};
   console.log(store.$state);
   Object.assign(req, store.$state);
+  /*
   return fetch('/api/' + Api.PicsList, {
     method: 'POST',
     headers: {
@@ -195,9 +196,11 @@ export function getPicIds() {
   }).then(res => {
     return res.json()
   });
-  /*
+
+   */
+
   return request.post<PhotosResult>({
     url: Api.PicsList,
     data: req,
-  });*/
+  });
 }
