@@ -1,8 +1,6 @@
 <template>
   <router-view v-if="!isRefreshing" v-slot="{ Component }">
-      <keep-alive :include="aliveViews">
         <component :is="Component" />
-      </keep-alive>
   </router-view>
   <frame-page />
 </template>

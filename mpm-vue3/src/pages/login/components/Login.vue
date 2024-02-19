@@ -53,7 +53,7 @@ const userStore = useUserStore();
 
 const INITIAL_DATA = {
   phone: '',
-  account: 'admin',
+  account: '',
   password: '',
   verifyCode: '',
   checked: false,
