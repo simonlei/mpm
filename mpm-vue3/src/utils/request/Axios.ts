@@ -286,6 +286,8 @@ export class VAxios {
         resolve(res as unknown as Promise<T>);
       })
       .catch((e: Error | AxiosError) => {
+        console.log("ERROR", e);
+        /*
         if (requestCatchHook && isFunction(requestCatchHook)) {
           reject(requestCatchHook(e, opt));
           return;
@@ -294,6 +296,7 @@ export class VAxios {
           // 在这里重写Axios的错误信息
         }
         reject(e);
+         */
       });
     });
   }
