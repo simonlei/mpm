@@ -32,6 +32,10 @@ My Photo Manager，个人相册管理
 3. 使用 docker run  --net=host --name mpm -v /home/simon/config:/config -v /home/simon/logs:/logs -d ghcr.io/simonlei/mpm:xxx 来启动docker镜像，其中 xxx 代表的版本号参见 https://github.com/simonlei/mpm/pkgs/container/mpm
 4. 浏览器访问 application.properties 配置的端口
 
+## 初始账号密码
+
+默认账号密码都是 admin，建议部署完成后立即改密码，或者另外创建一个管理员账号，删除 admin 账号
+
 ## mysql 可能的问题
 
 ``` references column 'photohome.t_photos.takenDate' which is not in SELECT list```
