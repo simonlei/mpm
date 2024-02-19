@@ -13,7 +13,7 @@ export function joinTimestamp(join: boolean, restful = false): string | object {
   if (restful) {
     return `?_t=${now}`;
   }
-  return { _t: now };
+  return {_t: now};
 }
 
 // 格式化提交参数时间
@@ -38,7 +38,8 @@ export function formatRequestDate(params: Recordable) {
       }
     }
     if (isObject(params[key])) {
-      formatRequestDate(params[key]);
+      // 这里在正式环境会陷入死循环，测试环境没问题，先注释掉
+      // formatRequestDate(params[key]);
     }
   }
 }
