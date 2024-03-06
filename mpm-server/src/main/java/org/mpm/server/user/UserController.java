@@ -1,6 +1,7 @@
 package org.mpm.server.user;
 
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.mpm.server.entity.EntityUser;
 import org.mpm.server.util.IdParam;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,8 +19,8 @@ public class UserController {
     }
 
     @PostMapping("/api/checkPassword")
-    public EntityUser checkPassword(@RequestBody EntityUser checkUser) {
-        return userService.checkPassword(checkUser.getAccount(), checkUser.getPasswd());
+    public EntityUser checkPassword(@RequestBody EntityUser checkUser, HttpServletResponse resp) {
+        return userService.checkPassword(resp, checkUser.getAccount(), checkUser.getPasswd());
     }
 
     @PostMapping("/api/createOrUpdateUser")

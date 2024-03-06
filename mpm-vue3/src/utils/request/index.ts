@@ -8,6 +8,7 @@ import {ContentTypeEnum} from '@/constants';
 import {VAxios} from './Axios';
 import type {AxiosTransform, CreateAxiosOptions} from './AxiosTransform';
 import {formatRequestDate, joinTimestamp, setObjToUrlParams} from './utils';
+import {useUserStore} from "@/store";
 
 const env = import.meta.env.MODE || 'development';
 
@@ -112,17 +113,17 @@ const transform: AxiosTransform = {
   // 请求拦截器处理
   requestInterceptors: (config, options) => {
     // 请求之前处理config
-    /* TODO: 应该是在每个 request 里面加 token，后面可以用到
-        const userStore = useUserStore();
-        const {token} = userStore;
-
-        if (token && (config as Recordable)?.requestOptions?.withToken !== false) {
+    /*  if (token && (config as Recordable)?.requestOptions?.withToken !== false) {
           // jwt token
           (config as Recordable).headers.Authorization = options.authenticationScheme
             ? `${options.authenticationScheme} ${token}`
             : token;
         }
     */
+    const userStore = useUserStore();
+
+    (config as Recordable).headers.Signature = userStore.signature;
+    (config as Recordable).headers.Account = userStore.account;
     return config;
   },
 

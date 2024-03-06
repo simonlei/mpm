@@ -14,6 +14,6 @@ class UserServiceTest {
 
     @Test
     void testCheckPasswd() {
-        assertNotNull(userService.checkPassword("admin", "admin"));
+        assertNotNull(userService.checkPassword(null, "admin", "admin"));
     }
 }

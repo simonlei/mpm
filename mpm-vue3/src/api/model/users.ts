@@ -5,4 +5,5 @@ export interface User {
   name: string;
   passwd?: string;
   faceId?: number;
+  signature?: string;
 }

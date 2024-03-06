@@ -1,10 +1,8 @@
 import {request} from "@/utils/request";
-import {LoginUserInfo} from "@/api/model/loginUserInfo";
 import {User} from "@/api/model/users";
 
 const Api = {
   CheckPassword: '/checkPassword',
-  AuthPassword: '/authPassword',
   CreateOrUpdateUser: '/createOrUpdateUser',
   LoadUsers: '/loadUsers',
   LoadUser: '/loadUser',
@@ -29,11 +27,4 @@ export function checkPassword(account: string, passwd: string) {
 
 export function createOrUpdateUser(user: User) {
   return request.post<Boolean>({url: Api.CreateOrUpdateUser, data: user});
-}
-
-export function getLoginUserInfo(userInfo: Record<string, unknown>) {
-  return request.post<LoginUserInfo>({
-    url: Api.AuthPassword,
-    data: userInfo,
-  });
 }

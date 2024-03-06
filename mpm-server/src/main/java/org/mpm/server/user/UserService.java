@@ -3,7 +3,10 @@ package org.mpm.server.user;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
+import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.mpm.server.entity.EntityMeta;
 import org.mpm.server.entity.EntityUser;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
@@ -22,7 +25,22 @@ public class UserService {
         this.dao = dao;
     }
 
-    public EntityUser checkPassword(String account, String passwd) {
+
+    public Boolean checkSignature(String user, String timestamp, String signature) {
+        // todo: 检查 timestamp，定个有效期
+        return Lang.equals(signature, calcSignature(user, timestamp));
+    }
+
+    private String calcSignature(String user, String timestamp) {
+        EntityMeta token = dao.fetch(EntityMeta.class, "login_token");
+        if (token == null) {
+            token = EntityMeta.builder().key("login_token").value(UUID.randomUUID().toString()).build();
+            dao.insert(token);
+        }
+        return Lang.md5(user + token.getValue() + timestamp);
+    }
+
+    public EntityUser checkPassword(HttpServletResponse resp, String account, String passwd) {
         EntityUser user = dao.fetch(EntityUser.class, Cnd.where("account", "=", account));
 
         if (user != null) {
@@ -31,6 +49,8 @@ public class UserService {
             if (Lang.equals(user.getPasswd(), calcedPwd)) {
                 user.setSalt("");
                 user.setPasswd("");
+                user.setSignature(calcSignature(account, ""));
+
                 return user;
             }
         }
