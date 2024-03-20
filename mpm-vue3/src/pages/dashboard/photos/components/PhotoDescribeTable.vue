@@ -19,6 +19,8 @@ import PhotoTagInput from "@/layouts/components/PhotoTagInput.vue";
 import {detailViewModuleStore, photoFilterStore} from "@/store";
 import {faceModule} from "@/store/modules/face-module";
 import {gisDateClipboardStore} from "@/store/modules/gis-date-clipboard";
+import ActivityEditDialog from "@/pages/activity/ActivityEditDialog.vue";
+import {ActivityModel} from "@/api/model/activityModel";
 
 const filterStore = photoFilterStore();
 const faceStore = faceModule();
@@ -93,6 +95,18 @@ function rescanFaceInPhoto() {
   });
 }
 
+let activity = ref(null as ActivityModel);
+
+function createActivity() {
+  activity.value = {
+    startDate: photo.takendate,
+    endDate: photo.takenDate,
+    latitude: photo.latitude,
+    longitude: photo.longitude
+  };
+
+}
+
 </script>
 
 <template>
@@ -124,12 +138,20 @@ function rescanFaceInPhoto() {
                     variant="outline">
             <download-icon slot="icon"/>
           </t-button>
+          <t-popup content="以当前照片创建活动" trigger="hover">
+            <t-button shape="circle" variant="outline"
+                      @click="createActivity">
+              <location-icon slot="icon"/>
+            </t-button>
+          </t-popup>
+          <!--
           <t-popup v-if="photo?.latitude!=null" content="复制当前 GIS及时间信息" trigger="hover">
             <t-button shape="circle" variant="outline"
                       @click="copyGisLocation">
               <location-icon slot="icon"/>
             </t-button>
           </t-popup>
+          -->
           <t-popup v-if="filterStore.faceId!=null" content="设置当前为默认人脸" trigger="hover">
             <t-button shape="circle" variant="outline"
                       @click="setDefaultFace">
@@ -155,6 +177,7 @@ function rescanFaceInPhoto() {
       </t-space>
     </t-footer>
   </t-layout>
+  <activity-edit-dialog ref="edit-dlg" v-model:activity="activity"/>
 </template>
 
 <style lang="less" scoped>
