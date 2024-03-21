@@ -11,3 +11,5 @@ create table t_activity
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
+alter table t_photos
+add column activity bigint NULL COMMENT '所属活动';

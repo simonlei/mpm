@@ -3,7 +3,7 @@
 import {filesize} from "filesize";
 import useClipboard from "vue-clipboard3";
 import {MessagePlugin} from "tdesign-vue-next";
-import {ref} from "vue";
+import {reactive, ref} from "vue";
 import {getFacesForPhoto, rescanFace, updateFace, updatePhoto} from "@/api/photos";
 import {
   DownloadIcon,
@@ -95,16 +95,14 @@ function rescanFaceInPhoto() {
   });
 }
 
-let activity = ref(null as ActivityModel);
+const activity = reactive({} as ActivityModel);
 
 function createActivity() {
-  activity.value = {
-    startDate: photo.takendate,
-    endDate: photo.takenDate,
-    latitude: photo.latitude,
-    longitude: photo.longitude
-  };
-
+  activity.startDate = photo.takendate;
+  activity.endDate = photo.takendate;
+  activity.latitude = photo.latitude;
+  activity.longitude = photo.longitude;
+  activity.fromPhoto = photo.id;
 }
 
 </script>

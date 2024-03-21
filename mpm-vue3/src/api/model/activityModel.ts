@@ -6,4 +6,5 @@ export interface ActivityModel {
   endDate?: Date;
   latitude?: number;
   longitude?: number;
+  fromPhoto?: number;
 }

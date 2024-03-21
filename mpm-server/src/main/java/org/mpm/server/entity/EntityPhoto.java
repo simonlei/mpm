@@ -38,4 +38,5 @@ public class EntityPhoto {
     private Double duration; // 视频长度
     private Integer rotate = 3600; // 旋转
     private String tags; // 标签
+    private Long activity; // 所属活动
 }
