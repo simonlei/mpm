@@ -137,19 +137,11 @@ function createActivity() {
             <download-icon slot="icon"/>
           </t-button>
           <t-popup content="以当前照片创建活动" trigger="hover">
-            <t-button shape="circle" variant="outline"
+            <t-button :disabled="photo?.activity != null" shape="circle" variant="outline"
                       @click="createActivity">
               <location-icon slot="icon"/>
             </t-button>
           </t-popup>
-          <!--
-          <t-popup v-if="photo?.latitude!=null" content="复制当前 GIS及时间信息" trigger="hover">
-            <t-button shape="circle" variant="outline"
-                      @click="copyGisLocation">
-              <location-icon slot="icon"/>
-            </t-button>
-          </t-popup>
-          -->
           <t-popup v-if="filterStore.faceId!=null" content="设置当前为默认人脸" trigger="hover">
             <t-button shape="circle" variant="outline"
                       @click="setDefaultFace">

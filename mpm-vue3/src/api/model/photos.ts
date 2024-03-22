@@ -27,6 +27,7 @@ export interface Photo {
   thumb: string;
   theyear: number;
   themonth: number;
+  activity: number;
 }
 
 export function getPhotoDetails(photo: Photo): String {

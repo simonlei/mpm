@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.mpm.server.entity.EntityActivity;
 import org.mpm.server.entity.EntityFile;
 import org.mpm.server.entity.EntityPhoto;
 import org.mpm.server.progress.ProgressController;
@@ -119,6 +120,7 @@ public class PicsController {
     @PostMapping("/api/updateImage")
     public Map update(@RequestBody Map values) {
         Record record = new Record();
+        updatePhotoActivity(record, values);
         record.putAll(values);
 
         if (values.get("longitude") != null || values.get("latitude") != null) {
@@ -132,6 +134,30 @@ public class PicsController {
         }
         dao.updateIgnoreNull(dao.getEntity(EntityPhoto.class).getObject(record));
         return addThumbField(dao.query("t_photos", Cnd.where("id", "=", record.getInt("id")))).get(0);
+    }
+
+    /**
+     * 更改活动 id
+     */
+    private void updatePhotoActivity(Record record, Map values) {
+        if (values.get("activity") == null) {
+            return;
+        }
+        EntityActivity fetched = dao.fetch(EntityActivity.class, (Integer) values.get("activity"));
+        EntityPhoto photo = dao.fetch(EntityPhoto.class, (Integer) values.get("id"));
+        if (fetched == null || photo == null) {
+            return;
+        }
+        if (photo.getTakenDate().isBefore(fetched.getStartDate().atStartOfDay())
+                || photo.getTakenDate().isAfter(fetched.getEndDate().atTime(23, 59, 59, 999))) {
+            // 如果当前时间不在活动范围内，更改时间为活动开始时间
+            record.set("takenDate", fetched.getStartDate().atStartOfDay());
+        }
+        if (photo.getLatitude() == null && photo.getLongitude() == null) {
+            // 如果当前 GIS 是空，更改 GIS 为活动的 GIS
+            record.set("longitude", fetched.getLongitude());
+            record.set("latitude", fetched.getLatitude());
+        }
     }
 
     private String getAddress(Map values) {

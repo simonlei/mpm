@@ -34,6 +34,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -118,7 +120,7 @@ public class PicsService {
         generatePoster(key, video);
         getVideoMetadata(key, video);
         // TODO: 应该有办法获取到video的拍摄时间吧？
-        video.setTakenDate(new Date(file.lastModified()));
+        video.setTakenDate(Instant.ofEpochMilli(file.lastModified()).atZone(ZoneId.systemDefault()).toLocalDateTime());
         dao.updateIgnoreNull(video);
 
         CopyObjectRequest request = new CopyObjectRequest(bucket, key, bucket, "video/" + video.getName() + ".mp4");
@@ -334,7 +336,7 @@ public class PicsService {
         String dateTime = MyUtils.cell(exifInfo, "DateTime.val");
         Date date = MyUtils.parseDate(dateTime, "yyyy:MM:dd HH:mm:ss");
         if (date != null) {
-            photo.setTakenDate(date);
+            photo.setTakenDate(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
         }
         Double latitude = parseGps(MyUtils.cell(exifInfo, "GPSLatitude.val"));
         if (latitude != null) {
@@ -368,7 +370,8 @@ public class PicsService {
 
     public void setInfosFromFile(File file, EntityPhoto photo) {
         if (photo.getTakenDate() == null) { // 如果已经有就不要重复设置了
-            photo.setTakenDate(new Date(file.lastModified()));
+            photo.setTakenDate(
+                    Instant.ofEpochMilli(file.lastModified()).atZone(ZoneId.systemDefault()).toLocalDateTime());
         }
         try {
             Metadata metadata = ImageMetadataReader.readMetadata(file);
@@ -390,7 +393,8 @@ public class PicsService {
             ExifSubIFDDirectory directory =
                     metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
             if (directory != null && directory.getDateOriginal() != null) {
-                photo.setTakenDate(directory.getDateOriginal());
+                photo.setTakenDate(
+                        directory.getDateOriginal().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
             }
         } catch (Exception e) {
             log.error("Can't read exif date", e);

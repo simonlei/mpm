@@ -2,9 +2,10 @@
 import {ref} from "vue";
 import {createOrUpdateActivity} from "@/api/activity";
 import {MessagePlugin} from "tdesign-vue-next";
+import {ActivityModel} from "@/api/model/activityModel";
 
-const activity = defineModel(
-  'activity', {type: Object}
+const activity = defineModel<ActivityModel>(
+  'activity'
 );
 
 const form = ref(null);

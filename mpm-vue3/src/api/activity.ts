@@ -2,7 +2,8 @@ import {request} from "@/utils/request";
 import {ActivityModel} from "@/api/model/activityModel";
 
 const Api = {
-  CreateOrUpdateActivity: '/createOrUpdateActivity'
+  CreateOrUpdateActivity: '/createOrUpdateActivity',
+  GetActivities: '/getActivities',
 }
 
 export function createOrUpdateActivity(activity: ActivityModel) {
@@ -11,5 +12,11 @@ export function createOrUpdateActivity(activity: ActivityModel) {
       activity: activity,
       fromPhoto: activity.fromPhoto,
     }
+  });
+}
+
+export function getActivities() {
+  return request.post<ActivityModel[]>({
+    url: Api.GetActivities, data: {}
   });
 }

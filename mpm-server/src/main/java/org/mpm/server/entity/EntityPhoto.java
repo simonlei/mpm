@@ -1,7 +1,7 @@
 package org.mpm.server.entity;
 
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,7 +33,7 @@ public class EntityPhoto {
     private Double latitude; // 纬度
     private Double longitude; // 经度
     private String address; // 定位到的地址
-    private Date takenDate; // 拍照时间
+    private LocalDateTime takenDate; // 拍照时间
     private String mediaType; // photo, video
     private Double duration; // 视频长度
     private Integer rotate = 3600; // 旋转
