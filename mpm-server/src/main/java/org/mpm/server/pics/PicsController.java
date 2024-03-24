@@ -228,14 +228,14 @@ public class PicsController {
                 $condition
                 $limit
                 """);
-        String joinSql = "";
+        String joinSql = "left join t_activity on t_activity.id=t_photos.activity ";
         Cnd cnd = Cnd.where("trashed", "=", trashed);
         if (Strings.isNotBlank(filePath)) {
-            joinSql = "inner join t_files on t_photos.id = t_files.photoId ";
+            joinSql += "inner join t_files on t_photos.id = t_files.photoId ";
             cnd.and("t_files.path", "like", filePath + "%");
         }
         if (req.faceId != null) {
-            joinSql = "inner join photo_face_info f on t_photos.id=f.photoId ";
+            joinSql += "inner join photo_face_info f on t_photos.id=f.photoId ";
             cnd.and("f.faceId", "=", req.faceId);
         }
         sql.setVar("join", joinSql);
@@ -249,7 +249,8 @@ public class PicsController {
             Long totalRows = (Long) DaoUtil.fetchOne(dao, sql, "c");
 
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
-            sql.setVar("fields", req.idOnly ? "distinct t_photos.id" : "distinct t_photos.*");
+            sql.setVar("fields", req.idOnly ? "distinct t_photos.id" : "distinct t_photos.*, "
+                    + "concat(t_activity.startDate, ' ', t_activity.name, ' ', t_activity.description) as activityDesc");
             sql.setCondition(cnd);
             sql.setVar("limit", req.idOnly ? "" : " limit " + start + ", " + size);
             log.info("sql is " + sql.toPreparedStatement());
@@ -279,10 +280,16 @@ public class PicsController {
         if (date == null) {
             return cnd;
         }
-        Integer theYear = date > 9999 ? date / 100 : date;
-        Integer theMonth = date > 9999 ? date % 100 : null;
-        cnd = theYear == null ? cnd : cnd.and("year(takenDate)", "=", theYear);
-        cnd = theMonth == null ? cnd : cnd.and("month(takenDate)", "=", theMonth);
+        if (date > 1000000) {
+            // it's activity
+            int id = date - 1000000;
+            cnd = cnd.and("activity", "=", id);
+        } else {
+            Integer theYear = date > 9999 ? date / 100 : date;
+            Integer theMonth = date > 9999 ? date % 100 : null;
+            cnd = theYear == null ? cnd : cnd.and("year(takenDate)", "=", theYear);
+            cnd = theMonth == null ? cnd : cnd.and("month(takenDate)", "=", theMonth);
+        }
         return cnd;
     }
 

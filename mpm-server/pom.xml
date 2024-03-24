@@ -47,7 +47,7 @@
         <dependency>
             <artifactId>mysql-connector-j</artifactId>
             <groupId>com.mysql</groupId>
-            <version>8.2.0</version>
+            <version>8.3.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.drewnoakes/metadata-extractor -->
         <dependency>

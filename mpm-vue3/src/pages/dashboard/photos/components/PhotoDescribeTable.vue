@@ -47,6 +47,9 @@ if (photo != null) {
   if (photo.address != null) {
     data.value.push({k: '地址', v: photo.address});
   }
+  if (photo.activitydesc != null) {
+    data.value.push({k: '所属活动', v: photo.activitydesc});
+  }
 }
 
 function copyGisLocation() {

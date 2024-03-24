@@ -8,5 +8,5 @@ export interface PhotosDate {
   year: number;
   month: number;
   photoCount: number;
-  months: Array<PhotosDate>;
+  children: Array<PhotosDate>;
 }

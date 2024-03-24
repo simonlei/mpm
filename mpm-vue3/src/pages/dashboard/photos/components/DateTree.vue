@@ -17,23 +17,21 @@ import {ref} from "vue";
 const filterStore = photoFilterStore();
 filterStore.path = null;
 filterStore.faceId = null;
-const root = {id: '', title: '全部', months: []};
+const root = {id: '', title: '全部', children: []};
 
 async function loadDateTreeWithRoot() {
   let photosDates = await getPicsDateList(filterStore.trashed, filterStore.star);
-  root.months = photosDates;
+  root.children = photosDates;
   return [root];
 }
 
 let TREE_DATA = ref(await loadDateTreeWithRoot());
-const KEYSX = {value: 'id', label: 'title', children: 'months'};
-let beforeIsTrashed = filterStore.trashed;
+const KEYSX = {value: 'id', label: 'title', children: 'children'};
 
 filterStore.$onAction(async ({after}) => {
   after(async (result) => {
     console.log("filter change result {}", result);
     if (result['dateKey'] == null) {
-      beforeIsTrashed = filterStore.trashed;
       TREE_DATA.value = await loadDateTreeWithRoot();
       console.log('data ' + TREE_DATA);
     }
