@@ -102,7 +102,7 @@ public class DateController {
                 from t_activity
                 left join t_photos on t_photos.activity=t_activity.id
                 where trashed = @trashed $started
-                group by year, month
+                group by year, month, activityId
                 order by year desc, month desc, startDate;
                 """);
         return fetchRecords(trashed, star, sql);
