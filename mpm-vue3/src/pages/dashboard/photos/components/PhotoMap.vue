@@ -129,6 +129,7 @@ const overrideStyleFunction = (feature, style) => {
   });
   style.setImage(icon);
   style.getText()?.setText(size.toString());
+  return style;
 };
 
 

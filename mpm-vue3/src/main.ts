@@ -14,6 +14,7 @@ import "vue3-video-play-fix/dist/style.css";
 import ContextMenu from "@imengyu/vue3-context-menu"; // 引入css
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
 import OpenLayersMap from "vue3-openlayers";
+import "vue3-openlayers/styles.css"
 
 const app = createApp(App);
 
