@@ -19,7 +19,14 @@ func setupEngine() {
 	base := getEnvIgnoreCase("static_base") // ../mpm-vue3/dist/
 	fmt.Println(base)
 	r.Use(static.Serve("/", static.LocalFile(base, true)))
+	r.POST("/api/getPicsDate", getPicsDate)
 
+	configForward(r)
+
+	r.Run(":8090")
+}
+
+func configForward(r *gin.Engine) {
 	r.NoRoute(func(c *gin.Context) {
 		remote, _ := url.Parse("http://localhost:" + getEnvIgnoreCaseWithDefault("SERVER_PORT", "80"))
 		fmt.Println(remote)
@@ -33,6 +40,4 @@ func setupEngine() {
 		proxy.ServeHTTP(c.Writer, c.Request)
 		fmt.Println("Forwarded request ", c.Request.URL)
 	})
-
-	r.Run(":8090")
 }
