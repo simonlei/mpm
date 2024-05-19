@@ -4,136 +4,136 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
-	"net/http"
+	"strconv"
+	"strings"
+	"time"
 )
 
-type PicDateRequest struct {
-	trashed, star bool
+type GetPicsRequest struct {
+	Star, Video, Trashed, IdOnly bool
+	Start, FaceId, IdRank        int
+	Size                         int `default:"75"`
+	DateKey, Path, Tag           string
+	Order                        string `default:"id"`
 }
 
-func getPicsDate(c *gin.Context) {
-	var req PicDateRequest
+func getPics(c *gin.Context) {
+	var req GetPicsRequest
 	err := c.BindJSON(&req)
 	if err != nil {
-		c.String(http.StatusBadRequest, "Bad request %v", err)
+		log.Println("Can't bind request:", err)
 		return
 	}
-	log.Printf("req %v", req)
-	dates := getPhotoDates(req.trashed, req.star)
-	var months = make(map[int]*TreeNode)
-	result := addYearAndMonths(dates, months)
+	desc := strings.HasPrefix(req.Order, "-")
+	if desc {
+		req.Order = req.Order[1:]
+	}
+	joinSql := "left join t_activity on t_activity.id=t_photos.activity "
+	var cnds []string
+	params := make(map[string]interface{})
 
-	activities := getActivities(req.trashed, req.star)
-	addActivities(activities, months)
-	c.JSON(http.StatusOK, Response{0, result})
-}
-
-func addActivities(activities []*PhotoDate, months map[int]*TreeNode) {
-	for _, a := range activities {
-		month, ok := months[(a.Year*100 + a.Month)]
-		if !ok {
-			continue
+	if req.Path != "" {
+		joinSql += "inner join t_files on t_photos.id = t_files.photoId "
+		cnds = append(cnds, "t_files.path like @filePath")
+		params["filePath"] = req.Path + "%"
+	}
+	if req.FaceId > 0 {
+		joinSql += "inner join photo_face_info f on t_photos.id=f.photoId "
+		cnds = append(cnds, "f.faceId = @faceId")
+		params["faceId"] = req.FaceId
+	}
+	cnds = append(cnds, "trashed = "+strconv.FormatBool(req.Trashed))
+	if req.Star {
+		cnds = append(cnds, "star = "+strconv.FormatBool(req.Star))
+	}
+	if req.Video {
+		cnds = append(cnds, "video = "+strconv.FormatBool(req.Video))
+	}
+	if req.Tag != "" {
+		cnds = append(cnds, "concat(',', tag, ',') like '%,"+req.Tag+",%'")
+	}
+	dateKey, _ := strconv.Atoi(req.DateKey)
+	switch {
+	case dateKey > 1000000:
+		cnds = append(cnds, "activity = @activity")
+		params["activity"] = dateKey - 1000000
+	case dateKey > 9999: // 202405
+		year := dateKey / 100
+		month := dateKey % 100
+		cnds = append(cnds, "year(takenDate)=@year and month(takenDate)=@month")
+		params["year"] = year
+		params["month"] = month
+	case dateKey > 0: // 2024
+		cnds = append(cnds, "year(takenDate)=@year")
+		params["year"] = req.DateKey
+	}
+	if req.IdRank == 0 {
+		total := 0
+		db().Raw("select count(distinct t_photos.id) as c from t_photos "+joinSql+
+			" where "+strings.Join(cnds, " and "), params).First(&total)
+		log.Println("Total is ", total)
+		sql := "select "
+		if req.IdOnly {
+			sql += "distinct t_photos.id"
+		} else {
+			sql += "distinct t_photos.*, " +
+				"concat(t_activity.startDate, ' ', t_activity.name, ' ', t_activity.description) as activityDesc "
 		}
-		activity := TreeNode{
-			Id:         1000000 + a.ActivityId,
-			Year:       month.Year,
-			Month:      month.Month,
-			PhotoCount: a.PhotoCount,
-			Title:      fmt.Sprintf("%d月%d日-%s(%d)", a.Month, a.Day, a.Name, a.PhotoCount),
+		sql += " from t_photos " + joinSql + " where "
+		sql += strings.Join(cnds, " and ")
+		if !req.IdOnly {
+			sql += fmt.Sprintf(" limit %d, %d", req.Start, req.Size)
 		}
-		month.Children = append(month.Children, &activity)
-	}
-}
+		log.Println("sql is ", sql)
+		var results []map[string]interface{}
 
-func getActivities(trashed bool, star bool) []*PhotoDate {
-	sql := `select year(startDate) as year, month(startDate) as month, t_activity.id as activity_id,
-                  count(t_photos.id) as photo_count, day(startDate) as day, t_activity.name as name
-                from t_activity
-                left join t_photos on t_photos.activity=t_activity.id
-                where trashed = %t %s
-                group by year, month, activity_id
-                order by year desc, month desc, startDate`
-	return queryDates(trashed, star, sql)
-}
-
-func addYearAndMonths(dates []*PhotoDate, months map[int]*TreeNode) []*TreeNode {
-	var lastYear *TreeNode
-	yearCount := 0
-	var result []*TreeNode
-
-	for _, d := range dates {
-		if lastYear == nil {
-			lastYear = &TreeNode{
-				Year: d.Year,
-				Id:   d.Year,
-			}
-			result = append(result, lastYear)
+		tx := db().Raw(sql, params).Scan(&results)
+		if tx.Error != nil {
+			log.Println("getPics error", tx.Error)
 		}
-		if lastYear.Year != d.Year {
-			lastYear.Title = fmt.Sprintf("%d年(%d)", lastYear.Year, yearCount)
-			yearCount = 0
-			lastYear = &TreeNode{
-				Year: d.Year,
-				Id:   d.Year,
-			}
-			result = append(result, lastYear)
+		log.Println("results is ", results)
+		if !req.IdOnly {
+			results = *addThumbField(&results)
 		}
-		month := TreeNode{
-			Id:         lastYear.Year*100 + d.Month,
-			Year:       lastYear.Year,
-			Month:      d.Month,
-			PhotoCount: d.PhotoCount,
-			Title:      fmt.Sprintf("%d月(%d)", d.Month, d.PhotoCount),
-		}
-		months[month.Id] = &month
-		yearCount += d.PhotoCount
-		lastYear.Children = append(lastYear.Children, &month)
+		c.JSON(200, Response{0, map[string]interface{}{
+			"totalRows": total,
+			"startRow":  req.Start,
+			"endRow":    req.Start + len(results),
+			"data":      results}})
+	} else {
+		/*
+		   sql = Sqls.create("""
+		           select id, r from (
+		               select distinct t_photos.id, rank() over (order by $sortedBy $desc) as r
+		               from t_photos
+		               $condition) t
+		           where id=@id
+		           """);
+		   sql.setVar("sortedBy", sortedBy).setVar("desc", desc ? "desc" : "asc")
+		           .setParam("id", req.idRank).setCondition(cnd);
+		   sql.setCallback(Sqls.callback.map());
+		   log.info("Sql is " + sql);
+		   dao.execute(sql);
+		   return (Map) sql.getResult();
+
+		*/
 	}
-	if lastYear != nil {
-		lastYear.Title = fmt.Sprintf("%d年(%d)", lastYear.Year, yearCount)
-	}
-	return result
 }
 
-type TreeNode struct {
-	Id         int         `json:"id"`
-	Year       int         `json:"year"`
-	Month      int         `json:"month"`
-	PhotoCount int         `json:"photoCount"`
-	Title      string      `json:"title"`
-	Children   []*TreeNode `json:"children"`
+func addThumbField(records *[]map[string]interface{}) *[]map[string]interface{} {
+	for _, r := range *records {
+		r["thumb"] = getThumbUrl(r["name"].(string), r["rotate"].(int64))
+		t := r["takenDate"].(time.Time)
+		r["theYear"] = t.Year()
+		r["theMonth"] = t.Month()
+	}
+	return records
 }
 
-type PhotoDate struct {
-	Year       int
-	Month      int
-	PhotoCount int
-	ActivityId int
-	Day        int
-	Name       string
-}
-
-func getPhotoDates(trashed bool, star bool) []*PhotoDate {
-	sql := `select year(takenDate) as year, month(takenDate) as month, count(*) as photo_count
-	           from t_photos
-	           where trashed = %t %s
-	           group by year, month
-	           order by year desc, month desc`
-	return queryDates(trashed, star, sql)
-}
-
-func queryDates(trashed bool, star bool, sql string) []*PhotoDate {
-	stared := ""
-	if star {
-		stared = " star = true "
+func getThumbUrl(name string, rotate int64) string {
+	if rotate == 3600 {
+		return "small/" + name + "/thumb"
 	}
-	var dates []*PhotoDate
-	tx := db().Raw(fmt.Sprintf(sql, trashed, stared)).Scan(&dates)
-	if tx.Error != nil {
-		log.Printf("getPhotoDates: %v", tx.Error)
-	}
-	for _, d := range dates {
-		log.Printf("dates %v", d)
-	}
-	return dates
+	rotate = (360 + rotate) % 360
+	return fmt.Sprintf("small/%s/thumb%d", name, rotate)
 }

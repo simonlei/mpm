@@ -20,6 +20,7 @@ func setupEngine() {
 	fmt.Println(base)
 	r.Use(static.Serve("/", static.LocalFile(base, true)))
 	r.POST("/api/getPicsDate", getPicsDate)
+	r.POST("/api/getPics", getPics)
 
 	configForward(r)
 
