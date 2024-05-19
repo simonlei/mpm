@@ -21,6 +21,7 @@ func setupEngine() {
 	r.Use(static.Serve("/", static.LocalFile(base, true)))
 	r.POST("/api/getPicsDate", getPicsDate)
 	r.POST("/api/getPics", getPics)
+	r.POST("/api/getCount", getCount)
 
 	configForward(r)
 

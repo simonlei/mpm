@@ -9,6 +9,17 @@ import (
 	"time"
 )
 
+func getCount(c *gin.Context) {
+	var req GetPicsRequest
+	err := c.BindJSON(&req)
+	if err != nil {
+		log.Println(err)
+	}
+	var count int64
+	db().Table("t_photos").Where("trashed=?", req.Trashed).Count(&count)
+	c.JSON(200, Response{0, count})
+}
+
 type GetPicsRequest struct {
 	Star, Video, Trashed, IdOnly bool
 	Start, FaceId, IdRank        int
@@ -31,6 +42,8 @@ func getPics(c *gin.Context) {
 	joinSql := "left join t_activity on t_activity.id=t_photos.activity "
 	var cnds []string
 	params := make(map[string]interface{})
+	cnds = append(cnds, "@a = 1")
+	params["a"] = 1
 
 	if req.Path != "" {
 		joinSql += "inner join t_files on t_photos.id = t_files.photoId "
