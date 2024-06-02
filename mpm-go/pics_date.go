@@ -114,7 +114,7 @@ type PhotoDate struct {
 }
 
 func getPhotoDates(trashed bool, star bool) []*PhotoDate {
-	sql := `select year(takenDate) as year, month(takenDate) as month, count(*) as photo_count
+	sql := `select year(taken_date) as year, month(taken_date) as month, count(*) as photo_count
 	           from t_photos
 	           where trashed = %t %s
 	           group by year, month

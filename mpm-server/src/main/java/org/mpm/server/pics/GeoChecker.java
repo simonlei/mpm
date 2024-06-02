@@ -27,7 +27,7 @@ public class GeoChecker {
 
     public void checkPhotoGeos() {
         photoTaskScanner.scanPhotoDoTask("lastCheckId",
-                this::checkPhoto, 20, true, Cnd.where("mediaType", "=", "photo").and(Exps.isNull("latitude")));
+                this::checkPhoto, 20, true, Cnd.where("media_type", "=", "photo").and(Exps.isNull("latitude")));
     }
 
     private void checkPhoto(EntityPhoto p) throws IOException {
@@ -54,13 +54,13 @@ public class GeoChecker {
         photoTaskScanner.scanPhotoDoTask("lastDateCheckId", (p) -> {
             picsService.setInfosFromCos("origin/" + p.getName(), p);
             dao.updateIgnoreNull(p);
-        }, 20, true, Cnd.where("mediaType", "=", "photo"));
+        }, 20, true, Cnd.where("media_type", "=", "photo"));
     }
 
     public void generateSmallPhotos() {
         photoTaskScanner.scanPhotoDoTask("lastRegenerateSmallPhotosCheckId", (p) -> {
             picsService.generateSmallPic("origin/" + p.getName(), p.getName());
-        }, 200, true, Cnd.where("mediaType", "=", "photo"));
+        }, 200, true, Cnd.where("media_type", "=", "photo"));
     }
 
     public void clearDuplicateDescs() {

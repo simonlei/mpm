@@ -19,10 +19,10 @@ function changePhotoDate() {
 
   let index = selectModule.lastSelectedIndex;
   photoModule.getPhotoById(photoModule.idList[index].id, index).then(photo => {
-    dlgStore.datePicked = photo.takendate;
+    dlgStore.datePicked = photo.taken_date;
     dlgStore.datePickerDlg = true;
     dlgStore.whenDateConfirmed((selectedDate: string) => {
-      photoModule.updateSelectedPhotos({"takenDate": selectedDate}, ` 拍摄时间到 ${selectedDate}`);
+      photoModule.updateSelectedPhotos({"taken_date": selectedDate}, ` 拍摄时间到 ${selectedDate}`);
     });
   });
 }
@@ -63,14 +63,14 @@ const gisDateClipboard = gisDateClipboardStore();
 function changePhotoGisDate() {
   const confirmDialog = DialogPlugin.confirm({
     header: '确定应用 GIS 及时间信息？',
-    body: `GIS: ${gisDateClipboard.latitude}, ${gisDateClipboard.longitude}\n 时间：${gisDateClipboard.takendate}`,
+    body: `GIS: ${gisDateClipboard.latitude}, ${gisDateClipboard.longitude}\n 时间：${gisDateClipboard.taken_date}`,
     confirmBtn: '确定',
     onConfirm: async ({e}) => {
       photoModule.updateSelectedPhotos(
         {
           'latitude': gisDateClipboard.latitude,
           'longitude': gisDateClipboard.longitude,
-          'takendate': gisDateClipboard.takendate,
+          'taken_date': gisDateClipboard.taken_date,
         }, `已应用 GIS 和时间信息`);
       confirmDialog.hide();
     },

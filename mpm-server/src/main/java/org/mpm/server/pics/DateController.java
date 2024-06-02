@@ -119,7 +119,7 @@ public class DateController {
     private List<NutMap> getPhotoDates(Boolean trashed, Boolean star) {
         // photo dates...include years and months
         Sql sql = Sqls.create("""
-                select year(takenDate) as year, month(takenDate) as month, count(*) as photoCount
+                select year(taken_date) as year, month(taken_date) as month, count(*) as photoCount
                 from t_photos
                 where trashed = @trashed $started
                 group by year, month

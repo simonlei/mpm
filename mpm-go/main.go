@@ -25,7 +25,7 @@ func setupEngine() {
 
 	configForward(r)
 
-	r.Run(":8090")
+	r.Run(":8080")
 }
 
 func configForward(r *gin.Engine) {

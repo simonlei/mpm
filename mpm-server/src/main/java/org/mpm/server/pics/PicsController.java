@@ -151,7 +151,7 @@ public class PicsController {
         if (photo.getTakenDate().isBefore(fetched.getStartDate().atStartOfDay())
                 || photo.getTakenDate().isAfter(fetched.getEndDate().atTime(23, 59, 59, 999))) {
             // 如果当前时间不在活动范围内，更改时间为活动开始时间
-            record.set("takenDate", fetched.getStartDate().atStartOfDay());
+            record.set("taken_date", fetched.getStartDate().atStartOfDay());
         }
         if (photo.getLatitude() == null && photo.getLongitude() == null) {
             // 如果当前 GIS 是空，更改 GIS 为活动的 GIS
@@ -250,7 +250,7 @@ public class PicsController {
 
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
             sql.setVar("fields", req.idOnly ? "distinct t_photos.id" : "distinct t_photos.*, "
-                    + "concat(t_activity.startDate, ' ', t_activity.name, ' ', t_activity.description) as activityDesc");
+                    + "concat(t_activity.startDate, ' ', t_activity.name, ' ', t_activity.description) as activity_desc");
             sql.setCondition(cnd);
             sql.setVar("limit", req.idOnly ? "" : " limit " + start + ", " + size);
             log.info("sql is " + sql.toPreparedStatement());
@@ -287,8 +287,8 @@ public class PicsController {
         } else {
             Integer theYear = date > 9999 ? date / 100 : date;
             Integer theMonth = date > 9999 ? date % 100 : null;
-            cnd = theYear == null ? cnd : cnd.and("year(takenDate)", "=", theYear);
-            cnd = theMonth == null ? cnd : cnd.and("month(takenDate)", "=", theMonth);
+            cnd = cnd.and("year(taken_date)", "=", theYear);
+            cnd = theMonth == null ? cnd : cnd.and("month(taken_date)", "=", theMonth);
         }
         return cnd;
     }
@@ -304,9 +304,9 @@ public class PicsController {
     private List<Record> addThumbField(List<Record> photos) {
         for (Record r : photos) {
             r.put("thumb", getThumbUrl(r.getString("name"), r.getInt("rotate")));
-            LocalDateTime takenDate = r.getTimestamp("takenDate").toLocalDateTime();
-            r.put("theYear", takenDate.getYear());
-            r.put("theMonth", takenDate.getMonthValue());
+            LocalDateTime takenDate = r.getTimestamp("taken_date").toLocalDateTime();
+            r.put("the_year", takenDate.getYear());
+            r.put("the_month", takenDate.getMonthValue());
         }
         return photos;
     }
@@ -327,7 +327,7 @@ public class PicsController {
 
     private void addVideoCriteria(Boolean video, SimpleCriteria cnd) {
         if (video != null && video) {
-            cnd.where().and("mediaType", "=", "video");
+            cnd.where().and("media_type", "=", "video");
         }
     }
 

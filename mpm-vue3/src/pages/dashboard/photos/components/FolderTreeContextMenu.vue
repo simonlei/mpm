@@ -60,11 +60,11 @@ const gisDateClipboard = gisDateClipboardStore();
 function changeGisAndDateInFolder() {
   const confirmDialog = DialogPlugin.confirm({
     header: '确定应用 GIS 及时间信息？',
-    body: `GIS: ${gisDateClipboard.latitude}, ${gisDateClipboard.longitude}\n 时间：${gisDateClipboard.takendate}`,
+    body: `GIS: ${gisDateClipboard.latitude}, ${gisDateClipboard.longitude}\n 时间：${gisDateClipboard.taken_date}`,
     confirmBtn: '确定',
     onConfirm: async ({e}) => {
-      let count = await updateFolderDate(props.node.data.path, gisDateClipboard.takendate.toString());
-      NotifyPlugin.info({title: `已设置目录下${count}张照片拍摄时间至 ${gisDateClipboard.takendate}`});
+      let count = await updateFolderDate(props.node.data.path, gisDateClipboard.taken_date.toString());
+      NotifyPlugin.info({title: `已设置目录下${count}张照片拍摄时间至 ${gisDateClipboard.taken_date}`});
       count = await updateFolderGis(props.node.data.path,
         gisDateClipboard.latitude.toString(), gisDateClipboard.longitude.toString());
       NotifyPlugin.info({title: `已设置目录下${count}张照片GIS至 ${gisDateClipboard.latitude},${gisDateClipboard.longitude}`});

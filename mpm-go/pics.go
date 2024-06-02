@@ -73,11 +73,11 @@ func getPics(c *gin.Context) {
 	case dateKey > 9999: // 202405
 		year := dateKey / 100
 		month := dateKey % 100
-		cnds = append(cnds, "year(takenDate)=@year and month(takenDate)=@month")
+		cnds = append(cnds, "year(taken_date)=@year and month(taken_date)=@month")
 		params["year"] = year
 		params["month"] = month
 	case dateKey > 0: // 2024
-		cnds = append(cnds, "year(takenDate)=@year")
+		cnds = append(cnds, "year(taken_date)=@year")
 		params["year"] = req.DateKey
 	}
 	if req.IdRank == 0 {
@@ -90,7 +90,7 @@ func getPics(c *gin.Context) {
 			sql += "distinct t_photos.id"
 		} else {
 			sql += "distinct t_photos.*, " +
-				"concat(t_activity.startDate, ' ', t_activity.name, ' ', t_activity.description) as activityDesc "
+				"concat(t_activity.startDate, ' ', t_activity.name, ' ', t_activity.description) as activity_desc "
 		}
 		sql += " from t_photos " + joinSql + " where "
 		sql += strings.Join(cnds, " and ")
@@ -136,9 +136,9 @@ func getPics(c *gin.Context) {
 func addThumbField(records *[]map[string]interface{}) *[]map[string]interface{} {
 	for _, r := range *records {
 		r["thumb"] = getThumbUrl(r["name"].(string), r["rotate"].(int64))
-		t := r["takenDate"].(time.Time)
-		r["theYear"] = t.Year()
-		r["theMonth"] = t.Month()
+		t := r["taken_date"].(time.Time)
+		r["the_year"] = t.Year()
+		r["the_month"] = t.Month()
 	}
 	return records
 }

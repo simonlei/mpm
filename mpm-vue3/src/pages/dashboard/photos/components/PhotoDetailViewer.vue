@@ -54,7 +54,7 @@ const theImg = ref(null);
             placement="center">
     <t-layout>
       <t-content v-if="detailViewStore.currentPhoto!=null">
-        <t-image v-if="detailViewStore.currentPhoto.mediatype=='photo'"
+        <t-image v-if="detailViewStore.currentPhoto.media_type=='photo'"
                  :key="detailViewStore.currentPhotoName+'-small'"
                  ref="theImg"
                  :src="detailViewStore.currentPhotoSmallUrl"

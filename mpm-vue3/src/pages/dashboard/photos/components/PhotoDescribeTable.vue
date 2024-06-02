@@ -47,8 +47,8 @@ if (photo != null) {
   if (photo.address != null) {
     data.value.push({k: '地址', v: photo.address});
   }
-  if (photo.activitydesc != null) {
-    data.value.push({k: '所属活动', v: photo.activitydesc});
+  if (photo.activity_desc != null) {
+    data.value.push({k: '所属活动', v: photo.activity_desc});
   }
 }
 
@@ -56,7 +56,7 @@ function copyGisLocation() {
   const {toClipboard} = useClipboard();
   gisDateClipboard.latitude = photo.latitude;
   gisDateClipboard.longitude = photo.longitude;
-  gisDateClipboard.takendate = photo.takendate;
+  gisDateClipboard.taken_date = photo.taken_date;
 
   toClipboard(`${photo?.latitude},${photo?.longitude}`)
   .then(() => {
@@ -101,8 +101,8 @@ function rescanFaceInPhoto() {
 const activity = reactive({} as ActivityModel);
 
 function createActivity() {
-  activity.startDate = photo.takendate;
-  activity.endDate = photo.takendate;
+  activity.startDate = photo.taken_date;
+  activity.endDate = photo.taken_date;
   activity.latitude = photo.latitude;
   activity.longitude = photo.longitude;
   activity.fromPhoto = photo.id;

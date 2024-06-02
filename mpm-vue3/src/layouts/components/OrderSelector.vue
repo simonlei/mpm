@@ -3,9 +3,9 @@ import {photoFilterStore} from "@/store";
 
 let filterStore = photoFilterStore();
 const options = [{
-  label: '时间逆序', value: '-takenDate'
+  label: '时间逆序', value: '-taken_date'
 }, {
-  label: '时间顺序', value: 'takenDate'
+  label: '时间顺序', value: 'taken_date'
 }, {
   label: '大小逆序', value: '-size'
 }, {

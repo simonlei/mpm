@@ -14,15 +14,15 @@
                  @click.right.shift.exact="shiftClicked"
         >
           <template #overlay-content>
-            <t-tag v-if="photo.mediatype=='video' || photo.star == true"
+            <t-tag v-if="photo.media_type=='video' || photo.star == true"
                    :style="{ position: 'absolute', right: '8px', bottom: '8px', borderRadius: '3px' }"
                    shape="mark"
                    theme="primary"
                    variant="light"
             >
               <t-icon v-if="photo.star==true" name="star-filled"/>
-              <t-icon v-if="photo.mediatype=='video'" name="play-circle"/>
-              {{ photo.mediatype == 'video' ? formatDuration(photo.duration * 1000) : "" }}
+              <t-icon v-if="photo.media_type=='video'" name="play-circle"/>
+              {{ photo.media_type == 'video' ? formatDuration(photo.duration * 1000) : "" }}
             </t-tag>
           </template>
         </t-image>

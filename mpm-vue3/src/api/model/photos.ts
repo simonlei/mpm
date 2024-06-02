@@ -19,16 +19,16 @@ export interface Photo {
   latitude: number;
   longitude: number;
   address: string;
-  takendate: Date;
-  mediatype: string;
+  taken_date: Date;
+  media_type: string;
   duration: number;
   rotate: number;
   tags: string;
   thumb: string;
-  theyear: number;
-  themonth: number;
+  the_year: number;
+  the_month: number;
   activity: number;
-  activitydesc: string;
+  activity_desc: string;
 }
 
 export function getPhotoDetails(photo: Photo): String {
@@ -36,7 +36,7 @@ export function getPhotoDetails(photo: Photo): String {
     + `描述：${photo.description}\n`
     + (photo.tags == null ? "" : `标签：${photo.tags}\n`)
     + (photo.address == null ? "" : `地址：${photo.address}\n`)
-    + `时间 ${photo.takendate}`;
+    + `时间 ${photo.taken_date}`;
 }
 
 export function getPhotoThumb(photo: Photo): String {

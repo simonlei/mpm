@@ -6,7 +6,7 @@ export const photoFilterStore = defineStore('photoFilter', {
       trashed: false,
       star: null,
       video: null,
-      order: "-takenDate",
+      order: "-taken_date",
       dateKey: null,
       path: null,
       tag: null,

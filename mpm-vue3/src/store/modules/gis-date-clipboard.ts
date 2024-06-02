@@ -6,7 +6,7 @@ export const gisDateClipboardStore = defineStore('gisDateClipboard',
       return {
         latitude: String,
         longitude: String,
-        takendate: Date,
+        taken_date: Date,
       }
     },
     persist: true,

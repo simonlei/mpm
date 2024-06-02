@@ -71,7 +71,7 @@ public class FilesController {
     public int updateFolderDate(@RequestBody UpdateFolderDateSchema request) {
         String s = "update t_photos "
                 + " inner join t_files on t_photos.id=t_files.photoId "
-                + " SET takenDate = @toDate "
+                + " SET taken_date = @toDate "
                 + " where t_files.path like @filePath";
         log.info("Request is " + request.path + ":" + request.toDate);
         Sql sql = Sqls.create(s).setParam("filePath", request.path + "%")
