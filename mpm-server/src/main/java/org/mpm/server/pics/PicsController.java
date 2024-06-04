@@ -81,6 +81,7 @@ public class PicsController {
      */
 
     @PostMapping("/api/getCount")
+    // @Migrated
     public int count(@RequestBody Map map) {
         return picsService.count((Boolean) map.get("trashed"));
     }
@@ -209,6 +210,7 @@ public class PicsController {
     }
 
     @PostMapping("/api/getPics")
+    // @Migrated
     public Map getPics(@RequestBody GetPicsRequest req) {
         log.info("Getting pics " + Json.toJson(req));
         Boolean trashed = req.trashed != null && req.trashed;

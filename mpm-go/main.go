@@ -22,6 +22,7 @@ func setupEngine() {
 	r.POST("/api/getPicsDate", getPicsDate)
 	r.POST("/api/getPics", getPics)
 	r.POST("/api/getCount", getCount)
+	r.POST("/api/getAllTags", getAllTags)
 
 	configForward(r)
 

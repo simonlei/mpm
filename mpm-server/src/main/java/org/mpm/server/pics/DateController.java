@@ -84,6 +84,7 @@ public class DateController {
     }
 
     @PostMapping("/api/getPicsDate")
+    // @Migrated
     public List<TreeNode> getPicsDate(@RequestBody PicDateRequest req) {
         log.info("Req is {}", req);
         List<TreeNode> result = new ArrayList<>();
