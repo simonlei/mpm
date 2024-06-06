@@ -17,6 +17,13 @@ func init() {
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))
 		return
 	}
+	viper.SetConfigName("cos_styles")
+	viper.SetConfigType("properties")
+	err = viper.MergeInConfig()
+	if err != nil {
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+		return
+	}
 }
 
 func getEnvIgnoreCase(key string) string {

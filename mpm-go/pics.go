@@ -104,7 +104,7 @@ func getPics(c *gin.Context) {
 		if tx.Error != nil {
 			log.Println("getPics error", tx.Error)
 		}
-		log.Println("results is ", results)
+		// log.Println("results is ", results)
 		if !req.IdOnly {
 			results = *addThumbField(&results)
 		}

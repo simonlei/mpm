@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	cachecontrol "go.eigsys.de/gin-cachecontrol/v2"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -23,6 +24,7 @@ func setupEngine() {
 	r.POST("/api/getPics", getPics)
 	r.POST("/api/getCount", getCount)
 	r.POST("/api/getAllTags", getAllTags)
+	r.GET("/cos/*path", cachecontrol.New(cachecontrol.CacheAssetsForeverPreset), proxyCos)
 
 	configForward(r)
 
