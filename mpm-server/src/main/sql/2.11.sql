@@ -13,3 +13,6 @@ create table t_activity
 
 alter table t_photos
 add column activity bigint NULL COMMENT '所属活动';
+
+alter table t_activity
+change column `description` `description` varchar(1000)   NOT NULL DEFAULT '' COMMENT '描述';
