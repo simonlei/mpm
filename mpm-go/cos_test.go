@@ -16,7 +16,7 @@ func Test_proxyCos(t *testing.T) {
 	}
 	q := u.Query()
 	var key string
-	for k, _ := range q {
+	for k := range q {
 		key = k
 	}
 	fmt.Println(key)

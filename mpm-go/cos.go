@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
-	"github.com/tencentyun/cos-go-sdk-v5"
 	"log"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+	"github.com/tencentyun/cos-go-sdk-v5"
 )
 
 func proxyCos(c *gin.Context) {
@@ -18,7 +19,7 @@ func proxyCos(c *gin.Context) {
 	key := c.Param("path")
 	query := c.Request.URL.Query()
 	var param string
-	for k, _ := range query {
+	for k := range query {
 		param = k
 	}
 	log.Printf("key is %s params is %s\n", key, param)

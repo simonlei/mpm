@@ -19,7 +19,7 @@ public class MpmTestService {
 
         boolean b22 = Lang.equals(v, -1);
         assertThrows(NullPointerException.class, () -> {
-            boolean b2 = v == -1;
+            // boolean b2 = v == -1;
         });
     }
 }

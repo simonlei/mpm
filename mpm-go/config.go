@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 	"os"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 func init() {
@@ -14,15 +15,13 @@ func init() {
 	viper.AddConfigPath("../mpm-server/src/main/resources") // for dev
 	err := viper.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %s \n", err))
-		return
+		panic(fmt.Sprintf("Fatal error config file: %s ", err))
 	}
 	viper.SetConfigName("cos_styles")
 	viper.SetConfigType("properties")
 	err = viper.MergeInConfig()
 	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %s \n", err))
-		return
+		panic(fmt.Sprintf("Fatal error config file: %s ", err))
 	}
 }
 
