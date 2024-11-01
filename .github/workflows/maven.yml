@@ -34,7 +34,7 @@ jobs:
         cd ../mpm-server
         mvn -B package --file pom.xml -DskipTests
         cd ../mpm-go
-        go build
+        CGO_ENABLED=0 go build
         cd ..
         mkdir docker
         cd docker
