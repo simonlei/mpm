@@ -10,7 +10,7 @@
           </template>
           {{ item.title }}
         </t-menu-item>
-        <t-menu-item v-else :name="item.path" :to="item.path" :value="getPath(item)">
+        <t-menu-item v-else :name="item.path" :to="{path:item.path}" :value="getPath(item)">
           <template #icon>
             <t-icon v-if="beIcon(item)" :name="item.icon"/>
             <component :is="beRender(item).render" v-else-if="beRender(item).can" class="t-icon"/>

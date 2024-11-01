@@ -23,24 +23,31 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '21.x'
-    - name: Build with Maven
+    - uses: actions/setup-go@v5
+      with:
+        go-version: '^1.23.2' 
+    - name: Build the whole thing
       run: |
         cd mpm-vue3
         npm install
         npm run build
         cd ../mpm-server
         mvn -B package --file pom.xml -DskipTests
+        cd ../mpm-go
+        go build
         cd ..
         mkdir docker
         cd docker
         mkdir logs
         cp -R ../mpm-vue3/dist web
         cp ../mpm-server/target/mpm-server-*.jar mpm.jar
+        cp ../mpm-go/mpm-go .
+        cp ../entrypoint.sh .
         echo '
           FROM openjdk:17-jdk-alpine
           COPY . /
           WORKDIR .
-          ENTRYPOINT ["/bin/sh","-c","java --add-opens java.base/java.lang=ALL-UNNAMED -jar mpm.jar > /logs/mpm.log 2> /logs/error.log"]
+          ENTRYPOINT ["/bin/sh","/entrypoint.sh"]
         ' > Dockerfile
     
     - name: Log in to GitHub Docker Registry
