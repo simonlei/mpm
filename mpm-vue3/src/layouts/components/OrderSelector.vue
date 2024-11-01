@@ -37,9 +37,9 @@ function handleChange(value) {
 
   </t-radio-group>
   <!--
-  <t-radio-group default-value="-takenDate" variant="default-filled">
-    <t-radio-button value="-takenDate">时间逆序</t-radio-button>
-    <t-radio-button value="takenDate">时间顺序</t-radio-button>
+  <t-radio-group default-value="-taken_date" variant="default-filled">
+    <t-radio-button value="-taken_date">时间逆序</t-radio-button>
+    <t-radio-button value="taken_date">时间顺序</t-radio-button>
     <t-radio-button value="-size">大小逆序</t-radio-button>
     <t-radio-button value="size">大小顺序</t-radio-button>
     <t-radio-button value="-id">导入时间逆序</t-radio-button>
