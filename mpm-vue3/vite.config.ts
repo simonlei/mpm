@@ -48,7 +48,7 @@ export default ({mode}: ConfigEnv): UserConfig => {
       port: 3002,
       host: '0.0.0.0',
       proxy: {
-        '/api': 'http://127.0.0.1:8080/',
+        '/api': 'http://127.0.0.1:18880/',
         '/geo_json_api': 'http://127.0.0.1:8080/',
         '/get_face_img': 'http://127.0.0.1:8080/',
         '/cos': 'http://127.0.0.1:8080/',

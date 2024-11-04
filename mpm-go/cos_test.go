@@ -2,17 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/magiconair/properties/assert"
-	"github.com/spf13/viper"
-	"log"
 	"net/url"
 	"testing"
+
+	"github.com/magiconair/properties/assert"
+	"github.com/spf13/viper"
 )
 
 func Test_proxyCos(t *testing.T) {
 	u, err := url.Parse("https://example.org/cos/small/vpbts6incmgm7pr2osfh5lbkkm?imageMogr2/rotate/90")
 	if err != nil {
-		log.Fatal(err)
+		l.Fatal(err)
 	}
 	q := u.Query()
 	var key string

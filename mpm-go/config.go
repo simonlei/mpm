@@ -6,7 +6,10 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
+
+var l *zap.SugaredLogger
 
 func init() {
 	viper.SetConfigName("application")
@@ -23,6 +26,9 @@ func init() {
 	if err != nil {
 		panic(fmt.Sprintf("Fatal error config file: %s ", err))
 	}
+	lo, _ := zap.NewDevelopment()
+	l = lo.Sugar()
+	defer l.Sync()
 }
 
 func getEnvIgnoreCase(key string) string {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -22,13 +21,13 @@ func proxyCos(c *gin.Context) {
 	for k := range query {
 		param = k
 	}
-	log.Printf("key is %s params is %s\n", key, param)
+	l.Infof("key is %s params is %s", key, param)
 	if strings.Contains(key, "/thumb") {
 		if param != "" {
 			c.Error(errors.New("同时存在param和thumb"))
 		}
 		key, param = parseKeyAndParam(key)
-		log.Printf("parsed key is %s params is %s\n", key, param)
+		l.Infof("parsed key is %s params is %s", key, param)
 	}
 	operation := ""
 	if param != "" {

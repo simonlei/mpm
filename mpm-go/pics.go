@@ -2,18 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"log"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 func getCount(c *gin.Context) {
 	var req GetPicsRequest
 	err := c.BindJSON(&req)
 	if err != nil {
-		log.Println(err)
+		l.Info(err)
 	}
 	var count int64
 	db().Table("t_photos").Where("trashed=?", req.Trashed).Count(&count)
@@ -32,7 +32,7 @@ func getPics(c *gin.Context) {
 	var req GetPicsRequest
 	err := c.BindJSON(&req)
 	if err != nil {
-		log.Println("Can't bind request:", err)
+		l.Info("Can't bind request:", err)
 		return
 	}
 	desc := strings.HasPrefix(req.Order, "-")
@@ -84,7 +84,7 @@ func getPics(c *gin.Context) {
 		total := 0
 		db().Raw("select count(distinct t_photos.id) as c from t_photos "+joinSql+
 			" where "+strings.Join(cnds, " and "), params).First(&total)
-		log.Println("Total is ", total)
+		l.Info("Total is ", total)
 		sql := "select "
 		if req.IdOnly {
 			sql += "distinct t_photos.id"
@@ -97,12 +97,12 @@ func getPics(c *gin.Context) {
 		if !req.IdOnly {
 			sql += fmt.Sprintf(" limit %d, %d", req.Start, req.Size)
 		}
-		log.Println("sql is ", sql)
+		l.Info("sql is ", sql)
 		var results []map[string]interface{}
 
 		tx := db().Raw(sql, params).Scan(&results)
 		if tx.Error != nil {
-			log.Println("getPics error", tx.Error)
+			l.Info("getPics error", tx.Error)
 		}
 		// log.Println("results is ", results)
 		if !req.IdOnly {

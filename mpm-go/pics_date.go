@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type PicDateRequest struct {
@@ -18,7 +18,7 @@ func getPicsDate(c *gin.Context) {
 		c.String(http.StatusBadRequest, "Bad request %v", err)
 		return
 	}
-	log.Printf("req %v", req)
+	l.Infof("req %v", req)
 	dates := getPhotoDates(req.Trashed, req.Star)
 	var months = make(map[int]*TreeNode)
 	result := addYearAndMonths(dates, months)
@@ -130,10 +130,10 @@ func queryDates(trashed bool, star bool, sql string) []*PhotoDate {
 	var dates []*PhotoDate
 	tx := db().Raw(fmt.Sprintf(sql, trashed, stared)).Scan(&dates)
 	if tx.Error != nil {
-		log.Printf("getPhotoDates: %v", tx.Error)
+		l.Infof("getPhotoDates: %v", tx.Error)
 	}
 	for _, d := range dates {
-		log.Printf("dates %v", d)
+		l.Infof("dates %v", d)
 	}
 	return dates
 }

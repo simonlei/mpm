@@ -5,3 +5,4 @@ target/
 /mpm-server/src/main/resources/application.properties
 logs/
 web/package-lock.json
+mpm-go/mpm-go
