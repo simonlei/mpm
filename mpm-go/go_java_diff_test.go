@@ -52,9 +52,6 @@ func Test_JavaGoDiff(t *testing.T) {
 			javaResult := javaResult(tt)
 			goResult := goResult(tt)
 
-			l.Info("Java:", javaResult)
-			l.Info("Go:", goResult)
-
 			// 创建差异比较器
 			differ := gojsondiff.New()
 			// 计算两个 JSON 的差异
@@ -63,19 +60,100 @@ func Test_JavaGoDiff(t *testing.T) {
 				panic(err)
 			}
 			if diff.Modified() {
-				// 创建格式化器以输出差异
-				x := formatter.NewDeltaFormatter()
-				result, err := x.Format(diff)
-				if err != nil {
-					panic(err)
+				count := 0
+				countDiff(diff.Deltas(), &count)
+				l.Info("Count is ", count)
+				if count > 0 {
+					l.Info("Java:", javaResult)
+					l.Info("Go:", goResult)
+					// 创建格式化器以输出差异
+					x := formatter.NewDeltaFormatter()
+					result, err := x.Format(diff)
+					if err != nil {
+						panic(err)
+					}
+					panic(result)
+					// l.Info(result)
 				}
-				// panic(result)
-				l.Info(result)
 			} else {
 				l.Info("No differences found.")
 			}
 		})
 	}
+}
+
+func countDiff(deltas []gojsondiff.Delta, count *int) (deltaJson map[string]interface{}, err error) {
+	deltaJson = map[string]interface{}{}
+	for _, delta := range deltas {
+		switch delta.(type) {
+		case *gojsondiff.Object:
+			d := delta.(*gojsondiff.Object)
+			deltaJson[d.Position.String()], err = countDiff(d.Deltas, count)
+			if err != nil {
+				return nil, err
+			}
+		case *gojsondiff.Array:
+			d := delta.(*gojsondiff.Array)
+			deltaJson[d.Position.String()], err = countArrayDiff(d.Deltas, count)
+			if err != nil {
+				return nil, err
+			}
+		case *gojsondiff.Added:
+			*count += 1
+		case *gojsondiff.Modified:
+			d := delta.(*gojsondiff.Modified)
+			if d.OldValue != nil && d.NewValue != nil {
+				*count += 1
+			}
+		case *gojsondiff.TextDiff:
+			*count += 1
+		case *gojsondiff.Deleted:
+			*count += 1
+		case *gojsondiff.Moved:
+			*count += 1
+		default:
+			*count += 1
+		}
+	}
+	return
+}
+
+func countArrayDiff(deltas []gojsondiff.Delta, count *int) (deltaJson map[string]interface{}, err error) {
+	deltaJson = map[string]interface{}{
+		"_t": "a",
+	}
+	for _, delta := range deltas {
+		switch delta.(type) {
+		case *gojsondiff.Object:
+			d := delta.(*gojsondiff.Object)
+			deltaJson[d.Position.String()], err = countDiff(d.Deltas, count)
+			if err != nil {
+				return nil, err
+			}
+		case *gojsondiff.Array:
+			d := delta.(*gojsondiff.Array)
+			deltaJson[d.Position.String()], err = countArrayDiff(d.Deltas, count)
+			if err != nil {
+				return nil, err
+			}
+		case *gojsondiff.Added:
+			*count += 1
+		case *gojsondiff.Modified:
+			d := delta.(*gojsondiff.Modified)
+			if d.OldValue != nil && d.NewValue != nil {
+				*count += 1
+			}
+		case *gojsondiff.TextDiff:
+			*count += 1
+		case *gojsondiff.Deleted:
+			*count += 1
+		case *gojsondiff.Moved:
+			*count += 1
+		default:
+			*count += 1
+		}
+	}
+	return
 }
 
 func goResult(tt TestFun) string {
