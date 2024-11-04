@@ -12,7 +12,7 @@ func Test_getTagsFromDb(t *testing.T) {
 	}{
 		{
 			"nothing",
-			[]string{"aa"},
+			[]string{"simon"},
 		},
 	}
 	for _, tt := range tests {
