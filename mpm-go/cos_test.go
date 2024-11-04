@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/url"
 	"testing"
 
@@ -19,8 +18,8 @@ func Test_proxyCos(t *testing.T) {
 	for k := range q {
 		key = k
 	}
-	fmt.Println(key)
-	fmt.Println(key == "")
+	l.Info(key)
+	l.Info(key == "")
 }
 
 func TestSubThumbnail(t *testing.T) {

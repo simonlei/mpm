@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -19,8 +18,9 @@ func setupEngine() {
 	r := gin.New()
 
 	base := getEnvIgnoreCase("static_base") // ../mpm-vue3/dist/
-	fmt.Println(base)
+	l.Info(base)
 	r.Use(static.Serve("/", static.LocalFile(base, true)))
+	r.POST("/api/getActivities", getActivitiesApi)
 	r.POST("/api/getPicsDate", getPicsDate)
 	r.POST("/api/getPics", getPics)
 	r.POST("/api/getCount", getCount)
@@ -33,17 +33,19 @@ func setupEngine() {
 }
 
 func configForward(r *gin.Engine) {
-	r.NoRoute(func(c *gin.Context) {
-		remote, _ := url.Parse("http://localhost:" + getEnvIgnoreCaseWithDefault("SERVER_PORT", "8080"))
-		fmt.Println(remote)
-		director := func(req *http.Request) {
-			req.URL.Scheme = remote.Scheme
-			req.URL.Host = remote.Host
-			req.URL.Path = remote.Path + c.Request.URL.Path
-			req.Header = c.Request.Header
-		}
-		proxy := &httputil.ReverseProxy{Director: director}
-		proxy.ServeHTTP(c.Writer, c.Request)
-		fmt.Println("Forwarded request ", c.Request.URL)
-	})
+	r.NoRoute(proxyJava)
+}
+
+func proxyJava(c *gin.Context) {
+	remote, _ := url.Parse("http://127.0.0.1:" + getEnvIgnoreCaseWithDefault("SERVER_PORT", "8080"))
+	l.Info(remote)
+	director := func(req *http.Request) {
+		req.URL.Scheme = remote.Scheme
+		req.URL.Host = remote.Host
+		req.URL.Path = remote.Path + c.Request.URL.Path
+		req.Header = c.Request.Header
+	}
+	proxy := &httputil.ReverseProxy{Director: director}
+	proxy.ServeHTTP(c.Writer, c.Request)
+	l.Info("Forwarded request ", c.Request.URL)
 }
