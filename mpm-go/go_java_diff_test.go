@@ -46,6 +46,18 @@ func Test_JavaGoDiff(t *testing.T) {
 			url:    "/api/getActivities",
 			params: "{}",
 		},
+		{
+			name:   "getPicsDate",
+			f:      getPicsDate,
+			url:    "/api/getPicsDate",
+			params: `{"trashed":false,"star":null}`,
+		},
+		{
+			name:   "getPics ids",
+			f:      getPics,
+			url:    "/api/getPics",
+			params: `{"idOnly":true,"trashed":false,"star":null,"video":null,"order":"-taken_date","dateKey":"undefined","path":null,"tag":null,"faceId":null}`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -168,6 +180,7 @@ func javaResult(tt TestFun) string {
 	recorder := CreateTestResponseRecorder()
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request, _ = http.NewRequest("POST", tt.url, bytes.NewBufferString(tt.params))
+	c.Request.Header.Add("content-type", "application/json")
 	proxyJava(c)
 	return recorder.Body.String()
 }

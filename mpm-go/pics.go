@@ -94,6 +94,10 @@ func getPics(c *gin.Context) {
 		}
 		sql += " from t_photos " + joinSql + " where "
 		sql += strings.Join(cnds, " and ")
+		sql += " order by " + req.Order
+		if desc {
+			sql += " desc"
+		}
 		if !req.IdOnly {
 			sql += fmt.Sprintf(" limit %d, %d", req.Start, req.Size)
 		}
