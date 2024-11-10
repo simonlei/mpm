@@ -248,6 +248,7 @@ public class PicsController {
 
         if (req.idRank == null) {
             sql.setVar("fields", "count(distinct t_photos.id) as c");
+            sql.setCondition(cnd);
             Long totalRows = (Long) DaoUtil.fetchOne(dao, sql, "c");
 
             cnd.orderBy(sortedBy, desc ? "desc" : "asc");
@@ -286,11 +287,14 @@ public class PicsController {
             // it's activity
             int id = date - 1000000;
             cnd = cnd.and("activity", "=", id);
-        } else {
+        } else if (date > 9999) { // 202405
             Integer theYear = date > 9999 ? date / 100 : date;
             Integer theMonth = date > 9999 ? date % 100 : null;
             cnd = cnd.and("year(taken_date)", "=", theYear);
             cnd = theMonth == null ? cnd : cnd.and("month(taken_date)", "=", theMonth);
+        } else { // 2024
+            Integer theYear = date > 9999 ? date / 100 : date;
+            cnd = cnd.and("year(taken_date)", "=", theYear);
         }
         return cnd;
     }

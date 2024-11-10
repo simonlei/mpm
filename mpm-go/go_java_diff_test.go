@@ -41,6 +41,19 @@ type TestFun struct {
 func Test_JavaGoDiff(t *testing.T) {
 	tests := []TestFun{
 		{
+			name:   "getCount",
+			f:      getCount,
+			url:    "/api/getCount",
+			params: `{"trashed":true}`,
+		},
+		{
+			name:   "getAllTags",
+			f:      getAllTags,
+			url:    "/api/getAllTags",
+			params: `{}`,
+		},
+
+		{
 			name:   "getActivities",
 			f:      getActivitiesApi,
 			url:    "/api/getActivities",
@@ -57,6 +70,18 @@ func Test_JavaGoDiff(t *testing.T) {
 			f:      getPics,
 			url:    "/api/getPics",
 			params: `{"idOnly":true,"trashed":false,"star":null,"video":null,"order":"-taken_date","dateKey":"undefined","path":null,"tag":null,"faceId":null}`,
+		},
+		{
+			name:   "getPics",
+			f:      getPics,
+			url:    "/api/getPics",
+			params: `{"start":0,"size":10,"trashed":false,"star":null,"video":null,"order":"-taken_date","dateKey":null,"path":null,"tag":null,"faceId":null}`,
+		},
+		{
+			name:   "getPicsYear",
+			f:      getPics,
+			url:    "/api/getPics",
+			params: `{"start":4,"size":10,"trashed":false,"star":null,"video":null,"order":"-taken_date","dateKey":"2022","path":null,"tag":null,"faceId":null}`,
 		},
 	}
 	for _, tt := range tests {
@@ -111,7 +136,11 @@ func countDiff(deltas []gojsondiff.Delta, count *int) (deltaJson map[string]inte
 				return nil, err
 			}
 		case *gojsondiff.Added:
-			*count += 1
+			d := delta.(*gojsondiff.Added)
+			l.Info("New value is ", d)
+			if d.Value != nil {
+				*count += 1
+			}
 		case *gojsondiff.Modified:
 			d := delta.(*gojsondiff.Modified)
 			if d.OldValue != nil && d.NewValue != nil {

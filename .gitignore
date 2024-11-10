@@ -6,3 +6,4 @@ target/
 logs/
 web/package-lock.json
 mpm-go/mpm-go
+mpm-server/nohupjava.out

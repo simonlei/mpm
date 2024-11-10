@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"mpm-go/model"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -98,25 +98,35 @@ func getPics(c *gin.Context) {
 		if desc {
 			sql += " desc"
 		}
-		if !req.IdOnly {
-			sql += fmt.Sprintf(" limit %d, %d", req.Start, req.Size)
-		}
 		l.Info("sql is ", sql)
-		var results []map[string]interface{}
+		if req.IdOnly {
+			var results []map[string]interface{}
 
-		tx := db().Raw(sql, params).Scan(&results)
-		if tx.Error != nil {
-			l.Info("getPics error", tx.Error)
+			tx := db().Raw(sql, params).Scan(&results)
+			if tx.Error != nil {
+				l.Info("getPics error", tx.Error)
+			}
+			c.JSON(200, Response{0, map[string]interface{}{
+				"totalRows": total,
+				"startRow":  req.Start,
+				"endRow":    req.Start + len(results),
+				"data":      results}})
+		} else {
+			sql += fmt.Sprintf(" limit %d, %d", req.Start, req.Size)
+			l.Info("sql is ", sql)
+			var results []*model.TPhoto
+
+			tx := db().Raw(sql, params).Scan(&results)
+			if tx.Error != nil {
+				l.Info("getPics error", tx.Error)
+			}
+			results = addThumbField(results)
+			c.JSON(200, Response{0, map[string]interface{}{
+				"totalRows": total,
+				"startRow":  req.Start,
+				"endRow":    req.Start + len(results),
+				"data":      results}})
 		}
-		// log.Println("results is ", results)
-		if !req.IdOnly {
-			results = *addThumbField(&results)
-		}
-		c.JSON(200, Response{0, map[string]interface{}{
-			"totalRows": total,
-			"startRow":  req.Start,
-			"endRow":    req.Start + len(results),
-			"data":      results}})
 	} else {
 		/*
 		   sql = Sqls.create("""
@@ -137,12 +147,12 @@ func getPics(c *gin.Context) {
 	}
 }
 
-func addThumbField(records *[]map[string]interface{}) *[]map[string]interface{} {
-	for _, r := range *records {
-		r["thumb"] = getThumbUrl(r["name"].(string), r["rotate"].(int64))
-		t := r["taken_date"].(time.Time)
-		r["the_year"] = t.Year()
-		r["the_month"] = t.Month()
+func addThumbField(records []*model.TPhoto) []*model.TPhoto {
+	for _, r := range records {
+		r.Thumb = getThumbUrl(r.Name, int64(r.Rotate))
+		t := r.TakenDate
+		r.TheYear = t.Year()
+		r.TheMonth = t.Month()
 	}
 	return records
 }
