@@ -83,6 +83,36 @@ func Test_JavaGoDiff(t *testing.T) {
 			url:    "/api/getPics",
 			params: `{"start":4,"size":10,"trashed":false,"star":null,"video":null,"order":"-taken_date","dateKey":"2022","path":null,"tag":null,"faceId":null}`,
 		},
+		{
+			name:   "getPicsYearMonth",
+			f:      getPics,
+			url:    "/api/getPics",
+			params: `{"idOnly":true,"trashed":false,"star":null,"video":null,"order":"-taken_date","dateKey":"202212","path":null,"tag":null,"faceId":null}`,
+		},
+		{
+			name:   "getPicsActivity",
+			f:      getPics,
+			url:    "/api/getPics",
+			params: `{"start":0,"size":150,"trashed":false,"star":null,"video":null,"order":"-taken_date","dateKey":"1000005","path":null,"tag":null,"faceId":null}`,
+		},
+		{
+			name:   "getPicsOrder",
+			f:      getPics,
+			url:    "/api/getPics",
+			params: `{"start":0,"size":150,"trashed":false,"star":null,"video":null,"order":"-size","dateKey":"202207","path":null,"tag":null,"faceId":null}`,
+		},
+		{
+			name:   "getPicsOrderStared",
+			f:      getPics,
+			url:    "/api/getPics",
+			params: `{"start":0,"size":150,"trashed":false,"star":true,"video":null,"order":"width","dateKey":"202207","path":null,"tag":null,"faceId":null}`,
+		},
+		{
+			name:   "getFoldersData",
+			f:      getFoldersData,
+			url:    "/api/getFoldersData",
+			params: `{"parentId":null,"trashed":false,"star":null,"video":null,"order":"-taken_date","dateKey":null,"path":null,"tag":null,"faceId":null}`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
