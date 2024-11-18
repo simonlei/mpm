@@ -20,10 +20,6 @@ func (r *TestResponseRecorder) CloseNotify() <-chan bool {
 	return r.closeChannel
 }
 
-func (r *TestResponseRecorder) closeClient() {
-	r.closeChannel <- true
-}
-
 func CreateTestResponseRecorder() *TestResponseRecorder {
 	return &TestResponseRecorder{
 		httptest.NewRecorder(),
@@ -38,7 +34,53 @@ type TestFun struct {
 	params string
 }
 
-func Test_JavaGoDiff(t *testing.T) {
+func Test_JavaGoDiffGet(t *testing.T) {
+	tests := []TestFun{
+		{
+			name: "loadMarkersGeoJson",
+			f:    loadMarkersGeoJson,
+			url:  "/geo_json_api/loadMarkersGeoJson",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			javaResult := javaGetResult(tt)
+			goResult := goResult(tt)
+
+			diffResult(goResult, javaResult)
+		})
+	}
+}
+
+func diffResult(goResult string, javaResult string) {
+	differ := gojsondiff.New()
+
+	diff, err := differ.Compare([]byte(goResult), []byte(javaResult))
+	if err != nil {
+		panic(err)
+	}
+	if diff.Modified() {
+		count := 0
+		countDiff(diff.Deltas(), &count)
+		l.Info("Count is ", count)
+		if count > 0 {
+			l.Info("Java:", javaResult)
+			l.Info("Go:", goResult)
+
+			x := formatter.NewDeltaFormatter()
+			result, err := x.Format(diff)
+			if err != nil {
+				panic(err)
+			}
+			panic(result)
+
+		}
+	} else {
+		l.Info("No differences found.")
+	}
+}
+
+func Test_JavaGoDiffPost(t *testing.T) {
 	tests := []TestFun{
 		{
 			name:   "getCount",
@@ -143,32 +185,7 @@ func Test_JavaGoDiff(t *testing.T) {
 			javaResult := javaResult(tt)
 			goResult := goResult(tt)
 
-			// 创建差异比较器
-			differ := gojsondiff.New()
-			// 计算两个 JSON 的差异
-			diff, err := differ.Compare([]byte(goResult), []byte(javaResult))
-			if err != nil {
-				panic(err)
-			}
-			if diff.Modified() {
-				count := 0
-				countDiff(diff.Deltas(), &count)
-				l.Info("Count is ", count)
-				if count > 0 {
-					l.Info("Java:", javaResult)
-					l.Info("Go:", goResult)
-					// 创建格式化器以输出差异
-					x := formatter.NewDeltaFormatter()
-					result, err := x.Format(diff)
-					if err != nil {
-						panic(err)
-					}
-					panic(result)
-					// l.Info(result)
-				}
-			} else {
-				l.Info("No differences found.")
-			}
+			diffResult(goResult, javaResult)
 		})
 	}
 }
@@ -176,27 +193,23 @@ func Test_JavaGoDiff(t *testing.T) {
 func countDiff(deltas []gojsondiff.Delta, count *int) (deltaJson map[string]interface{}, err error) {
 	deltaJson = map[string]interface{}{}
 	for _, delta := range deltas {
-		switch delta.(type) {
+		switch d := delta.(type) {
 		case *gojsondiff.Object:
-			d := delta.(*gojsondiff.Object)
 			deltaJson[d.Position.String()], err = countDiff(d.Deltas, count)
 			if err != nil {
 				return nil, err
 			}
 		case *gojsondiff.Array:
-			d := delta.(*gojsondiff.Array)
 			deltaJson[d.Position.String()], err = countArrayDiff(d.Deltas, count)
 			if err != nil {
 				return nil, err
 			}
 		case *gojsondiff.Added:
-			d := delta.(*gojsondiff.Added)
 			l.Info("New value is ", d)
 			if d.Value != nil {
 				*count += 1
 			}
 		case *gojsondiff.Modified:
-			d := delta.(*gojsondiff.Modified)
 			if d.OldValue != nil && d.NewValue != nil {
 				*count += 1
 			}
@@ -218,15 +231,13 @@ func countArrayDiff(deltas []gojsondiff.Delta, count *int) (deltaJson map[string
 		"_t": "a",
 	}
 	for _, delta := range deltas {
-		switch delta.(type) {
+		switch d := delta.(type) {
 		case *gojsondiff.Object:
-			d := delta.(*gojsondiff.Object)
 			deltaJson[d.Position.String()], err = countDiff(d.Deltas, count)
 			if err != nil {
 				return nil, err
 			}
 		case *gojsondiff.Array:
-			d := delta.(*gojsondiff.Array)
 			deltaJson[d.Position.String()], err = countArrayDiff(d.Deltas, count)
 			if err != nil {
 				return nil, err
@@ -234,7 +245,6 @@ func countArrayDiff(deltas []gojsondiff.Delta, count *int) (deltaJson map[string
 		case *gojsondiff.Added:
 			*count += 1
 		case *gojsondiff.Modified:
-			d := delta.(*gojsondiff.Modified)
 			if d.OldValue != nil && d.NewValue != nil {
 				*count += 1
 			}
@@ -264,6 +274,15 @@ func javaResult(tt TestFun) string {
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request, _ = http.NewRequest("POST", tt.url, bytes.NewBufferString(tt.params))
 	c.Request.Header.Add("content-type", "application/json")
+	proxyJava(c)
+	return recorder.Body.String()
+}
+
+func javaGetResult(tt TestFun) string {
+	recorder := CreateTestResponseRecorder()
+	c, _ := gin.CreateTestContext(recorder)
+	c.Request, _ = http.NewRequest("GET", tt.url, nil)
+	// c.Request.Header.Add("content-type", "application/json")
 	proxyJava(c)
 	return recorder.Body.String()
 }

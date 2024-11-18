@@ -382,8 +382,9 @@
 - [ ] LoadUsers: '/loadUsers',
 - [ ] LoadUser: '/loadUser',
 - [ ] DeleteUser: '/deleteUser',
-
-
+- [x] /geo_json_api/loadMarkersGeoJson
+- [ ] /get_face_img/{id}/{photoId}
+- [x] /cos/**
 
 ## 需求池
 - [ ] 引入小程序的支持，可以直接从微信群里面读取照片进行上传
