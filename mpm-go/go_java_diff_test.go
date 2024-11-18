@@ -113,6 +113,30 @@ func Test_JavaGoDiff(t *testing.T) {
 			url:    "/api/getFoldersData",
 			params: `{"parentId":null,"trashed":false,"star":null,"video":null,"order":"-taken_date","dateKey":null,"path":null,"tag":null,"faceId":null}`,
 		},
+		{
+			name:   "getFaces",
+			f:      getFaces,
+			url:    "/api/getFaces",
+			params: `{"showHidden":false,"page":1,"size":10,"nameFilter":""}`,
+		},
+		{
+			name:   "getFacesFilterName",
+			f:      getFaces,
+			url:    "/api/getFaces",
+			params: `{"showHidden":false,"page":1,"size":100,"nameFilter":"s"}`,
+		},
+		{
+			name:   "getFacesWithName",
+			f:      getFacesWithName,
+			url:    "/api/getFacesWithName",
+			params: `{}`,
+		},
+		{
+			name:   "getFacesForPhoto",
+			f:      getFacesForPhoto,
+			url:    "/api/getFacesForPhoto",
+			params: `{"id":17}`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -352,7 +352,38 @@
 
 ### v2.12
 - [ ] 相似图片的查找和展示
-- [ ] 用 go 重写服务端
+- [ ] 用 go 重写服务端，下面是使用到的接口
+- [ ] CreateOrUpdateActivity: '/createOrUpdateActivity',
+- [x] GetActivities: '/getActivities',
+- [x] PicsDateList: '/getPicsDate',
+- [x] PicsFolderList: '/getFoldersData',
+- [x] PicsList: '/getPics',
+- [x] PicsCount: '/getCount',
+- [ ] TrashPhotos: '/trashPhotos',
+- [ ] UploadPhoto: '/uploadPhoto',
+- [ ] EmptyTrash: '/emptyTrash',
+- [ ] TaskProgress: '/getProgress/',
+- [ ] SwitchTrashFolder: '/switchTrashFolder',
+- [ ] UpdatePhoto: '/updateImage',
+- [ ] UpdateFolderDate: '/updateFolderDate',
+- [ ] UpdateFolderGis: '/updateFolderGis',
+- [ ] MoveFolder: '/moveFolder',
+- [x] GetAllTags: '/getAllTags',
+- [ ] ~~LoadMarkers: '/loadMarkers',~~
+- [x] GetFaces: '/getFaces',
+- [x] GetFacesWithName: '/getFacesWithName',
+- [ ] UpdateFace: '/updateFace',
+- [ ] MergeFace: '/mergeFace',
+- [x] GetFacesForPhoto: '/getFacesForPhoto',
+- [ ] RemovePhotoFaceInfo: '/removePhotoFaceInfo',
+- [ ] RescanFace: '/rescanFace',
+- [ ] CheckPassword: '/checkPassword',
+- [ ] CreateOrUpdateUser: '/createOrUpdateUser',
+- [ ] LoadUsers: '/loadUsers',
+- [ ] LoadUser: '/loadUser',
+- [ ] DeleteUser: '/deleteUser',
+
+
 
 ## 需求池
 - [ ] 引入小程序的支持，可以直接从微信群里面读取照片进行上传

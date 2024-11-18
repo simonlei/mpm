@@ -26,6 +26,10 @@ func setupEngine() {
 	r.POST("/api/getCount", getCount)
 	r.POST("/api/getAllTags", getAllTags)
 	r.POST("/api/getFoldersData", getFoldersData)
+	r.POST("/api/getFaces", getFaces)
+	r.POST("/api/getFacesWithName", getFacesWithName)
+	r.POST("/api/getFacesForPhoto", getFacesForPhoto)
+
 	r.GET("/cos/*path", cachecontrol.New(cachecontrol.CacheAssetsForeverPreset), proxyCos)
 
 	configForward(r)
