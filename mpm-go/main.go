@@ -30,6 +30,7 @@ func setupEngine() {
 	r.POST("/api/getFacesWithName", getFacesWithName)
 	r.POST("/api/getFacesForPhoto", getFacesForPhoto)
 	r.GET("/geo_json_api/loadMarkersGeoJson", loadMarkersGeoJson)
+	r.GET("/get_face_img/:faceId/:infoId", getFaceImg)
 
 	r.GET("/cos/*path", cachecontrol.New(cachecontrol.CacheAssetsForeverPreset), proxyCos)
 

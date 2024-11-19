@@ -94,7 +94,7 @@ func getPics(c *gin.Context) {
 		}
 		sql += " from t_photos " + joinSql + " where "
 		sql += strings.Join(cnds, " and ")
-		sql += " order by " + req.Order
+		sql += " order by t_photos." + req.Order
 		if desc {
 			sql += " desc"
 		}

@@ -1,11 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"math"
+	"mpm-go/model"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tencentyun/cos-go-sdk-v5"
+	"gorm.io/gorm"
 )
 
 type FaceGetRequest struct {
@@ -99,4 +105,67 @@ func getFacesForPhoto(c *gin.Context) {
 	var data []FacesForPhotoResp
 	db().Raw(fmt.Sprintf(s, req.Id)).Find(&data)
 	c.JSON(http.StatusOK, Response{0, data})
+}
+
+type PhotoFaceInfo struct {
+	gorm.Model
+	PhotoId int64 `gorm:"column:photoId" json:"photoId"`
+	FaceId  int64 `gorm:"column:faceId" json:"faceId"`
+	X       int   `gorm:"column:x" json:"x"`
+	Y       int   `gorm:"column:y" json:"y"`
+	Width   int   `gorm:"column:width" json:"width"`
+	Height  int   `gorm:"column:height" json:"height"`
+}
+
+func getFaceImg(c *gin.Context) {
+	faceId, _ := strconv.Atoi(c.Param("faceId"))
+	infoId, _ := strconv.Atoi(c.Param("infoId"))
+	var x *gorm.DB
+	if infoId <= 0 {
+		x = db().Raw("select * from photo_face_info where faceId=? order by height desc limit 1", faceId)
+	} else {
+		x = db().Raw("select * from photo_face_info where id=?", infoId)
+	}
+	var faceInfo PhotoFaceInfo
+	x.Scan(&faceInfo)
+	l.Info("face info is ", faceInfo.ID)
+	var photo model.TPhoto
+	db().First(&photo, faceInfo.PhotoId)
+	getWiderFace(&photo, &faceInfo)
+	cosObj := getFaceFromCos(&photo, &faceInfo)
+	c.Header("Cache-Control", "max-age=31536000")
+	c.Header("content-length", strconv.Itoa(int(cosObj.ContentLength)))
+	c.DataFromReader(200, cosObj.ContentLength, cosObj.Response.Header.Get("content-type"), cosObj.Body, nil)
+}
+
+func getFaceFromCos(photo *model.TPhoto, faceInfo *PhotoFaceInfo) *cos.Response {
+	req := "/small/" + photo.Name
+	param := "imageMogr2/format/jpeg"
+	if faceInfo != nil {
+		getWiderFace(photo, faceInfo)
+		param = "imageMogr2/cut/" + strconv.Itoa(faceInfo.Width) +
+			"x" + strconv.Itoa(faceInfo.Height) +
+			"x" + strconv.Itoa(faceInfo.X) +
+			"x" + strconv.Itoa(faceInfo.Y) + "|" + param
+	}
+	obj, _ := Cos().CI.Get(context.Background(), req, param, nil)
+	return obj
+}
+
+func getWiderFace(photo *model.TPhoto, faceInfo *PhotoFaceInfo) {
+	padX := float64(faceInfo.Width) * 0.3
+	padY := float64(faceInfo.Height) * 0.3
+	x := float64(faceInfo.X) - padX
+	y := float64(faceInfo.Y) - padY
+	w := x + float64(faceInfo.Width) + 2*padX
+	h := y + float64(faceInfo.Height) + 2*padY
+	x2 := 0.0
+	y2 := 0.0
+	w2 := float64(photo.Width)
+	h2 := float64(photo.Height)
+
+	faceInfo.X = int(math.Max(x, x2))
+	faceInfo.Y = int(math.Max(y, y2))
+	faceInfo.Width = int(math.Min(w, w2) - float64(faceInfo.X))
+	faceInfo.Height = int(math.Min(h, h2) - float64(faceInfo.Y))
 }

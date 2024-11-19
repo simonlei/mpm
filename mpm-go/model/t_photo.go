@@ -27,3 +27,7 @@ type TPhoto struct {
 	TheMonth     int    `json:"the_month"`     // 月份
 	ActivityDesc string `json:"activity_desc"` // 活动描述
 }
+
+func (*TPhoto) TableName() string {
+	return "t_photos"
+}

@@ -125,7 +125,7 @@ func getPhotoDates(trashed bool, star bool) []*PhotoDate {
 func queryDates(trashed bool, star bool, sql string) []*PhotoDate {
 	stared := ""
 	if star {
-		stared = " star = true "
+		stared = " and star = true "
 	}
 	var dates []*PhotoDate
 	tx := db().Raw(fmt.Sprintf(sql, trashed, stared)).Scan(&dates)
