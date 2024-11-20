@@ -24,5 +24,7 @@ func TestCreateOrUpdateActivity(t *testing.T) {
 		t.Errorf("Expected status code %d, got %d", http.StatusOK, w.Code)
 	}
 
-	// 可以根据需要添加更多的断言来检查数据库操作的结果
+	// todo: 可以根据需要添加更多的断言来检查数据库操作的结果
+	// todo: should roll back
+
 }

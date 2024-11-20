@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"time"
 )
@@ -18,6 +19,25 @@ func (t *Date) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*t = Date(tt)
+	return nil
+}
+
+// Value方法将自定义日期类型转换为数据库能够存储的格式，这里转换为time.Time类型
+func (d Date) Value() (driver.Value, error) {
+	t := time.Time(d)
+	return t, nil
+}
+
+// Scan方法将从数据库读取的数据（通常是time.Time类型）转换为自定义日期类型
+func (d *Date) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	t, ok := value.(time.Time)
+	if !ok {
+		return fmt.Errorf("无法将值转换为time.Time类型")
+	}
+	*d = Date(t)
 	return nil
 }
 
