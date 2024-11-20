@@ -39,6 +39,9 @@ func init() {
 	sqlDB.SetMaxOpenConns(200)
 	// 设置了连接可复用的最大时间
 	sqlDB.SetConnMaxLifetime(time.Minute * 10)
+	if err := db.Use(errHanlerPlugin); err != nil {
+		panic(err.Error())
+	}
 
 	dbInstance = db
 

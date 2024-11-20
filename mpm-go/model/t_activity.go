@@ -9,3 +9,7 @@ type TActivity struct {
 	Latitude    float64 `gorm:"column:latitude;comment:'纬度'" json:"latitude"`
 	Longitude   float64 `gorm:"column:longitude;comment:'经度'" json:"longitude"`
 }
+
+func (*TActivity) TableName() string {
+	return "t_activity"
+}

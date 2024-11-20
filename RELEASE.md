@@ -353,6 +353,7 @@
 ### v2.12
 - [ ] 相似图片的查找和展示
 - [ ] 用 go 重写服务端，下面是使用到的接口
+- [x] go的基础设施，例如 panic 的处理、gorm异常自动抛出panic等
 - [ ] CreateOrUpdateActivity: '/createOrUpdateActivity',
 - [x] GetActivities: '/getActivities',
 - [x] PicsDateList: '/getPicsDate',

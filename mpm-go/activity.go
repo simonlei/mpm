@@ -14,23 +14,18 @@ func getActivitiesApi(c *gin.Context) {
 	c.JSON(http.StatusOK, Response{0, as})
 }
 
-/*
+type ActivityParam struct {
+	Activity  model.TActivity `json:"activity"`
+	FromPhoto int64           `json:"fromPhoto"`
+}
 
-@PostMapping("/api/createOrUpdateActivity")
-public int createOrUpdateActivity(@RequestBody ActivityParam param) {
-	EntityActivity activity = param.activity;
-	log.info("param {}", param);
-	if (activity.getId() == null) {
-		EntityActivity inserted = dao.insert(activity, true, false, false);
-		EntityPhoto photo = dao.fetch(EntityPhoto.class, param.fromPhoto);
-		if (photo != null) {
-			// update photo
-			photo.setActivity(inserted.getId());
-			dao.update(photo);
-		}
-		return inserted.getId().intValue();
+func createOrUpdateActivity(c *gin.Context) {
+	var param ActivityParam
+	c.BindJSON(&param)
+	if param.Activity.ID == 0 {
+		db().Create(&param.Activity)
+		db().Model(&model.TPhoto{}).Where("id =?", param.FromPhoto).Update("activity", param.Activity.ID)
 	} else {
-		return dao.updateIgnoreNull(activity);
+		db().Model(&param.Activity).Updates(&param.Activity)
 	}
 }
-*/
