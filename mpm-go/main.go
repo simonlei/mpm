@@ -37,6 +37,7 @@ func setupEngine() {
 	r.GET("/get_face_img/:faceId/:infoId", getFaceImg)
 
 	r.POST("/api/createOrUpdateActivity", createOrUpdateActivity)
+	r.POST("/api/deleteActivity", deleteActivity)
 
 	r.GET("/cos/*path", cachecontrol.New(cachecontrol.CacheAssetsForeverPreset), proxyCos)
 

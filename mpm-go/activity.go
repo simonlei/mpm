@@ -28,4 +28,12 @@ func createOrUpdateActivity(c *gin.Context) {
 	} else {
 		db().Model(&param.Activity).Updates(&param.Activity)
 	}
+	c.JSON(http.StatusOK, param.Activity)
+}
+
+func deleteActivity(c *gin.Context) {
+	var a model.TActivity
+	c.BindJSON(&a)
+	db().Delete(&a)
+	c.JSON(http.StatusOK, a)
 }
