@@ -360,7 +360,7 @@
 - [x] PicsFolderList: '/getFoldersData',
 - [x] PicsList: '/getPics',
 - [x] PicsCount: '/getCount',
-- [ ] TrashPhotos: '/trashPhotos',
+- [x] TrashPhotos: '/trashPhotos',
 - [ ] UploadPhoto: '/uploadPhoto',
 - [ ] EmptyTrash: '/emptyTrash',
 - [ ] TaskProgress: '/getProgress/',

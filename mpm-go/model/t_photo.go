@@ -22,10 +22,10 @@ type TPhoto struct {
 	Tags        string   `gorm:"column:tags" json:"tags"`                      // 标签
 	Activity    int64    `gorm:"column:activity" json:"activity"`              // 所属活动
 	// 以下不在数据库中
-	Thumb        string `json:"thumb"`         // 缩略图
-	TheYear      int    `json:"the_year"`      // 年份
-	TheMonth     int    `json:"the_month"`     // 月份
-	ActivityDesc string `json:"activity_desc"` // 活动描述
+	Thumb        string `gorm:"-" json:"thumb"`         // 缩略图
+	TheYear      int    `gorm:"-" json:"the_year"`      // 年份
+	TheMonth     int    `gorm:"-" json:"the_month"`     // 月份
+	ActivityDesc string `gorm:"-" json:"activity_desc"` // 活动描述
 }
 
 func (*TPhoto) TableName() string {
