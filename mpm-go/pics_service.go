@@ -27,23 +27,23 @@ func getMajorName(filename string) string {
 	return filename[:index]
 }
 
-func savePhotoInDb(key, name, lastModified, contentType string, size int64, file *os.File) *model.TPhoto {
+func savePhotoInDb(key, name, lastModified, contentType string, size int64, fileName string) *model.TPhoto {
 	if strings.Contains(contentType, "video") {
-		return saveVideo(file, size, lastModified, key, getMajorName(name))
+		return saveVideo(fileName, size, lastModified, key, getMajorName(name))
 	} else {
-		return saveImage(file, size, lastModified, key, getMajorName(name))
+		return saveImage(fileName, size, lastModified, key, getMajorName(name))
 	}
 }
 
-func saveImage(file *os.File, size int64, lastModified, key, name string) *model.TPhoto {
-	photo := sameFileExist(file, key, name, size)
+func saveImage(fileName string, size int64, lastModified, key, name string) *model.TPhoto {
+	photo := sameFileExist(fileName, key, name, size)
 	if photo.ID > 0 {
 		return photo
 	}
 	photo.MediaType = "photo"
 	photo.Description = name
 	setInfosFromCos(key, photo)
-	setInfosFromFile(file, lastModified, photo)
+	setInfosFromFile(fileName, lastModified, photo)
 	checkInBlacklist(photo)
 	db().Create(&photo)
 	l.Info("Photo:", photo)
@@ -94,21 +94,26 @@ func generateSmallPic(key, name string) {
 	}
 }
 
-func setInfosFromFile(file *os.File, lastModified string, photo *model.TPhoto) {
+func setInfosFromFile(fileName string, lastModified string, photo *model.TPhoto) {
 	if time.Time(photo.TakenDate).IsZero() {
 		photo.TakenDate = model.DateTime(time.UnixMilli(parseInt64(lastModified)))
 	}
-	exif, err := imagemeta.Decode(file)
-	if err != nil {
-		l.Error("Can't read exif info", err)
+	if file, err := os.Open(fileName); err != nil {
+		l.Error("Can't open file")
 	} else {
-		if !exif.DateTimeOriginal().IsZero() {
-			photo.TakenDate = model.DateTime(exif.DateTimeOriginal())
-		}
-		if exif.GPS.Latitude() != 0 && exif.GPS.Longitude() != 0 {
-			photo.Latitude = exif.GPS.Latitude()
-			photo.Longitude = exif.GPS.Longitude()
-			photo.Address = getGisAddress(photo.Latitude, photo.Longitude)
+		defer file.Close()
+		exif, err := imagemeta.Decode(file)
+		if err != nil {
+			l.Error("Can't read exif info", err)
+		} else {
+			if !exif.DateTimeOriginal().IsZero() {
+				photo.TakenDate = model.DateTime(exif.DateTimeOriginal())
+			}
+			if exif.GPS.Latitude() != 0 && exif.GPS.Longitude() != 0 {
+				photo.Latitude = exif.GPS.Latitude()
+				photo.Longitude = exif.GPS.Longitude()
+				photo.Address = getGisAddress(photo.Latitude, photo.Longitude)
+			}
 		}
 	}
 }
@@ -127,7 +132,7 @@ type ImageInfo struct {
 }
 
 func setInfosFromCos(key string, photo *model.TPhoto) {
-	resp, err := Cos().Object.Get(context.Background(), key+"?imageInfo", nil)
+	resp, err := Cos().CI.Get(context.Background(), key, "imageInfo", nil)
 	if err != nil {
 		l.Error("Can't get image info", err)
 	} else {
@@ -136,7 +141,7 @@ func setInfosFromCos(key string, photo *model.TPhoto) {
 		photo.Width = parseInt(info.Width)
 		photo.Height = parseInt(info.Height)
 	}
-	resp, err = Cos().Object.Get(context.Background(), key+"?exif", nil)
+	resp, err = Cos().CI.Get(context.Background(), key, "exif", nil)
 	if err != nil {
 		l.Error("Can't get exif info", err)
 	} else {
@@ -165,8 +170,8 @@ func setInfosFromCos(key string, photo *model.TPhoto) {
 	}
 }
 
-func saveVideo(file *os.File, size int64, lastModified, key, name string) *model.TPhoto {
-	video := sameFileExist(file, key, name, size)
+func saveVideo(fileName string, size int64, lastModified, key, name string) *model.TPhoto {
+	video := sameFileExist(fileName, key, name, size)
 	if video.ID > 0 {
 		return video
 	}
@@ -278,9 +283,9 @@ func checkInBlacklist(p *model.TPhoto) {
 	}
 }
 
-func sameFileExist(file *os.File, key, name string, size int64) *model.TPhoto {
-	md5 := getFileMD5(file)
-	sha1 := getFileSha1(file)
+func sameFileExist(fileName string, key, name string, size int64) *model.TPhoto {
+	md5 := getFileMD5(fileName)
+	sha1 := getFileSha1(fileName)
 	var exist model.TPhoto
 	db().Where("md5", md5).Where("sha1", sha1).Where("size", size).First(&exist)
 	if exist.ID > 0 {

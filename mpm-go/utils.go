@@ -19,22 +19,26 @@ func getMD5Hash(s string) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-func getFileMD5(file *os.File) string {
-	hash := md5.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		panic(err)
+func getFileMD5(fileName string) string {
+	if file, err := os.Open(fileName); err == nil {
+		defer file.Close()
+		hash := md5.New()
+		if _, err := io.Copy(hash, file); err == nil {
+			return fmt.Sprintf("%x", hash.Sum(nil))
+		}
 	}
-
-	return fmt.Sprintf("%x", hash.Sum(nil))
+	panic("Can't get md5")
 }
 
-func getFileSha1(file *os.File) string {
-	hash := sha1.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		panic(err)
+func getFileSha1(fileName string) string {
+	if file, err := os.Open(fileName); err == nil {
+		defer file.Close()
+		hash := sha1.New()
+		if _, err := io.Copy(hash, file); err == nil {
+			return fmt.Sprintf("%x", hash.Sum(nil))
+		}
 	}
-
-	return fmt.Sprintf("%x", hash.Sum(nil))
+	panic("Can't get sha1")
 }
 
 func parseInt(s string) int {

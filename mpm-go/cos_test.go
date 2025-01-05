@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"io"
 	"net/url"
 	"testing"
 
@@ -32,4 +34,15 @@ func TestSubThumbnail(t *testing.T) {
 	assert.Equal(t, "thumb", param)
 
 	assert.Equal(t, "imageMogr2/auto-orient/thumbnail/200x150/pad/1/color/IzNEM0QzRA", viper.GetString("thumb"))
+}
+
+func Test_Exif(t *testing.T) {
+	obj, _ := Cos().CI.Get(context.Background(), "/origin/66hg81bu12j8qqku0js44l5tjn", "exif", nil)
+	a, _ := io.ReadAll(obj.Body)
+	t.Log(string(a))
+
+	obj, _ = Cos().CI.Get(context.Background(), "/origin/66hg81bu12j8qqku0js44l5tjn", "imageInfo", nil)
+	a, _ = io.ReadAll(obj.Body)
+	t.Log(string(a))
+
 }

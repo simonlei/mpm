@@ -76,7 +76,7 @@ func uploadFile(key, lastModified, contentType string, size int64, fileName stri
 		}
 	}
 	name := paths[len(paths)-1]
-	photo := savePhotoInDb(key, name, lastModified, contentType, size, file)
+	photo := savePhotoInDb(key, name, lastModified, contentType, size, fileName)
 	if photo != nil {
 		tfile := existOrCreate(parent, path+"/"+name, name, false)
 		tfile.PhotoID = photo.ID
