@@ -1,0 +1,91 @@
+package main
+
+import (
+	"io"
+	"mpm-go/model"
+	"os"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+)
+
+func uploadPhoto(c *gin.Context) {
+	lastModified := c.PostForm("lastModified")
+	batchId := c.PostForm("batchId")
+	file, header, err := c.Request.FormFile("file")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	l.Info("total files {} with {}", header.Size, lastModified)
+	key := "upload/" + batchId + "_" + header.Filename
+	tmpFile, err := os.CreateTemp("", "mpm*")
+
+	if err != nil {
+		panic(err)
+	}
+	defer tmpFile.Close()
+	_, err = io.Copy(tmpFile, file)
+	if err != nil {
+		panic(err)
+	}
+
+	defer func() {
+		if recover() != nil {
+			l.Error("Can't upload file:", key, err)
+			db().Create(&model.Meta{
+				Key:   "Error_Log_" + key,
+				Value: err.Error(),
+			})
+		}
+	}()
+
+	uploadFileToCos(key, header.Header.Get("Content-Type"), header.Size, tmpFile)
+	uploadFile(key, lastModified, header.Header.Get("Content-Type"), header.Size, tmpFile)
+	c.String(200, "0")
+}
+
+func uploadFile(key, lastModified, contentType string, size int64, file *os.File) {
+	l.Info("Key is	", key)
+	// upload/1616851720630_tmpupload/七上1025义工/IMG_002.jpg
+	paths := strings.Split(key, "/")
+	path := "/" + paths[1]
+	// name: 1616851720630_tmpupload 去掉前面的 1616851720630_
+	parent := existOrCreate(nil, path, paths[1][14:], true)
+	// skip upload, 1616851720630_tmpupload and last one
+	if len(paths) > 2 {
+		for i := 2; i < len(paths)-1; i++ {
+			path += "/" + paths[i]
+			// path exist?
+			parent = existOrCreate(parent, path, paths[i], true)
+		}
+	}
+	name := paths[len(paths)-1]
+	photo := savePhotoInDb(key, name, lastModified, contentType, size, file)
+	if photo != nil {
+		tfile := existOrCreate(parent, path+"/"+name, name, false)
+		tfile.PhotoID = photo.ID
+		tfile.PhotoName = photo.Name
+		db().Save(tfile)
+	}
+}
+
+func existOrCreate(parent *model.TFile, path, name string, isFolder bool) *model.TFile {
+	var file model.TFile
+	db().Where("path = ?", path).First(&file)
+	if file.ID != 0 {
+		return &file
+	}
+	var parentId int64
+	if parent != nil {
+		parentId = parent.ID
+	}
+	file = model.TFile{
+		Path:     path,
+		Name:     name,
+		IsFolder: isFolder,
+		ParentID: parentId,
+	}
+	db().Create(&file)
+	return &file
+}

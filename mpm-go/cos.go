@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -62,4 +63,18 @@ func Cos() *cos.Client {
 		},
 	})
 
+}
+
+func uploadFileToCos(key, contentType string, size int64, file *os.File) {
+	uopt := cos.ObjectPutOptions{
+		ObjectPutHeaderOptions: &cos.ObjectPutHeaderOptions{
+			ContentType:   contentType,
+			ContentLength: size,
+		},
+	}
+	resp, err := Cos().Object.Put(context.Background(), key, file, &uopt)
+	if err != nil {
+		panic(err)
+	}
+	l.Info("upload result ", resp.Body)
 }

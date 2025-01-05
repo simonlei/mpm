@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+	"github.com/tidwall/gjson"
 )
 
 type Marker struct {
@@ -45,4 +48,24 @@ func loadMarkersGeoJson(c *gin.Context) {
 		"type":     "FeatureCollection",
 		"features": features,
 	})
+}
+
+func getAddress(latitude, longitude float64) string {
+	// todo: takeToken();
+
+	result, err := getAddressFromRemote(latitude, longitude)
+	l.Info("qqlbs result:", result, err)
+	if err == nil {
+		return gjson.Get("result.address", result).String()
+	}
+	return ""
+}
+
+func getAddressFromRemote(latitude, longitude float64) (string, error) {
+	requestStr := fmt.Sprintf("key=%s&location=%f,%f", viper.GetString("qqlbsKey"), latitude, longitude)
+	sig := getMD5Hash("/ws/geocoder/v1?" + requestStr + viper.GetString("qqlbsToken"))
+	url := fmt.Sprintf("https://apis.map.qq.com/ws/geocoder/v1?key=%s&location=%f%%2c%f&sig=%s", viper.GetString("qqlbsKey"), latitude, longitude, sig)
+	l.Info("Getting gis info from " + url)
+	// return (Map) Json.fromJson(Http.get(url).getContent());
+	return getUrlResponse(url)
 }
