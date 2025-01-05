@@ -8,6 +8,7 @@ import (
 
 	"github.com/magiconair/properties/assert"
 	"github.com/spf13/viper"
+	"github.com/tencentyun/cos-go-sdk-v5"
 )
 
 func Test_proxyCos(t *testing.T) {
@@ -44,5 +45,18 @@ func Test_Exif(t *testing.T) {
 	obj, _ = Cos().CI.Get(context.Background(), "/origin/66hg81bu12j8qqku0js44l5tjn", "imageInfo", nil)
 	a, _ = io.ReadAll(obj.Body)
 	t.Log(string(a))
+}
 
+func Test_MediaTemplate(t *testing.T) {
+	result, resp, err := Cos().CI.DescribeMediaTemplate(context.Background(), &cos.DescribeMediaTemplateOptions{
+		Tag:  "Transcode",
+		Name: "video-converter",
+	})
+	t.Log(result)
+	t.Log(resp)
+	t.Log(err)
+}
+
+func Test_CreateTemplate(t *testing.T) {
+	createConvertTemplate()
 }

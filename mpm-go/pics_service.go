@@ -225,7 +225,7 @@ func checkConvertTemplate() string {
 }
 
 func createConvertTemplate() string {
-	result, _, _ := Cos().CI.CreateMediaTranscodeTemplate(context.Background(), &cos.CreateMediaTranscodeTemplateOptions{
+	result, _, err := Cos().CI.CreateMediaTranscodeTemplate(context.Background(), &cos.CreateMediaTranscodeTemplateOptions{
 		Tag:  "Transcode",
 		Name: "video-converter",
 		Container: &cos.Container{
@@ -242,6 +242,9 @@ func createConvertTemplate() string {
 			Samplerate: "44100",
 		},
 	})
+	if err != nil {
+		l.Error(err)
+	}
 	return result.Template.TemplateId
 }
 
@@ -270,7 +273,10 @@ func generatePoster(key string, video *model.TPhoto) {
 		Time: "1",
 		Mode: "keyframe",
 	}
-	Cos().CI.PostSnapshot(context.Background(), opt)
+	_, _, err := Cos().CI.PostSnapshot(context.Background(), opt)
+	if err != nil {
+		l.Error("Can't generate poster", err)
+	}
 }
 
 func checkInBlacklist(p *model.TPhoto) {

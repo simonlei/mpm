@@ -361,7 +361,7 @@
 - [x] PicsList: '/getPics',
 - [x] PicsCount: '/getCount',
 - [x] TrashPhotos: '/trashPhotos',
-- [ ] UploadPhoto: '/uploadPhoto',
+- [x] UploadPhoto: '/uploadPhoto',
 - [ ] EmptyTrash: '/emptyTrash',
 - [ ] TaskProgress: '/getProgress/',
 - [ ] SwitchTrashFolder: '/switchTrashFolder',

@@ -54,7 +54,11 @@ func parseKeyAndParam(key string) (string, string) {
 func Cos() *cos.Client {
 	u, _ := url.Parse(fmt.Sprintf("https://%s.cos.%s.myqcloud.com", viper.GetString("cos.bucket"), viper.GetString("cos.region")))
 	su, _ := url.Parse(fmt.Sprintf("https://cos.%s.myqcloud.com", viper.GetString("cos.region")))
-	b := &cos.BaseURL{BucketURL: u, ServiceURL: su}
+	ci, _ := url.Parse(fmt.Sprintf("https://%s.ci.%s.myqcloud.com", viper.GetString("cos.bucket"), viper.GetString("cos.region")))
+	b := &cos.BaseURL{
+		BucketURL:  u,
+		ServiceURL: su,
+		CIURL:      ci}
 	// 1.永久密钥
 	return cos.NewClient(b, &http.Client{
 		Transport: &cos.AuthorizationTransport{
