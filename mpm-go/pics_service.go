@@ -40,6 +40,7 @@ func saveImage(file *os.File, size int64, lastModified, key, name string) *model
 	if photo.ID > 0 {
 		return photo
 	}
+	photo.MediaType = "photo"
 	photo.Description = name
 	setInfosFromCos(key, photo)
 	setInfosFromFile(file, lastModified, photo)
@@ -52,10 +53,12 @@ func saveImage(file *os.File, size int64, lastModified, key, name string) *model
 
 func savePhotosOnCos(key string, photo *model.TPhoto) {
 	_, _, err := Cos().Object.Copy(context.Background(), "origin/"+photo.Name,
-		fmt.Sprintf("https://%s.cos.%s.myqcloud.com/%s", viper.GetString("cos.bucket"), viper.GetString("cos.region"), key), nil)
+		fmt.Sprintf("%s.cos.%s.myqcloud.com/%s", viper.GetString("cos.bucket"), viper.GetString("cos.region"), key), nil)
 	if err == nil {
 		generateSmallPic(key, photo.Name)
 		Cos().Object.Delete(context.Background(), key)
+	} else {
+		panic(err)
 	}
 }
 
@@ -108,10 +111,6 @@ func setInfosFromFile(file *os.File, lastModified string, photo *model.TPhoto) {
 			photo.Address = getGisAddress(photo.Latitude, photo.Longitude)
 		}
 	}
-}
-
-func getGisAddress(f1, f2 float64) string {
-	panic("unimplemented")
 }
 
 type ImageInfo struct {
@@ -180,7 +179,7 @@ func saveVideo(file *os.File, size int64, lastModified, key, name string) *model
 	video.TakenDate = model.DateTime(time.UnixMilli(parseInt64(lastModified)))
 	db().Save(&video)
 	_, _, err := Cos().Object.Copy(context.Background(), "video/"+video.Name+".mp4",
-		fmt.Sprintf("https://%s.cos.%s.myqcloud.com/%s", viper.GetString("cos.bucket"), viper.GetString("cos.region"), key), nil)
+		fmt.Sprintf("%s.cos.%s.myqcloud.com/%s", viper.GetString("cos.bucket"), viper.GetString("cos.region"), key), nil)
 	if err == nil {
 		Cos().Object.Delete(context.Background(), key)
 	}
@@ -285,7 +284,7 @@ func sameFileExist(file *os.File, key, name string, size int64) *model.TPhoto {
 	var exist model.TPhoto
 	db().Where("md5", md5).Where("sha1", sha1).Where("size", size).First(&exist)
 	if exist.ID > 0 {
-		l.Info("与图片 {} 重复，file {} 被抛弃！", exist.ID, key)
+		l.Info(fmt.Sprintf("与图片 %d 重复，file %s 被抛弃！", exist.ID, key))
 		if !strings.Contains(exist.Description, name) {
 			exist.Description += "\n" + name
 			db().Save(exist)

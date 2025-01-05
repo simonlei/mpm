@@ -66,3 +66,20 @@ func (t DateTime) Month() int {
 	d := time.Time(t)
 	return int(d.Month())
 }
+
+func (dt *DateTime) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	switch v := value.(type) {
+	case time.Time:
+		*dt = DateTime(v)
+	default:
+		return fmt.Errorf("unsupported scan type for DateTime: %T", value)
+	}
+	return nil
+}
+
+func (dt DateTime) Value() (driver.Value, error) {
+	return time.Time(dt), nil
+}

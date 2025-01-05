@@ -17,15 +17,17 @@ func uploadPhoto(c *gin.Context) {
 		panic(err)
 	}
 	defer file.Close()
-	l.Info("total files {} with {}", header.Size, lastModified)
-	key := "upload/" + batchId + "_" + header.Filename
-	tmpFile, err := os.CreateTemp("", "mpm*")
+	l.Info("total files %d with %d", header.Size, lastModified)
+	key := "upload/" + batchId + "_" + getFullPathName(header.Header.Get("Content-Disposition"))
+	tmpFile, err := os.CreateTemp("", "mpm*"+header.Filename)
 
 	if err != nil {
 		panic(err)
 	}
-	defer tmpFile.Close()
+
 	_, err = io.Copy(tmpFile, file)
+	tmpFile.Close()
+
 	if err != nil {
 		panic(err)
 	}
@@ -40,12 +42,25 @@ func uploadPhoto(c *gin.Context) {
 		}
 	}()
 
-	uploadFileToCos(key, header.Header.Get("Content-Type"), header.Size, tmpFile)
-	uploadFile(key, lastModified, header.Header.Get("Content-Type"), header.Size, tmpFile)
+	uploadFileToCos(key, header.Header.Get("Content-Type"), header.Size, tmpFile.Name())
+	uploadFile(key, lastModified, header.Header.Get("Content-Type"), header.Size, tmpFile.Name())
 	c.String(200, "0")
 }
 
-func uploadFile(key, lastModified, contentType string, size int64, file *os.File) {
+func getFullPathName(s string) string {
+	ss := strings.Split(s, ";")
+	for _, v := range ss {
+		if strings.Contains(v, "filename") {
+			sss := v[11 : len(v)-1]
+			return sss
+		}
+	}
+	return ""
+}
+
+func uploadFile(key, lastModified, contentType string, size int64, fileName string) {
+	file, _ := os.Open(fileName)
+	defer file.Close()
 	l.Info("Key is	", key)
 	// upload/1616851720630_tmpupload/七上1025义工/IMG_002.jpg
 	paths := strings.Split(key, "/")

@@ -50,7 +50,7 @@ func loadMarkersGeoJson(c *gin.Context) {
 	})
 }
 
-func getAddress(latitude, longitude float64) string {
+func getGisAddress(latitude, longitude float64) string {
 	// todo: takeToken();
 
 	result, err := getAddressFromRemote(latitude, longitude)

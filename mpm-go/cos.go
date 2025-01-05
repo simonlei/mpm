@@ -65,7 +65,9 @@ func Cos() *cos.Client {
 
 }
 
-func uploadFileToCos(key, contentType string, size int64, file *os.File) {
+func uploadFileToCos(key, contentType string, size int64, fileName string) {
+	file, _ := os.Open(fileName)
+	defer file.Close()
 	uopt := cos.ObjectPutOptions{
 		ObjectPutHeaderOptions: &cos.ObjectPutHeaderOptions{
 			ContentType:   contentType,
