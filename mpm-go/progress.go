@@ -40,7 +40,7 @@ func (e BaseProgress) ProgressDetail() map[string]any {
 	return map[string]any{"total": e.Total, "count": e.Count, "progress": e.Progress()}
 }
 
-var tasks map[string]ProgressInterface
+var tasks map[string]ProgressInterface = make(map[string]ProgressInterface)
 
 func addTask(progress ProgressInterface) string {
 	taskId := uuid.New().String()
@@ -52,8 +52,11 @@ func getProgress(c *gin.Context) {
 	taskId := c.Param("taskId")
 	l.Infof("taskId %s", taskId)
 	if t, ok := tasks[taskId]; ok {
-		c.JSON(200, t.ProgressDetail())
+		if t.IsFinished() {
+			delete(tasks, taskId)
+		}
+		c.JSON(200, Response{0, t.ProgressDetail()})
 	} else {
-		c.JSON(200, map[string]any{"progress": 100})
+		c.JSON(200, Response{0, map[string]any{"progress": 100}})
 	}
 }

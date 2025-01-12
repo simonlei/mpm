@@ -44,7 +44,7 @@ func uploadPhoto(c *gin.Context) {
 
 	uploadFileToCos(key, header.Header.Get("Content-Type"), header.Size, tmpFile.Name())
 	uploadFile(key, lastModified, header.Header.Get("Content-Type"), header.Size, tmpFile.Name())
-	c.String(200, "0")
+	c.JSON(200, Response{Code: 0, Data: 0})
 }
 
 func getFullPathName(s string) string {

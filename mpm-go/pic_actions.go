@@ -3,6 +3,7 @@ package main
 import (
 	"mpm-go/model"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +26,7 @@ func (e *EmptyTrashTask) Run() {
 	e.Count = 0
 	for _, p := range photos {
 		realDelete(&p)
+		time.Sleep(1000 * time.Millisecond)
 		e.Count++
 	}
 }
@@ -33,5 +35,5 @@ func emptyTrash(c *gin.Context) {
 	t := EmptyTrashTask{}
 	taskId := addTask(&t)
 	safeGo(t.Run)
-	c.JSON(200, map[string]string{"taskId": taskId})
+	c.JSON(200, Response{0, map[string]string{"taskId": taskId}})
 }

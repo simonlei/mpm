@@ -1,9 +1,7 @@
 package model
 
-import "gorm.io/gorm"
-
 type PhotoFaceInfo struct {
-	gorm.Model
+	ID      int64 `gorm:"column:id;primaryKey;autoIncrement" json:"id"` // 元数据的唯一标识 ID，主键且自增
 	PhotoId int64 `gorm:"column:photoId" json:"photoId"`
 	FaceId  int64 `gorm:"column:faceId" json:"faceId"`
 	X       int   `gorm:"column:x" json:"x"`

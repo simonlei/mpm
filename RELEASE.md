@@ -363,7 +363,7 @@
 - [x] TrashPhotos: '/trashPhotos',
 - [x] UploadPhoto: '/uploadPhoto',
 - [x] EmptyTrash: '/emptyTrash',
-- [ ] TaskProgress: '/getProgress/',
+- [x] TaskProgress: '/getProgress/',
 - [ ] SwitchTrashFolder: '/switchTrashFolder',
 - [ ] UpdatePhoto: '/updateImage',
 - [ ] UpdateFolderDate: '/updateFolderDate',
