@@ -47,6 +47,7 @@ func setupEngine() {
 	r.POST("/api/updateFolderGis", updateFolderGis)
 	r.POST("/api/moveFolder", moveFolder)
 	r.POST("/api/updateImage", updateImage)
+	r.POST("/api/updateFace", updateFace)
 
 	r.GET("/cos/*path", cachecontrol.New(cachecontrol.CacheAssetsForeverPreset), proxyCos)
 

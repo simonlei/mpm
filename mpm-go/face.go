@@ -159,3 +159,47 @@ func getWiderFace(photo *model.TPhoto, faceInfo *model.PhotoFaceInfo) {
 	faceInfo.Width = int(math.Min(w, w2) - float64(faceInfo.X))
 	faceInfo.Height = int(math.Min(h, h2) - float64(faceInfo.Y))
 }
+
+type FaceUpdateParam struct {
+	FaceId       int    `json:"faceId"`
+	Name         string `json:"name"`
+	SelectedFace int64  `json:"selectedFace"`
+	Hidden       *bool  `json:"hidden"`
+	Collected    *bool  `json:"collected"`
+}
+
+func updateFace(c *gin.Context) {
+	var face FaceUpdateParam
+	c.BindJSON(&face)
+	var entityFace model.TFace
+	db().First(&entityFace, face.FaceId)
+	if entityFace.ID == 0 {
+		c.JSON(http.StatusOK, Response{0, false})
+		return
+	}
+	if face.Name != "" {
+		var existFace model.TFace
+		db().First(&existFace, "name=?", face.Name)
+		if existFace.ID != 0 {
+			c.JSON(http.StatusOK, Response{0, false})
+			return
+		}
+		entityFace.Name = face.Name
+	}
+	if face.SelectedFace > 0 {
+		// 设置对应的图片当中的人脸来当做默认人脸
+		var faceInfo model.PhotoFaceInfo
+		db().First(&faceInfo, "photoId=? and faceId=?", face.SelectedFace, face.FaceId)
+		if faceInfo.ID > 0 {
+			entityFace.SelectedFace = faceInfo.ID
+		}
+	}
+	if face.Hidden != nil {
+		entityFace.Hidden = *face.Hidden
+	}
+	if face.Collected != nil {
+		entityFace.Collected = *face.Collected
+	}
+	db().Save(entityFace)
+	c.JSON(http.StatusOK, Response{0, true})
+}

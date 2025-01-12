@@ -365,7 +365,7 @@
 - [x] EmptyTrash: '/emptyTrash',
 - [x] TaskProgress: '/getProgress/',
 - [x] SwitchTrashFolder: '/switchTrashFolder',
-- [ ] UpdatePhoto: '/updateImage',
+- [x] UpdatePhoto: '/updateImage',
 - [x] UpdateFolderDate: '/updateFolderDate',
 - [x] UpdateFolderGis: '/updateFolderGis',
 - [x] MoveFolder: '/moveFolder',
