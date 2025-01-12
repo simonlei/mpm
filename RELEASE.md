@@ -373,8 +373,8 @@
 - [ ] ~~LoadMarkers: '/loadMarkers',~~
 - [x] GetFaces: '/getFaces',
 - [x] GetFacesWithName: '/getFacesWithName',
-- [ ] UpdateFace: '/updateFace',
-- [ ] MergeFace: '/mergeFace',
+- [x] UpdateFace: '/updateFace',
+- [x] MergeFace: '/mergeFace',
 - [x] GetFacesForPhoto: '/getFacesForPhoto',
 - [ ] RemovePhotoFaceInfo: '/removePhotoFaceInfo',
 - [ ] RescanFace: '/rescanFace',

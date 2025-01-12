@@ -11,6 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
+	v20200303 "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/iai/v20200303"
 	"github.com/tencentyun/cos-go-sdk-v5"
 )
 
@@ -83,4 +85,16 @@ func uploadFileToCos(key, contentType string, size int64, fileName string) {
 		panic(err)
 	}
 	l.Info("upload result ", resp.Body)
+}
+
+func Iai() *v20200303.Client {
+	cred := &common.Credential{
+		SecretId:  viper.GetString("cos.secretId"),
+		SecretKey: viper.GetString("cos.secretKey"),
+	}
+	cli, err := v20200303.NewClient(cred, viper.GetString("cos.region"), nil)
+	if err != nil {
+		panic(err)
+	}
+	return cli
 }

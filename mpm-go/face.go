@@ -10,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+	v20200303 "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/iai/v20200303"
 	"github.com/tencentyun/cos-go-sdk-v5"
 	"gorm.io/gorm"
 )
@@ -202,4 +204,36 @@ func updateFace(c *gin.Context) {
 	}
 	db().Save(entityFace)
 	c.JSON(http.StatusOK, Response{0, true})
+}
+
+type MergeFaceParam struct {
+	From int `json:"from"`
+	To   int `json:"to"`
+}
+
+func mergeFace(c *gin.Context) {
+	var req MergeFaceParam
+	c.BindJSON(&req)
+	var face model.TFace
+	db().First(&face, req.From)
+	// 这里也要把腾讯云上的 face 给删掉
+	resp, err := Iai().DeletePersonFromGroup(&v20200303.DeletePersonFromGroupRequest{
+		GroupId:  getGroupName(),
+		PersonId: &face.PersonId,
+	})
+	l.Infof("Delete person from group response:{}, err:{}", resp, err)
+	db().Transaction(func(tx *gorm.DB) error {
+		tx.Exec("delete from t_face where id=?", req.From)
+		tx.Exec("update photo_face_info set faceId=? where faceId=?", req.To, req.From)
+		return nil
+	})
+	c.JSON(http.StatusOK, Response{0, true})
+}
+
+func getGroupName() *string {
+	name := "faceGroup"
+	if viper.GetBool("isDev") {
+		name = "faceGroup-dev"
+	}
+	return &name
 }

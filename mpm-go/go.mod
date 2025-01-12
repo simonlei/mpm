@@ -47,6 +47,8 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.18.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1079 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/iai v1.0.1079 // indirect
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.49 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
