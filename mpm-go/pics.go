@@ -5,6 +5,7 @@ import (
 	"mpm-go/model"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -163,4 +164,54 @@ func getThumbUrl(name string, rotate int64) string {
 	}
 	rotate = (360 + rotate) % 360
 	return fmt.Sprintf("small/%s/thumb%d", name, rotate)
+}
+
+func updateImage(c *gin.Context) {
+	var values map[string]interface{}
+	c.BindJSON(&values)
+	result := make(map[string]any)
+	for k, v := range values {
+		result[k] = v
+	}
+	updatePhotoActivity(result, values)
+	if values["longitude"].(float64) > 0 || values["latitude"].(float64) > 0 {
+		address := getGisAddress(values["latitude"].(float64), values["longitude"].(float64))
+		if address != "" {
+			result["address"] = address
+		}
+		if values["tags"] != nil {
+			setTagsRelation(result["id"].(int), values["tags"].(string))
+		}
+	}
+	db().Model(&model.TPhoto{}).Where("id=?", result["id"]).Updates(result)
+	var p model.TPhoto
+	db().First(&p, values["id"])
+	c.JSON(200, Response{0, addThumbField([]*model.TPhoto{&p})[0]})
+}
+
+// 更改活动 id
+
+func updatePhotoActivity(result, values map[string]any) {
+	if _, ok := values["activity"]; !ok {
+		return
+	}
+	var ac model.TActivity
+	db().First(&ac, values["activity"])
+	var photo model.TPhoto
+	db().First(&photo, values["id"])
+	if ac.ID == 0 || photo.ID == 0 {
+		return
+	}
+	takeDate := time.Time(photo.TakenDate)
+	startDate := time.Time(ac.StartDate)
+	endDate := time.Time(ac.EndDate)
+	if takeDate.Before(startDate) || takeDate.After(endDate.Add(24*time.Hour)) {
+		// 如果当前时间不在活动范围内，更改时间为活动开始时间
+		result["taken_date"] = startDate
+	}
+	if photo.Latitude == 0 && photo.Longitude == 0 {
+		// 如果当前 GIS 是空，更改 GIS 为活动的 GIS
+		result["longitude"] = ac.Longitude
+		result["latitude"] = ac.Latitude
+	}
 }
