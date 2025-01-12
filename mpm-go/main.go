@@ -44,6 +44,8 @@ func setupEngine() {
 	r.GET("/api/getProgress/:taskId", getProgress)
 	r.POST("/api/switchTrashFolder", switchTrashFolder)
 	r.POST("/api/updateFolderDate", updateFolderDate)
+	r.POST("/api/updateFolderGis", updateFolderGis)
+	r.POST("/api/moveFolder", moveFolder)
 
 	r.GET("/cos/*path", cachecontrol.New(cachecontrol.CacheAssetsForeverPreset), proxyCos)
 

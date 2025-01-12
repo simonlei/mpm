@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"mpm-go/model"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -87,4 +88,83 @@ func updateFolderDate(c *gin.Context) {
 	     where t_files.path like ?
 	`, req.ToDate, req.Path+"%").RowsAffected
 	c.JSON(200, Response{0, affected})
+}
+
+type UpdateFolderGisSchema struct {
+	Path      string  `json:"path"`
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
+func updateFolderGis(c *gin.Context) {
+	var req UpdateFolderGisSchema
+	c.BindJSON(&req)
+	address := getGisAddress(req.Latitude, req.Longitude)
+	affected := db().Exec(`
+		update t_photos
+		inner join t_files on t_photos.id=t_files.photoId
+		SET latitude = ?, longitude=?, address=?
+		where t_files.path like ?
+	`, req.Latitude, req.Longitude, address, req.Path+"%").RowsAffected
+	c.JSON(200, Response{0, affected})
+}
+
+type FolderActionSchema struct {
+	FromPath string `json:"fromPath"`
+	ToId     string `json:"toId"`
+	Merge    bool   `json:"merge"`
+}
+
+func moveFolder(c *gin.Context) {
+	var req FolderActionSchema
+	c.BindJSON(&req)
+	l.Infof("Move Folder ", req)
+	var node model.TFile
+	db().Where("path = ?", req.FromPath).Find(&node)
+	var newParent model.TFile
+	db().Where("id = ?", req.ToId).Find(&newParent)
+	if req.Merge {
+		mergeTo(&node, &newParent)
+	} else {
+		moveFolderTo(&node, &newParent)
+	}
+	c.JSON(200, Response{0, true})
+}
+
+func moveFolderTo(child *model.TFile, newParent *model.TFile) {
+	if newParent.ID == 0 || child.ID == 0 {
+		return
+	}
+	l.Infof("Child {} parent id {}", child.ID, newParent.ID)
+	// 如果 newParent 下面有同名 node，那么将node merge到newParent下的同名node下
+	var sameNode model.TFile
+	db().Where("parentId =? and name =?", newParent.ID, child.Name).Find(&sameNode)
+	if !child.IsFolder || sameNode.ID == 0 || sameNode.ID == child.ID {
+		child.ParentID = newParent.ID
+		newPath := newParent.Path + "/" + child.Name
+		l.Infof("New path {} {}", newPath, child.ParentID)
+		child.Path = newPath
+		db().Save(child)
+		var children []model.TFile
+		db().Where("parentId =?", child.ID).Find(&children)
+		for _, sub := range children {
+			moveFolderTo(&sub, child)
+		}
+	} else {
+		mergeTo(child, &sameNode)
+	}
+}
+
+// 将node 下的所有目录和文件都转移到 newParent 目录下，并删除node
+func mergeTo(node *model.TFile, newParent *model.TFile) {
+	if newParent.ID == 0 {
+		panic("不能合并到root下")
+	}
+	l.Infof("New parent id {}", newParent.ID)
+	var children []model.TFile
+	db().Where("parentId =?", node.ID).Find(&children)
+	for _, sub := range children {
+		moveFolderTo(&sub, newParent)
+	}
+	db().Delete(&node)
 }

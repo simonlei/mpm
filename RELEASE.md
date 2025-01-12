@@ -367,8 +367,8 @@
 - [x] SwitchTrashFolder: '/switchTrashFolder',
 - [ ] UpdatePhoto: '/updateImage',
 - [x] UpdateFolderDate: '/updateFolderDate',
-- [ ] UpdateFolderGis: '/updateFolderGis',
-- [ ] MoveFolder: '/moveFolder',
+- [x] UpdateFolderGis: '/updateFolderGis',
+- [x] MoveFolder: '/moveFolder',
 - [x] GetAllTags: '/getAllTags',
 - [ ] ~~LoadMarkers: '/loadMarkers',~~
 - [x] GetFaces: '/getFaces',
