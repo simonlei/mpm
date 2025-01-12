@@ -107,16 +107,6 @@ func getFacesForPhoto(c *gin.Context) {
 	c.JSON(http.StatusOK, Response{0, data})
 }
 
-type PhotoFaceInfo struct {
-	gorm.Model
-	PhotoId int64 `gorm:"column:photoId" json:"photoId"`
-	FaceId  int64 `gorm:"column:faceId" json:"faceId"`
-	X       int   `gorm:"column:x" json:"x"`
-	Y       int   `gorm:"column:y" json:"y"`
-	Width   int   `gorm:"column:width" json:"width"`
-	Height  int   `gorm:"column:height" json:"height"`
-}
-
 func getFaceImg(c *gin.Context) {
 	faceId, _ := strconv.Atoi(c.Param("faceId"))
 	infoId, _ := strconv.Atoi(c.Param("infoId"))
@@ -126,7 +116,7 @@ func getFaceImg(c *gin.Context) {
 	} else {
 		x = db().Raw("select * from photo_face_info where id=?", infoId)
 	}
-	var faceInfo PhotoFaceInfo
+	var faceInfo model.PhotoFaceInfo
 	x.Scan(&faceInfo)
 	l.Info("face info is ", faceInfo.ID)
 	var photo model.TPhoto
@@ -138,7 +128,7 @@ func getFaceImg(c *gin.Context) {
 	c.DataFromReader(200, cosObj.ContentLength, cosObj.Response.Header.Get("content-type"), cosObj.Body, nil)
 }
 
-func getFaceFromCos(photo *model.TPhoto, faceInfo *PhotoFaceInfo) *cos.Response {
+func getFaceFromCos(photo *model.TPhoto, faceInfo *model.PhotoFaceInfo) *cos.Response {
 	req := "/small/" + photo.Name
 	param := "imageMogr2/format/jpeg"
 	if faceInfo != nil {
@@ -152,7 +142,7 @@ func getFaceFromCos(photo *model.TPhoto, faceInfo *PhotoFaceInfo) *cos.Response 
 	return obj
 }
 
-func getWiderFace(photo *model.TPhoto, faceInfo *PhotoFaceInfo) {
+func getWiderFace(photo *model.TPhoto, faceInfo *model.PhotoFaceInfo) {
 	padX := float64(faceInfo.Width) * 0.3
 	padY := float64(faceInfo.Height) * 0.3
 	x := float64(faceInfo.X) - padX

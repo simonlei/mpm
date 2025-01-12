@@ -40,6 +40,7 @@ func setupEngine() {
 	r.POST("/api/deleteActivity", deleteActivity)
 	r.POST("/api/trashPhotos", trashPhotos)
 	r.POST("/api/uploadPhoto", uploadPhoto)
+	r.POST("/api/emptyTrash", emptyTrash)
 
 	r.GET("/cos/*path", cachecontrol.New(cachecontrol.CacheAssetsForeverPreset), proxyCos)
 

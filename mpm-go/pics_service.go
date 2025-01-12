@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tencentyun/cos-go-sdk-v5"
 	"github.com/tidwall/gjson"
+	"gorm.io/gorm"
 )
 
 func getMajorName(filename string) string {
@@ -60,6 +61,28 @@ func savePhotosOnCos(key string, photo *model.TPhoto) {
 	} else {
 		panic(err)
 	}
+}
+
+func realDelete(p *model.TPhoto) {
+	bl := model.TBlockPhoto{
+		MD5:  p.MD5,
+		SHA1: p.SHA1,
+		Size: p.Size,
+	}
+	db().Transaction(func(tx *gorm.DB) error {
+		Cos().Object.Delete(context.Background(), "small/"+p.Name)
+		if p.MediaType == "video" {
+			Cos().Object.Delete(context.Background(), "video/"+p.Name+".mp4")
+			Cos().Object.Delete(context.Background(), "video_t/"+p.Name+".mp4")
+		} else {
+			Cos().Object.Delete(context.Background(), "origin/"+p.Name)
+		}
+		tx.Create(&bl)
+		tx.Delete(&p)
+		tx.Delete(&model.TFile{}, "photoId = ?", p.ID)
+		tx.Delete(&model.PhotoFaceInfo{}, "photoId =?", p.ID)
+		return nil
+	})
 }
 
 func generateSmallPic(key, name string) {

@@ -116,3 +116,15 @@ func getUrlResponse(url string) (string, error) {
 
 	return string(body), nil
 }
+
+func safeGo(f func()) {
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				// 在这里处理panic，例如记录日志或发送通知
+				l.Infof("Recovered from panic: %v", r)
+			}
+		}()
+		f()
+	}()
+}

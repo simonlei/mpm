@@ -362,7 +362,7 @@
 - [x] PicsCount: '/getCount',
 - [x] TrashPhotos: '/trashPhotos',
 - [x] UploadPhoto: '/uploadPhoto',
-- [ ] EmptyTrash: '/emptyTrash',
+- [x] EmptyTrash: '/emptyTrash',
 - [ ] TaskProgress: '/getProgress/',
 - [ ] SwitchTrashFolder: '/switchTrashFolder',
 - [ ] UpdatePhoto: '/updateImage',
