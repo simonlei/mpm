@@ -49,6 +49,8 @@ func setupEngine() {
 	r.POST("/api/updateImage", updateImage)
 	r.POST("/api/updateFace", updateFace)
 	r.POST("/api/mergeFace", mergeFace)
+	r.POST("/api/removePhotoFaceInfo", removePhotoFaceInfo)
+	r.POST("/api/rescanFace", rescanFace)
 
 	r.GET("/cos/*path", cachecontrol.New(cachecontrol.CacheAssetsForeverPreset), proxyCos)
 

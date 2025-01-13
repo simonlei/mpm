@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"io"
 	"math"
 	"mpm-go/model"
 	"net/http"
@@ -11,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	v20200303 "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/iai/v20200303"
 	"github.com/tencentyun/cos-go-sdk-v5"
 	"gorm.io/gorm"
@@ -236,4 +239,111 @@ func getGroupName() *string {
 		name = "faceGroup-dev"
 	}
 	return &name
+}
+
+func removePhotoFaceInfo(c *gin.Context) {
+	var req IdReq
+	c.BindJSON(&req)
+	db().Exec("delete from photo_face_info where id=?", req.Id)
+	c.JSON(http.StatusOK, Response{0, 1})
+}
+
+func rescanFace(c *gin.Context) {
+	var req IdReq
+	c.BindJSON(&req)
+	var photo model.TPhoto
+	db().First(&photo, req.Id)
+	if photo.ID > 0 {
+		detectFaceIn(photo)
+	}
+	c.JSON(http.StatusOK, Response{0, true})
+}
+
+func detectFaceIn(photo model.TPhoto) {
+	faceInfos, err := detectFacesInPhoto(photo)
+	if err != nil {
+		l.Info("detect face error:", err)
+		return
+	}
+	db().Transaction(func(tx *gorm.DB) error {
+		tx.Exec("delete from photo_face_info where photoId=?", photo.ID)
+		for _, faceInfo := range faceInfos {
+			if *faceInfo.Width <= 64 || *faceInfo.Height <= 64 || *faceInfo.X < 0 || *faceInfo.Y < 0 {
+				continue
+			}
+			// face info 应该记录下来，到时候可以在页面上点选对应的人头
+			info := model.PhotoFaceInfo{
+				PhotoId: photo.ID,
+				X:       int(*faceInfo.X),
+				Y:       int(*faceInfo.Y),
+				Width:   int(*faceInfo.Width),
+				Height:  int(*faceInfo.Height),
+			}
+			tx.Create(&info)
+			addFaceToGroup(tx, photo, info)
+		}
+		return nil
+	})
+}
+
+func addFaceToGroup(tx *gorm.DB, photo model.TPhoto, info model.PhotoFaceInfo) {
+	img := getImage(photo, &info)
+	// 一张照片里面可能有多个 face，所以 person id 应该是photo.id+faceInfo.id
+	personId := common.StringPtr(strconv.Itoa(int(photo.ID)) + "-" + strconv.Itoa(int(info.ID)))
+	resp, err := Iai().CreatePerson(&v20200303.CreatePersonRequest{
+		GroupId:             getGroupName(),
+		Image:               &img,
+		PersonId:            personId,
+		PersonName:          personId,
+		UniquePersonControl: common.Uint64Ptr(uint64(1)),
+		NeedRotateDetection: common.Uint64Ptr(uint64(1)),
+	})
+	if err != nil {
+		l.Errorf("create person error: %s", err)
+		return
+	}
+	faceId := *resp.Response.FaceId
+	similarPersonId := resp.Response.SimilarPersonId
+	l.Infof("face info %s's similar person id %s ", photo.Name, *similarPersonId)
+	// 有可能 entity face 被删除了的情况，这时要创建新的 face
+	var face model.TFace
+	if similarPersonId != nil {
+		tx.Where("personId=?", similarPersonId).First(&face)
+	}
+	if face.ID == 0 {
+		face = model.TFace{
+			FaceId:   faceId,
+			PersonId: *personId,
+		}
+		tx.Create(&face)
+	}
+	info.FaceId = face.ID
+	tx.Save(&info)
+}
+
+func detectFacesInPhoto(photo model.TPhoto) ([]*v20200303.FaceInfo, error) {
+	image := getImage(photo, nil)
+	var maxFace uint64 = 10
+	var needRotate uint64 = 1
+	resp, err := Iai().DetectFace(&v20200303.DetectFaceRequest{
+		Image:               &image,
+		MaxFaceNum:          &maxFace,
+		NeedRotateDetection: &needRotate,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Response.FaceInfos, nil
+}
+
+// 如果face为空，则从cos上获取整个图片，否则 cut 一下
+func getImage(photo model.TPhoto, face *model.PhotoFaceInfo) string {
+	object := getFaceFromCos(&photo, face)
+	defer object.Body.Close() // 确保在函数结束时关闭资源
+
+	bytes, err := io.ReadAll(object.Body)
+	if err != nil {
+		return ""
+	}
+	return base64.StdEncoding.EncodeToString(bytes)
 }
