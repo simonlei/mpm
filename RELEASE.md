@@ -379,7 +379,7 @@
 - [x] RemovePhotoFaceInfo: '/removePhotoFaceInfo',
 - [x] RescanFace: '/rescanFace',
 - [x] CheckPassword: '/checkPassword',
-- [ ] CreateOrUpdateUser: '/createOrUpdateUser',
+- [x] CreateOrUpdateUser: '/createOrUpdateUser',
 - [ ] LoadUsers: '/loadUsers',
 - [ ] LoadUser: '/loadUser',
 - [ ] DeleteUser: '/deleteUser',

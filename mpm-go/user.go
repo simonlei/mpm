@@ -24,7 +24,7 @@ func checkPassword(c *gin.Context) {
 		user.Passwd = ""
 		user.Signature = calcSignature(req.Account, "")
 	}
-	c.JSON(200, user)
+	c.JSON(200, Response{0, user})
 }
 
 func calcSignature(user, timestamp string) string {
@@ -38,8 +38,31 @@ func calcSignature(user, timestamp string) string {
 	return getMD5Hash(user + token.Value + timestamp)
 }
 
+func createOrUpdateUser(c *gin.Context) {
+	var req model.TUser
+	c.BindJSON(&req)
+	var user model.TUser
+	if req.ID > 0 {
+		db().First(&user, "id =?", req.ID)
+	}
+	if user.ID == 0 {
+		req.ID = 0
+		req.Salt = uuid.NewString()
+		req.Passwd = fmt.Sprintf("%X", sha256.Sum256([]byte(req.Passwd+req.Salt)))
+		db().Create(&req)
+	} else {
+		user.Name = req.Name
+		user.FaceId = req.FaceId
+		user.IsAdmin = req.IsAdmin
+		if req.Passwd != "" {
+			user.Passwd = fmt.Sprintf("%X", sha256.Sum256([]byte(req.Passwd+user.Salt)))
+		}
+		db().Save(&user)
+	}
+	c.JSON(200, Response{0, true})
+}
+
 /*
-- [ ] CheckPassword: '/checkPassword',
 - [ ] CreateOrUpdateUser: '/createOrUpdateUser',
 - [ ] LoadUsers: '/loadUsers',
 - [ ] LoadUser: '/loadUser',
