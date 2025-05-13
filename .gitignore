@@ -8,3 +8,4 @@ web/package-lock.json
 mpm-go/mpm-go
 mpm-server/nohupjava.out
 mpm-go/mpm-go
+mpm-go/__debug*

@@ -380,9 +380,9 @@
 - [x] RescanFace: '/rescanFace',
 - [x] CheckPassword: '/checkPassword',
 - [x] CreateOrUpdateUser: '/createOrUpdateUser',
-- [ ] LoadUsers: '/loadUsers',
-- [ ] LoadUser: '/loadUser',
-- [ ] DeleteUser: '/deleteUser',
+- [x] LoadUsers: '/loadUsers',
+- [x] LoadUser: '/loadUser',
+- [x] DeleteUser: '/deleteUser',
 - [x] /geo_json_api/loadMarkersGeoJson
 - [x] /get_face_img/{id}/{photoId}
 - [x] /cos/**

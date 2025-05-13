@@ -62,10 +62,25 @@ func createOrUpdateUser(c *gin.Context) {
 	c.JSON(200, Response{0, true})
 }
 
-/*
-- [ ] CreateOrUpdateUser: '/createOrUpdateUser',
-- [ ] LoadUsers: '/loadUsers',
-- [ ] LoadUser: '/loadUser',
-- [ ] DeleteUser: '/deleteUser',
+func loadUsers(c *gin.Context) {
+	var users []model.TUser
+	db().Find(&users)
+	c.JSON(200, Response{0, users})
+}
 
-*/
+func loadUser(c *gin.Context) {
+	var req IdReq
+	c.BindJSON(&req)
+	var user model.TUser
+	db().First(&user, "id =?", req.Id)
+	user.Salt = ""
+	user.Passwd = ""
+	c.JSON(200, Response{0, user})
+}
+
+func deleteUser(c *gin.Context) {
+	var req IdReq
+	c.BindJSON(&req)
+	db().Delete(&model.TUser{}, req.Id)
+	c.JSON(200, Response{0, true})
+}
