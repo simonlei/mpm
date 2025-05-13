@@ -274,7 +274,7 @@ func javaResult(tt TestFun) string {
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request, _ = http.NewRequest("POST", tt.url, bytes.NewBufferString(tt.params))
 	c.Request.Header.Add("content-type", "application/json")
-	proxyJava(c)
+	// proxyJava(c)
 	return recorder.Body.String()
 }
 
@@ -283,6 +283,6 @@ func javaGetResult(tt TestFun) string {
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request, _ = http.NewRequest("GET", tt.url, nil)
 	// c.Request.Header.Add("content-type", "application/json")
-	proxyJava(c)
+	// proxyJava(c)
 	return recorder.Body.String()
 }

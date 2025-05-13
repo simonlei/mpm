@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	cachecontrol "go.eigsys.de/gin-cachecontrol/v2"
 )
 
@@ -57,7 +58,7 @@ func setupEngine() {
 
 	r.GET("/cos/*path", cachecontrol.New(cachecontrol.CacheAssetsForeverPreset), proxyCos)
 
-	r.Run(":" + getEnvIgnoreCaseWithDefault("SERVER_PORT", "8080"))
+	r.Run(":" + viper.GetString("server.port"))
 }
 
 func MpmMiddleWare() gin.HandlerFunc {
