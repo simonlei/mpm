@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"strings"
 
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -29,20 +27,4 @@ func init() {
 	lo, _ := zap.NewDevelopment()
 	l = lo.Sugar()
 	defer l.Sync()
-}
-
-func getEnvIgnoreCase(key string) string {
-	env := os.Getenv(strings.ToLower(key))
-	if env == "" {
-		env = os.Getenv(strings.ToUpper(key))
-	}
-	return env
-}
-
-func getEnvIgnoreCaseWithDefault(key, dft string) string {
-	env := getEnvIgnoreCase(key)
-	if env == "" {
-		return dft
-	}
-	return env
 }

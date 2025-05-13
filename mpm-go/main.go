@@ -20,7 +20,10 @@ func setupEngine() {
 	r := gin.New()
 	r.Use(MpmMiddleWare(), MpmRecovery())
 
-	base := getEnvIgnoreCase("static_base") // ../mpm-vue3/dist/
+	base := viper.GetString("static.base") // ../mpm-vue3/dist/
+	if base == "" {
+		base = "/web"
+	}
 	l.Info(base)
 	r.Use(static.Serve("/", static.LocalFile(base, true)))
 	r.POST("/api/getActivities", getActivitiesApi)
