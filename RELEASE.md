@@ -378,7 +378,7 @@
 - [x] GetFacesForPhoto: '/getFacesForPhoto',
 - [x] RemovePhotoFaceInfo: '/removePhotoFaceInfo',
 - [x] RescanFace: '/rescanFace',
-- [ ] CheckPassword: '/checkPassword',
+- [x] CheckPassword: '/checkPassword',
 - [ ] CreateOrUpdateUser: '/createOrUpdateUser',
 - [ ] LoadUsers: '/loadUsers',
 - [ ] LoadUser: '/loadUser',

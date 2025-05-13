@@ -304,10 +304,10 @@ func addFaceToGroup(tx *gorm.DB, photo model.TPhoto, info model.PhotoFaceInfo) {
 	}
 	faceId := *resp.Response.FaceId
 	similarPersonId := resp.Response.SimilarPersonId
-	l.Infof("face info %s's similar person id %s ", photo.Name, *similarPersonId)
 	// 有可能 entity face 被删除了的情况，这时要创建新的 face
 	var face model.TFace
 	if similarPersonId != nil {
+		l.Infof("face info %s's similar person id %s ", photo.Name, *similarPersonId)
 		tx.Where("personId=?", similarPersonId).First(&face)
 	}
 	if face.ID == 0 {
