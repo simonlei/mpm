@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"strings"
 
 	"github.com/gin-contrib/static"
@@ -59,27 +57,7 @@ func setupEngine() {
 
 	r.GET("/cos/*path", cachecontrol.New(cachecontrol.CacheAssetsForeverPreset), proxyCos)
 
-	configForward(r)
-
-	r.Run(":18880")
-}
-
-func configForward(r *gin.Engine) {
-	r.NoRoute(proxyJava)
-}
-
-func proxyJava(c *gin.Context) {
-	remote, _ := url.Parse("http://127.0.0.1:" + getEnvIgnoreCaseWithDefault("SERVER_PORT", "8080"))
-	l.Info(remote)
-	director := func(req *http.Request) {
-		req.URL.Scheme = remote.Scheme
-		req.URL.Host = remote.Host
-		req.URL.Path = remote.Path + c.Request.URL.Path
-		req.Header = c.Request.Header
-	}
-	proxy := &httputil.ReverseProxy{Director: director}
-	proxy.ServeHTTP(c.Writer, c.Request)
-	l.Info("Forwarded request ", c.Request.URL)
+	r.Run(":" + getEnvIgnoreCaseWithDefault("SERVER_PORT", "8080"))
 }
 
 func MpmMiddleWare() gin.HandlerFunc {
