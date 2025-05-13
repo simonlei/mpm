@@ -13,7 +13,7 @@ func init() {
 	viper.SetConfigName("application")
 	viper.SetConfigType("properties")
 	viper.AddConfigPath("config/")
-	viper.AddConfigPath("../mpm-server/src/main/resources") // for dev
+	viper.AddConfigPath("../docs") // for dev
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(fmt.Sprintf("Fatal error config file: %s ", err))

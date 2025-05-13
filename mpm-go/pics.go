@@ -174,7 +174,9 @@ func updateImage(c *gin.Context) {
 		result[k] = v
 	}
 	updatePhotoActivity(result, values)
-	if values["longitude"].(float64) > 0 || values["latitude"].(float64) > 0 {
+	lo, loOk := values["longitude"]
+	la, laOk := values["latitude"]
+	if loOk && lo.(float64) > 0 || laOk && la.(float64) > 0 {
 		address := getGisAddress(values["latitude"].(float64), values["longitude"].(float64))
 		if address != "" {
 			result["address"] = address
