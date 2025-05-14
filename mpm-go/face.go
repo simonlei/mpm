@@ -290,14 +290,15 @@ func addFaceToGroup(tx *gorm.DB, photo model.TPhoto, info model.PhotoFaceInfo) {
 	img := getImage(photo, &info)
 	// 一张照片里面可能有多个 face，所以 person id 应该是photo.id+faceInfo.id
 	personId := common.StringPtr(strconv.Itoa(int(photo.ID)) + "-" + strconv.Itoa(int(info.ID)))
-	resp, err := Iai().CreatePerson(&v20200303.CreatePersonRequest{
-		GroupId:             getGroupName(),
-		Image:               &img,
-		PersonId:            personId,
-		PersonName:          personId,
-		UniquePersonControl: common.Uint64Ptr(uint64(1)),
-		NeedRotateDetection: common.Uint64Ptr(uint64(1)),
-	})
+	req := v20200303.NewCreatePersonRequest()
+	req.GroupId = getGroupName()
+	req.Image = &img
+	req.PersonId = personId
+	req.PersonName = personId
+	req.UniquePersonControl = common.Uint64Ptr(uint64(1))
+	req.NeedRotateDetection = common.Uint64Ptr(uint64(1))
+
+	resp, err := Iai().CreatePerson(req)
 	if err != nil {
 		l.Errorf("create person error: %s", err)
 		return
@@ -312,7 +313,7 @@ func addFaceToGroup(tx *gorm.DB, photo model.TPhoto, info model.PhotoFaceInfo) {
 	}
 	if face.ID == 0 {
 		face = model.TFace{
-			FaceId:   faceId,
+			FaceId:   parseInt64(faceId),
 			PersonId: *personId,
 		}
 		tx.Create(&face)
@@ -325,11 +326,11 @@ func detectFacesInPhoto(photo model.TPhoto) ([]*v20200303.FaceInfo, error) {
 	image := getImage(photo, nil)
 	var maxFace uint64 = 10
 	var needRotate uint64 = 1
-	resp, err := Iai().DetectFace(&v20200303.DetectFaceRequest{
-		Image:               &image,
-		MaxFaceNum:          &maxFace,
-		NeedRotateDetection: &needRotate,
-	})
+	req := v20200303.NewDetectFaceRequest()
+	req.Image = &image
+	req.MaxFaceNum = &maxFace
+	req.NeedRotateDetection = &needRotate
+	resp, err := Iai().DetectFace(req)
 	if err != nil {
 		return nil, err
 	}
