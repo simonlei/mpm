@@ -1,8 +1,11 @@
 package main
 
 import (
+	"crypto/hmac"
 	"crypto/md5"
 	"crypto/sha1"
+	"encoding/base32"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"math"
@@ -127,4 +130,32 @@ func safeGo(f func()) {
 		}()
 		f()
 	}()
+}
+
+func generateTOTP(secret string, interval int64) string {
+	if secret == "" || interval <= 0 {
+		return ""
+	}
+	// 解码Base32编码的密钥
+	key, _ := base32.StdEncoding.DecodeString(secret)
+
+	// 计算时间戳
+	counter := interval / 30
+	buf := make([]byte, 8)
+	binary.BigEndian.PutUint64(buf, uint64(counter))
+
+	// HMAC-SHA1哈希
+	h := hmac.New(sha1.New, key)
+	h.Write(buf)
+	hash := h.Sum(nil)
+
+	// 动态截断
+	offset := hash[19] & 0xf
+	code := ((int(hash[offset]) & 0x7f) << 24) |
+		((int(hash[offset+1]) & 0xff) << 16) |
+		((int(hash[offset+2]) & 0xff) << 8) |
+		(int(hash[offset+3]) & 0xff)
+
+	// 生成6位数字
+	return fmt.Sprintf("%06d", code%1000000)
 }
