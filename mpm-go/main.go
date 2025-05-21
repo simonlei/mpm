@@ -68,10 +68,15 @@ func MpmMiddleWare() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// hasRight := AuthFilter(c)
 		hasRight := true
+		url := c.Request.URL.String()
+		if url != "/api/checkPassword" && strings.HasPrefix(url, "/api") && c.GetHeader("Signature") != calcSignature(c.GetHeader("Account"), "") {
+			// todo: 检查 timestamp，定个有效期
+			hasRight = false
+		}
 		bodyWriter := &BodyWriter{buf: &bytes.Buffer{}, ResponseWriter: c.Writer}
 
 		if !hasRight {
-			c.String(http.StatusForbidden, "无权限访问，请确认已正确登录或是正确的 API 调用方式")
+			c.String(http.StatusForbidden, "签名不对，不允许访问 API")
 			c.Abort()
 		} else {
 			if !c.IsAborted() {
@@ -79,7 +84,7 @@ func MpmMiddleWare() gin.HandlerFunc {
 				c.Next()
 				contentType := c.Writer.Header().Get("Content-Type")
 
-				l.Info(c.Request.Context(), "Content type is :", contentType)
+				l.Info("Content type is :", contentType)
 				if strings.HasPrefix(contentType, "application/json") {
 					// 拿到 response 之后再包一层
 					bodyWriter.wrapJsonRpc(c)

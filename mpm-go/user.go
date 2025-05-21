@@ -23,13 +23,15 @@ func checkPassword(c *gin.Context) {
 		user.Salt = ""
 		user.Passwd = ""
 		user.Signature = calcSignature(req.Account, "")
+	} else {
+		panic("密码不正确")
 	}
 	c.JSON(200, Response{0, user})
 }
 
 func calcSignature(user, timestamp string) string {
 	var token model.Meta
-	db().First(&token, "key =?", "login_token")
+	db().First(&token, "`c_key` =?", "login_token")
 	if token.ID == 0 {
 		token.Key = "login_token"
 		token.Value = uuid.NewString()
