@@ -101,7 +101,7 @@ func getPics(c *gin.Context) {
 		}
 		l.Info("sql is ", sql)
 		if req.IdOnly {
-			var results []map[string]interface{}
+			var results []map[string]any
 
 			tx := db().Raw(sql, params).Scan(&results)
 			if tx.Error != nil {
