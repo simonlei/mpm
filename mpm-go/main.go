@@ -58,6 +58,7 @@ func setupEngine() {
 	r.POST("/api/loadUsers", loadUsers)
 	r.POST("/api/loadUser", loadUser)
 	r.POST("/api/deleteUser", deleteUser)
+	r.POST("/api/totp", totp)
 
 	r.GET("/cos/*path", cachecontrol.New(cachecontrol.CacheAssetsForeverPreset), proxyCos)
 

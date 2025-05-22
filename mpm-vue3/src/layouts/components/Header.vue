@@ -2,33 +2,33 @@
   <div :class="layoutCls">
     <t-head-menu :class="menuCls" :theme="'dark'" :value="active" expand-type="popup">
       <template v-if="layout !== 'side'" #default>
-        <menu-content :nav-data="menu" class="header-menu"/>
+        <menu-content :nav-data="menu" class="header-menu" />
       </template>
       <!-- My Photo Manager(1111) [ ] 跳转 []只看星标 []只看视频 [tags dropdown] [排序（c] 回收站(1) 地图模式 上传照片 -->
       <template #operations>
         <div class="operations-container">
 
           <t-tooltip content="跳转至指定位置，按回车确定" placement="bottom">
-            <t-input-number v-model:value="selectStore.lastSelectedIndex" :label="'跳转至'"
-                            :onEnter="jumpTo" align="center" theme="normal"/>
+            <t-input-number v-model:value="selectStore.lastSelectedIndex" :label="'跳转至'" :onEnter="jumpTo"
+              align="center" theme="normal" />
           </t-tooltip>
           <t-dropdown trigger="click">
             <template #dropdown>
               <t-dropdown-menu>
                 <t-dropdown-item class="operations-dropdown-container-item">
                   <template #content>
-                    <video-only-checkbox/>
+                    <video-only-checkbox />
                   </template>
                 </t-dropdown-item>
                 <t-dropdown-item class="operations-dropdown-container-item">
                   <template #content>
-                    <star-only-checkbox/>
+                    <star-only-checkbox />
                   </template>
                 </t-dropdown-item>
                 <t-dropdown-item class="operations-dropdown-container-item">
                   <template #content>
                     <Suspense>
-                      <tag-filter-select/>
+                      <tag-filter-select />
                     </Suspense>
                   </template>
                 </t-dropdown-item>
@@ -36,10 +36,10 @@
             </template>
             <t-button class="header-user-btn" theme="default" variant="text">
               <template #icon>
-                <t-icon class="header-user-avatar" name="filter"/>
+                <t-icon class="header-user-avatar" name="filter" />
               </template>
               <template #suffix>
-                <t-icon name="chevron-down"/>
+                <t-icon name="chevron-down" />
               </template>
             </t-button>
           </t-dropdown>
@@ -49,42 +49,45 @@
               <t-dropdown-menu :maxColumnWidth="150">
                 <t-dropdown-item class="operations-dropdown-container-item">
                   <template #content>
-                    <order-selector/>
+                    <order-selector />
                   </template>
                 </t-dropdown-item>
               </t-dropdown-menu>
             </template>
             <t-button class="header-user-btn" theme="default" variant="text">
               <template #icon>
-                <t-icon class="header-user-avatar" name="order-descending"/>
+                <t-icon class="header-user-avatar" name="order-descending" />
               </template>
               <template #suffix>
-                <t-icon name="chevron-down"/>
+                <t-icon name="chevron-down" />
               </template>
             </t-button>
           </t-dropdown>
-          <key-board-listener/>
+          <key-board-listener />
 
 
-          <switch-trash-button/>
-          <empty-trash-button/>
+          <switch-trash-button />
+          <empty-trash-button />
           <!-- 搜索框 -->
-          <search v-if="layout !== 'side'" :layout="layout"/>
+          <search v-if="layout !== 'side'" :layout="layout" />
 
-          <upload-photo-button/>
+          <upload-photo-button />
 
           <t-tooltip content="代码仓库" placement="bottom">
             <t-button shape="square" theme="default" variant="text" @click="navToGitHub">
-              <t-icon name="logo-github"/>
+              <t-icon name="logo-github" />
             </t-button>
           </t-tooltip>
           <t-dropdown trigger="click">
             <template #dropdown>
               <t-dropdown-menu>
-                <t-dropdown-item class="operations-dropdown-container-item"
-                                 @click="handleNav('/user/index')">
+                <t-dropdown-item class="operations-dropdown-container-item" @click="handleNav('/user/index')">
                   <t-icon name="user-circle"></t-icon>
                   个人中心
+                </t-dropdown-item>
+                <t-dropdown-item class="operations-dropdown-container-item" @click="handleTotp">
+                  <t-icon name="https"></t-icon>
+                  Totp
                 </t-dropdown-item>
                 <t-dropdown-item class="operations-dropdown-container-item" @click="handleLogout">
                   <t-icon name="poweroff"></t-icon>
@@ -94,10 +97,10 @@
             </template>
             <t-button class="header-user-btn" theme="default" variant="text">
               <template #icon>
-                <t-icon class="header-user-avatar" name="user-circle"/>
+                <t-icon class="header-user-avatar" name="user-circle" />
               </template>
               <template #suffix>
-                <t-icon name="chevron-down"/>
+                <t-icon name="chevron-down" />
               </template>
             </t-button>
           </t-dropdown>
@@ -115,17 +118,17 @@
 </template>
 
 <script lang="ts" setup>
-import type {PropType} from 'vue';
-import {computed} from 'vue';
-import {useRouter} from 'vue-router';
-import {useSettingStore} from '@/store';
-import {getActive} from '@/router';
-import {prefix} from '@/config/global';
-import type {MenuRoute} from '@/types/interface';
+import type { PropType } from 'vue';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useSettingStore } from '@/store';
+import { getActive } from '@/router';
+import { prefix } from '@/config/global';
+import type { MenuRoute } from '@/types/interface';
 
 import Search from './Search.vue';
 import MenuContent from './MenuContent.vue';
-import {selectModuleStore} from "@/store/modules/select-module";
+import { selectModuleStore } from "@/store/modules/select-module";
 import SwitchTrashButton from "@/layouts/components/SwitchTrashButton.vue";
 import UploadPhotoButton from "@/layouts/components/UploadPhotoButton.vue";
 import OrderSelector from "@/layouts/components/OrderSelector.vue";
@@ -134,6 +137,8 @@ import VideoOnlyCheckbox from "@/layouts/components/VideoOnlyCheckbox.vue";
 import StarOnlyCheckbox from "@/layouts/components/StarOnlyCheckbox.vue";
 import KeyBoardListener from "@/pages/dashboard/photos/components/KeyBoardListener.vue";
 import TagFilterSelect from "@/layouts/components/TagFilterSelect.vue";
+
+import { totp } from "@/api/users"
 
 const props = defineProps({
   theme: {
@@ -181,7 +186,7 @@ const active = computed(() => getActive());
 const layoutCls = computed(() => [`${prefix}-header-layout`]);
 
 const menuCls = computed(() => {
-  const {isFixed, layout, isCompact} = props;
+  const { isFixed, layout, isCompact } = props;
   return [
     {
       [`${prefix}-header-menu`]: !isFixed,
@@ -196,10 +201,18 @@ const handleNav = (url) => {
   router.push(url);
 };
 
+const handleTotp = () => {
+  totp().then((resp) => alert("TOTP:" + resp)).catch((error) => {
+    console.error('请求 TOTP 接口出错:', error);
+    // 若请求出错，弹出错误信息
+    alert('请求 TOTP 接口出错，请稍后重试');
+  });
+}
+
 const handleLogout = () => {
   router.push({
     path: '/login',
-    query: {redirect: encodeURIComponent(router.currentRoute.value.fullPath)},
+    query: { redirect: encodeURIComponent(router.currentRoute.value.fullPath) },
   });
 };
 

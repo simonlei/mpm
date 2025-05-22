@@ -14,6 +14,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 func getMD5Hash(s string) string {
@@ -130,6 +133,13 @@ func safeGo(f func()) {
 		}()
 		f()
 	}()
+}
+
+func totp(c *gin.Context) {
+	secret := viper.GetString("totpSecretKey")
+	interval := time.Now().Unix()
+	r := generateTOTP(secret, interval)
+	c.JSON(200, Response{0, r})
 }
 
 func generateTOTP(secret string, interval int64) string {
