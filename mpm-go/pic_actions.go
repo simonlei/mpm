@@ -12,7 +12,7 @@ func trashPhotos(c *gin.Context) {
 	var names []string
 	c.BindJSON(&names)
 	x := db().Exec(`update t_photos set trashed=!trashed where name in (?)`, names)
-	c.JSON(http.StatusOK, x.RowsAffected)
+	c.JSON(http.StatusOK, Response{0, x.RowsAffected})
 }
 
 type EmptyTrashTask struct {

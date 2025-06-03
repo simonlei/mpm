@@ -50,7 +50,7 @@ func init() {
 }
 
 func fetchDbSource() string {
-	source := "%s:%s@tcp(localhost:3306)/%s?readTimeout=1500ms&writeTimeout=1500ms&charset=utf8mb4&loc=Local&&parseTime=true"
+	source := "%s:%s@tcp(localhost:3306)/%s?timeout=5s&charset=utf8mb4&loc=Local&&parseTime=true"
 	user := viper.GetString("jdbc.username")
 	l.Infof("user is %v", user)
 	pwd := viper.GetString("jdbc.password")
