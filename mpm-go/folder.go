@@ -28,7 +28,7 @@ func getFoldersData(c *gin.Context) {
 		l.Info("Can't bind request:", err)
 		return
 	}
-	sql := `select f.id, f.path, concat(f.name,'(',count(distinct p.id),')') title, if (f.parentId is null, -1, f.parentId) parent_id
+	sql := `select f.id, f.path, concat(f.name,'(',count(distinct p.id),')') title, f.parentId parent_id
 	               from t_files f
 	               left join t_files fp on fp.path like concat(f.path, '%%')
 	               left join t_photos p  on fp.photoId=p.id
@@ -39,7 +39,7 @@ func getFoldersData(c *gin.Context) {
 	var parentIdCnd string
 	if req.ParentId <= 0 {
 		sql += "f.id"
-		parentIdCnd = " f.parentId is null"
+		parentIdCnd = " f.parentId=-1"
 	} else {
 		sql += "f.name"
 		parentIdCnd = fmt.Sprintf(" f.parentId=%d", req.ParentId)
