@@ -1,7 +1,7 @@
 <template>
   <t-layout>
     <t-aside style="position:sticky; top:10px; height:1200px; width:200px">
-      <div>
+      <div  style="height:1200px; overflow:auto">
         <Suspense>
           <date-tree/>
         </Suspense>

@@ -1,6 +1,6 @@
 <template>
   <t-layout>
-    <t-aside style="position:sticky; top:10px; height:1200px; width:200px">
+    <t-aside style="position:sticky; top:10px; height:1200px; width:200px; overflow:auto">
       <div>
         <Suspense>
           <folder-tree/>
