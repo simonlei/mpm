@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,10 @@ func main() {
 }
 
 func setupEngine() {
+	safeGo(func() {
+		detectFaces()
+		time.Sleep(5 * time.Second)
+	})
 	r := gin.New()
 	r.Use(MpmMiddleWare(), MpmRecovery())
 

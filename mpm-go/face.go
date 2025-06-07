@@ -348,3 +348,46 @@ func getImage(photo model.TPhoto, face *model.PhotoFaceInfo) string {
 	}
 	return base64.StdEncoding.EncodeToString(bytes)
 }
+
+func detectFaces() {
+	scanPhotoDoTask("lastCheckDetectedFaces", func(photo *model.TPhoto) {
+		detectFaceIn(*photo)
+	}, 100)
+}
+
+func scanPhotoDoTask(taskName string, f func(photo *model.TPhoto), pageSize int) {
+	var meta model.Meta
+	db().First(&meta, "c_key=?", taskName)
+	var lastId int64
+	if meta.ID > 0 {
+		lastId = parseInt64(meta.Value)
+	} else {
+		meta.Key = taskName
+	}
+	var photos []model.TPhoto
+	db().Where("id > ?", lastId).Order("id").Limit(pageSize).Find(&photos)
+	if len(photos) == 0 {
+		return
+	}
+	l.Infof("Start to do photos %d", len(photos))
+	for _, photo := range photos {
+		defer func() {
+			if r := recover(); r != nil {
+				// 在这里处理panic，例如记录日志或发送通知
+				l.Infof("Recovered from panic: %v", r)
+			}
+		}()
+		f(&photo)
+		lastId = photo.ID
+		meta.Value = strconv.FormatInt(lastId, 10)
+		saveMeta(&meta)
+	}
+}
+
+func saveMeta(meta *model.Meta) {
+	if meta.ID == 0 {
+		db().Create(meta)
+	} else {
+		db().Save(meta)
+	}
+}
