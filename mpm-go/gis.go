@@ -52,11 +52,13 @@ func loadMarkersGeoJson(c *gin.Context) {
 
 func getGisAddress(latitude, longitude float64) string {
 	// todo: takeToken();
-
+	if latitude <= 0 || longitude <= 0 {
+		return ""
+	}
 	result, err := getAddressFromRemote(latitude, longitude)
 	l.Info("qqlbs result:", result, err)
 	if err == nil {
-		return gjson.Get("result.address", result).String()
+		return gjson.Get(result, "result.address").String()
 	}
 	return ""
 }

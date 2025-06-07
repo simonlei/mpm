@@ -46,7 +46,7 @@ func saveImage(fileName string, size int64, lastModified, key, name string) *mod
 	setInfosFromCos(key, photo)
 	setInfosFromFile(fileName, lastModified, photo)
 	checkInBlacklist(photo)
-	db().Create(&photo)
+	db().Create(photo)
 	l.Info("Photo:", photo)
 	savePhotosOnCos(key, photo)
 	return photo
@@ -132,7 +132,7 @@ func setInfosFromFile(fileName string, lastModified string, photo *model.TPhoto)
 			if !exif.DateTimeOriginal().IsZero() {
 				photo.TakenDate = model.DateTime(exif.DateTimeOriginal())
 			}
-			if exif.GPS.Latitude() != 0 && exif.GPS.Longitude() != 0 {
+			if exif.GPS.Latitude() > 0 && exif.GPS.Longitude() > 0 {
 				photo.Latitude = exif.GPS.Latitude()
 				photo.Longitude = exif.GPS.Longitude()
 				photo.Address = getGisAddress(photo.Latitude, photo.Longitude)

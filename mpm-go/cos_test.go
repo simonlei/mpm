@@ -38,12 +38,16 @@ func TestSubThumbnail(t *testing.T) {
 }
 
 func Test_Exif(t *testing.T) {
-	obj, _ := Cos().CI.Get(context.Background(), "/origin/66hg81bu12j8qqku0js44l5tjn", "exif", nil)
-	a, _ := io.ReadAll(obj.Body)
+	obj, err := Cos().CI.Get(context.Background(), "origin/60991178-49fe-4616-aad7-4dd1332531d1", "exif", nil)
+	t.Log(err)
+	a, err := io.ReadAll(obj.Body)
+	t.Log(err)
 	t.Log(string(a))
 
-	obj, _ = Cos().CI.Get(context.Background(), "/origin/66hg81bu12j8qqku0js44l5tjn", "imageInfo", nil)
-	a, _ = io.ReadAll(obj.Body)
+	obj, err = Cos().CI.Get(context.Background(), "origin/60991178-49fe-4616-aad7-4dd1332531d1", "imageInfo", nil)
+	t.Log(err)
+	a, err = io.ReadAll(obj.Body)
+	t.Log(err)
 	t.Log(string(a))
 }
 
