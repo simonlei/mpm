@@ -5,6 +5,7 @@ import (
 	"mpm-go/model"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
@@ -85,13 +86,19 @@ func uploadFile(key, lastModified, contentType string, size int64, fileName stri
 	}
 }
 
+var fileMutex sync.Mutex
+
 func existOrCreate(parent *model.TFile, path, name string, isFolder bool) *model.TFile {
+	// 增加一个锁，避免重复建相同path的file
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
+
 	var file model.TFile
 	db().Where("path = ?", path).First(&file)
 	if file.ID != 0 {
 		return &file
 	}
-	var parentId int64
+	var parentId int64 = -1
 	if parent != nil {
 		parentId = parent.ID
 	}
