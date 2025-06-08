@@ -4,7 +4,9 @@
     <t-tree ref="tree" :data="TREE_DATA" :expand-level="1" :keys="KEYSX"
             :load="load" :onActive="treeActive" activable draggable
             expand-on-click-node
-            hover @drop="dropFolder">
+            hover @drop="dropFolder"
+            style="height:1200px; overflow: auto" class="custom-scrollbar"
+            >
       <template #label="{ node }">
         <folder-tree-context-menu :node="node"/>
       </template>
@@ -12,6 +14,28 @@
   </div>
 
 </template>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px; /* 滚动条宽度 */
+  height: 6px; /* 滚动条高度 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2); /* 滚动条滑块颜色 */
+  border-radius: 3px; /* 滚动条滑块圆角 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.05); /* 滚动条轨道颜色 */
+}
+
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin; /* 滚动条宽度为 thin */
+  scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05); /* 滑块颜色和轨道颜色 */
+}
+</style>
 
 <script lang="ts" setup>
 

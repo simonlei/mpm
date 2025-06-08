@@ -26,7 +26,7 @@ func (e *EmptyTrashTask) Run() {
 	e.Count = 0
 	for _, p := range photos {
 		realDelete(&p)
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 		e.Count++
 	}
 }
