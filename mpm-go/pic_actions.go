@@ -32,7 +32,12 @@ func (e *EmptyTrashTask) Run() {
 }
 
 func emptyTrash(c *gin.Context) {
-	t := EmptyTrashTask{}
+	t := EmptyTrashTask{
+		BaseProgress: BaseProgress{
+			Total: -1,
+			Count: 0,
+		},
+	}
 	taskId := addTask(&t)
 	safeGo(t.Run)
 	c.JSON(200, Response{0, map[string]string{"taskId": taskId}})

@@ -13,6 +13,7 @@ type ProgressInterface interface {
 }
 
 type BaseProgress struct {
+	// Total = -1 意味着还没开始
 	Total int
 	Count int
 }
@@ -30,7 +31,7 @@ func (e BaseProgress) Progress() int {
 }
 
 func (e BaseProgress) IsFinished() bool {
-	return e.Count >= e.Total
+	return e.Total >= 0 && e.Count >= e.Total
 }
 
 func (e BaseProgress) ProgressDetail() map[string]any {
