@@ -19,8 +19,10 @@ func main() {
 
 func setupEngine() {
 	safeGo(func() {
-		detectFaces()
-		time.Sleep(5 * time.Second)
+		for {
+			detectFaces()
+			time.Sleep(5 * time.Second)
+		}
 	})
 	r := gin.New()
 	r.Use(MpmMiddleWare(), MpmRecovery())
