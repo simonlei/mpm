@@ -215,19 +215,20 @@ type MergeFaceParam struct {
 }
 
 func mergeFace(c *gin.Context) {
-	var req MergeFaceParam
-	c.BindJSON(&req)
+	var r MergeFaceParam
+	c.BindJSON(&r)
 	var face model.TFace
-	db().First(&face, req.From)
+	db().First(&face, r.From)
+	req := v20200303.NewDeletePersonFromGroupRequest()
+	req.GroupId = getGroupName()
+	req.PersonId = &face.PersonId
 	// 这里也要把腾讯云上的 face 给删掉
-	resp, err := Iai().DeletePersonFromGroup(&v20200303.DeletePersonFromGroupRequest{
-		GroupId:  getGroupName(),
-		PersonId: &face.PersonId,
-	})
+	resp, err := Iai().DeletePersonFromGroup(req)
+
 	l.Infof("Delete person from group response:{}, err:{}", resp, err)
 	db().Transaction(func(tx *gorm.DB) error {
-		tx.Exec("delete from t_face where id=?", req.From)
-		tx.Exec("update photo_face_info set faceId=? where faceId=?", req.To, req.From)
+		tx.Exec("delete from t_face where id=?", r.From)
+		tx.Exec("update photo_face_info set faceId=? where faceId=?", r.To, r.From)
 		return nil
 	})
 	c.JSON(http.StatusOK, Response{0, true})
