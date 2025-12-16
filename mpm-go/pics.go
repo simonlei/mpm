@@ -64,7 +64,7 @@ func getPics(c *gin.Context) {
 		cnds = append(cnds, "video = "+strconv.FormatBool(req.Video))
 	}
 	if req.Tag != "" {
-		cnds = append(cnds, "concat(',', tag, ',') like '%,"+req.Tag+",%'")
+		cnds = append(cnds, "concat(',', tags, ',') like '%,"+req.Tag+",%'")
 	}
 	dateKey, _ := strconv.Atoi(req.DateKey)
 	switch {
@@ -181,9 +181,9 @@ func updateImage(c *gin.Context) {
 		if address != "" {
 			result["address"] = address
 		}
-		if values["tags"] != nil {
-			setTagsRelation(result["id"].(int), values["tags"].(string))
-		}
+	}
+	if values["tags"] != nil {
+		setTagsRelation(int(result["id"].(float64)), values["tags"].(string))
 	}
 	db().Model(&model.TPhoto{}).Where("id=?", result["id"]).Updates(result)
 	var p model.TPhoto

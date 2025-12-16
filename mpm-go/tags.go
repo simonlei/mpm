@@ -15,7 +15,7 @@ func getAllTags(c *gin.Context) {
 
 func getTagsFromDb() []string {
 	var result []string
-	db().Table("photo_tags").Select("name").Scan(&result)
+	db().Table("photo_tags").Select("distinct name").Scan(&result)
 	return result
 }
 
@@ -29,6 +29,7 @@ func setTagsRelation(id int, tags string) {
 		tx.Exec("delete from photo_tags where photoId=? and name not in (?)", id, tagList)
 		var existNames []string
 		tx.Raw("select name from photo_tags where photoId=?", id).Scan(&existNames)
+		l.Info("exist names:", existNames)
 		for _, t := range tagList {
 			if !slices.Contains(existNames, t) {
 				tx.Exec("insert into photo_tags (name, photoId) values (?, ?)", t, id)

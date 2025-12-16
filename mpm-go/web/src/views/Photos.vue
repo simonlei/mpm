@@ -268,8 +268,23 @@
               <t-descriptions-item label="时间">
                 {{ formatDateTime(currentPhoto.takenDate) }}
               </t-descriptions-item>
-              <t-descriptions-item v-if="currentPhoto.tag" label="标签">
-                {{ currentPhoto.tag }}
+              <t-descriptions-item label="标签">
+                <t-select
+                  v-model="currentPhotoTags"
+                  placeholder="选择或输入标签"
+                  multiple
+                  filterable
+                  creatable
+                  clearable
+                  @change="handleTagChange"
+                >
+                  <t-option
+                    v-for="tag in allTags"
+                    :key="tag"
+                    :value="tag"
+                    :label="tag"
+                  />
+                </t-select>
               </t-descriptions-item>
               <t-descriptions-item v-if="currentPhoto.address" label="地址">
                 {{ currentPhoto.address }}
@@ -370,6 +385,7 @@ const viewerVisible = ref(false)
 const currentPhoto = ref<Photo | null>(null)
 const currentPhotoIndex = ref<number>(-1)
 const photoSwitching = ref(false) // 照片切换中状态
+const currentPhotoTags = ref<string[]>([]) // 当前照片的tags数组
 
 // 多选功能
 const selectedPhotos = ref<Set<number>>(new Set())
@@ -573,6 +589,46 @@ const toggleStar = async (photo: Photo) => {
   }
 }
 
+// 处理tag变化
+const handleTagChange = async (value: string[]) => {
+  if (!currentPhoto.value) return
+  
+  try {
+    // 将数组转换为逗号分隔的字符串
+    const tagString = value.filter(t => t.trim()).join(',')
+    
+    await updateImageApi({
+      id: currentPhoto.value.id,
+      tags: tagString
+    })
+    
+    // 更新当前照片对象的tags
+    currentPhoto.value.tags = tagString
+    
+    // 同步更新缓存中的照片数据
+    const cacheKey = Math.floor(currentPhotoIndex.value / pageSize) * pageSize
+    const cachePhotos = photoCache.value.get(cacheKey)
+    if (cachePhotos) {
+      const photoIndex = currentPhotoIndex.value - cacheKey
+      if (cachePhotos[photoIndex]) {
+        cachePhotos[photoIndex].tags = tagString
+      }
+    }
+    
+    // 如果有新tag不在列表中，添加到标签列表
+    value.forEach(tag => {
+      if (tag && !allTags.value.includes(tag)) {
+        allTags.value.push(tag)
+      }
+    })
+    
+    MessagePlugin.success('标签已更新')
+  } catch (error) {
+    console.error('Update tag error:', error)
+    MessagePlugin.error('标签更新失败')
+  }
+}
+
 const trashPhoto = async (photo: Photo) => {
   try {
     await trashPhotosApi([photo.name])
@@ -660,6 +716,8 @@ const getAllPhotosInOrder = (): Photo[] => {
 
 const viewPhoto = (photo: Photo) => {
   currentPhoto.value = photo
+  // 将逗号分隔的tag字符串转换为数组
+  currentPhotoTags.value = photo.tags ? photo.tags.split(',').filter(t => t.trim()) : []
   
   // 计算当前照片在所有照片中的索引
   const allPhotos = getAllPhotosInOrder()
@@ -683,6 +741,8 @@ const viewPrevPhoto = async () => {
     if (photo) {
       currentPhoto.value = photo
       currentPhotoIndex.value = newIndex
+      // 将逗号分隔的tag字符串转换为数组
+      currentPhotoTags.value = photo.tags ? photo.tags.split(',').filter(t => t.trim()) : []
     }
   } catch (error) {
     console.error('View prev photo error:', error)
@@ -705,6 +765,8 @@ const viewNextPhoto = async () => {
     if (photo) {
       currentPhoto.value = photo
       currentPhotoIndex.value = newIndex
+      // 将逗号分隔的tag字符串转换为数组
+      currentPhotoTags.value = photo.tags ? photo.tags.split(',').filter(t => t.trim()) : []
     }
   } catch (error) {
     console.error('View next photo error:', error)

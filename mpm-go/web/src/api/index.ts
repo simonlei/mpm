@@ -36,7 +36,7 @@ export interface Photo {
   thumb: string
   activity: number
   activityDesc: string
-  tag: string
+  tags: string
   theYear: number
   theMonth: number
   size: number
