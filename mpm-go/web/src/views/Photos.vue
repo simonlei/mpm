@@ -33,17 +33,24 @@
           <t-option value="-taken_date" label="日期 降序" />
         </t-select>
         
-        <t-input
+        <t-select
           v-model="searchTag"
-          placeholder="搜索标签"
+          placeholder="选择标签"
           clearable
+          filterable
           style="width: 200px"
           @change="resetAndLoad"
         >
           <template #prefix-icon>
-            <t-icon name="search" />
+            <t-icon name="discount" />
           </template>
-        </t-input>
+          <t-option
+            v-for="tag in allTags"
+            :key="tag"
+            :value="tag"
+            :label="tag"
+          />
+        </t-select>
       </t-space>
       
       <div class="right-actions">
@@ -56,6 +63,15 @@
         <span v-else class="count-text">
           共 {{ totalCount }} 张照片
         </span>
+        <t-button
+          :theme="selectionMode ? 'primary' : 'default'"
+          :variant="selectionMode ? 'base' : 'outline'"
+          size="small"
+          @click="toggleSelectionMode"
+        >
+          <template #icon><t-icon :name="selectionMode ? 'check-circle-filled' : 'check-circle'" /></template>
+          {{ selectionMode ? '退出选择' : '选择' }}
+        </t-button>
         <t-button
           v-if="totalCount > 0"
           size="small"
@@ -89,9 +105,14 @@
             @click="handlePhotoClick(photo, $event)"
           >
             <div class="photo-wrapper">
-              <!-- 选中标记 -->
-              <div v-if="selectedPhotos.has(photo.id)" class="selection-badge">
+              <!-- 选中标记（选择模式下才显示勾选图标） -->
+              <div v-if="selectionMode && selectedPhotos.has(photo.id)" class="selection-badge">
                 <t-icon name="check-circle-filled" size="24px" />
+              </div>
+              
+              <!-- 选择框（选择模式下始终显示） -->
+              <div v-if="selectionMode" class="selection-checkbox" :class="{ 'is-checked': selectedPhotos.has(photo.id) }">
+                <t-icon :name="selectedPhotos.has(photo.id) ? 'check-circle-filled' : 'circle'" size="20px" />
               </div>
               
               <!-- 收藏标记（小星星） -->
@@ -171,38 +192,93 @@
     <!-- 照片查看器 -->
     <t-dialog
       v-model:visible="viewerVisible"
-      :header="currentPhoto?.name"
+      :header="currentPhotoHeader"
       width="90%"
       :footer="false"
+      placement="center"
       destroy-on-close
+      @opened="handleViewerOpened"
+      @closed="handleViewerClosed"
     >
       <div v-if="currentPhoto" class="photo-viewer">
-        <div class="viewer-image">
-          <img
-            :src="`/cos/small/${currentPhoto.name}`"
-            :alt="currentPhoto.name"
-            style="max-width: 100%; max-height: 70vh; object-fit: contain;"
-          />
+        <!-- 导航按钮 -->
+        <div class="viewer-nav">
+          <t-button
+            v-if="hasPrevPhoto"
+            class="nav-button nav-prev"
+            theme="default"
+            variant="outline"
+            shape="circle"
+            size="large"
+            :disabled="photoSwitching"
+            :loading="photoSwitching"
+            @click="viewPrevPhoto"
+          >
+            <t-icon name="chevron-left" size="24px" />
+          </t-button>
+          
+          <t-button
+            v-if="hasNextPhoto"
+            class="nav-button nav-next"
+            theme="default"
+            variant="outline"
+            shape="circle"
+            size="large"
+            :disabled="photoSwitching"
+            :loading="photoSwitching"
+            @click="viewNextPhoto"
+          >
+            <t-icon name="chevron-right" size="24px" />
+          </t-button>
         </div>
         
-        <div class="viewer-info">
-          <t-descriptions :column="2" bordered>
-            <t-descriptions-item label="拍摄日期">
-              {{ formatDateTime(currentPhoto.takenDate) }}
-            </t-descriptions-item>
-            <t-descriptions-item label="尺寸">
-              {{ currentPhoto.width }} × {{ currentPhoto.height }}
-            </t-descriptions-item>
-            <t-descriptions-item v-if="currentPhoto.address" label="位置">
-              {{ currentPhoto.address }}
-            </t-descriptions-item>
-            <t-descriptions-item v-if="currentPhoto.tag" label="标签">
-              {{ currentPhoto.tag }}
-            </t-descriptions-item>
-            <t-descriptions-item v-if="currentPhoto.activityDesc" label="活动" :span="2">
-              {{ currentPhoto.activityDesc }}
-            </t-descriptions-item>
-          </t-descriptions>
+        <div class="viewer-content">
+          <!-- 左侧图片 -->
+          <div class="viewer-image">
+            <!-- 加载中遮罩 -->
+            <div v-if="photoSwitching" class="viewer-loading">
+              <t-loading size="large" text="加载中..." />
+            </div>
+            
+            <img
+              v-show="!photoSwitching"
+              :key="currentPhoto.id"
+              :src="`/cos/small/${currentPhoto.name}`"
+              :alt="currentPhoto.name"
+              @load="handleImageLoaded"
+              @error="handleImageError"
+            />
+          </div>
+          
+          <!-- 右侧信息 -->
+          <div class="viewer-info">
+            <t-descriptions :column="1" bordered>
+              <t-descriptions-item label="大小">
+                {{ formatFileSize(currentPhoto.size) }}
+              </t-descriptions-item>
+              <t-descriptions-item label="宽度">
+                {{ currentPhoto.width }} px
+              </t-descriptions-item>
+              <t-descriptions-item label="高度">
+                {{ currentPhoto.height }} px
+              </t-descriptions-item>
+              <t-descriptions-item v-if="currentPhoto.description" label="描述">
+                {{ currentPhoto.description }}
+              </t-descriptions-item>
+              <t-descriptions-item label="时间">
+                {{ formatDateTime(currentPhoto.takenDate) }}
+              </t-descriptions-item>
+              <t-descriptions-item v-if="currentPhoto.tag" label="标签">
+                {{ currentPhoto.tag }}
+              </t-descriptions-item>
+              <t-descriptions-item v-if="currentPhoto.address" label="地址">
+                {{ currentPhoto.address }}
+              </t-descriptions-item>
+              <t-descriptions-item v-if="currentPhoto.activityDesc" label="所属活动">
+                {{ currentPhoto.activityDesc }}
+              </t-descriptions-item>
+            </t-descriptions>
+          </div>
         </div>
       </div>
     </t-dialog>
@@ -212,13 +288,14 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
-import { getPicsApi, updateImageApi, trashPhotosApi, getCountApi, Photo } from '@/api'
+import { getPicsApi, updateImageApi, trashPhotosApi, getCountApi, getAllTagsApi, Photo } from '@/api'
 import dayjs from 'dayjs'
 
 const loading = ref(false)
 const scrollContainer = ref<HTMLElement | null>(null)
 const totalCount = ref(0)
 const searchTag = ref('')
+const allTags = ref<string[]>([])
 
 const filters = reactive({
   star: false,
@@ -291,15 +368,48 @@ const visiblePhotos = computed(() => {
 
 const viewerVisible = ref(false)
 const currentPhoto = ref<Photo | null>(null)
+const currentPhotoIndex = ref<number>(-1)
+const photoSwitching = ref(false) // 照片切换中状态
 
 // 多选功能
 const selectedPhotos = ref<Set<number>>(new Set())
 const lastSelectedIndex = ref<number>(-1)
+const selectionMode = ref(false) // 选择模式开关
+
+// 计算当前照片的标题（显示序号）
+const currentPhotoHeader = computed(() => {
+  if (!currentPhoto.value) return ''
+  const index = currentPhotoIndex.value
+  if (index >= 0 && totalCount.value > 0) {
+    return `${currentPhoto.value.name} (${index + 1} / ${totalCount.value})`
+  }
+  return currentPhoto.value.name
+})
+
+// 是否有上一张
+const hasPrevPhoto = computed(() => {
+  return currentPhotoIndex.value > 0
+})
+
+// 是否有下一张
+const hasNextPhoto = computed(() => {
+  return currentPhotoIndex.value < totalCount.value - 1
+})
 
 // 清除选择
 const clearSelection = () => {
   selectedPhotos.value.clear()
   lastSelectedIndex.value = -1
+}
+
+// 切换选择模式
+const toggleSelectionMode = () => {
+  selectionMode.value = !selectionMode.value
+  
+  // 退出选择模式时清除选择
+  if (!selectionMode.value) {
+    clearSelection()
+  }
 }
 
 // 切换过滤器，重置列表
@@ -395,6 +505,30 @@ const scrollToTop = () => {
   }
 }
 
+// 滚动到指定照片位置
+const scrollToPhoto = async (photoIndex: number) => {
+  if (!scrollContainer.value) return
+  
+  // 确保该照片的数据已加载
+  await ensurePhotoLoaded(photoIndex)
+  
+  // 计算照片所在的行
+  const row = Math.floor(photoIndex / itemsPerRow.value)
+  
+  // 计算滚动位置（居中显示）
+  const targetScrollTop = row * itemHeight - containerHeight.value / 2 + itemHeight / 2
+  
+  // 滚动到目标位置
+  scrollContainer.value.scrollTo({
+    top: Math.max(0, targetScrollTop),
+    behavior: 'smooth'
+  })
+  
+  // 等待滚动和渲染完成
+  await nextTick()
+  await new Promise(resolve => setTimeout(resolve, 300))
+}
+
 // 计算每行显示数量
 const updateItemsPerRow = () => {
   if (!scrollContainer.value) return
@@ -412,6 +546,17 @@ const loadCount = async () => {
     }
   } catch (error) {
     console.error('Load count error:', error)
+  }
+}
+
+const loadAllTags = async () => {
+  try {
+    const res = await getAllTagsApi()
+    if (res.code === 0) {
+      allTags.value = res.data
+    }
+  } catch (error) {
+    console.error('Load tags error:', error)
   }
 }
 
@@ -444,23 +589,25 @@ const trashPhoto = async (photo: Photo) => {
 
 // 处理照片点击
 const handlePhotoClick = (photo: Photo, event: MouseEvent) => {
-  // 如果按住 Ctrl/Cmd 键，单独选择/取消选择
-  if (event.ctrlKey || event.metaKey) {
-    toggleSelection(photo)
-  }
-  // 如果按住 Shift 键，连续选择
-  else if (event.shiftKey && lastSelectedIndex.value >= 0) {
-    selectRange(photo)
-  }
-  // 普通点击
-  else {
-    // 如果已经有选中的照片，则切换当前照片的选中状态
-    if (selectedPhotos.value.size > 0) {
+  // 选择模式下
+  if (selectionMode.value) {
+    // 如果按住 Ctrl/Cmd 键，单独选择/取消选择
+    if (event.ctrlKey || event.metaKey) {
       toggleSelection(photo)
-    } else {
-      // 否则查看照片
-      viewPhoto(photo)
     }
+    // 如果按住 Shift 键，连续选择
+    else if (event.shiftKey && lastSelectedIndex.value >= 0) {
+      selectRange(photo)
+    }
+    // 普通点击，切换选中状态
+    else {
+      toggleSelection(photo)
+    }
+  }
+  // 非选择模式下
+  else {
+    // 普通点击查看照片
+    viewPhoto(photo)
   }
 }
 
@@ -513,7 +660,117 @@ const getAllPhotosInOrder = (): Photo[] => {
 
 const viewPhoto = (photo: Photo) => {
   currentPhoto.value = photo
+  
+  // 计算当前照片在所有照片中的索引
+  const allPhotos = getAllPhotosInOrder()
+  currentPhotoIndex.value = allPhotos.findIndex(p => p.id === photo.id)
+  
   viewerVisible.value = true
+}
+
+// 查看上一张照片
+const viewPrevPhoto = async () => {
+  if (!hasPrevPhoto.value || photoSwitching.value) return
+  
+  photoSwitching.value = true
+  
+  try {
+    const newIndex = currentPhotoIndex.value - 1
+    await ensurePhotoLoaded(newIndex)
+    
+    const allPhotos = getAllPhotosInOrder()
+    const photo = allPhotos[newIndex]
+    if (photo) {
+      currentPhoto.value = photo
+      currentPhotoIndex.value = newIndex
+    }
+  } catch (error) {
+    console.error('View prev photo error:', error)
+    photoSwitching.value = false
+  }
+}
+
+// 查看下一张照片
+const viewNextPhoto = async () => {
+  if (!hasNextPhoto.value || photoSwitching.value) return
+  
+  photoSwitching.value = true
+  
+  try {
+    const newIndex = currentPhotoIndex.value + 1
+    await ensurePhotoLoaded(newIndex)
+    
+    const allPhotos = getAllPhotosInOrder()
+    const photo = allPhotos[newIndex]
+    if (photo) {
+      currentPhoto.value = photo
+      currentPhotoIndex.value = newIndex
+    }
+  } catch (error) {
+    console.error('View next photo error:', error)
+    photoSwitching.value = false
+  }
+}
+
+// 图片加载完成
+const handleImageLoaded = () => {
+  photoSwitching.value = false
+}
+
+// 图片加载失败
+const handleImageError = () => {
+  photoSwitching.value = false
+  MessagePlugin.error('照片加载失败')
+}
+
+// 确保指定索引的照片已加载
+const ensurePhotoLoaded = async (index: number) => {
+  const cacheKey = Math.floor(index / pageSize) * pageSize
+  
+  // 如果该分页未加载，先加载
+  if (!photoCache.value.has(cacheKey)) {
+    await loadPhotos(cacheKey, pageSize)
+  }
+}
+
+// 键盘事件处理
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (!viewerVisible.value || photoSwitching.value) return
+  
+  if (event.key === 'ArrowLeft') {
+    event.preventDefault()
+    viewPrevPhoto()
+  } else if (event.key === 'ArrowRight') {
+    event.preventDefault()
+    viewNextPhoto()
+  } else if (event.key === 'Escape') {
+    viewerVisible.value = false
+  }
+}
+
+// 查看器打开时添加键盘监听
+const handleViewerOpened = () => {
+  window.addEventListener('keydown', handleKeyDown)
+  photoSwitching.value = false // 重置加载状态
+}
+
+// 查看器关闭时移除键盘监听
+const handleViewerClosed = async () => {
+  window.removeEventListener('keydown', handleKeyDown)
+  photoSwitching.value = false
+  
+  // 如果有当前照片，滚动到该位置并选中
+  if (currentPhoto.value && currentPhotoIndex.value >= 0) {
+    // 清空之前的选择
+    selectedPhotos.value.clear()
+    
+    // 选中当前照片（只显示边框高亮）
+    selectedPhotos.value.add(currentPhoto.value.id)
+    lastSelectedIndex.value = currentPhotoIndex.value
+    
+    // 滚动到照片位置
+    await scrollToPhoto(currentPhotoIndex.value)
+  }
 }
 
 const formatDate = (date: string) => {
@@ -522,6 +779,16 @@ const formatDate = (date: string) => {
 
 const formatDateTime = (date: string) => {
   return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
+}
+
+const formatFileSize = (bytes: number) => {
+  if (!bytes) return '0 B'
+  
+  const units = ['B', 'KB', 'MB', 'GB', 'TB']
+  const k = 1024
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  
+  return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + units[i]
 }
 
 // 窗口大小改变时重新计算
@@ -533,7 +800,7 @@ const handleResize = () => {
 }
 
 onMounted(async () => {
-  await loadCount()
+  await Promise.all([loadCount(), loadAllTags()])
   updateItemsPerRow()
   
   if (scrollContainer.value) {
@@ -636,6 +903,33 @@ onBeforeUnmount(() => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.selection-checkbox {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  color: var(--td-text-color-placeholder);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.selection-checkbox.is-checked {
+  color: var(--td-brand-color);
+  background: white;
+}
+
+.selection-checkbox:hover {
+  transform: scale(1.1);
+}
+
 .star-badge {
   position: absolute;
   top: 8px;
@@ -661,9 +955,9 @@ onBeforeUnmount(() => {
   transition: opacity 0.2s;
 }
 
-/* 如果有选中标记，将操作菜单向左移动 */
-.photo-selected .action-menu {
-  right: 40px;
+/* 选择模式下，将操作菜单向左移动以避免与选择框重叠 */
+.photo-item:has(.selection-checkbox) .action-menu {
+  right: 44px;
 }
 
 .menu-trigger {
@@ -761,15 +1055,95 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  position: relative;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.viewer-content {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.viewer-nav {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.nav-button {
+  pointer-events: auto;
+  position: absolute;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nav-button:hover {
+  background: white !important;
+  transform: scale(1.1);
+}
+
+.nav-prev {
+  left: -60px;
+}
+
+.nav-next {
+  right: -60px;
 }
 
 .viewer-image {
+  flex: 1;
   text-align: center;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.viewer-image img {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.viewer-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .viewer-info {
-  padding: 16px;
-  background: var(--td-bg-color-container);
-  border-radius: 8px;
+  width: 300px;
+  max-width: 25vw;
+  min-width: 200px;
+  flex-shrink: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  word-wrap: break-word;
+  word-break: break-all;
+}
+
+.viewer-info :deep(.t-descriptions__label) {
+  width: 60px;
+  min-width: 60px;
 }
 </style>

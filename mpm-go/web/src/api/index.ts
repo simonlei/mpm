@@ -39,6 +39,8 @@ export interface Photo {
   tag: string
   theYear: number
   theMonth: number
+  size: number
+  description: string
 }
 
 export interface GetPicsParams {
