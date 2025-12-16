@@ -166,41 +166,69 @@ func getThumbUrl(name string, rotate int64) string {
 	return fmt.Sprintf("small/%s/thumb%d", name, rotate)
 }
 
+type UpdateImageRequest struct {
+	ID          int      `json:"id"`
+	Star        *bool    `json:"star"`
+	Trashed     *bool    `json:"trashed"`
+	Activity    *int     `json:"activity"`
+	Longitude   *float64 `json:"longitude"`
+	Latitude    *float64 `json:"latitude"`
+	Tags        *string  `json:"tags"`
+	TakenDate   *time.Time `json:"taken_date"`
+	Description *string  `json:"description"`
+	Address     *string  `json:"address"`
+}
+
 func updateImage(c *gin.Context) {
-	var values map[string]interface{}
-	c.BindJSON(&values)
-	result := make(map[string]any)
-	for k, v := range values {
-		result[k] = v
+	var req UpdateImageRequest
+	if err := c.BindJSON(&req); err != nil {
+		l.Info("Can't bind request:", err)
+		c.JSON(400, Response{1, "Invalid request"})
+		return
 	}
-	updatePhotoActivity(result, values)
-	lo, loOk := values["longitude"]
-	la, laOk := values["latitude"]
-	if loOk && lo.(float64) > 0 || laOk && la.(float64) > 0 {
-		address := getGisAddress(la.(float64), lo.(float64))
+
+	// 处理活动相关更新
+	updatePhotoActivity(&req)
+	
+	// 处理地理位置
+	if (req.Longitude != nil && *req.Longitude > 0) || (req.Latitude != nil && *req.Latitude > 0) {
+		lo := 0.0
+		la := 0.0
+		if req.Longitude != nil {
+			lo = *req.Longitude
+		}
+		if req.Latitude != nil {
+			la = *req.Latitude
+		}
+		address := getGisAddress(la, lo)
 		if address != "" {
-			result["address"] = address
+			req.Address = &address
 		}
 	}
-	if values["tags"] != nil {
-		setTagsRelation(int(result["id"].(float64)), values["tags"].(string))
+	
+	// 处理标签
+	if req.Tags != nil {
+		setTagsRelation(req.ID, *req.Tags)
 	}
-	db().Model(&model.TPhoto{}).Where("id=?", result["id"]).Updates(result)
+	
+	// 直接使用 struct 更新
+	db().Model(&model.TPhoto{}).Where("id=?", req.ID).Updates(req)
+	
 	var p model.TPhoto
-	db().First(&p, values["id"])
+	db().First(&p, req.ID)
 	c.JSON(200, Response{0, addThumbField([]*model.TPhoto{&p})[0]})
 }
 
 // 更改活动 id
 
-func updatePhotoActivity(result, values map[string]any) {
-	if _, ok := values["activity"]; !ok {
+func updatePhotoActivity(req *UpdateImageRequest) {
+	if req.Activity == nil {
 		return
 	}
 	var ac model.TActivity
-	db().First(&ac, values["activity"])
+	db().First(&ac, *req.Activity)
 	var photo model.TPhoto
-	db().First(&photo, values["id"])
+	db().First(&photo, req.ID)
 	if ac.ID == 0 || photo.ID == 0 {
 		return
 	}
@@ -209,11 +237,11 @@ func updatePhotoActivity(result, values map[string]any) {
 	endDate := time.Time(ac.EndDate)
 	if takeDate.Before(startDate) || takeDate.After(endDate.Add(24*time.Hour)) {
 		// 如果当前时间不在活动范围内，更改时间为活动开始时间
-		result["taken_date"] = startDate
+		req.TakenDate = &startDate
 	}
 	if photo.Latitude == 0 && photo.Longitude == 0 {
 		// 如果当前 GIS 是空，更改 GIS 为活动的 GIS
-		result["longitude"] = ac.Longitude
-		result["latitude"] = ac.Latitude
+		req.Longitude = &ac.Longitude
+		req.Latitude = &ac.Latitude
 	}
 }
