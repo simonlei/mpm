@@ -204,9 +204,38 @@
               :key="currentPhoto.id"
               :src="`/cos/small/${currentPhoto.name}`"
               :alt="currentPhoto.name"
+              :style="{ transform: `rotate(${currentPhoto.rotate || 0}deg)` }"
               @load="handleImageLoaded"
               @error="handleImageError"
             />
+            
+            <!-- 旋转按钮 -->
+            <div v-if="currentPhoto && currentPhoto.media_type !== 'video'" class="rotate-buttons">
+              <t-button
+                theme="default"
+                variant="outline"
+                shape="circle"
+                size="medium"
+                :loading="rotating"
+                @click="rotatePhoto(-90)"
+              >
+                <template #icon>
+                  <t-icon name="rollback" size="20px" />
+                </template>
+              </t-button>
+              <t-button
+                theme="default"
+                variant="outline"
+                shape="circle"
+                size="medium"
+                :loading="rotating"
+                @click="rotatePhoto(90)"
+              >
+                <template #icon>
+                  <t-icon name="rollfront" size="20px" />
+                </template>
+              </t-button>
+            </div>
           </div>
           
           <!-- 右侧信息 -->
@@ -581,6 +610,53 @@ const handleImageLoaded = () => {
 const handleImageError = () => {
   photoSwitching.value = false
   MessagePlugin.error('照片加载失败')
+}
+
+// 旋转功能
+const rotating = ref(false)
+const rotatePhoto = async (degrees: number) => {
+  if (!currentPhoto.value || rotating.value) return
+  
+  rotating.value = true
+  try {
+    const currentRotate = currentPhoto.value.rotate || 0
+    const newRotate = (currentRotate + degrees) % 360
+    
+    // 调用 API 更新旋转角度
+    const { updateImageApi } = await import('@/api')
+    const response = await updateImageApi({
+      id: currentPhoto.value.id,
+      rotate: newRotate
+    })
+    
+    // 从后端响应中获取更新后的照片数据（包含新的 thumb）
+    if (response.code === 0 && response.data) {
+      const updatedPhoto = response.data
+      
+      // 更新当前照片的旋转角度和缩略图
+      currentPhoto.value.rotate = updatedPhoto.rotate
+      currentPhoto.value.thumb = updatedPhoto.thumb
+      
+      // 同步更新缓存中的照片数据
+      const currentIndex = currentPhotoIndex.value
+      const cacheKey = Math.floor(currentIndex / pageSize) * pageSize
+      const cachePhotos = photoCache.value.get(cacheKey)
+      if (cachePhotos) {
+        const photoIndex = currentIndex - cacheKey
+        if (cachePhotos[photoIndex]) {
+          cachePhotos[photoIndex].rotate = updatedPhoto.rotate
+          cachePhotos[photoIndex].thumb = updatedPhoto.thumb
+        }
+      }
+    }
+    
+    MessagePlugin.success('旋转成功')
+  } catch (error) {
+    console.error('Rotate photo error:', error)
+    MessagePlugin.error('旋转失败')
+  } finally {
+    rotating.value = false
+  }
 }
 
 // 确保指定索引的照片已加载
@@ -1041,6 +1117,31 @@ onBeforeUnmount(() => {
   max-height: 70vh;
   object-fit: contain;
   border-radius: 4px;
+  transition: transform 0.3s ease;
+}
+
+.rotate-buttons {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 5;
+}
+
+.rotate-buttons .t-button {
+  width: 40px;
+  height: 40px;
+}
+
+.rotate-buttons .t-button:hover {
+  background-color: var(--td-brand-color-light);
+  border-color: var(--td-brand-color);
 }
 
 .video-player {

@@ -177,6 +177,7 @@ type UpdateImageRequest struct {
 	TakenDate   *time.Time `json:"taken_date"`
 	Description *string    `json:"description"`
 	Address     *string    `json:"address"`
+	Rotate      *int       `json:"rotate"`
 }
 
 func updateImage(c *gin.Context) {
