@@ -36,7 +36,7 @@ jobs:
         cp ../mpm-go/mpm-go .
         cp ../entrypoint.sh .
         echo '
-          FROM openjdk:17-jdk-alpine
+          FROM alpine:3.23.0
           COPY . /
           WORKDIR .
           ENTRYPOINT ["/bin/sh","/entrypoint.sh"]
