@@ -1,8 +1,32 @@
 <template>
   <div class="photos-container">
-    <!-- 过滤器 -->
-    <div class="filter-bar">
+    <!-- 左侧时间线树 -->
+    <div class="sidebar">
+      <DateTree
+        ref="dateTreeRef"
+        :star="filters.star"
+        :trashed="false"
+        @select="handleDateSelect"
+      />
+    </div>
+    
+    <!-- 右侧主内容区 -->
+    <div class="main-content">
+      <!-- 过滤器 -->
+      <div class="filter-bar">
       <t-space>
+        <!-- 时间筛选提示 -->
+        <t-tag
+          v-if="filters.dateKey !== null"
+          theme="primary"
+          variant="light"
+          closable
+          @close="handleDateSelect(null)"
+        >
+          <template #icon><t-icon name="time" /></template>
+          {{ getDateKeyLabel(filters.dateKey) }}
+        </t-tag>
+        
         <t-button
           :theme="filters.star ? 'primary' : 'default'"
           :variant="filters.star ? 'base' : 'outline'"
@@ -314,6 +338,7 @@
         </div>
       </div>
     </t-dialog>
+    </div>
   </div>
 </template>
 
@@ -321,6 +346,7 @@
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
 import { getPicsApi, updateImageApi, trashPhotosApi, getCountApi, getAllTagsApi, Photo } from '@/api'
+import DateTree from '@/components/DateTree.vue'
 import dayjs from 'dayjs'
 
 const loading = ref(false)
@@ -328,11 +354,13 @@ const scrollContainer = ref<HTMLElement | null>(null)
 const totalCount = ref(0)
 const searchTag = ref('')
 const allTags = ref<string[]>([])
+const dateTreeRef = ref<InstanceType<typeof DateTree> | null>(null)
 
 const filters = reactive({
   star: false,
   video: false,
-  order: '-taken_date' as string
+  order: '-taken_date' as string,
+  dateKey: null as string | null
 })
 
 // 虚拟滚动配置
@@ -449,7 +477,46 @@ const toggleSelectionMode = () => {
 const toggleFilter = (key: 'star' | 'video') => {
   filters[key] = !filters[key]
   clearSelection()
+  // 清除时间线选择
+  dateTreeRef.value?.clearSelection()
+  filters.dateKey = null
   resetAndLoad()
+}
+
+// 处理时间线选择
+const handleDateSelect = (nodeId: number | null) => {
+  if (nodeId === null) {
+    filters.dateKey = null
+  } else if (nodeId >= 1000000) {
+    // 活动节点: ID = 1000000 + activityId
+    filters.dateKey = String(nodeId)
+  } else if (nodeId >= 100) {
+    // 月份节点: ID = year * 100 + month
+    const year = Math.floor(nodeId / 100)
+    const month = nodeId % 100
+    filters.dateKey = `${year}${String(month).padStart(2, '0')}`
+  } else {
+    // 年份节点: ID = year
+    filters.dateKey = String(nodeId)
+  }
+  
+  clearSelection()
+  resetAndLoad()
+}
+
+// 获取 dateKey 的显示标签
+const getDateKeyLabel = (dateKey: string) => {
+  const nodeId = parseInt(dateKey)
+  
+  if (nodeId >= 1000000) {
+    return '活动筛选'
+  } else if (nodeId >= 100) {
+    const year = Math.floor(nodeId / 100)
+    const month = nodeId % 100
+    return `${year} 年 ${month} 月`
+  } else {
+    return `${nodeId} 年`
+  }
 }
 
 // 重置并加载
@@ -474,6 +541,9 @@ const loadPhotos = async (start: number, size: number) => {
   }
   
   try {
+    // 构建 dateKey 参数
+    const dateKey = filters.dateKey || undefined
+    
     const res = await getPicsApi({
       star: filters.star || undefined,
       video: filters.video || undefined,
@@ -481,7 +551,8 @@ const loadPhotos = async (start: number, size: number) => {
       start,
       size,
       order: filters.order,
-      tag: searchTag.value || undefined
+      tag: searchTag.value || undefined,
+      dateKey: dateKey
     })
     
     if (res.code === 0) {
@@ -998,7 +1069,19 @@ onBeforeUnmount(() => {
 .photos-container {
   height: 100%;
   display: flex;
+  gap: 16px;
+}
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .filter-bar {
