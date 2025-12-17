@@ -46,6 +46,7 @@
         </t-button>
         
         <t-select
+          key="order-select"
           v-model="filters.order"
           placeholder="排序"
           style="width: 150px"
@@ -58,6 +59,7 @@
         </t-select>
         
         <t-select
+          key="tag-select"
           v-model="searchTag"
           placeholder="选择标签"
           clearable
@@ -65,7 +67,7 @@
           style="width: 200px"
           @change="resetAndLoad"
         >
-          <template #prefix-icon>
+          <template #prefixIcon>
             <t-icon name="discount" />
           </template>
           <t-option
@@ -257,14 +259,30 @@
         </div>
         
         <div class="viewer-content">
-          <!-- 左侧图片 -->
+          <!-- 左侧媒体展示 -->
           <div class="viewer-image">
             <!-- 加载中遮罩 -->
             <div v-if="photoSwitching" class="viewer-loading">
               <t-loading size="large" text="加载中..." />
             </div>
             
+            <!-- 视频播放器 -->
+            <video
+              v-if="currentPhoto.media_type === 'video'"
+              v-show="!photoSwitching"
+              :key="currentPhoto.id"
+              :src="`/cos/video_t/${currentPhoto.name}.mp4`"
+              controls
+              class="video-player"
+              @loadeddata="handleImageLoaded"
+              @error="handleImageError"
+            >
+              您的浏览器不支持视频播放
+            </video>
+            
+            <!-- 图片展示 -->
             <img
+              v-else
               v-show="!photoSwitching"
               :key="currentPhoto.id"
               :src="`/cos/small/${currentPhoto.name}`"
@@ -277,6 +295,12 @@
           <!-- 右侧信息 -->
           <div class="viewer-info">
             <t-descriptions :column="1" bordered>
+              <t-descriptions-item label="类型">
+                {{ currentPhoto.media_type === 'video' ? '视频' : '图片' }}
+              </t-descriptions-item>
+              <t-descriptions-item v-if="currentPhoto.media_type === 'video' && currentPhoto.duration" label="时长">
+                {{ formatDuration(currentPhoto.duration) }}
+              </t-descriptions-item>
               <t-descriptions-item label="大小">
                 {{ formatFileSize(currentPhoto.size) }}
               </t-descriptions-item>
@@ -506,16 +530,20 @@ const handleDateSelect = (nodeId: number | null) => {
 
 // 获取 dateKey 的显示标签
 const getDateKeyLabel = (dateKey: string) => {
-  const nodeId = parseInt(dateKey)
-  
-  if (nodeId >= 1000000) {
-    return '活动筛选'
-  } else if (nodeId >= 100) {
-    const year = Math.floor(nodeId / 100)
-    const month = nodeId % 100
+  // 根据 dateKey 的格式判断类型
+  if (dateKey.length === 4) {
+    // 年份: "2025"
+    return `${dateKey} 年`
+  } else if (dateKey.length === 6) {
+    // 月份: "202501"
+    const year = dateKey.substring(0, 4)
+    const month = parseInt(dateKey.substring(4, 6))
     return `${year} 年 ${month} 月`
+  } else if (parseInt(dateKey) >= 1000000) {
+    // 活动: "1000001"
+    return '活动筛选'
   } else {
-    return `${nodeId} 年`
+    return dateKey
   }
 }
 
@@ -1038,6 +1066,22 @@ const formatFileSize = (bytes: number) => {
   return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + units[i]
 }
 
+const formatDuration = (seconds: number) => {
+  if (!seconds) return '0秒'
+  
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = Math.floor(seconds % 60)
+  
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  } else if (minutes > 0) {
+    return `${minutes}:${String(secs).padStart(2, '0')}`
+  } else {
+    return `${secs}秒`
+  }
+}
+
 // 窗口大小改变时重新计算
 const handleResize = () => {
   updateItemsPerRow()
@@ -1375,6 +1419,13 @@ onBeforeUnmount(() => {
   max-height: 70vh;
   object-fit: contain;
   border-radius: 4px;
+}
+
+.video-player {
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: 4px;
+  outline: none;
 }
 
 .viewer-loading {

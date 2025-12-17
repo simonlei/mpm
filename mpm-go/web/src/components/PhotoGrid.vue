@@ -176,14 +176,30 @@
         </div>
         
         <div class="viewer-content">
-          <!-- 左侧图片 -->
+          <!-- 左侧媒体展示 -->
           <div class="viewer-image">
             <!-- 加载中遮罩 -->
             <div v-if="photoSwitching" class="viewer-loading">
               <t-loading size="large" text="加载中..." />
             </div>
             
+            <!-- 视频播放器 -->
+            <video
+              v-if="currentPhoto.media_type === 'video'"
+              v-show="!photoSwitching"
+              :key="currentPhoto.id"
+              :src="`/cos/video_t/${currentPhoto.name}.mp4`"
+              controls
+              class="video-player"
+              @loadeddata="handleImageLoaded"
+              @error="handleImageError"
+            >
+              您的浏览器不支持视频播放
+            </video>
+            
+            <!-- 图片展示 -->
             <img
+              v-else
               v-show="!photoSwitching"
               :key="currentPhoto.id"
               :src="`/cos/small/${currentPhoto.name}`"
@@ -196,6 +212,12 @@
           <!-- 右侧信息 -->
           <div class="viewer-info">
             <t-descriptions :column="1" bordered>
+              <t-descriptions-item label="类型">
+                {{ currentPhoto.media_type === 'video' ? '视频' : '图片' }}
+              </t-descriptions-item>
+              <t-descriptions-item v-if="currentPhoto.media_type === 'video' && currentPhoto.duration" label="时长">
+                {{ formatDuration(currentPhoto.duration) }}
+              </t-descriptions-item>
               <t-descriptions-item label="大小">
                 {{ formatFileSize(currentPhoto.size) }}
               </t-descriptions-item>
@@ -619,6 +641,22 @@ const formatFileSize = (bytes: number) => {
   return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + units[i]
 }
 
+const formatDuration = (seconds: number) => {
+  if (!seconds) return '0秒'
+  
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = Math.floor(seconds % 60)
+  
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  } else if (minutes > 0) {
+    return `${minutes}:${String(secs).padStart(2, '0')}`
+  } else {
+    return `${secs}秒`
+  }
+}
+
 // 窗口大小改变时重新计算
 const handleResize = () => {
   updateItemsPerRow()
@@ -1003,6 +1041,13 @@ onBeforeUnmount(() => {
   max-height: 70vh;
   object-fit: contain;
   border-radius: 4px;
+}
+
+.video-player {
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: 4px;
+  outline: none;
 }
 
 .viewer-loading {

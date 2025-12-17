@@ -1,16 +1,40 @@
 <template>
   <div class="trash-container">
-    <PhotoGrid
-      ref="photoGridRef"
-      :load-photos-api="loadPhotosWrapper"
-      :total-count="totalCount"
-      :trashed="true"
-      empty-text="回收站为空"
-    >
-      <!-- 过滤器插槽 -->
-      <template #filters>
-        <t-alert theme="warning" message="回收站中的照片可以恢复" />
-      </template>
+    <!-- 左侧时间线树 -->
+    <div class="sidebar">
+      <DateTree
+        ref="dateTreeRef"
+        :star="false"
+        :trashed="true"
+        @select="handleDateSelect"
+      />
+    </div>
+    
+    <!-- 右侧主内容区 -->
+    <div class="main-content">
+      <PhotoGrid
+        ref="photoGridRef"
+        :load-photos-api="loadPhotosWrapper"
+        :total-count="totalCount"
+        :trashed="true"
+        empty-text="回收站为空"
+      >
+        <!-- 过滤器插槽 -->
+        <template #filters>
+          <!-- 时间筛选提示 -->
+          <t-tag
+            v-if="dateKey !== null"
+            theme="primary"
+            variant="light"
+            closable
+            @close="handleDateSelect(null)"
+          >
+            <template #icon><t-icon name="time" /></template>
+            {{ getDateKeyLabel(dateKey) }}
+          </t-tag>
+          
+          <t-alert theme="warning" message="回收站中的照片可以恢复" />
+        </template>
       
       <!-- 批量操作插槽 -->
       <template #batch-actions="{ selectedPhotosList }">
@@ -50,7 +74,8 @@
           恢复照片
         </t-button>
       </template>
-    </PhotoGrid>
+      </PhotoGrid>
+    </div>
     
     <!-- 清空进度对话框 -->
     <t-dialog
@@ -83,10 +108,13 @@ import {
   Photo
 } from '@/api'
 import PhotoGrid from '@/components/PhotoGrid.vue'
+import DateTree from '@/components/DateTree.vue'
 
 const photoGridRef = ref<InstanceType<typeof PhotoGrid> | null>(null)
+const dateTreeRef = ref<InstanceType<typeof DateTree> | null>(null)
 const totalCount = ref(0)
 const emptying = ref(false)
+const dateKey = ref<string | null>(null)
 
 const progressVisible = ref(false)
 const progressData = reactive({
@@ -98,6 +126,46 @@ const progressData = reactive({
 const progress = ref(0)
 let progressTimer: number | null = null
 
+// 处理时间线选择
+const handleDateSelect = (nodeId: number | null) => {
+  if (nodeId === null) {
+    dateKey.value = null
+  } else if (nodeId >= 1000000) {
+    // 活动节点: ID = 1000000 + activityId
+    dateKey.value = String(nodeId)
+  } else if (nodeId >= 100) {
+    // 月份节点: ID = year * 100 + month
+    const year = Math.floor(nodeId / 100)
+    const month = nodeId % 100
+    dateKey.value = `${year}${String(month).padStart(2, '0')}`
+  } else {
+    // 年份节点: ID = year
+    dateKey.value = String(nodeId)
+  }
+  
+  // 刷新照片列表
+  photoGridRef.value?.refresh()
+}
+
+// 获取 dateKey 的显示标签
+const getDateKeyLabel = (key: string) => {
+  // 根据 dateKey 的格式判断类型
+  if (key.length === 4) {
+    // 年份: "2025"
+    return `${key} 年`
+  } else if (key.length === 6) {
+    // 月份: "202501"
+    const year = key.substring(0, 4)
+    const month = parseInt(key.substring(4, 6))
+    return `${year} 年 ${month} 月`
+  } else if (parseInt(key) >= 1000000) {
+    // 活动: "1000001"
+    return '活动筛选'
+  } else {
+    return key
+  }
+}
+
 // 加载照片的包装函数
 const loadPhotosWrapper = async (start: number, size: number): Promise<Photo[]> => {
   try {
@@ -105,7 +173,8 @@ const loadPhotosWrapper = async (start: number, size: number): Promise<Photo[]> 
       trashed: true,
       start,
       size,
-      order: '-taken_date'
+      order: '-taken_date',
+      dateKey: dateKey.value || undefined
     })
     
     if (res.code === 0) {
@@ -251,7 +320,19 @@ onBeforeUnmount(() => {
 .trash-container {
   height: 100%;
   display: flex;
+  gap: 16px;
+}
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .progress-content {

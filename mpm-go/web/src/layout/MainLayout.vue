@@ -1,104 +1,101 @@
 <template>
   <t-layout class="main-layout">
-    <t-aside :width="200">
-      <div class="sidebar">
-        <div class="sidebar-header">
-          <h2>MPM</h2>
+    <t-header class="main-header">
+      <div class="header-left">
+        <!-- 菜单触发区域 -->
+        <div 
+          class="menu-trigger-area"
+          @mouseenter="showMenu = true"
+        >
+          <t-icon name="menu-fold" size="20px" />
+          <h2 class="logo">MPM</h2>
         </div>
         
-        <t-menu
-          :value="activeMenu"
-          :collapsed="false"
-          theme="light"
-          @change="handleMenuChange"
+        <!-- 下拉菜单 -->
+        <div 
+          v-show="showMenu"
+          class="menu-dropdown"
+          @mouseleave="showMenu = false"
         >
-          <t-menu-item value="photos">
-            <template #icon>
-              <t-icon name="image" />
-            </template>
-            照片
-          </t-menu-item>
-          
-          <t-menu-item value="timeline">
-            <template #icon>
-              <t-icon name="time" />
-            </template>
-            时间线
-          </t-menu-item>
-          
-          <t-menu-item value="map">
-            <template #icon>
-              <t-icon name="location" />
-            </template>
-            地图
-          </t-menu-item>
-          
-          <t-menu-item value="faces">
-            <template #icon>
-              <t-icon name="user" />
-            </template>
-            人脸
-          </t-menu-item>
-          
-          <t-menu-item value="activities">
-            <template #icon>
-              <t-icon name="calendar" />
-            </template>
-            活动
-          </t-menu-item>
-          
-          <t-menu-item value="folders">
-            <template #icon>
-              <t-icon name="folder" />
-            </template>
-            文件夹
-          </t-menu-item>
-          
-          <t-menu-item value="upload">
-            <template #icon>
-              <t-icon name="upload" />
-            </template>
-            上传
-          </t-menu-item>
-          
-          <t-menu-item value="trash">
-            <template #icon>
-              <t-icon name="delete" />
-            </template>
-            回收站
-          </t-menu-item>
-        </t-menu>
-        
-        <div class="sidebar-footer">
-          <t-button
-            theme="default"
-            variant="text"
-            block
-            @click="handleLogout"
+          <t-menu
+            :value="activeMenu"
+            theme="light"
+            @change="handleMenuChange"
           >
-            <template #icon>
-              <t-icon name="poweroff" />
-            </template>
-            退出登录
-          </t-button>
+            <t-menu-item value="photos">
+              <template #icon>
+                <t-icon name="image" />
+              </template>
+              照片
+            </t-menu-item>
+            
+            <t-menu-item value="timeline">
+              <template #icon>
+                <t-icon name="time" />
+              </template>
+              时间线
+            </t-menu-item>
+            
+            <t-menu-item value="map">
+              <template #icon>
+                <t-icon name="location" />
+              </template>
+              地图
+            </t-menu-item>
+            
+            <t-menu-item value="faces">
+              <template #icon>
+                <t-icon name="user" />
+              </template>
+              人脸
+            </t-menu-item>
+            
+            <t-menu-item value="activities">
+              <template #icon>
+                <t-icon name="calendar" />
+              </template>
+              活动
+            </t-menu-item>
+            
+            <t-menu-item value="folders">
+              <template #icon>
+                <t-icon name="folder" />
+              </template>
+              文件夹
+            </t-menu-item>
+            
+            <t-menu-item value="upload">
+              <template #icon>
+                <t-icon name="upload" />
+              </template>
+              上传
+            </t-menu-item>
+            
+            <t-menu-item value="trash">
+              <template #icon>
+                <t-icon name="delete" />
+              </template>
+              回收站
+            </t-menu-item>
+            
+            <t-menu-item value="logout" @click="handleLogout">
+              <template #icon>
+                <t-icon name="poweroff" />
+              </template>
+              退出登录
+            </t-menu-item>
+          </t-menu>
         </div>
       </div>
-    </t-aside>
-    
-    <t-layout>
-      <t-header class="main-header">
-        <div class="header-left">
-          <h3>{{ currentTitle }}</h3>
-        </div>
-        <div class="header-right">
-          <span class="user-info">{{ userStore.user?.name }}</span>
-        </div>
-      </t-header>
       
-      <t-content class="main-content">
-        <router-view />
-      </t-content>
-    </t-layout>
+      <div class="header-right">
+        <span class="user-info">{{ userStore.user?.name }}</span>
+      </div>
+    </t-header>
+    
+    <t-content class="main-content">
+      <router-view />
+    </t-content>
   </t-layout>
 </template>
 
@@ -113,10 +110,7 @@ const route = useRoute()
 const userStore = useUserStore()
 
 const activeMenu = ref('photos')
-
-const currentTitle = computed(() => {
-  return route.meta.title || '照片'
-})
+const showMenu = ref(false)
 
 watch(() => route.name, (newName) => {
   if (newName && typeof newName === 'string') {
@@ -125,6 +119,8 @@ watch(() => route.name, (newName) => {
 }, { immediate: true })
 
 const handleMenuChange = (value: string) => {
+  if (value === 'logout') return // 退出登录不跳转
+  showMenu.value = false // 点击菜单后隐藏
   router.push(`/${value}`)
 }
 
@@ -144,34 +140,8 @@ const handleLogout = () => {
 <style scoped>
 .main-layout {
   height: 100vh;
-}
-
-.sidebar {
-  height: 100%;
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-right: 1px solid var(--td-border-level-1-color);
-}
-
-.sidebar-header {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid var(--td-border-level-1-color);
-}
-
-.sidebar-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--td-brand-color);
-}
-
-.sidebar-footer {
-  margin-top: auto;
-  padding: 16px;
-  border-top: 1px solid var(--td-border-level-1-color);
 }
 
 .main-header {
@@ -182,12 +152,80 @@ const handleLogout = () => {
   padding: 0 24px;
   background: #fff;
   border-bottom: 1px solid var(--td-border-level-1-color);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
 }
 
-.header-left h3 {
-  font-size: 18px;
-  font-weight: 500;
+.header-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.menu-trigger-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.menu-trigger-area:hover {
+  background-color: var(--td-bg-color-container-hover);
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--td-brand-color);
   margin: 0;
+  white-space: nowrap;
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 1000;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu-dropdown :deep(.t-menu) {
+  border: none;
+  background: transparent;
+}
+
+.menu-dropdown :deep(.t-menu__item) {
+  padding: 12px 20px;
+}
+
+.menu-dropdown :deep(.t-menu__item:hover) {
+  background-color: var(--td-bg-color-container-hover);
+}
+
+.menu-dropdown :deep(.t-menu__item.t-is-active) {
+  color: var(--td-brand-color);
+  background-color: var(--td-brand-color-light);
 }
 
 .header-right {
@@ -202,6 +240,7 @@ const handleLogout = () => {
 }
 
 .main-content {
+  flex: 1;
   padding: 24px;
   overflow-y: auto;
   background: var(--td-bg-color-container);

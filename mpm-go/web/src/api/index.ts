@@ -41,6 +41,8 @@ export interface Photo {
   theMonth: number
   size: number
   description: string
+  media_type: string
+  duration: number
 }
 
 export interface GetPicsParams {

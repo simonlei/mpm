@@ -61,7 +61,7 @@ func getPics(c *gin.Context) {
 		cnds = append(cnds, "star = "+strconv.FormatBool(req.Star))
 	}
 	if req.Video {
-		cnds = append(cnds, "video = "+strconv.FormatBool(req.Video))
+		cnds = append(cnds, "media_type = 'video' ")
 	}
 	if req.Tag != "" {
 		cnds = append(cnds, "concat(',', tags, ',') like '%,"+req.Tag+",%'")
@@ -167,16 +167,16 @@ func getThumbUrl(name string, rotate int64) string {
 }
 
 type UpdateImageRequest struct {
-	ID          int      `json:"id"`
-	Star        *bool    `json:"star"`
-	Trashed     *bool    `json:"trashed"`
-	Activity    *int     `json:"activity"`
-	Longitude   *float64 `json:"longitude"`
-	Latitude    *float64 `json:"latitude"`
-	Tags        *string  `json:"tags"`
+	ID          int        `json:"id"`
+	Star        *bool      `json:"star"`
+	Trashed     *bool      `json:"trashed"`
+	Activity    *int       `json:"activity"`
+	Longitude   *float64   `json:"longitude"`
+	Latitude    *float64   `json:"latitude"`
+	Tags        *string    `json:"tags"`
 	TakenDate   *time.Time `json:"taken_date"`
-	Description *string  `json:"description"`
-	Address     *string  `json:"address"`
+	Description *string    `json:"description"`
+	Address     *string    `json:"address"`
 }
 
 func updateImage(c *gin.Context) {
@@ -189,7 +189,7 @@ func updateImage(c *gin.Context) {
 
 	// 处理活动相关更新
 	updatePhotoActivity(&req)
-	
+
 	// 处理地理位置
 	if (req.Longitude != nil && *req.Longitude > 0) || (req.Latitude != nil && *req.Latitude > 0) {
 		lo := 0.0
@@ -205,15 +205,15 @@ func updateImage(c *gin.Context) {
 			req.Address = &address
 		}
 	}
-	
+
 	// 处理标签
 	if req.Tags != nil {
 		setTagsRelation(req.ID, *req.Tags)
 	}
-	
+
 	// 直接使用 struct 更新
 	db().Model(&model.TPhoto{}).Where("id=?", req.ID).Updates(req)
-	
+
 	var p model.TPhoto
 	db().First(&p, req.ID)
 	c.JSON(200, Response{0, addThumbField([]*model.TPhoto{&p})[0]})
