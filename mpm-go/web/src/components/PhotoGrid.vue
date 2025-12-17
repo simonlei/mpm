@@ -1,56 +1,9 @@
 <template>
-  <div class="photos-container">
-    <!-- 过滤器 -->
+  <div class="photo-grid-container">
+    <!-- 过滤器和操作栏 -->
     <div class="filter-bar">
       <t-space>
-        <t-button
-          :theme="filters.star ? 'primary' : 'default'"
-          :variant="filters.star ? 'base' : 'outline'"
-          @click="toggleFilter('star')"
-        >
-          <template #icon><t-icon name="star" /></template>
-          收藏
-        </t-button>
-        
-        <t-button
-          :theme="filters.video ? 'primary' : 'default'"
-          :variant="filters.video ? 'base' : 'outline'"
-          @click="toggleFilter('video')"
-        >
-          <template #icon><t-icon name="video" /></template>
-          视频
-        </t-button>
-        
-        <t-select
-          v-model="filters.order"
-          placeholder="排序"
-          style="width: 150px"
-          @change="resetAndLoad"
-        >
-          <t-option value="id" label="ID 升序" />
-          <t-option value="-id" label="ID 降序" />
-          <t-option value="taken_date" label="日期 升序" />
-          <t-option value="-taken_date" label="日期 降序" />
-        </t-select>
-        
-        <t-select
-          v-model="searchTag"
-          placeholder="选择标签"
-          clearable
-          filterable
-          style="width: 200px"
-          @change="resetAndLoad"
-        >
-          <template #prefix-icon>
-            <t-icon name="discount" />
-          </template>
-          <t-option
-            v-for="tag in allTags"
-            :key="tag"
-            :value="tag"
-            :label="tag"
-          />
-        </t-select>
+        <slot name="filters"></slot>
       </t-space>
       
       <div class="right-actions">
@@ -59,6 +12,7 @@
           <t-button size="small" variant="text" @click="clearSelection">
             清除选择
           </t-button>
+          <slot name="batch-actions" :selectedPhotos="selectedPhotos" :selectedPhotosList="getSelectedPhotosList()"></slot>
         </span>
         <span v-else class="count-text">
           共 {{ totalCount }} 张照片
@@ -72,6 +26,7 @@
           <template #icon><t-icon :name="selectionMode ? 'check-circle-filled' : 'check-circle'" /></template>
           {{ selectionMode ? '退出选择' : '选择' }}
         </t-button>
+        <slot name="extra-actions"></slot>
         <t-button
           v-if="totalCount > 0"
           size="small"
@@ -116,7 +71,7 @@
               </div>
               
               <!-- 收藏标记（小星星） -->
-              <div v-if="photo.star" class="star-badge">
+              <div v-if="photo.star && !trashed" class="star-badge">
                 <t-icon name="star-filled" size="16px" />
               </div>
               
@@ -138,19 +93,7 @@
                   </t-button>
                   
                   <t-dropdown-menu>
-                    <t-dropdown-item @click="toggleStar(photo)">
-                      <template #prefix-icon>
-                        <t-icon :name="photo.star ? 'star-filled' : 'star'" />
-                      </template>
-                      {{ photo.star ? '取消收藏' : '收藏' }}
-                    </t-dropdown-item>
-                    
-                    <t-dropdown-item theme="error" @click="trashPhoto(photo)">
-                      <template #prefix-icon>
-                        <t-icon name="delete" />
-                      </template>
-                      删除
-                    </t-dropdown-item>
+                    <slot name="photo-actions" :photo="photo"></slot>
                   </t-dropdown-menu>
                 </t-dropdown>
               </div>
@@ -185,7 +128,7 @@
       </div>
       
       <div v-if="totalCount === 0 && !loading" class="empty-state">
-        <t-empty description="暂无照片" />
+        <t-empty :description="emptyText" />
       </div>
     </div>
     
@@ -194,8 +137,8 @@
       v-model:visible="viewerVisible"
       :header="currentPhotoHeader"
       width="90%"
-      :footer="false"
       placement="center"
+      :footer="false"
       destroy-on-close
       @opened="handleViewerOpened"
       @closed="handleViewerClosed"
@@ -269,22 +212,10 @@
                 {{ formatDateTime(currentPhoto.takenDate) }}
               </t-descriptions-item>
               <t-descriptions-item label="标签">
-                <t-select
-                  v-model="currentPhotoTags"
-                  placeholder="选择或输入标签"
-                  multiple
-                  filterable
-                  creatable
-                  clearable
-                  @change="handleTagChange"
-                >
-                  <t-option
-                    v-for="tag in allTags"
-                    :key="tag"
-                    :value="tag"
-                    :label="tag"
-                  />
-                </t-select>
+                <slot name="tag-editor" :photo="currentPhoto" :tags="currentPhotoTags" :onTagChange="handleTagChange">
+                  <span v-if="currentPhoto.tags">{{ currentPhoto.tags }}</span>
+                  <span v-else class="empty-tag">无标签</span>
+                </slot>
               </t-descriptions-item>
               <t-descriptions-item v-if="currentPhoto.address" label="地址">
                 {{ currentPhoto.address }}
@@ -294,21 +225,8 @@
               </t-descriptions-item>
             </t-descriptions>
             
-            <!-- 操作按钮 -->
             <div class="viewer-actions">
-              <t-space direction="vertical" style="width: 100%">
-                <t-button theme="primary" block @click="toggleStarInViewer">
-                  <template #icon>
-                    <t-icon :name="currentPhoto.star ? 'star-filled' : 'star'" />
-                  </template>
-                  {{ currentPhoto.star ? '取消收藏' : '收藏' }}
-                </t-button>
-                
-                <t-button theme="danger" block @click="deleteCurrentPhoto">
-                  <template #icon><t-icon name="delete" /></template>
-                  删除
-                </t-button>
-              </t-space>
+              <slot name="viewer-actions" :photo="currentPhoto"></slot>
             </div>
           </div>
         </div>
@@ -318,39 +236,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
-import { getPicsApi, updateImageApi, trashPhotosApi, getCountApi, getAllTagsApi, Photo } from '@/api'
+import { Photo } from '@/api'
 import dayjs from 'dayjs'
+
+interface Props {
+  loadPhotosApi: (start: number, size: number) => Promise<Photo[]>
+  totalCount: number
+  trashed?: boolean
+  emptyText?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  trashed: false,
+  emptyText: '暂无照片'
+})
+
+const emit = defineEmits<{
+  'update:totalCount': [count: number]
+  'refresh': []
+}>()
 
 const loading = ref(false)
 const scrollContainer = ref<HTMLElement | null>(null)
-const totalCount = ref(0)
-const searchTag = ref('')
-const allTags = ref<string[]>([])
-
-const filters = reactive({
-  star: false,
-  video: false,
-  order: '-taken_date' as string
-})
 
 // 虚拟滚动配置
-const itemHeight = 280 // 每个照片项的高度（包括图片和信息）
-const itemsPerRow = ref(5) // 每行显示数量
-const bufferSize = 3 // 缓冲行数
+const itemHeight = 280
+const itemsPerRow = ref(5)
+const bufferSize = 3
 
-// 照片缓存: key = start, value = photos
+// 照片缓存
 const photoCache = ref<Map<number, Photo[]>>(new Map())
-const pageSize = 100 // 每次请求的数量
+const pageSize = 100
 
 // 滚动状态
 const scrollTop = ref(0)
 const containerHeight = ref(0)
 
-// 计算总高度（基于总数和每行数量）
+// 计算总高度
 const totalHeight = computed(() => {
-  const rowCount = Math.ceil(totalCount.value / itemsPerRow.value)
+  const rowCount = Math.ceil(props.totalCount / itemsPerRow.value)
   return rowCount * itemHeight
 })
 
@@ -359,12 +285,11 @@ const visibleRange = computed(() => {
   const startRow = Math.floor(scrollTop.value / itemHeight)
   const endRow = Math.ceil((scrollTop.value + containerHeight.value) / itemHeight)
   
-  // 添加缓冲区
   const bufferedStartRow = Math.max(0, startRow - bufferSize)
   const bufferedEndRow = endRow + bufferSize
   
   const startIndex = bufferedStartRow * itemsPerRow.value
-  const endIndex = Math.min(bufferedEndRow * itemsPerRow.value, totalCount.value)
+  const endIndex = Math.min(bufferedEndRow * itemsPerRow.value, props.totalCount)
   
   return {
     startIndex,
@@ -383,7 +308,6 @@ const visiblePhotos = computed(() => {
   const { startIndex, endIndex } = visibleRange.value
   const photos: Photo[] = []
   
-  // 从缓存中获取照片
   for (let i = startIndex; i < endIndex; i++) {
     const cacheKey = Math.floor(i / pageSize) * pageSize
     const cachePhotos = photoCache.value.get(cacheKey)
@@ -398,95 +322,43 @@ const visiblePhotos = computed(() => {
   return photos
 })
 
+// 查看器相关
 const viewerVisible = ref(false)
 const currentPhoto = ref<Photo | null>(null)
 const currentPhotoIndex = ref<number>(-1)
-const photoSwitching = ref(false) // 照片切换中状态
-const currentPhotoTags = ref<string[]>([]) // 当前照片的tags数组
+const photoSwitching = ref(false)
+const currentPhotoTags = ref<string[]>([])
 
 // 多选功能
 const selectedPhotos = ref<Set<number>>(new Set())
 const lastSelectedIndex = ref<number>(-1)
-const selectionMode = ref(false) // 选择模式开关
+const selectionMode = ref(false)
 
-// 计算当前照片的标题（显示序号）
+// 计算当前照片的标题
 const currentPhotoHeader = computed(() => {
   if (!currentPhoto.value) return ''
   const index = currentPhotoIndex.value
-  if (index >= 0 && totalCount.value > 0) {
-    return `${currentPhoto.value.name} (${index + 1} / ${totalCount.value})`
+  if (index >= 0 && props.totalCount > 0) {
+    return `${currentPhoto.value.name} (${index + 1} / ${props.totalCount})`
   }
   return currentPhoto.value.name
 })
 
-// 是否有上一张
-const hasPrevPhoto = computed(() => {
-  return currentPhotoIndex.value > 0
-})
-
-// 是否有下一张
-const hasNextPhoto = computed(() => {
-  return currentPhotoIndex.value < totalCount.value - 1
-})
-
-// 清除选择
-const clearSelection = () => {
-  selectedPhotos.value.clear()
-  lastSelectedIndex.value = -1
-}
-
-// 切换选择模式
-const toggleSelectionMode = () => {
-  selectionMode.value = !selectionMode.value
-  
-  // 退出选择模式时清除选择
-  if (!selectionMode.value) {
-    clearSelection()
-  }
-}
-
-// 切换过滤器，重置列表
-const toggleFilter = (key: 'star' | 'video') => {
-  filters[key] = !filters[key]
-  clearSelection()
-  resetAndLoad()
-}
-
-// 重置并加载
-const resetAndLoad = async () => {
-  photoCache.value.clear()
-  scrollTop.value = 0
-  if (scrollContainer.value) {
-    scrollContainer.value.scrollTop = 0
-  }
-  clearSelection()
-  await loadCount()
-  loadVisiblePhotos()
-}
+// 是否有上一张/下一张
+const hasPrevPhoto = computed(() => currentPhotoIndex.value > 0)
+const hasNextPhoto = computed(() => currentPhotoIndex.value < props.totalCount - 1)
 
 // 加载指定范围的照片
 const loadPhotos = async (start: number, size: number) => {
   const cacheKey = start
   
-  // 如果已在缓存中，直接返回
   if (photoCache.value.has(cacheKey)) {
     return
   }
   
   try {
-    const res = await getPicsApi({
-      star: filters.star || undefined,
-      video: filters.video || undefined,
-      trashed: false,
-      start,
-      size,
-      order: filters.order,
-      tag: searchTag.value || undefined
-    })
-    
-    if (res.code === 0) {
-      photoCache.value.set(cacheKey, res.data.data)
-    }
+    const photos = await props.loadPhotosApi(start, size)
+    photoCache.value.set(cacheKey, photos)
   } catch (error) {
     console.error('Load photos error:', error)
   }
@@ -494,17 +366,15 @@ const loadPhotos = async (start: number, size: number) => {
 
 // 加载可见区域的照片
 const loadVisiblePhotos = async () => {
-  if (loading.value || totalCount.value === 0) return
+  if (loading.value || props.totalCount === 0) return
   
   loading.value = true
   
   const { startIndex, endIndex } = visibleRange.value
   
-  // 计算需要加载的分页
   const startPage = Math.floor(startIndex / pageSize)
   const endPage = Math.floor((endIndex - 1) / pageSize)
   
-  // 并行加载所有需要的分页
   const promises: Promise<void>[] = []
   for (let page = startPage; page <= endPage; page++) {
     const start = page * pageSize
@@ -524,7 +394,6 @@ const handleScroll = async () => {
   scrollTop.value = scrollContainer.value.scrollTop
   containerHeight.value = scrollContainer.value.clientHeight
   
-  // 加载可见区域的照片
   await loadVisiblePhotos()
 }
 
@@ -538,245 +407,62 @@ const scrollToTop = () => {
   }
 }
 
-// 滚动到指定照片位置
-const scrollToPhoto = async (photoIndex: number) => {
-  if (!scrollContainer.value) return
-  
-  // 确保该照片的数据已加载
-  await ensurePhotoLoaded(photoIndex)
-  
-  // 计算照片所在的行
-  const row = Math.floor(photoIndex / itemsPerRow.value)
-  
-  // 计算滚动位置（居中显示）
-  const targetScrollTop = row * itemHeight - containerHeight.value / 2 + itemHeight / 2
-  
-  // 滚动到目标位置
-  scrollContainer.value.scrollTo({
-    top: Math.max(0, targetScrollTop),
-    behavior: 'smooth'
-  })
-  
-  // 等待滚动和渲染完成
-  await nextTick()
-  await new Promise(resolve => setTimeout(resolve, 300))
-}
-
 // 计算每行显示数量
 const updateItemsPerRow = () => {
   if (!scrollContainer.value) return
   
   const containerWidth = scrollContainer.value.clientWidth
-  const itemWidth = 216 // 200px + 16px gap
+  const itemWidth = 216
   itemsPerRow.value = Math.max(1, Math.floor(containerWidth / itemWidth))
 }
 
-const loadCount = async () => {
-  try {
-    const res = await getCountApi({ trashed: false })
-    if (res.code === 0) {
-      totalCount.value = res.data
-    }
-  } catch (error) {
-    console.error('Load count error:', error)
-  }
-}
-
-const loadAllTags = async () => {
-  try {
-    const res = await getAllTagsApi()
-    if (res.code === 0) {
-      allTags.value = res.data
-    }
-  } catch (error) {
-    console.error('Load tags error:', error)
-  }
-}
-
-const toggleStar = async (photo: Photo) => {
-  try {
-    await updateImageApi({
-      id: photo.id,
-      star: !photo.star
-    })
-    photo.star = !photo.star
-    MessagePlugin.success(photo.star ? '已收藏' : '已取消收藏')
-  } catch (error) {
-    console.error('Toggle star error:', error)
-  }
-}
-
-// 处理tag变化
-const handleTagChange = async (value: string[]) => {
-  if (!currentPhoto.value) return
+// 获取所有照片（按顺序）
+const getAllPhotosInOrder = (): Photo[] => {
+  const allPhotos: Photo[] = []
   
-  try {
-    // 将数组转换为逗号分隔的字符串
-    const tagString = value.filter(t => t.trim()).join(',')
-    
-    await updateImageApi({
-      id: currentPhoto.value.id,
-      tags: tagString
-    })
-    
-    // 更新当前照片对象的tags
-    currentPhoto.value.tags = tagString
-    
-    // 同步更新缓存中的照片数据
-    const cacheKey = Math.floor(currentPhotoIndex.value / pageSize) * pageSize
-    const cachePhotos = photoCache.value.get(cacheKey)
-    if (cachePhotos) {
-      const photoIndex = currentPhotoIndex.value - cacheKey
-      if (cachePhotos[photoIndex]) {
-        cachePhotos[photoIndex].tags = tagString
-      }
+  const cacheKeys = Array.from(photoCache.value.keys()).sort((a, b) => a - b)
+  for (const key of cacheKeys) {
+    const photos = photoCache.value.get(key)
+    if (photos) {
+      allPhotos.push(...photos)
     }
-    
-    // 如果有新tag不在列表中，添加到标签列表
-    value.forEach(tag => {
-      if (tag && !allTags.value.includes(tag)) {
-        allTags.value.push(tag)
-      }
-    })
-    
-    MessagePlugin.success('标签已更新')
-  } catch (error) {
-    console.error('Update tag error:', error)
-    MessagePlugin.error('标签更新失败')
   }
-}
-
-const trashPhoto = async (photo: Photo) => {
-  try {
-    await trashPhotosApi([photo.name])
-    MessagePlugin.success('已移至回收站')
-    
-    // 清除缓存，重新加载
-    photoCache.value.clear()
-    totalCount.value--
-    await loadVisiblePhotos()
-  } catch (error) {
-    console.error('Trash photo error:', error)
-  }
-}
-
-// 在查看器中切换收藏状态
-const toggleStarInViewer = async () => {
-  if (!currentPhoto.value) return
   
-  try {
-    await updateImageApi({
-      id: currentPhoto.value.id,
-      star: !currentPhoto.value.star
-    })
-    
-    currentPhoto.value.star = !currentPhoto.value.star
-    
-    // 同步更新缓存中的照片数据
-    const cacheKey = Math.floor(currentPhotoIndex.value / pageSize) * pageSize
-    const cachePhotos = photoCache.value.get(cacheKey)
-    if (cachePhotos) {
-      const photoIndex = currentPhotoIndex.value - cacheKey
-      if (cachePhotos[photoIndex]) {
-        cachePhotos[photoIndex].star = currentPhoto.value.star
-      }
-    }
-    
-    MessagePlugin.success(currentPhoto.value.star ? '已收藏' : '已取消收藏')
-  } catch (error) {
-    console.error('Toggle star error:', error)
-    MessagePlugin.error('操作失败')
-  }
+  return allPhotos
 }
 
-// 删除当前查看的照片
-const deleteCurrentPhoto = async () => {
-  if (!currentPhoto.value) return
+// 获取选中的照片列表
+const getSelectedPhotosList = (): Photo[] => {
+  const allPhotos = getAllPhotosInOrder()
+  return allPhotos.filter(p => selectedPhotos.value.has(p.id))
+}
+
+// 清除选择
+const clearSelection = () => {
+  selectedPhotos.value.clear()
+  lastSelectedIndex.value = -1
+}
+
+// 切换选择模式
+const toggleSelectionMode = () => {
+  selectionMode.value = !selectionMode.value
   
-  try {
-    const photoName = currentPhoto.value.name
-    const currentIndex = currentPhotoIndex.value
-    
-    // 删除照片
-    await trashPhotosApi([photoName])
-    MessagePlugin.success('已移至回收站')
-    
-    // 减少总数
-    totalCount.value--
-    
-    // 清除缓存
-    photoCache.value.clear()
-    
-    // 判断是否还有照片
-    if (totalCount.value === 0) {
-      // 没有照片了，关闭查看器
-      viewerVisible.value = false
-      await loadVisiblePhotos()
-      return
-    }
-    
-    // 重新加载照片数据
-    await loadVisiblePhotos()
-    
-    // 等待数据加载完成
-    await nextTick()
-    
-    // 获取更新后的照片列表
-    const allPhotos = getAllPhotosInOrder()
-    
-    if (allPhotos.length === 0) {
-      // 没有照片了，关闭查看器
-      viewerVisible.value = false
-      return
-    }
-    
-    // 切换到下一张照片
-    let newIndex = currentIndex
-    
-    // 如果当前索引超出范围，切换到上一张
-    if (newIndex >= allPhotos.length) {
-      newIndex = allPhotos.length - 1
-    }
-    
-    // 确保新索引的照片已加载
-    await ensurePhotoLoaded(newIndex)
-    
-    // 更新当前照片
-    const newPhoto = allPhotos[newIndex]
-    if (newPhoto) {
-      currentPhoto.value = newPhoto
-      currentPhotoIndex.value = newIndex
-      currentPhotoTags.value = newPhoto.tags ? newPhoto.tags.split(',').filter(t => t.trim()) : []
-    } else {
-      // 如果找不到照片，关闭查看器
-      viewerVisible.value = false
-    }
-  } catch (error) {
-    console.error('Delete photo error:', error)
-    MessagePlugin.error('删除失败')
+  if (!selectionMode.value) {
+    clearSelection()
   }
 }
 
 // 处理照片点击
 const handlePhotoClick = (photo: Photo, event: MouseEvent) => {
-  // 选择模式下
   if (selectionMode.value) {
-    // 如果按住 Ctrl/Cmd 键，单独选择/取消选择
     if (event.ctrlKey || event.metaKey) {
       toggleSelection(photo)
-    }
-    // 如果按住 Shift 键，连续选择
-    else if (event.shiftKey && lastSelectedIndex.value >= 0) {
+    } else if (event.shiftKey && lastSelectedIndex.value >= 0) {
       selectRange(photo)
-    }
-    // 普通点击，切换选中状态
-    else {
+    } else {
       toggleSelection(photo)
     }
-  }
-  // 非选择模式下
-  else {
-    // 普通点击查看照片
+  } else {
     viewPhoto(photo)
   }
 }
@@ -787,7 +473,6 @@ const toggleSelection = (photo: Photo) => {
     selectedPhotos.value.delete(photo.id)
   } else {
     selectedPhotos.value.add(photo.id)
-    // 记录最后选中的索引
     const allPhotos = getAllPhotosInOrder()
     lastSelectedIndex.value = allPhotos.findIndex(p => p.id === photo.id)
   }
@@ -806,41 +491,22 @@ const selectRange = (photo: Photo) => {
   const start = Math.min(lastSelectedIndex.value, currentIndex)
   const end = Math.max(lastSelectedIndex.value, currentIndex)
   
-  // 选中范围内的所有照片
   for (let i = start; i <= end; i++) {
     selectedPhotos.value.add(allPhotos[i].id)
   }
 }
 
-// 获取所有照片（按顺序）
-const getAllPhotosInOrder = (): Photo[] => {
-  const allPhotos: Photo[] = []
-  
-  // 从缓存中提取所有照片并排序
-  const cacheKeys = Array.from(photoCache.value.keys()).sort((a, b) => a - b)
-  for (const key of cacheKeys) {
-    const photos = photoCache.value.get(key)
-    if (photos) {
-      allPhotos.push(...photos)
-    }
-  }
-  
-  return allPhotos
-}
-
 const viewPhoto = (photo: Photo) => {
   currentPhoto.value = photo
-  // 将逗号分隔的tag字符串转换为数组
   currentPhotoTags.value = photo.tags ? photo.tags.split(',').filter(t => t.trim()) : []
   
-  // 计算当前照片在所有照片中的索引
   const allPhotos = getAllPhotosInOrder()
   currentPhotoIndex.value = allPhotos.findIndex(p => p.id === photo.id)
   
   viewerVisible.value = true
 }
 
-// 查看上一张照片
+// 查看上一张/下一张照片
 const viewPrevPhoto = async () => {
   if (!hasPrevPhoto.value || photoSwitching.value) return
   
@@ -855,7 +521,6 @@ const viewPrevPhoto = async () => {
     if (photo) {
       currentPhoto.value = photo
       currentPhotoIndex.value = newIndex
-      // 将逗号分隔的tag字符串转换为数组
       currentPhotoTags.value = photo.tags ? photo.tags.split(',').filter(t => t.trim()) : []
     }
   } catch (error) {
@@ -864,7 +529,6 @@ const viewPrevPhoto = async () => {
   }
 }
 
-// 查看下一张照片
 const viewNextPhoto = async () => {
   if (!hasNextPhoto.value || photoSwitching.value) return
   
@@ -879,7 +543,6 @@ const viewNextPhoto = async () => {
     if (photo) {
       currentPhoto.value = photo
       currentPhotoIndex.value = newIndex
-      // 将逗号分隔的tag字符串转换为数组
       currentPhotoTags.value = photo.tags ? photo.tags.split(',').filter(t => t.trim()) : []
     }
   } catch (error) {
@@ -888,12 +551,11 @@ const viewNextPhoto = async () => {
   }
 }
 
-// 图片加载完成
+// 图片加载完成/失败
 const handleImageLoaded = () => {
   photoSwitching.value = false
 }
 
-// 图片加载失败
 const handleImageError = () => {
   photoSwitching.value = false
   MessagePlugin.error('照片加载失败')
@@ -903,10 +565,14 @@ const handleImageError = () => {
 const ensurePhotoLoaded = async (index: number) => {
   const cacheKey = Math.floor(index / pageSize) * pageSize
   
-  // 如果该分页未加载，先加载
   if (!photoCache.value.has(cacheKey)) {
     await loadPhotos(cacheKey, pageSize)
   }
+}
+
+// 处理tag变化（由父组件提供具体实现）
+const handleTagChange = (value: string[]) => {
+  // 这个函数会通过 slot 传递给父组件
 }
 
 // 键盘事件处理
@@ -924,29 +590,15 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 }
 
-// 查看器打开时添加键盘监听
+// 查看器打开/关闭时的处理
 const handleViewerOpened = () => {
   window.addEventListener('keydown', handleKeyDown)
-  photoSwitching.value = false // 重置加载状态
+  photoSwitching.value = false
 }
 
-// 查看器关闭时移除键盘监听
-const handleViewerClosed = async () => {
+const handleViewerClosed = () => {
   window.removeEventListener('keydown', handleKeyDown)
   photoSwitching.value = false
-  
-  // 如果有当前照片，滚动到该位置并选中
-  if (currentPhoto.value && currentPhotoIndex.value >= 0) {
-    // 清空之前的选择
-    selectedPhotos.value.clear()
-    
-    // 选中当前照片（只显示边框高亮）
-    selectedPhotos.value.add(currentPhoto.value.id)
-    lastSelectedIndex.value = currentPhotoIndex.value
-    
-    // 滚动到照片位置
-    await scrollToPhoto(currentPhotoIndex.value)
-  }
 }
 
 const formatDate = (date: string) => {
@@ -975,8 +627,83 @@ const handleResize = () => {
   }
 }
 
+// 暴露方法给父组件
+const refresh = () => {
+  photoCache.value.clear()
+  scrollTop.value = 0
+  if (scrollContainer.value) {
+    scrollContainer.value.scrollTop = 0
+  }
+  clearSelection()
+  loadVisiblePhotos()
+}
+
+// 关闭查看器
+const closeViewer = () => {
+  viewerVisible.value = false
+}
+
+// 在查看器中切换到下一张或上一张照片（用于恢复/删除后的智能切换）
+const switchPhotoInViewer = async (currentIndex: number) => {
+  // 判断是否还有照片
+  if (props.totalCount === 0) {
+    closeViewer()
+    return
+  }
+  
+  // 重新加载照片数据
+  await loadVisiblePhotos()
+  
+  // 获取更新后的照片列表
+  const allPhotos = getAllPhotosInOrder()
+  
+  if (allPhotos.length === 0) {
+    closeViewer()
+    return
+  }
+  
+  // 计算新的索引
+  let newIndex = currentIndex
+  
+  // 如果当前索引超出范围，切换到上一张
+  if (newIndex >= allPhotos.length) {
+    newIndex = allPhotos.length - 1
+  }
+  
+  // 确保新索引的照片已加载
+  await ensurePhotoLoaded(newIndex)
+  
+  // 更新当前照片
+  const newPhoto = allPhotos[newIndex]
+  if (newPhoto) {
+    currentPhoto.value = newPhoto
+    currentPhotoIndex.value = newIndex
+    currentPhotoTags.value = newPhoto.tags ? newPhoto.tags.split(',').filter(t => t.trim()) : []
+  } else {
+    closeViewer()
+  }
+}
+
+defineExpose({
+  refresh,
+  clearSelection,
+  selectedPhotos,
+  photoCache,
+  viewerVisible,
+  currentPhoto,
+  currentPhotoIndex,
+  switchPhotoInViewer,
+  closeViewer
+})
+
+// 监听 totalCount 变化，当从 0 变为有值时加载照片
+watch(() => props.totalCount, (newCount, oldCount) => {
+  if (newCount > 0 && oldCount === 0) {
+    loadVisiblePhotos()
+  }
+})
+
 onMounted(async () => {
-  await Promise.all([loadCount(), loadAllTags()])
   updateItemsPerRow()
   
   if (scrollContainer.value) {
@@ -984,7 +711,11 @@ onMounted(async () => {
   }
   
   await nextTick()
-  await loadVisiblePhotos()
+  
+  // 只有在 totalCount 已经有值的情况下才加载
+  if (props.totalCount > 0) {
+    await loadVisiblePhotos()
+  }
   
   window.addEventListener('resize', handleResize)
 })
@@ -995,7 +726,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.photos-container {
+.photo-grid-container {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -1020,6 +751,15 @@ onBeforeUnmount(() => {
 .count-text {
   font-size: 14px;
   color: var(--td-text-color-secondary);
+}
+
+.selection-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--td-brand-color);
+  font-weight: 500;
 }
 
 .photos-scroll-container {
@@ -1131,7 +871,6 @@ onBeforeUnmount(() => {
   transition: opacity 0.2s;
 }
 
-/* 选择模式下，将操作菜单向左移动以避免与选择框重叠 */
 .photo-item:has(.selection-checkbox) .action-menu {
   right: 44px;
 }
@@ -1146,15 +885,6 @@ onBeforeUnmount(() => {
   background: white !important;
 }
 
-.selection-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: var(--td-brand-color);
-  font-weight: 500;
-}
-
 .photo-img {
   position: absolute;
   top: 0;
@@ -1162,25 +892,6 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.photo-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s;
-  pointer-events: none;
-}
-
-.photo-wrapper:hover .photo-overlay {
-  opacity: 1;
 }
 
 .photo-info {
@@ -1327,5 +1038,10 @@ onBeforeUnmount(() => {
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid var(--td-component-border);
+}
+
+.empty-tag {
+  color: var(--td-text-color-placeholder);
+  font-size: 12px;
 }
 </style>
