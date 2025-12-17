@@ -46,6 +46,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '活动' }
       },
       {
+        path: 'albums',
+        name: 'Albums',
+        component: () => import('@/views/Albums.vue'),
+        meta: { title: '相册' }
+      },
+      {
         path: 'folders',
         name: 'Folders',
         component: () => import('@/views/Folders.vue'),

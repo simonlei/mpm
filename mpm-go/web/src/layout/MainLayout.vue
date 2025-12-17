@@ -57,6 +57,13 @@
               活动
             </t-menu-item>
             
+            <t-menu-item value="albums">
+              <template #icon>
+                <t-icon name="view-module" />
+              </template>
+              相册
+            </t-menu-item>
+            
             <t-menu-item value="folders">
               <template #icon>
                 <t-icon name="folder" />
