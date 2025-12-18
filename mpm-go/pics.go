@@ -224,6 +224,40 @@ func updateImage(c *gin.Context) {
 	c.JSON(200, Response{0, addThumbField([]*model.TPhoto{&p})[0]})
 }
 
+// 通过 ID 获取单张照片信息
+func getPhotoById(c *gin.Context) {
+	var req IdReq
+	err := c.BindJSON(&req)
+	if err != nil {
+		l.Info("Can't bind request:", err)
+		c.JSON(400, Response{1, "Invalid request"})
+		return
+	}
+
+	var photo model.TPhoto
+	result := db().Raw(`
+		select t_photos.*, 
+		concat(t_activity.startDate, ' ', t_activity.name, ' ', t_activity.description) as activity_desc
+		from t_photos
+		left join t_activity on t_activity.id=t_photos.activity
+		where t_photos.id=?
+	`, req.Id).Scan(&photo)
+
+	if result.Error != nil {
+		l.Info("getPhotoById error:", result.Error)
+		c.JSON(500, Response{1, "Error fetching photo"})
+		return
+	}
+
+	if photo.ID == 0 {
+		c.JSON(404, Response{1, "Photo not found"})
+		return
+	}
+
+	photos := addThumbField([]*model.TPhoto{&photo})
+	c.JSON(200, Response{0, photos[0]})
+}
+
 // 更改活动 id
 
 func updatePhotoActivity(req *UpdateImageRequest) {

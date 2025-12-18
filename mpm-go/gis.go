@@ -30,7 +30,7 @@ type Feature struct {
 
 func loadMarkersGeoJson(c *gin.Context) {
 	s := `select id, name, latitude, longitude, rotate
-			from t_photos where latitude is not null and trashed=false`
+			from t_photos where latitude is not null and latitude>0 and trashed=false`
 	var markers []Marker
 	db().Raw(s).Find(&markers)
 	var features []Feature

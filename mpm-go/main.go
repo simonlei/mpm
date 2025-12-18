@@ -36,6 +36,7 @@ func setupEngine() {
 	r.POST("/api/getActivities", getActivitiesApi)
 	r.POST("/api/getPicsDate", getPicsDate)
 	r.POST("/api/getPics", getPics)
+	r.POST("/api/getPhotoById", getPhotoById)
 	r.POST("/api/getCount", getCount)
 	r.POST("/api/getAllTags", getAllTags)
 	r.POST("/api/getFoldersData", getFoldersData)

@@ -71,6 +71,10 @@ export const getPicsApi = (data: GetPicsParams) => {
   return request.post<ApiResponse<PicsResponse>>('/api/getPics', data)
 }
 
+export const getPhotoByIdApi = (data: { id: number }) => {
+  return request.post<ApiResponse<Photo>>('/api/getPhotoById', data)
+}
+
 export const getCountApi = (data: { trashed: boolean }) => {
   return request.post<ApiResponse<number>>('/api/getCount', data)
 }
