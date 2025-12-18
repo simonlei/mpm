@@ -23,7 +23,7 @@ export const loginApi = (data: LoginParams) => {
 export interface Photo {
   id: number
   name: string
-  takenDate: string
+  taken_date: string
   latitude: number
   longitude: number
   address: string
@@ -35,10 +35,10 @@ export interface Photo {
   video: boolean
   thumb: string
   activity: number
-  activityDesc: string
+  activity_desc: string
   tags: string
-  theYear: number
-  theMonth: number
+  the_year: number
+  the_month: number
   size: number
   description: string
   media_type: string

@@ -166,7 +166,13 @@ const orderOptions = [
   { label: 'ID 升序', value: 'id' },
   { label: 'ID 降序', value: '-id' },
   { label: '日期 升序', value: 'taken_date' },
-  { label: '日期 降序', value: '-taken_date' }
+  { label: '日期 降序', value: '-taken_date' },
+  { label: '大小 升序', value: 'size' },
+  { label: '大小 降序', value: '-size' },
+  { label: '宽度 升序', value: 'width' },
+  { label: '宽度 降序', value: '-width' },
+  { label: '高度 升序', value: 'height' },
+  { label: '高度 降序', value: '-height' }
 ]
 
 // 标签选项
