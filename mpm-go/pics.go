@@ -36,6 +36,10 @@ func getPics(c *gin.Context) {
 		l.Info("Can't bind request:", err)
 		return
 	}
+	// 如果 order 为空，设置默认值为 -id
+	if req.Order == "" {
+		req.Order = "-id"
+	}
 	desc := strings.HasPrefix(req.Order, "-")
 	if desc {
 		req.Order = req.Order[1:]
