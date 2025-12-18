@@ -1,5 +1,5 @@
 <template>
-  <div class="photo-detail-container">
+  <div class="photo-detail-container" :class="layoutClass">
     <!-- 媒体展示区域 -->
     <div class="media-section">
       <!-- 视频播放器 -->
@@ -242,15 +242,23 @@ import dayjs from 'dayjs'
 
 interface Props {
   photo: Photo
+  layout?: 'vertical' | 'horizontal' // vertical: 上下结构, horizontal: 左右结构
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  layout: 'horizontal'
+})
 
 const emit = defineEmits<{
   'update:photo': [photo: Photo]
 }>()
 
 const viewerImageRef = ref<HTMLImageElement | null>(null)
+
+// 计算布局类名
+const layoutClass = computed(() => {
+  return props.layout === 'vertical' ? 'layout-vertical' : 'layout-horizontal'
+})
 
 // 人脸圈选功能
 const showFaceBoxes = ref(false)
@@ -529,14 +537,41 @@ const formatDuration = (seconds: number) => {
 /* 照片详情容器 */
 .photo-detail-container {
   display: flex;
-  flex-direction: column;
   gap: 24px;
+}
+
+/* 垂直布局（上下结构）- 用于地图页面 */
+.photo-detail-container.layout-vertical {
+  flex-direction: column;
+}
+
+.photo-detail-container.layout-vertical .media-section {
+  width: 100%;
+}
+
+.photo-detail-container.layout-vertical .info-section {
+  width: 100%;
+}
+
+/* 水平布局（左右结构）- 用于首页、相册等页面 */
+.photo-detail-container.layout-horizontal {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.photo-detail-container.layout-horizontal .media-section {
+  flex: 0 0 65%;
+  max-width: 65%;
+}
+
+.photo-detail-container.layout-horizontal .info-section {
+  flex: 0 0 35%;
+  max-width: 35%;
 }
 
 /* 媒体展示区域 */
 .media-section {
   position: relative;
-  width: 100%;
   background: #f5f5f5;
   border-radius: 8px;
   overflow: hidden;

@@ -14,6 +14,7 @@
         <PhotoDetail
           v-if="selectedPhoto"
           :photo="selectedPhoto"
+          layout="vertical"
           @update:photo="handlePhotoUpdate"
         >
           <template #tag-editor="{ photo }">

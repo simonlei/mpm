@@ -184,244 +184,30 @@
           </t-button>
         </div>
         
-        <div class="viewer-content">
-          <!-- 左侧媒体展示 -->
-          <div class="viewer-image">
-            <!-- 加载中遮罩 -->
-            <div v-if="photoSwitching" class="viewer-loading">
-              <t-loading size="large" text="加载中..." />
-            </div>
-            
-            <!-- 视频播放器 -->
-            <video
-              v-if="currentPhoto.media_type === 'video'"
-              v-show="!photoSwitching"
-              :key="currentPhoto.id"
-              :src="`/cos/video_t/${currentPhoto.name}.mp4`"
-              controls
-              class="video-player"
-              @loadeddata="handleImageLoaded"
-              @error="handleImageError"
-            >
-              您的浏览器不支持视频播放
-            </video>
-            
-            <!-- 图片展示（带人脸框） -->
-            <div
-              v-else
-              v-show="!photoSwitching"
-              class="image-container"
-            >
-              <div class="image-wrapper" :style="{ transform: `rotate(${currentPhoto.rotate || 0}deg)` }">
-                <img
-                  ref="viewerImageRef"
-                  :key="currentPhoto.id"
-                  :src="`/cos/small/${currentPhoto.name}`"
-                  :alt="currentPhoto.name"
-                  @load="handleImageLoaded"
-                  @error="handleImageError"
-                />
-                
-                <!-- 人脸框 -->
-                <div
-                  v-if="showFaceBoxes && facesForPhoto.length > 0"
-                  class="face-boxes-overlay"
-                >
-                  <div
-                    v-for="face in facesForPhoto"
-                    :key="face.id"
-                    class="face-box"
-                    :style="getFaceBoxStyle(face)"
-                    @click.stop="editFaceName(face)"
-                  >
-                    <div class="face-name">{{ face.name || '未命名' }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- 旋转按钮 -->
-            <div v-if="currentPhoto && currentPhoto.media_type !== 'video'" class="rotate-buttons">
-              <t-button
-                theme="default"
-                variant="outline"
-                shape="circle"
-                size="medium"
-                :loading="rotating"
-                @click="rotatePhoto(-90)"
-              >
-                <template #icon>
-                  <t-icon name="rollback" size="20px" />
-                </template>
-              </t-button>
-              <t-button
-                theme="default"
-                variant="outline"
-                shape="circle"
-                size="medium"
-                :loading="rotating"
-                @click="rotatePhoto(90)"
-              >
-                <template #icon>
-                  <t-icon name="rollfront" size="20px" />
-                </template>
-              </t-button>
-            </div>
-          </div>
-          
-          <!-- 右侧信息 -->
-          <div class="viewer-info">
-            <t-descriptions :column="1" bordered>
-              <t-descriptions-item v-if="currentPhoto.media_type === 'video' && currentPhoto.duration" label="时长">
-                {{ formatDuration(currentPhoto.duration) }}
-              </t-descriptions-item>
-              <t-descriptions-item label="大小">
-                {{ formatFileSize(currentPhoto.size) }}
-              </t-descriptions-item>
-              <t-descriptions-item label="宽度">
-                {{ currentPhoto.width }} px
-              </t-descriptions-item>
-              <t-descriptions-item label="高度">
-                {{ currentPhoto.height }} px
-              </t-descriptions-item>
-              <t-descriptions-item label="描述">
-                <div v-if="!editingDescription" class="description-display">
-                  <span v-if="currentPhoto.description" class="description-text">{{ currentPhoto.description }}</span>
-                  <span v-else class="empty-description">无描述</span>
-                  <t-button
-                    theme="default"
-                    variant="text"
-                    size="small"
-                    @click="startEditDescription"
-                  >
-                    <template #icon><t-icon name="edit" /></template>
-                  </t-button>
-                </div>
-                <div v-else class="description-editor">
-                  <t-textarea
-                    v-model="editDescriptionValue"
-                    placeholder="请输入描述信息"
-                    :autosize="{ minRows: 2, maxRows: 6 }"
-                    :maxlength="500"
-                    show-limit-number
-                  />
-                  <div class="editor-actions">
-                    <t-button
-                      size="small"
-                      variant="outline"
-                      @click="cancelEditDescription"
-                    >
-                      取消
-                    </t-button>
-                    <t-button
-                      size="small"
-                      theme="primary"
-                      :loading="savingDescription"
-                      @click="saveDescription"
-                    >
-                      保存
-                    </t-button>
-                  </div>
-                </div>
-              </t-descriptions-item>
-              <t-descriptions-item label="时间">
-                <div v-if="!editingDateTime" class="description-display">
-                  <span class="description-text">{{ formatDateTime(currentPhoto.taken_date) }}</span>
-                  <t-button
-                    theme="default"
-                    variant="text"
-                    size="small"
-                    @click="startEditDateTime"
-                  >
-                    <template #icon><t-icon name="edit" /></template>
-                  </t-button>
-                </div>
-                <div v-else class="description-editor">
-                  <t-date-picker
-                    v-model="editDateTimeValue"
-                    enable-time-picker
-                    format="YYYY-MM-DD HH:mm:ss"
-                    value-type="YYYY-MM-DD HH:mm:ss"
-                    placeholder="请选择日期时间"
-                    clearable
-                  />
-                  <div class="editor-actions">
-                    <t-button
-                      size="small"
-                      variant="outline"
-                      @click="cancelEditDateTime"
-                    >
-                      取消
-                    </t-button>
-                    <t-button
-                      size="small"
-                      theme="primary"
-                      :loading="savingDateTime"
-                      @click="saveDateTime"
-                    >
-                      保存
-                    </t-button>
-                  </div>
-                </div>
-              </t-descriptions-item>
-              <t-descriptions-item label="标签">
-                <slot name="tag-editor" :photo="currentPhoto" :tags="currentPhotoTags" :onTagChange="handleTagChange">
-                  <span v-if="currentPhoto.tags">{{ currentPhoto.tags }}</span>
-                  <span v-else class="empty-tag">无标签</span>
-                </slot>
-              </t-descriptions-item>
-              <t-descriptions-item v-if="currentPhoto.address" label="地址">
-                {{ currentPhoto.address }}
-              </t-descriptions-item>
-              <t-descriptions-item v-if="currentPhoto.activity_desc" label="所属活动">
-                {{ currentPhoto.activity_desc }}
-              </t-descriptions-item>
-            </t-descriptions>
-            
-            <div class="viewer-actions">
-              <t-button
-                v-if="currentPhoto.media_type !== 'video'"
-                :theme="showFaceBoxes ? 'primary' : 'default'"
-                variant="outline"
-                block
-                :loading="loadingFaces"
-                @click="toggleFaceBoxes"
-              >
-                <template #icon><t-icon name="usergroup" /></template>
-                {{ showFaceBoxes ? '隐藏圈人' : '圈人' }}
-              </t-button>
-              <t-button
-                theme="primary"
-                variant="outline"
-                block
-                @click="downloadOriginal"
-              >
-                <template #icon><t-icon name="download" /></template>
-                下载原图
-              </t-button>
-              <slot name="viewer-actions" :photo="currentPhoto"></slot>
-            </div>
-          </div>
+        <!-- 加载中遮罩 -->
+        <div v-if="photoSwitching" class="viewer-loading-overlay">
+          <t-loading size="large" text="加载中..." />
+        </div>
+        
+        <!-- 照片详情内容 -->
+        <div v-show="!photoSwitching" class="viewer-content-wrapper">
+          <PhotoDetail
+            :key="currentPhoto.id"
+            :photo="currentPhoto"
+            @update:photo="handlePhotoUpdate"
+          >
+            <template #tag-editor="{ photo }">
+              <slot name="tag-editor" :photo="photo" :tags="currentPhotoTags" :onTagChange="handleTagChange">
+                <span v-if="photo.tags">{{ photo.tags }}</span>
+                <span v-else class="empty-tag">无标签</span>
+              </slot>
+            </template>
+            <template #actions="{ photo }">
+              <slot name="viewer-actions" :photo="photo"></slot>
+            </template>
+          </PhotoDetail>
         </div>
       </div>
-    </t-dialog>
-    
-    <!-- 编辑人脸名字对话框 -->
-    <t-dialog
-      v-model:visible="editFaceNameVisible"
-      header="编辑人脸名字"
-      :on-confirm="saveFaceName"
-      :confirm-btn="{ loading: savingFaceName }"
-    >
-      <t-form :data="editFaceNameForm" label-align="top">
-        <t-form-item label="姓名">
-          <t-input 
-            v-model="editFaceNameForm.name" 
-            placeholder="请输入姓名"
-            @keyup.enter="saveFaceName"
-          />
-        </t-form-item>
-      </t-form>
     </t-dialog>
   </div>
 </template>
@@ -429,7 +215,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
-import { Photo, FaceForPhoto, getFacesForPhotoApi, updateFaceApi } from '@/api'
+import { Photo } from '@/api'
+import PhotoDetail from './PhotoDetail.vue'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -457,7 +244,6 @@ const emit = defineEmits<{
 
 const loading = ref(false)
 const scrollContainer = ref<HTMLElement | null>(null)
-const viewerImageRef = ref<HTMLImageElement | null>(null)
 
 // 虚拟滚动配置
 const itemHeight = 280
@@ -534,19 +320,6 @@ const selectionMode = ref(false)
 
 // 当前浏览的照片（用于在网格中高亮显示）
 const lastViewedPhotoId = ref<number | null>(null)
-
-// 人脸圈选功能
-const showFaceBoxes = ref(false)
-const loadingFaces = ref(false)
-const facesForPhoto = ref<FaceForPhoto[]>([])
-
-// 编辑人脸名字
-const editFaceNameVisible = ref(false)
-const savingFaceName = ref(false)
-const editFaceNameForm = ref({
-  faceId: 0,
-  name: ''
-})
 
 // 计算当前照片的标题
 const currentPhotoHeader = computed(() => {
@@ -722,13 +495,23 @@ const viewPhoto = (photo: Photo) => {
   const allPhotos = getAllPhotosInOrder()
   currentPhotoIndex.value = allPhotos.findIndex(p => p.id === photo.id)
   
-  // 重置编辑状态
-  editingDescription.value = false
-  editDescriptionValue.value = ''
-  editingDateTime.value = false
-  editDateTimeValue.value = ''
-  
   viewerVisible.value = true
+}
+
+// 处理照片更新
+const handlePhotoUpdate = (updatedPhoto: Photo) => {
+  currentPhoto.value = updatedPhoto
+  
+  // 同步更新缓存中的照片数据
+  const currentIndex = currentPhotoIndex.value
+  const cacheKey = Math.floor(currentIndex / pageSize) * pageSize
+  const cachePhotos = photoCache.value.get(cacheKey)
+  if (cachePhotos) {
+    const photoIndex = currentIndex - cacheKey
+    if (cachePhotos[photoIndex]) {
+      Object.assign(cachePhotos[photoIndex], updatedPhoto)
+    }
+  }
 }
 
 // 查看上一张/下一张照片
@@ -736,16 +519,6 @@ const viewPrevPhoto = async () => {
   if (!hasPrevPhoto.value || photoSwitching.value) return
   
   photoSwitching.value = true
-  
-  // 重置编辑状态
-  editingDescription.value = false
-  editDescriptionValue.value = ''
-  editingDateTime.value = false
-  editDateTimeValue.value = ''
-  
-  // 重置人脸框状态
-  showFaceBoxes.value = false
-  facesForPhoto.value = []
   
   try {
     const newIndex = currentPhotoIndex.value - 1
@@ -760,6 +533,7 @@ const viewPrevPhoto = async () => {
     }
   } catch (error) {
     console.error('View prev photo error:', error)
+  } finally {
     photoSwitching.value = false
   }
 }
@@ -768,16 +542,6 @@ const viewNextPhoto = async () => {
   if (!hasNextPhoto.value || photoSwitching.value) return
   
   photoSwitching.value = true
-  
-  // 重置编辑状态
-  editingDescription.value = false
-  editDescriptionValue.value = ''
-  editingDateTime.value = false
-  editDateTimeValue.value = ''
-  
-  // 重置人脸框状态
-  showFaceBoxes.value = false
-  facesForPhoto.value = []
   
   try {
     const newIndex = currentPhotoIndex.value + 1
@@ -792,190 +556,8 @@ const viewNextPhoto = async () => {
     }
   } catch (error) {
     console.error('View next photo error:', error)
+  } finally {
     photoSwitching.value = false
-  }
-}
-
-// 图片加载完成/失败
-const handleImageLoaded = () => {
-  photoSwitching.value = false
-}
-
-const handleImageError = () => {
-  photoSwitching.value = false
-  MessagePlugin.error('照片加载失败')
-}
-
-// 下载原图
-const downloadOriginal = () => {
-  if (!currentPhoto.value) return
-  
-  const downloadUrl = `/cos/origin/${currentPhoto.value.name}`
-  const link = document.createElement('a')
-  link.href = downloadUrl
-  link.download = currentPhoto.value.name
-  link.click()
-}
-
-// 旋转功能
-const rotating = ref(false)
-const rotatePhoto = async (degrees: number) => {
-  if (!currentPhoto.value || rotating.value) return
-  
-  rotating.value = true
-  try {
-    const currentRotate = currentPhoto.value.rotate || 0
-    const newRotate = (currentRotate + degrees) % 360
-    
-    // 调用 API 更新旋转角度
-    const { updateImageApi } = await import('@/api')
-    const response = await updateImageApi({
-      id: currentPhoto.value.id,
-      rotate: newRotate
-    })
-    
-    // 从后端响应中获取更新后的照片数据（包含新的 thumb）
-    if (response.code === 0 && response.data) {
-      const updatedPhoto = response.data
-      
-      // 更新当前照片的旋转角度和缩略图
-      currentPhoto.value.rotate = updatedPhoto.rotate
-      currentPhoto.value.thumb = updatedPhoto.thumb
-      
-      // 同步更新缓存中的照片数据
-      const currentIndex = currentPhotoIndex.value
-      const cacheKey = Math.floor(currentIndex / pageSize) * pageSize
-      const cachePhotos = photoCache.value.get(cacheKey)
-      if (cachePhotos) {
-        const photoIndex = currentIndex - cacheKey
-        if (cachePhotos[photoIndex]) {
-          cachePhotos[photoIndex].rotate = updatedPhoto.rotate
-          cachePhotos[photoIndex].thumb = updatedPhoto.thumb
-        }
-      }
-    }
-    
-    MessagePlugin.success('旋转成功')
-  } catch (error) {
-    console.error('Rotate photo error:', error)
-    MessagePlugin.error('旋转失败')
-  } finally {
-    rotating.value = false
-  }
-}
-
-// 描述编辑功能
-const editingDescription = ref(false)
-const editDescriptionValue = ref('')
-const savingDescription = ref(false)
-
-const startEditDescription = () => {
-  if (!currentPhoto.value) return
-  editDescriptionValue.value = currentPhoto.value.description || ''
-  editingDescription.value = true
-}
-
-const cancelEditDescription = () => {
-  editingDescription.value = false
-  editDescriptionValue.value = ''
-}
-
-const saveDescription = async () => {
-  if (!currentPhoto.value || savingDescription.value) return
-  
-  savingDescription.value = true
-  try {
-    const { updateImageApi } = await import('@/api')
-    const response = await updateImageApi({
-      id: currentPhoto.value.id,
-      description: editDescriptionValue.value
-    })
-    
-    if (response.code === 0 && response.data) {
-      const updatedPhoto = response.data
-      
-      // 更新当前照片的描述
-      currentPhoto.value.description = updatedPhoto.description
-      
-      // 同步更新缓存中的照片数据
-      const currentIndex = currentPhotoIndex.value
-      const cacheKey = Math.floor(currentIndex / pageSize) * pageSize
-      const cachePhotos = photoCache.value.get(cacheKey)
-      if (cachePhotos) {
-        const photoIndex = currentIndex - cacheKey
-        if (cachePhotos[photoIndex]) {
-          cachePhotos[photoIndex].description = updatedPhoto.description
-        }
-      }
-      
-      MessagePlugin.success('保存成功')
-      editingDescription.value = false
-    }
-  } catch (error) {
-    console.error('Save description error:', error)
-    MessagePlugin.error('保存失败')
-  } finally {
-    savingDescription.value = false
-  }
-}
-
-// 日期时间编辑功能
-const editingDateTime = ref(false)
-const editDateTimeValue = ref('')
-const savingDateTime = ref(false)
-
-const startEditDateTime = () => {
-  if (!currentPhoto.value) return
-  // 格式化为 YYYY-MM-DD HH:mm:ss 格式
-  editDateTimeValue.value = formatDateTime(currentPhoto.value.taken_date)
-  editingDateTime.value = true
-}
-
-const cancelEditDateTime = () => {
-  editingDateTime.value = false
-  editDateTimeValue.value = ''
-}
-
-const saveDateTime = async () => {
-  if (!currentPhoto.value || savingDateTime.value || !editDateTimeValue.value) return
-  
-  savingDateTime.value = true
-  try {
-    const { updateImageApi } = await import('@/api')
-    
-    // 将本地时间转换为 ISO 8601 格式，但保持为本地时间（使用 +08:00 时区）
-    const localDateString = dayjs(editDateTimeValue.value).format('YYYY-MM-DDTHH:mm:ss+08:00')
-    
-    const response = await updateImageApi({
-      id: currentPhoto.value.id,
-      taken_date: localDateString
-    })
-    
-    if (response.code === 0 && response.data) {
-      const updatedPhoto = response.data
-      
-      // 更新当前照片的时间
-      currentPhoto.value.taken_date = updatedPhoto.taken_date
-      
-      // 同步更新缓存中的照片数据
-      const currentIndex = currentPhotoIndex.value
-      const cacheKey = Math.floor(currentIndex / pageSize) * pageSize
-      const cachePhotos = photoCache.value.get(cacheKey)
-      if (cachePhotos) {
-        const photoIndex = currentIndex - cacheKey
-        if (cachePhotos[photoIndex]) {
-          cachePhotos[photoIndex].taken_date = updatedPhoto.taken_date
-        }
-      }
-      
-      MessagePlugin.success('保存成功')
-      editingDateTime.value = false
-    }
-  } catch (error) {
-    console.error('Save datetime error:', error)
-    MessagePlugin.error('保存失败')
-  } finally {
-    savingDateTime.value = false
   }
 }
 
@@ -991,109 +573,6 @@ const ensurePhotoLoaded = async (index: number) => {
 // 处理tag变化（由父组件提供具体实现）
 const handleTagChange = (value: string[]) => {
   // 这个函数会通过 slot 传递给父组件
-}
-
-// 切换人脸框显示
-const toggleFaceBoxes = async () => {
-  if (showFaceBoxes.value) {
-    // 隐藏人脸框
-    showFaceBoxes.value = false
-    facesForPhoto.value = []
-  } else {
-    // 加载并显示人脸框
-    await loadFacesForPhoto()
-  }
-}
-
-// 加载照片的人脸信息
-const loadFacesForPhoto = async () => {
-  if (!currentPhoto.value || loadingFaces.value) return
-  
-  loadingFaces.value = true
-  try {
-    const res = await getFacesForPhotoApi({ id: currentPhoto.value.id })
-    if (res.code === 0 && res.data) {
-      facesForPhoto.value = res.data
-      showFaceBoxes.value = true
-      
-      if (res.data.length === 0) {
-        MessagePlugin.info('该照片未检测到人脸')
-      }
-    }
-  } catch (error) {
-    console.error('Load faces for photo error:', error)
-    MessagePlugin.error('加载人脸信息失败')
-  } finally {
-    loadingFaces.value = false
-  }
-}
-
-// 计算人脸框的样式（基于图片实际显示大小）
-const getFaceBoxStyle = (face: FaceForPhoto) => {
-  if (!viewerImageRef.value || !currentPhoto.value) return {}
-  
-  const img = viewerImageRef.value
-  
-  // 图片在浏览器中的实际显示尺寸（受 CSS max-width/max-height 影响）
-  const imgDisplayWidth = img.offsetWidth
-  const imgDisplayHeight = img.offsetHeight
-  
-  // /small/ 图片的实际像素尺寸（这才是后端检测人脸时使用的图片尺寸）
-  const imgNaturalWidth = img.naturalWidth
-  const imgNaturalHeight = img.naturalHeight
-  
-  // 计算缩放比例：/small/ 图片尺寸 -> 浏览器显示尺寸
-  const scaleX = imgDisplayWidth / imgNaturalWidth
-  const scaleY = imgDisplayHeight / imgNaturalHeight
-  
-  // 转换坐标和尺寸（从 /small/ 图片坐标转换为显示坐标）
-  const left = face.x * scaleX
-  const top = face.y * scaleY
-  const width = face.width * scaleX
-  const height = face.height * scaleY
-  
-  return {
-    left: `${left}px`,
-    top: `${top}px`,
-    width: `${width}px`,
-    height: `${height}px`
-  }
-}
-
-// 编辑人脸名字
-const editFaceName = (face: FaceForPhoto) => {
-  editFaceNameForm.value = {
-    faceId: face.faceId,
-    name: face.name || ''
-  }
-  editFaceNameVisible.value = true
-}
-
-// 保存人脸名字
-const saveFaceName = async () => {
-  if (savingFaceName.value) return
-  
-  savingFaceName.value = true
-  try {
-    await updateFaceApi({
-      faceId: editFaceNameForm.value.faceId,
-      name: editFaceNameForm.value.name || undefined
-    })
-    
-    // 更新本地数据
-    const faceIndex = facesForPhoto.value.findIndex(f => f.faceId === editFaceNameForm.value.faceId)
-    if (faceIndex !== -1) {
-      facesForPhoto.value[faceIndex].name = editFaceNameForm.value.name
-    }
-    
-    MessagePlugin.success('保存成功')
-    editFaceNameVisible.value = false
-  } catch (error) {
-    console.error('Save face name error:', error)
-    MessagePlugin.error('保存失败')
-  } finally {
-    savingFaceName.value = false
-  }
 }
 
 // 键盘事件处理
@@ -1120,14 +599,6 @@ const handleViewerOpened = () => {
 const handleViewerClosed = () => {
   window.removeEventListener('keydown', handleKeyDown)
   photoSwitching.value = false
-  // 重置编辑状态
-  editingDescription.value = false
-  editDescriptionValue.value = ''
-  editingDateTime.value = false
-  editDateTimeValue.value = ''
-  // 重置人脸框状态
-  showFaceBoxes.value = false
-  facesForPhoto.value = []
   // 记录最后查看的照片ID并滚动到该位置
   if (currentPhoto.value) {
     lastViewedPhotoId.value = currentPhoto.value.id
@@ -1160,24 +631,7 @@ const scrollToPhoto = (index: number) => {
 
 const formatDate = (date: string) => {
   if (!date) return ''
-  // 直接格式化，不进行时区转换（假设后端返回的已经是正确的时间）
   return dayjs(date).format('YYYY-MM-DD')
-}
-
-const formatDateTime = (date: string) => {
-  if (!date) return ''
-  // 直接格式化，不进行时区转换（假设后端返回的已经是正确的时间）
-  return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
-}
-
-const formatFileSize = (bytes: number) => {
-  if (!bytes) return '0 B'
-  
-  const units = ['B', 'KB', 'MB', 'GB', 'TB']
-  const k = 1024
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  
-  return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + units[i]
 }
 
 const formatDuration = (seconds: number) => {
@@ -1188,10 +642,8 @@ const formatDuration = (seconds: number) => {
   const secs = Math.floor(seconds % 60)
   
   if (hours > 0) {
-    // 大于等于1小时：1:03:04
     return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
   } else {
-    // 小于1小时：3:04 或 0:04
     return `${minutes}:${String(secs).padStart(2, '0')}`
   }
 }
@@ -1557,12 +1009,8 @@ onBeforeUnmount(() => {
   max-width: 100%;
 }
 
-.viewer-content {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
-  overflow: hidden;
-  max-width: 100%;
+.viewer-content-wrapper {
+  width: 100%;
 }
 
 .viewer-nav {
@@ -1596,191 +1044,20 @@ onBeforeUnmount(() => {
   right: -60px;
 }
 
-.viewer-image {
-  flex: 1;
-  text-align: center;
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.image-container {
-  position: relative;
-  display: inline-block;
-  line-height: 0;
-}
-
-.image-wrapper {
-  position: relative;
-  display: inline-block;
-  line-height: 0;
-  transform-origin: center;
-  transition: transform 0.3s ease;
-}
-
-.image-wrapper > img {
-  display: block;
-}
-
-.viewer-image img {
-  max-width: 100%;
-  max-height: 70vh;
-  object-fit: contain;
-  border-radius: 4px;
-}
-
-.face-boxes-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-}
-
-.face-box {
-  position: absolute;
-  border: 2px solid #0052d9;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8), 0 0 10px rgba(0, 82, 217, 0.5);
-  border-radius: 4px;
-  transition: all 0.2s;
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-.face-box:hover {
-  border-color: #0034b5;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9), 0 0 15px rgba(0, 82, 217, 0.8);
-  transform: scale(1.02);
-}
-
-.face-name {
-  position: absolute;
-  bottom: -24px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 82, 217, 0.9);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(4px);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.face-name:hover {
-  background: rgba(0, 52, 181, 0.95);
-  transform: translateX(-50%) scale(1.05);
-}
-
-.rotate-buttons {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 12px 16px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 5;
-}
-
-.rotate-buttons .t-button {
-  width: 40px;
-  height: 40px;
-}
-
-.rotate-buttons .t-button:hover {
-  background-color: var(--td-brand-color-light);
-  border-color: var(--td-brand-color);
-}
-
-.video-player {
-  max-width: 100%;
-  max-height: 70vh;
-  border-radius: 4px;
-  outline: none;
-}
-
-.viewer-loading {
+.viewer-loading-overlay {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 10;
+  z-index: 20;
   background: rgba(255, 255, 255, 0.9);
   padding: 40px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.viewer-info {
-  width: 300px;
-  max-width: 25vw;
-  min-width: 200px;
-  flex-shrink: 0;
-  max-height: 70vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  word-wrap: break-word;
-  word-break: break-all;
-}
-
-.viewer-info :deep(.t-descriptions__label) {
-  width: 60px;
-  min-width: 60px;
-}
-
-.viewer-actions {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--td-component-border);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
 .empty-tag {
   color: var(--td-text-color-placeholder);
   font-size: 12px;
-}
-
-.description-display {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.description-text {
-  flex: 1;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.empty-description {
-  color: var(--td-text-color-placeholder);
-  font-size: 12px;
-}
-
-.description-editor {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.editor-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
 }
 </style>
