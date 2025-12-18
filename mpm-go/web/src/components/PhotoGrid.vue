@@ -78,6 +78,12 @@
                 <t-icon name="star-filled" size="16px" />
               </div>
               
+              <!-- 视频时长标记 -->
+              <div v-if="photo.media_type === 'video' && photo.duration" class="duration-badge">
+                <t-icon name="play-circle-filled" size="12px" />
+                <span>{{ formatDuration(photo.duration) }}</span>
+              </div>
+              
               <!-- 更多操作按钮 -->
               <div class="action-menu" @click.stop>
                 <t-dropdown
@@ -200,17 +206,38 @@
               您的浏览器不支持视频播放
             </video>
             
-            <!-- 图片展示 -->
-            <img
+            <!-- 图片展示（带人脸框） -->
+            <div
               v-else
               v-show="!photoSwitching"
-              :key="currentPhoto.id"
-              :src="`/cos/small/${currentPhoto.name}`"
-              :alt="currentPhoto.name"
-              :style="{ transform: `rotate(${currentPhoto.rotate || 0}deg)` }"
-              @load="handleImageLoaded"
-              @error="handleImageError"
-            />
+              class="image-container"
+            >
+              <div class="image-wrapper" :style="{ transform: `rotate(${currentPhoto.rotate || 0}deg)` }">
+                <img
+                  ref="viewerImageRef"
+                  :key="currentPhoto.id"
+                  :src="`/cos/small/${currentPhoto.name}`"
+                  :alt="currentPhoto.name"
+                  @load="handleImageLoaded"
+                  @error="handleImageError"
+                />
+                
+                <!-- 人脸框 -->
+                <div
+                  v-if="showFaceBoxes && facesForPhoto.length > 0"
+                  class="face-boxes-overlay"
+                >
+                  <div
+                    v-for="face in facesForPhoto"
+                    :key="face.id"
+                    class="face-box"
+                    :style="getFaceBoxStyle(face)"
+                  >
+                    <div class="face-name">{{ face.name || '未命名' }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
             
             <!-- 旋转按钮 -->
             <div v-if="currentPhoto && currentPhoto.media_type !== 'video'" class="rotate-buttons">
@@ -352,6 +379,17 @@
             
             <div class="viewer-actions">
               <t-button
+                v-if="currentPhoto.media_type !== 'video'"
+                :theme="showFaceBoxes ? 'primary' : 'default'"
+                variant="outline"
+                block
+                :loading="loadingFaces"
+                @click="toggleFaceBoxes"
+              >
+                <template #icon><t-icon name="usergroup" /></template>
+                {{ showFaceBoxes ? '隐藏圈人' : '圈人' }}
+              </t-button>
+              <t-button
                 theme="primary"
                 variant="outline"
                 block
@@ -372,7 +410,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
-import { Photo } from '@/api'
+import { Photo, FaceForPhoto, getFacesForPhotoApi } from '@/api'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -400,6 +438,7 @@ const emit = defineEmits<{
 
 const loading = ref(false)
 const scrollContainer = ref<HTMLElement | null>(null)
+const viewerImageRef = ref<HTMLImageElement | null>(null)
 
 // 虚拟滚动配置
 const itemHeight = 280
@@ -476,6 +515,11 @@ const selectionMode = ref(false)
 
 // 当前浏览的照片（用于在网格中高亮显示）
 const lastViewedPhotoId = ref<number | null>(null)
+
+// 人脸圈选功能
+const showFaceBoxes = ref(false)
+const loadingFaces = ref(false)
+const facesForPhoto = ref<FaceForPhoto[]>([])
 
 // 计算当前照片的标题
 const currentPhotoHeader = computed(() => {
@@ -672,6 +716,10 @@ const viewPrevPhoto = async () => {
   editingDateTime.value = false
   editDateTimeValue.value = ''
   
+  // 重置人脸框状态
+  showFaceBoxes.value = false
+  facesForPhoto.value = []
+  
   try {
     const newIndex = currentPhotoIndex.value - 1
     await ensurePhotoLoaded(newIndex)
@@ -699,6 +747,10 @@ const viewNextPhoto = async () => {
   editDescriptionValue.value = ''
   editingDateTime.value = false
   editDateTimeValue.value = ''
+  
+  // 重置人脸框状态
+  showFaceBoxes.value = false
+  facesForPhoto.value = []
   
   try {
     const newIndex = currentPhotoIndex.value + 1
@@ -914,6 +966,73 @@ const handleTagChange = (value: string[]) => {
   // 这个函数会通过 slot 传递给父组件
 }
 
+// 切换人脸框显示
+const toggleFaceBoxes = async () => {
+  if (showFaceBoxes.value) {
+    // 隐藏人脸框
+    showFaceBoxes.value = false
+    facesForPhoto.value = []
+  } else {
+    // 加载并显示人脸框
+    await loadFacesForPhoto()
+  }
+}
+
+// 加载照片的人脸信息
+const loadFacesForPhoto = async () => {
+  if (!currentPhoto.value || loadingFaces.value) return
+  
+  loadingFaces.value = true
+  try {
+    const res = await getFacesForPhotoApi({ id: currentPhoto.value.id })
+    if (res.code === 0 && res.data) {
+      facesForPhoto.value = res.data
+      showFaceBoxes.value = true
+      
+      if (res.data.length === 0) {
+        MessagePlugin.info('该照片未检测到人脸')
+      }
+    }
+  } catch (error) {
+    console.error('Load faces for photo error:', error)
+    MessagePlugin.error('加载人脸信息失败')
+  } finally {
+    loadingFaces.value = false
+  }
+}
+
+// 计算人脸框的样式（基于图片实际显示大小）
+const getFaceBoxStyle = (face: FaceForPhoto) => {
+  if (!viewerImageRef.value || !currentPhoto.value) return {}
+  
+  const img = viewerImageRef.value
+  
+  // 图片在浏览器中的实际显示尺寸（受 CSS max-width/max-height 影响）
+  const imgDisplayWidth = img.offsetWidth
+  const imgDisplayHeight = img.offsetHeight
+  
+  // /small/ 图片的实际像素尺寸（这才是后端检测人脸时使用的图片尺寸）
+  const imgNaturalWidth = img.naturalWidth
+  const imgNaturalHeight = img.naturalHeight
+  
+  // 计算缩放比例：/small/ 图片尺寸 -> 浏览器显示尺寸
+  const scaleX = imgDisplayWidth / imgNaturalWidth
+  const scaleY = imgDisplayHeight / imgNaturalHeight
+  
+  // 转换坐标和尺寸（从 /small/ 图片坐标转换为显示坐标）
+  const left = face.x * scaleX
+  const top = face.y * scaleY
+  const width = face.width * scaleX
+  const height = face.height * scaleY
+  
+  return {
+    left: `${left}px`,
+    top: `${top}px`,
+    width: `${width}px`,
+    height: `${height}px`
+  }
+}
+
 // 键盘事件处理
 const handleKeyDown = (event: KeyboardEvent) => {
   if (!viewerVisible.value || photoSwitching.value) return
@@ -943,6 +1062,9 @@ const handleViewerClosed = () => {
   editDescriptionValue.value = ''
   editingDateTime.value = false
   editDateTimeValue.value = ''
+  // 重置人脸框状态
+  showFaceBoxes.value = false
+  facesForPhoto.value = []
   // 记录最后查看的照片ID并滚动到该位置
   if (currentPhoto.value) {
     lastViewedPhotoId.value = currentPhoto.value.id
@@ -996,18 +1118,18 @@ const formatFileSize = (bytes: number) => {
 }
 
 const formatDuration = (seconds: number) => {
-  if (!seconds) return '0秒'
+  if (!seconds) return '0:00'
   
   const hours = Math.floor(seconds / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
   const secs = Math.floor(seconds % 60)
   
   if (hours > 0) {
+    // 大于等于1小时：1:03:04
     return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-  } else if (minutes > 0) {
-    return `${minutes}:${String(secs).padStart(2, '0')}`
   } else {
-    return `${secs}秒`
+    // 小于1小时：3:04 或 0:04
+    return `${minutes}:${String(secs).padStart(2, '0')}`
   }
 }
 
@@ -1268,6 +1390,25 @@ onBeforeUnmount(() => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.duration-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 10;
+  color: white;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
 .action-menu {
   position: absolute;
   top: 8px;
@@ -1404,12 +1545,68 @@ onBeforeUnmount(() => {
   overflow: hidden;
 }
 
+.image-container {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+.image-wrapper {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+.image-wrapper > img {
+  display: block;
+}
+
 .viewer-image img {
   max-width: 100%;
   max-height: 70vh;
   object-fit: contain;
   border-radius: 4px;
-  transition: transform 0.3s ease;
+}
+
+.face-boxes-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.face-box {
+  position: absolute;
+  border: 2px solid #0052d9;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8), 0 0 10px rgba(0, 82, 217, 0.5);
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.face-box:hover {
+  border-color: #0034b5;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9), 0 0 15px rgba(0, 82, 217, 0.8);
+}
+
+.face-name {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 82, 217, 0.9);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  backdrop-filter: blur(4px);
 }
 
 .rotate-buttons {
