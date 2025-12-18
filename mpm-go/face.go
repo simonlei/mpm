@@ -71,7 +71,7 @@ func setConditions(showHidden bool, nameFilter, s string) string {
 	if strings.TrimSpace(nameFilter) != "" {
 		s = s + " and name like '%" + strings.TrimSpace(nameFilter) + "%'"
 	}
-	return s + " group by faceId order by collected desc, count(*) desc, i.faceId"
+	return s + " group by i.faceId order by collected desc, count(*) desc, i.faceId"
 }
 
 func getFacesWithName(c *gin.Context) {

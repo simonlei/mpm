@@ -125,7 +125,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
 import {
   getFacesApi,
@@ -200,16 +200,20 @@ const loadFaces = async () => {
 }
 
 // 选择人脸
-const selectFace = (face: Face) => {
+const selectFace = async (face: Face) => {
   selectedFace.value = face
   totalCount.value = face.count
+  // 等待下一个 tick，确保 computed 属性已更新
+  await nextTick()
   photoGridViewRef.value?.refresh()
 }
 
 // 清除人脸选择
-const clearFaceSelection = () => {
+const clearFaceSelection = async () => {
   selectedFace.value = null
-  loadAllPhotosCount()
+  await loadAllPhotosCount()
+  // 等待下一个 tick，确保 computed 属性已更新
+  await nextTick()
   photoGridViewRef.value?.refresh()
 }
 
