@@ -232,6 +232,7 @@
                     :key="face.id"
                     class="face-box"
                     :style="getFaceBoxStyle(face)"
+                    @click.stop="editFaceName(face)"
                   >
                     <div class="face-name">{{ face.name || '未命名' }}</div>
                   </div>
@@ -404,13 +405,31 @@
         </div>
       </div>
     </t-dialog>
+    
+    <!-- 编辑人脸名字对话框 -->
+    <t-dialog
+      v-model:visible="editFaceNameVisible"
+      header="编辑人脸名字"
+      :on-confirm="saveFaceName"
+      :confirm-btn="{ loading: savingFaceName }"
+    >
+      <t-form :data="editFaceNameForm" label-align="top">
+        <t-form-item label="姓名">
+          <t-input 
+            v-model="editFaceNameForm.name" 
+            placeholder="请输入姓名"
+            @keyup.enter="saveFaceName"
+          />
+        </t-form-item>
+      </t-form>
+    </t-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
-import { Photo, FaceForPhoto, getFacesForPhotoApi } from '@/api'
+import { Photo, FaceForPhoto, getFacesForPhotoApi, updateFaceApi } from '@/api'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -520,6 +539,14 @@ const lastViewedPhotoId = ref<number | null>(null)
 const showFaceBoxes = ref(false)
 const loadingFaces = ref(false)
 const facesForPhoto = ref<FaceForPhoto[]>([])
+
+// 编辑人脸名字
+const editFaceNameVisible = ref(false)
+const savingFaceName = ref(false)
+const editFaceNameForm = ref({
+  faceId: 0,
+  name: ''
+})
 
 // 计算当前照片的标题
 const currentPhotoHeader = computed(() => {
@@ -1030,6 +1057,42 @@ const getFaceBoxStyle = (face: FaceForPhoto) => {
     top: `${top}px`,
     width: `${width}px`,
     height: `${height}px`
+  }
+}
+
+// 编辑人脸名字
+const editFaceName = (face: FaceForPhoto) => {
+  editFaceNameForm.value = {
+    faceId: face.faceId,
+    name: face.name || ''
+  }
+  editFaceNameVisible.value = true
+}
+
+// 保存人脸名字
+const saveFaceName = async () => {
+  if (savingFaceName.value) return
+  
+  savingFaceName.value = true
+  try {
+    await updateFaceApi({
+      faceId: editFaceNameForm.value.faceId,
+      name: editFaceNameForm.value.name || undefined
+    })
+    
+    // 更新本地数据
+    const faceIndex = facesForPhoto.value.findIndex(f => f.faceId === editFaceNameForm.value.faceId)
+    if (faceIndex !== -1) {
+      facesForPhoto.value[faceIndex].name = editFaceNameForm.value.name
+    }
+    
+    MessagePlugin.success('保存成功')
+    editFaceNameVisible.value = false
+  } catch (error) {
+    console.error('Save face name error:', error)
+    MessagePlugin.error('保存失败')
+  } finally {
+    savingFaceName.value = false
   }
 }
 
@@ -1585,11 +1648,14 @@ onBeforeUnmount(() => {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8), 0 0 10px rgba(0, 82, 217, 0.5);
   border-radius: 4px;
   transition: all 0.2s;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .face-box:hover {
   border-color: #0034b5;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9), 0 0 15px rgba(0, 82, 217, 0.8);
+  transform: scale(1.02);
 }
 
 .face-name {
@@ -1605,8 +1671,14 @@ onBeforeUnmount(() => {
   font-weight: 500;
   white-space: nowrap;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  pointer-events: auto;
   backdrop-filter: blur(4px);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.face-name:hover {
+  background: rgba(0, 52, 181, 0.95);
+  transform: translateX(-50%) scale(1.05);
 }
 
 .rotate-buttons {
