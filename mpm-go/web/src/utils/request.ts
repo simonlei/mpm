@@ -1,7 +1,16 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { MessagePlugin } from 'tdesign-vue-next'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
+
+export interface ApiResponse<T = any> {
+  code: number
+  data: T
+  error?: {
+    code: number
+    message: string
+  }
+}
 
 const service: AxiosInstance = axios.create({
   baseURL: '',
@@ -10,7 +19,7 @@ const service: AxiosInstance = axios.create({
 
 // 请求拦截器
 service.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     const userStore = useUserStore()
     if (userStore.signature && userStore.account) {
       config.headers['Signature'] = userStore.signature
@@ -26,7 +35,7 @@ service.interceptors.request.use(
 
 // 响应拦截器
 service.interceptors.response.use(
-  (response: AxiosResponse) => {
+  (response: AxiosResponse<ApiResponse>) => {
     const res = response.data
     
     // 处理错误响应
@@ -40,7 +49,7 @@ service.interceptors.response.use(
       return Promise.reject(new Error(res.error.message || '请求失败'))
     }
     
-    return res
+    return response.data
   },
   (error) => {
     console.error('Response error:', error)
@@ -64,12 +73,3 @@ service.interceptors.response.use(
 )
 
 export default service
-
-export interface ApiResponse<T = any> {
-  code: number
-  data: T
-  error?: {
-    code: number
-    message: string
-  }
-}

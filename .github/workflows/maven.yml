@@ -23,16 +23,21 @@ jobs:
         go-version: '^1.23.2' 
     - name: Build the whole thing
       run: |
-        cd mpm-vue3
+        #        cd mpm-vue3
+        # npm install
+        # npm run build
+        cd mpm-go
+        CGO_ENABLED=0 go build
+        cd web
         npm install
         npm run build
-        cd ../mpm-go
-        CGO_ENABLED=0 go build
+        cd ..
         cd ..
         mkdir docker
         cd docker
         mkdir logs
-        cp -R ../mpm-vue3/dist web
+        #        cp -R ../mpm-vue3/dist web
+        cp -R ../mpm-go/web/dist web
         cp ../mpm-go/mpm-go .
         cp ../entrypoint.sh .
         echo '
