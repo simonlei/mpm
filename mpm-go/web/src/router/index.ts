@@ -22,12 +22,6 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '照片' }
       },
       {
-        path: 'timeline',
-        name: 'Timeline',
-        component: () => import('@/views/Timeline.vue'),
-        meta: { title: '时间线' }
-      },
-      {
         path: 'map',
         name: 'Map',
         component: () => import('@/views/Map.vue'),

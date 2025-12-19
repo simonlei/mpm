@@ -29,13 +29,6 @@
               照片
             </t-menu-item>
             
-            <t-menu-item value="timeline">
-              <template #icon>
-                <t-icon name="time" />
-              </template>
-              时间线
-            </t-menu-item>
-            
             <t-menu-item value="map">
               <template #icon>
                 <t-icon name="location" />
@@ -161,7 +154,7 @@ const handleLogout = () => {
   border-bottom: 1px solid var(--td-border-level-1-color);
   flex-shrink: 0;
   position: relative;
-  z-index: 100;
+  z-index: 2000;
 }
 
 .header-left {
@@ -202,7 +195,7 @@ const handleLogout = () => {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   min-width: 200px;
-  z-index: 1000;
+  z-index: 2100;
   animation: slideDown 0.2s ease-out;
 }
 

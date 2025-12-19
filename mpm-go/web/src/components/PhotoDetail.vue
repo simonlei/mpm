@@ -43,7 +43,7 @@
         </div>
       </div>
       
-      <!-- 旋转按钮 -->
+      <!-- 旋转按钮和全屏按钮 -->
       <div v-if="photo.media_type !== 'video'" class="rotate-buttons">
         <t-button
           theme="default"
@@ -64,6 +64,15 @@
           @click="rotatePhoto(90)"
         >
           <template #icon><t-icon name="rollfront" /></template>
+        </t-button>
+        <t-button
+          theme="primary"
+          variant="outline"
+          shape="circle"
+          size="small"
+          @click="toggleFullscreen"
+        >
+          <template #icon><t-icon :name="isFullscreen ? 'fullscreen-exit' : 'fullscreen'" /></template>
         </t-button>
       </div>
     </div>
@@ -229,7 +238,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
 import { 
   Photo, 
@@ -284,6 +293,9 @@ const editFaceNameForm = ref({
 
 // 旋转功能
 const rotating = ref(false)
+
+// 全屏功能
+const isFullscreen = ref(false)
 
 // 监听 photo 变化，更新标签
 watch(() => props.photo, (newPhoto) => {
@@ -531,6 +543,65 @@ const formatDuration = (seconds: number) => {
     return `${minutes}:${String(secs).padStart(2, '0')}`
   }
 }
+
+// 全屏功能实现
+const toggleFullscreen = async () => {
+  if (!viewerImageRef.value) return
+  
+  try {
+    if (!isFullscreen.value) {
+      // 进入全屏
+      if (viewerImageRef.value.requestFullscreen) {
+        await viewerImageRef.value.requestFullscreen()
+      } else if ((viewerImageRef.value as any).webkitRequestFullscreen) {
+        await (viewerImageRef.value as any).webkitRequestFullscreen()
+      } else if ((viewerImageRef.value as any).mozRequestFullScreen) {
+        await (viewerImageRef.value as any).mozRequestFullScreen()
+      } else if ((viewerImageRef.value as any).msRequestFullscreen) {
+        await (viewerImageRef.value as any).msRequestFullscreen()
+      }
+    } else {
+      // 退出全屏
+      if (document.exitFullscreen) {
+        await document.exitFullscreen()
+      } else if ((document as any).webkitExitFullscreen) {
+        await (document as any).webkitExitFullscreen()
+      } else if ((document as any).mozCancelFullScreen) {
+        await (document as any).mozCancelFullScreen()
+      } else if ((document as any).msExitFullscreen) {
+        await (document as any).msExitFullscreen()
+      }
+    }
+  } catch (error) {
+    console.error('全屏操作失败:', error)
+    MessagePlugin.error('全屏操作失败')
+  }
+}
+
+// 监听全屏状态变化
+const handleFullscreenChange = () => {
+  isFullscreen.value = !!(
+    document.fullscreenElement ||
+    (document as any).webkitFullscreenElement ||
+    (document as any).mozFullScreenElement ||
+    (document as any).msFullscreenElement
+  )
+}
+
+// 生命周期钩子
+onMounted(() => {
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+  document.addEventListener('mozfullscreenchange', handleFullscreenChange)
+  document.addEventListener('MSFullscreenChange', handleFullscreenChange)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
+  document.removeEventListener('mozfullscreenchange', handleFullscreenChange)
+  document.removeEventListener('MSFullscreenChange', handleFullscreenChange)
+})
 </script>
 
 <style scoped>
@@ -623,6 +694,43 @@ const formatDuration = (seconds: number) => {
   max-height: 500px;
   object-fit: contain;
   border-radius: 4px;
+}
+
+/* 全屏时的样式 */
+.media-image:fullscreen {
+  max-height: 100vh;
+  max-width: 100vw;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.media-image:-webkit-full-screen {
+  max-height: 100vh;
+  max-width: 100vw;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.media-image:-moz-full-screen {
+  max-height: 100vh;
+  max-width: 100vw;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.media-image:-ms-fullscreen {
+  max-height: 100vh;
+  max-width: 100vw;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
 }
 
 .face-boxes-overlay {
