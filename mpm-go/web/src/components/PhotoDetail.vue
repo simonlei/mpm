@@ -733,18 +733,19 @@ const formatDuration = (seconds: number) => {
 
 /* 限制 label 列宽度 */
 .info-section :deep(.t-descriptions-item__label) {
-  width: 52px !important; /* 适合4个中文字 */
-  min-width: 52px !important;
-  max-width: 52px !important;
+  width: 60px !important; /* 适合4个中文字 */
+  min-width: 60px !important;
+  max-width: 60px !important;
   font-size: 12px;
-  padding: 4px 4px !important;
+  padding: 4px 6px !important;
   line-height: 1.5;
   word-break: keep-all;
+  text-align: left;
 }
 
 /* 限制 descriptions 内容区域的子元素 */
 .info-section :deep(.t-descriptions-item__content) {
-  width: calc(100% - 52px) !important; /* 剩余宽度给内容 */
+  width: calc(100% - 60px) !important; /* 剩余宽度给内容 */
   font-size: 12px;
   padding: 4px 6px !important;
 }
