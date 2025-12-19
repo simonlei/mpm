@@ -537,7 +537,11 @@ const formatDuration = (seconds: number) => {
 /* 照片详情容器 */
 .photo-detail-container {
   display: flex;
-  gap: 24px;
+  gap: 0; /* 移除gap，改用padding */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* 垂直布局（上下结构）- 用于地图页面 */
@@ -547,6 +551,7 @@ const formatDuration = (seconds: number) => {
 
 .photo-detail-container.layout-vertical .media-section {
   width: 100%;
+  margin-bottom: 16px;
 }
 
 .photo-detail-container.layout-vertical .info-section {
@@ -560,13 +565,21 @@ const formatDuration = (seconds: number) => {
 }
 
 .photo-detail-container.layout-horizontal .media-section {
-  flex: 0 0 65%;
-  max-width: 65%;
+  flex: 0 0 79%;
+  width: 79%;
+  max-width: 79%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .photo-detail-container.layout-horizontal .info-section {
-  flex: 0 0 35%;
-  max-width: 35%;
+  flex: 0 0 21%;
+  width: 21%;
+  max-width: 21%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  padding-left: 20px; /* 左侧留出间隙 */
 }
 
 /* 媒体展示区域 */
@@ -678,19 +691,118 @@ const formatDuration = (seconds: number) => {
 .info-section {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px; /* 减小间距 */
+  width: 100%;
+  min-width: 0; /* 允许内容收缩 */
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0; /* 确保没有额外的内边距 */
+}
+
+/* 强制限制 descriptions 表格宽度 */
+.info-section :deep(.t-descriptions) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed !important; /* 固定表格布局，防止单元格撑开 */
+  overflow: hidden;
+  box-sizing: border-box;
+  margin: 0 !important; /* 移除外边距 */
+}
+
+.info-section :deep(.t-descriptions table) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed !important;
+  box-sizing: border-box;
+  margin: 0 !important;
+}
+
+.info-section :deep(.t-descriptions-item__label),
+.info-section :deep(.t-descriptions-item__content) {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  white-space: normal; /* 允许换行 */
+  padding: 6px 8px !important; /* 减小内边距 */
+  box-sizing: border-box;
+}
+
+/* 限制 label 列宽度 */
+.info-section :deep(.t-descriptions-item__label) {
+  width: 52px !important; /* 适合4个中文字 */
+  min-width: 52px !important;
+  max-width: 52px !important;
+  font-size: 12px;
+  padding: 4px 4px !important;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+/* 限制 descriptions 内容区域的子元素 */
+.info-section :deep(.t-descriptions-item__content) {
+  width: calc(100% - 52px) !important; /* 剩余宽度给内容 */
+  font-size: 12px;
+  padding: 4px 6px !important;
+}
+
+.info-section :deep(.t-descriptions-item__content) > * {
+  max-width: 100% !important;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 特别限制 select 组件 */
+.info-section :deep(.t-select),
+.info-section :deep(.t-select__wrap) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* 确保表单元素不会溢出 */
+.info-section :deep(.t-textarea__inner),
+.info-section :deep(.t-input),
+.info-section :deep(.t-input__inner),
+.info-section :deep(.t-select),
+.info-section :deep(.t-select__wrap),
+.info-section :deep(.t-date-picker),
+.info-section :deep(.t-date-picker__input-container) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  font-size: 13px !important; /* 减小字体 */
+}
+
+.description-editor {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.description-editor :deep(.t-textarea),
+.description-editor :deep(.t-date-picker) {
+  width: 100% !important;
 }
 
 .description-display {
   display: flex;
   align-items: flex-start;
   gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .description-text {
   flex: 1;
   white-space: pre-wrap;
-  word-break: break-word;
+  word-break: break-all; /* 强制在任意字符处换行 */
+  overflow-wrap: break-word;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .empty-description {
@@ -702,19 +814,53 @@ const formatDuration = (seconds: number) => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 强制限制编辑器内的所有元素 */
+.description-editor > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+.description-editor :deep(.t-textarea),
+.description-editor :deep(.t-textarea__inner),
+.description-editor :deep(.t-date-picker),
+.description-editor :deep(.t-date-picker__panel) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
 }
 
 .editor-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
 }
 
 .action-buttons {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-top: 16px;
+  gap: 8px; /* 减小间距 */
+  padding-top: 12px; /* 减小上边距 */
   border-top: 1px solid var(--td-component-border);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 强制限制操作按钮宽度 */
+.action-buttons :deep(.t-button) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  font-size: 13px !important; /* 减小按钮字体 */
+  padding: 6px 12px !important; /* 减小按钮内边距 */
 }
 </style>

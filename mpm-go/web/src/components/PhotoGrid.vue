@@ -145,10 +145,11 @@
     <t-dialog
       v-model:visible="viewerVisible"
       :header="currentPhotoHeader"
-      width="90%"
+      width="95%"
       placement="center"
       :footer="false"
       destroy-on-close
+      attach="body"
       @opened="handleViewerOpened"
       @closed="handleViewerClosed"
     >
@@ -1005,12 +1006,26 @@ onBeforeUnmount(() => {
   flex-direction: column;
   gap: 24px;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden; /* 隐藏横向滚动 */
+  overflow-y: visible; /* 允许纵向滚动 */
   max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0; /* 移除可能的内边距 */
 }
 
 .viewer-content-wrapper {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden; /* 隐藏横向滚动 */
+  padding: 0; /* 移除可能的内边距 */
+}
+
+/* 强制限制 dialog 内容宽度 */
+:deep(.t-dialog__body) {
+  padding: 16px !important; /* 减小内边距 */
+  overflow-x: hidden !important;
 }
 
 .viewer-nav {
