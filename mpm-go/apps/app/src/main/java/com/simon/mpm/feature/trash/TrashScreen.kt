@@ -1,14 +1,9 @@
 package com.simon.mpm.feature.trash
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,10 +12,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
-import com.simon.mpm.common.Constants
-import com.simon.mpm.network.model.Photo
-import kotlinx.coroutines.launch
+import com.simon.mpm.feature.photos.PhotoGrid
+import com.simon.mpm.feature.photos.TrashPhotoGridItem
 
 /**
  * 回收站页面
@@ -81,75 +74,23 @@ fun TrashScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when {
-                uiState.isLoading && photos.isEmpty() -> {
-                    // 加载状态
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+            // 使用通用PhotoGrid组件
+            PhotoGrid(
+                photos = photos,
+                isLoading = uiState.isLoading,
+                hasMore = uiState.hasMore,
+                emptyText = if (totalCount == 0) "回收站为空\n删除的照片会在这里显示" else "正在加载...",
+                emptyIcon = Icons.Default.DeleteForever,
+                onPhotoClick = { /* 回收站照片点击暂不处理，或者可以导航到详情 */ },
+                onLoadMore = { viewModel.loadPhotos(photos.size) },
+                onRefresh = { viewModel.loadPhotos(0) },
+                photoItemContent = { photo ->
+                    TrashPhotoGridItem(
+                        photo = photo,
+                        onRestore = { viewModel.restorePhotos(listOf(photo.id)) }
                     )
                 }
-                
-                photos.isEmpty() && !uiState.isLoading -> {
-                    // 空状态
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.DeleteForever,
-                            contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = if (totalCount == 0) "回收站为空" else "正在加载...",
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        if (totalCount == 0) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "删除的照片会在这里显示",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                }
-                
-                else -> {
-                    // 照片网格
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(3),
-                        contentPadding = PaddingValues(4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(photos) { photo ->
-                            TrashPhotoItem(
-                                photo = photo,
-                                serverUrl = serverUrl,
-                                onRestore = { viewModel.restorePhotos(listOf(photo.id)) }
-                            )
-                        }
-                        
-                        // 加载更多
-                        item {
-                            if (uiState.hasMore && !uiState.isLoading) {
-                                LaunchedEffect(Unit) {
-                                    viewModel.loadPhotos(photos.size)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            )
             
             // 清空回收站进度
             uiState.emptyTrashTaskId?.let { taskId ->
@@ -158,64 +99,6 @@ fun TrashScreen(
                         progress = uiState.emptyTrashProgress,
                         total = uiState.emptyTrashTotal,
                         onDismiss = { }
-                    )
-                }
-            }
-            
-            // 底部加载指示器
-            if (uiState.isLoading && photos.isNotEmpty()) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
-                )
-            }
-        }
-    }
-}
-
-/**
- * 回收站照片项
- */
-@Composable
-private fun TrashPhotoItem(
-    photo: Photo,
-    serverUrl: String,
-    onRestore: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .aspectRatio(1f)
-            .fillMaxWidth(),
-        onClick = onRestore
-    ) {
-        Box {
-            // 照片缩略图
-            AsyncImage(
-                model = "$serverUrl${Constants.COS_PATH}${photo.thumb}",
-                contentDescription = photo.name,
-                modifier = Modifier.fillMaxSize()
-            )
-            
-            // 恢复按钮覆盖层
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp),
-                contentAlignment = Alignment.BottomEnd
-            ) {
-                IconButton(
-                    onClick = onRestore,
-                    modifier = Modifier
-                        .background(
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-                            MaterialTheme.shapes.small
-                        )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "恢复",
-                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
