@@ -9,7 +9,8 @@ object Routes {
     const val HOME = "home"
     const val PHOTO_LIST = "photo_list"
     const val PHOTO_DETAIL = "photo_detail/{photoId}"
-    const val TRASH = "trash"
+    const val TRASH = "trash?trashed={trashed}"
     
     fun photoDetail(photoId: Int) = "photo_detail/$photoId"
+    fun trash() = "trash?trashed=true"
 }

@@ -13,16 +13,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.simon.mpm.feature.photos.PhotoGrid
+import com.simon.mpm.feature.photos.PhotoListViewModel
 import com.simon.mpm.feature.photos.TrashPhotoGridItem
 
 /**
- * 回收站页面
+ * 回收站屏幕
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrashScreen(
     onBack: () -> Unit,
-    viewModel: TrashViewModel = hiltViewModel()
+    viewModel: PhotoListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val photos by viewModel.photos.collectAsStateWithLifecycle()
@@ -82,8 +83,8 @@ fun TrashScreen(
                 emptyText = if (totalCount == 0) "回收站为空\n删除的照片会在这里显示" else "正在加载...",
                 emptyIcon = Icons.Default.DeleteForever,
                 onPhotoClick = { /* 回收站照片点击暂不处理，或者可以导航到详情 */ },
-                onLoadMore = { viewModel.loadPhotos(photos.size) },
-                onRefresh = { viewModel.loadPhotos(0) },
+                onLoadMore = { viewModel.loadMore() },
+                onRefresh = { viewModel.refresh() },
                 photoItemContent = { photo ->
                     TrashPhotoGridItem(
                         photo = photo,

@@ -66,13 +66,21 @@ fun MpmNavGraph(
                     navController.navigate(Routes.PHOTO_LIST)
                 },
                 onNavigateToTrash = {
-                    navController.navigate(Routes.TRASH)
+                    navController.navigate(Routes.trash())
                 }
             )
         }
         
         // 回收站
-        composable(Routes.TRASH) {
+        composable(
+            route = Routes.TRASH,
+            arguments = listOf(
+                navArgument("trashed") { 
+                    type = NavType.BoolType
+                    defaultValue = true
+                }
+            )
+        ) {
             TrashScreen(
                 onBack = { navController.popBackStack() }
             )
