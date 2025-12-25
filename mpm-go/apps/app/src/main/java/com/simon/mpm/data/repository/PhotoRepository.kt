@@ -54,18 +54,18 @@ class PhotoRepository @Inject constructor(
         val result = safeApiCall {
             apiService.getPics(
                 GetPicsRequest(
-                    star = star,
-                    video = video,
+                    star = if (star) true else null,  // 只有为true时才传递，false时传null表示不筛选
+                    video = if (video) true else null,  // 只有为true时才传递，false时传null表示不筛选
                     trashed = trashed,
                     idOnly = false,
                     start = start,
                     size = size,
-                    dateKey = dateKey,
-                    path = path,
-                    tag = tag,
-                    faceId = faceId,
+                    dateKey = dateKey.ifEmpty { null },
+                    path = path.ifEmpty { null },
+                    tag = tag.ifEmpty { null },
+                    faceId = if (faceId > 0) faceId else null,
                     order = order,
-                    idRank = 0
+                    idRank = null
                 )
             )
         }

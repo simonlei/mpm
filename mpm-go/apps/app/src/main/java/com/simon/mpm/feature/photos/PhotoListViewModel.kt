@@ -165,6 +165,22 @@ class PhotoListViewModel @Inject constructor(
         }
         refresh()
     }
+    
+    /**
+     * 切换收藏筛选
+     */
+    fun toggleStarFilter() {
+        _uiState.update { it.copy(filterStar = !it.filterStar) }
+        refresh()
+    }
+    
+    /**
+     * 切换视频筛选
+     */
+    fun toggleVideoFilter() {
+        _uiState.update { it.copy(filterVideo = !it.filterVideo) }
+        refresh()
+    }
 
     /**
      * 设置排序方式
