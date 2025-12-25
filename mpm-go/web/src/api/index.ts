@@ -83,8 +83,8 @@ export const updateImageApi = (data: Partial<Photo>) => {
   return request.post<ApiResponse<Photo>>('/api/updateImage', data)
 }
 
-export const trashPhotosApi = (names: string[]) => {
-  return request.post<ApiResponse<number>>('/api/trashPhotos', names)
+export const trashPhotosApi = (ids: number[]) => {
+  return request.post<ApiResponse<number>>('/api/trashPhotos', ids)
 }
 
 export const emptyTrashApi = () => {
