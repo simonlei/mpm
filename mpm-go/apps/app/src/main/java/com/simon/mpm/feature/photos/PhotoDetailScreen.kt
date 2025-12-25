@@ -2,7 +2,12 @@
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculateCentroid
+import androidx.compose.foundation.gestures.calculateCentroidSize
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -245,7 +250,7 @@ fun PhotoDetailScreen(
 
 /**
  * 可缩放的图片组件
- * 使用双击缩放，避免拦截HorizontalPager的滑动手势
+ * 支持双指缩放和拖动，不拦截HorizontalPager的滑动手势
  */
 @Composable
 fun ZoomableImage(
@@ -274,6 +279,41 @@ fun ZoomableImage(
                     translationX = offset.x,
                     translationY = offset.y
                 )
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false)
+                        
+                        do {
+                            val event = awaitPointerEvent()
+                            
+                            // 只有在双指或更多手指时才处理缩放
+                            if (event.changes.size >= 2) {
+                                // 消费事件，防止传递给 Pager
+                                event.changes.forEach { it.consume() }
+                                
+                                val zoom = event.calculateZoom()
+                                val pan = event.calculatePan()
+                                
+                                // 更新缩放
+                                scale = (scale * zoom).coerceIn(1f, 5f)
+                                
+                                // 更新偏移
+                                if (scale > 1f) {
+                                    offset += pan
+                                } else {
+                                    offset = Offset.Zero
+                                }
+                            } else if (scale > 1f) {
+                                // 如果已经缩放了，单指拖动也要消费事件
+                                event.changes.forEach { it.consume() }
+                                val pan = event.calculatePan()
+                                offset += pan
+                            }
+                            // 如果是单指且未缩放，不消费事件，让 Pager 处理
+                            
+                        } while (event.changes.any { it.pressed })
+                    }
+                }
         )
     }
 }
