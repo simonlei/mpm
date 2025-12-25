@@ -2,6 +2,9 @@
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,10 +21,13 @@ import com.simon.mpm.network.model.Photo
 @Composable
 fun PhotoListScreen(
     onPhotoClick: (Photo) -> Unit,
+    onNavigateToTrash: () -> Unit = {},
+    onLogout: () -> Unit = {},
     viewModel: PhotoListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val photos by viewModel.photos.collectAsState()
+    var showMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -37,6 +43,52 @@ fun PhotoListScreen(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = "刷新"
                         )
+                    }
+                    
+                    // 更多菜单
+                    Box {
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "更多"
+                            )
+                        }
+                        
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("回收站") },
+                                onClick = {
+                                    showMenu = false
+                                    onNavigateToTrash()
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                            
+                            Divider()
+                            
+                            DropdownMenuItem(
+                                text = { Text("退出登录") },
+                                onClick = {
+                                    showMenu = false
+                                    viewModel.logout()
+                                    onLogout()
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.ExitToApp,
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             )

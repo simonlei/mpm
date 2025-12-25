@@ -23,6 +23,7 @@ import com.simon.mpm.feature.photos.TrashPhotoGridItem
 @Composable
 fun TrashScreen(
     onBack: () -> Unit,
+    onPhotoClick: (com.simon.mpm.network.model.Photo) -> Unit = {},
     viewModel: PhotoListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -82,7 +83,7 @@ fun TrashScreen(
                 hasMore = uiState.hasMore,
                 emptyText = if (totalCount == 0) "回收站为空\n删除的照片会在这里显示" else "正在加载...",
                 emptyIcon = Icons.Default.DeleteForever,
-                onPhotoClick = { /* 回收站照片点击暂不处理，或者可以导航到详情 */ },
+                onPhotoClick = onPhotoClick,
                 onLoadMore = { viewModel.loadMore() },
                 onRefresh = { viewModel.refresh() },
                 photoItemContent = { photo ->

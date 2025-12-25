@@ -1,8 +1,11 @@
 ﻿package com.simon.mpm.feature.photos
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.StarBorder
@@ -25,7 +28,7 @@ import java.util.*
 /**
  * 照片详情屏幕
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PhotoDetailScreen(
     onBack: () -> Unit,
@@ -33,6 +36,8 @@ fun PhotoDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val currentPhoto by viewModel.photo.collectAsState()
+    val photoList by viewModel.photoList.collectAsState()
+    val currentPhotoIndex by viewModel.currentPhotoIndex.collectAsState()
 
     // 如果照片被删除，返回上一页
     LaunchedEffect(uiState.photoDeleted) {
@@ -50,6 +55,30 @@ fun PhotoDetailScreen(
     }
 
     val displayPhoto = currentPhoto ?: return
+
+    // 创建 Pager 状态
+    val pagerState = rememberPagerState(
+        initialPage = currentPhotoIndex,
+        pageCount = { photoList.size }
+    )
+
+    // 监听 Pager 页面变化
+    LaunchedEffect(pagerState.currentPage) {
+        android.util.Log.d("PhotoDetail", "Pager currentPage changed to: ${pagerState.currentPage}, photoList size: ${photoList.size}")
+        if (pagerState.currentPage != currentPhotoIndex && photoList.isNotEmpty()) {
+            android.util.Log.d("PhotoDetail", "Switching to photo at index: ${pagerState.currentPage}")
+            viewModel.switchToPhoto(pagerState.currentPage)
+        }
+    }
+
+    // 当 ViewModel 中的索引变化时，同步 Pager
+    LaunchedEffect(currentPhotoIndex) {
+        android.util.Log.d("PhotoDetail", "ViewModel currentPhotoIndex changed to: $currentPhotoIndex")
+        if (pagerState.currentPage != currentPhotoIndex && photoList.isNotEmpty()) {
+            android.util.Log.d("PhotoDetail", "Scrolling pager to: $currentPhotoIndex")
+            pagerState.scrollToPage(currentPhotoIndex)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -133,12 +162,30 @@ fun PhotoDetailScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 照片查看器（支持缩放和拖动）
-            ZoomableImage(
-                imageUrl = displayPhoto.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",  // 使用原图，移除/thumb及rotate参数
-                contentDescription = displayPhoto.name,
-                modifier = Modifier.fillMaxSize()
-            )
+            // 使用 HorizontalPager 实现左右滑动切换
+            if (photoList.isNotEmpty()) {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+                    val photo = photoList.getOrNull(page)
+                    if (photo != null) {
+                        // 照片查看器（支持缩放和拖动）
+                        ZoomableImage(
+                            imageUrl = photo.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",  // 使用原图，移除/thumb及 rotate参数
+                            contentDescription = photo.name,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+            } else {
+                // 如果列表还没加载，显示单张照片
+                ZoomableImage(
+                    imageUrl = displayPhoto.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",
+                    contentDescription = displayPhoto.name,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
 
             // 信息面板
             if (uiState.showInfoPanel) {
@@ -170,6 +217,7 @@ fun PhotoDetailScreen(
 
 /**
  * 可缩放的图片组件
+ * 使用双击缩放，避免拦截HorizontalPager的滑动手势
  */
 @Composable
 fun ZoomableImage(
@@ -183,27 +231,7 @@ fun ZoomableImage(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black)
-            .pointerInput(Unit) {
-                detectTransformGestures { _, pan, zoom, _ ->
-                    scale = (scale * zoom).coerceIn(1f, 5f)
-                    
-                    if (scale > 1f) {
-                        offset = Offset(
-                            x = (offset.x + pan.x).coerceIn(
-                                -size.width * (scale - 1) / 2,
-                                size.width * (scale - 1) / 2
-                            ),
-                            y = (offset.y + pan.y).coerceIn(
-                                -size.height * (scale - 1) / 2,
-                                size.height * (scale - 1) / 2
-                            )
-                        )
-                    } else {
-                        offset = Offset.Zero
-                    }
-                }
-            },
+            .background(Color.Black),
         contentAlignment = Alignment.Center
     ) {
         AsyncImage(

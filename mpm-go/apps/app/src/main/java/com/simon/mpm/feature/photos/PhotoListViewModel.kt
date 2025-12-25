@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.simon.mpm.common.Result
+import com.simon.mpm.data.repository.AuthRepository
 import com.simon.mpm.data.repository.PhotoRepository
 import com.simon.mpm.network.model.Photo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PhotoListViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
+    private val authRepository: AuthRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -330,6 +332,15 @@ class PhotoListViewModel @Inject constructor(
      */
     fun clearRestoreSuccess() {
         _uiState.update { it.copy(restoreSuccess = false) }
+    }
+
+    /**
+     * 退出登录
+     */
+    fun logout() {
+        viewModelScope.launch {
+            authRepository.logout()
+        }
     }
 
     companion object {

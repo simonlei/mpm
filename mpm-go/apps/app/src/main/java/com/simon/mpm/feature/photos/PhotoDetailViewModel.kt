@@ -31,21 +31,30 @@ class PhotoDetailViewModel @Inject constructor(
     private val _photo = MutableStateFlow<Photo?>(null)
     val photo: StateFlow<Photo?> = _photo.asStateFlow()
 
+    // 照片列表（用于左右滑动切换）
+    private val _photoList = MutableStateFlow<List<Photo>>(emptyList())
+    val photoList: StateFlow<List<Photo>> = _photoList.asStateFlow()
+
+    // 当前照片索引
+    private val _currentPhotoIndex = MutableStateFlow(0)
+    val currentPhotoIndex: StateFlow<Int> = _currentPhotoIndex.asStateFlow()
+
     init {
-        // 如果有photoId，加载照片详情
+        // 如果有photoId，加载照片详情和列表
         if (photoId > 0) {
             loadPhotoDetail()
+            loadPhotoList()
         }
     }
 
     /**
      * 加载照片详情
      */
-    private fun loadPhotoDetail() {
+    private fun loadPhotoDetail(id: Int = photoId) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             
-            photoRepository.getPhotoById(photoId).collect { result ->
+            photoRepository.getPhotoById(id).collect { result ->
                 when (result) {
                     is Result.Loading -> {
                         _uiState.update { it.copy(isLoading = true) }
@@ -62,6 +71,57 @@ class PhotoDetailViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /**
+     * 加载照片列表（用于左右滑动）
+     */
+    private fun loadPhotoList() {
+        viewModelScope.launch {
+            android.util.Log.d("PhotoDetailVM", "Loading photo list for photoId: $photoId")
+            // 加载当前照片所在的照片列表
+            photoRepository.getPhotos(
+                star = false,
+                video = false,
+                trashed = false,
+                start = 0,
+                size = 1000, // 加载足够多的照片
+                dateKey = "",
+                order = "-id"
+            ).collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        _photoList.value = result.data.data
+                        android.util.Log.d("PhotoDetailVM", "Photo list loaded: ${result.data.data.size} photos")
+                        // 找到当前照片的索引
+                        val index = result.data.data.indexOfFirst { it.id == photoId }
+                        android.util.Log.d("PhotoDetailVM", "Current photo index: $index")
+                        if (index >= 0) {
+                            _currentPhotoIndex.value = index
+                        }
+                    }
+                    else -> {
+                        android.util.Log.d("PhotoDetailVM", "Photo list loading failed or loading")
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 切换到指定索引的照片
+     */
+    fun switchToPhoto(index: Int) {
+        android.util.Log.d("PhotoDetailVM", "switchToPhoto called with index: $index, list size: ${_photoList.value.size}")
+        if (index < 0 || index >= _photoList.value.size) {
+            android.util.Log.w("PhotoDetailVM", "Invalid index: $index")
+            return
+        }
+        
+        _currentPhotoIndex.value = index
+        val photo = _photoList.value[index]
+        android.util.Log.d("PhotoDetailVM", "Switching to photo: ${photo.id} - ${photo.name}")
+        loadPhotoDetail(photo.id)
     }
 
     /**

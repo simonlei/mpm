@@ -36,7 +36,7 @@ fun MpmNavGraph(
                     }
                 },
                 onNavigateToHome = {
-                    navController.navigate(Routes.HOME) {
+                    navController.navigate(Routes.PHOTO_LIST) {
                         popUpTo(Routes.SPLASH) { inclusive = true }
                     }
                 }
@@ -47,7 +47,7 @@ fun MpmNavGraph(
         composable(Routes.LOGIN) {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate(Routes.HOME) {
+                    navController.navigate(Routes.PHOTO_LIST) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
                 }
@@ -82,15 +82,26 @@ fun MpmNavGraph(
             )
         ) {
             TrashScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onPhotoClick = { photo ->
+                    navController.navigate(Routes.photoDetail(photo.id))
+                }
             )
         }
         
-        // 照片列表
+        // 照片列表（主屏幕）
         composable(Routes.PHOTO_LIST) {
             PhotoListScreen(
                 onPhotoClick = { photo ->
                     navController.navigate(Routes.photoDetail(photo.id))
+                },
+                onNavigateToTrash = {
+                    navController.navigate(Routes.trash())
+                },
+                onLogout = {
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.PHOTO_LIST) { inclusive = true }
+                    }
                 }
             )
         }
