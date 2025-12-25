@@ -153,7 +153,20 @@ class PhotoDetailViewModel @Inject constructor(
                 rotate = newRotate
             ).collect { result ->
                 if (result is Result.Success) {
+                    // 更新当前照片的rotate值
                     _photo.update { it?.copy(rotate = newRotate) }
+                    
+                    // 同时更新photoList中对应照片的rotate值
+                    val currentIndex = _currentPhotoIndex.value
+                    _photoList.update { list ->
+                        list.mapIndexed { index, photo ->
+                            if (index == currentIndex) {
+                                photo.copy(rotate = newRotate)
+                            } else {
+                                photo
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -205,8 +205,9 @@ fun PhotoDetailScreen(
                     if (photo != null) {
                         // 照片查看器（支持缩放和拖动）
                         ZoomableImage(
-                            imageUrl = photo.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",  // 使用原图，移除/thumb及 rotate参数
+                            imageUrl = photo.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",  // 使用原图，移除/thumb参数
                             contentDescription = photo.name,
+                            rotate = photo.rotate.toFloat(),
                             modifier = Modifier.fillMaxSize()
                         )
                     }
@@ -216,6 +217,7 @@ fun PhotoDetailScreen(
                 ZoomableImage(
                     imageUrl = displayPhoto.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",
                     contentDescription = displayPhoto.name,
+                    rotate = displayPhoto.rotate.toFloat(),
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -256,6 +258,7 @@ fun PhotoDetailScreen(
 fun ZoomableImage(
     imageUrl: String,
     contentDescription: String?,
+    rotate: Float = 0f,
     modifier: Modifier = Modifier
 ) {
     var scale by remember { mutableStateOf(1f) }
@@ -277,7 +280,8 @@ fun ZoomableImage(
                     scaleX = scale,
                     scaleY = scale,
                     translationX = offset.x,
-                    translationY = offset.y
+                    translationY = offset.y,
+                    rotationZ = rotate
                 )
                 .pointerInput(Unit) {
                     awaitEachGesture {
