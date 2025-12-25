@@ -39,7 +39,15 @@ fun PhotoListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("照片") },
+                title = { 
+                    Text(
+                        text = if (uiState.totalRows > 0) {
+                            "照片 (${uiState.totalRows})"
+                        } else {
+                            "照片"
+                        }
+                    )
+                },
                 actions = {
                     // 排序按钮
                     Box {
