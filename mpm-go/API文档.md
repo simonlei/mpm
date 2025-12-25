@@ -173,7 +173,44 @@ MPM-GO 是一个照片管理系统的后端服务，基于 Gin 框架开发，�
   }
   ```
 
-#### 3.2 获取照片数量
+#### 3.2 根据ID获取照片详情
+- **URL**: `/api/getPhotoById`
+- **Method**: `POST`
+- **请求参数**:
+  ```json
+  {
+    "id": 1
+  }
+  ```
+- **响应示例**:
+  ```json
+  {
+    "code": 0,
+    "data": {
+      "id": 1,
+      "name": "photo_name.jpg",
+      "takenDate": "2024-01-01T10:30:00Z",
+      "latitude": 39.9042,
+      "longitude": 116.4074,
+      "address": "北京市朝阳区",
+      "width": 1920,
+      "height": 1080,
+      "rotate": 0,
+      "star": false,
+      "trashed": false,
+      "thumb": "small/photo_name.jpg/thumb",
+      "activity": 1,
+      "activityDesc": "2024-01-01 春游 活动描述",
+      "tags": "风景,旅游",
+      "description": "照片描述",
+      "mediaType": "image",
+      "size": 2048576,
+      "duration": 0
+    }
+  }
+  ```
+
+#### 3.3 获取照片数量
 - **URL**: `/api/getCount`
 - **Method**: `POST`
 - **请求参数**:
@@ -184,7 +221,7 @@ MPM-GO 是一个照片管理系统的后端服务，基于 Gin 框架开发，�
   ```
 - **响应**: 返回照片总数
 
-#### 3.3 更新照片信息
+#### 3.4 更新照片信息
 - **URL**: `/api/updateImage`
 - **Method**: `POST`
 - **请求参数**:
@@ -202,7 +239,7 @@ MPM-GO 是一个照片管理系统的后端服务，基于 Gin 框架开发，�
   ```
 - **响应**: 返回更新后的照片对象
 
-#### 3.4 移入/移出回收站
+#### 3.5 移入/移出回收站
 - **URL**: `/api/trashPhotos`
 - **Method**: `POST`
 - **请求参数**:
@@ -211,7 +248,7 @@ MPM-GO 是一个照片管理系统的后端服务，基于 Gin 框架开发，�
   ```
 - **响应**: 返回影响的行数
 
-#### 3.5 清空回收站
+#### 3.6 清空回收站
 - **URL**: `/api/emptyTrash`
 - **Method**: `POST`
 - **描述**: 异步任务，永久删除回收站中的所有照片

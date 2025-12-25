@@ -402,7 +402,7 @@ const toggleStarInViewer = async (photo: Photo) => {
 // 删除/恢复照片
 const trashPhoto = async (photo: Photo) => {
   try {
-    await trashPhotosApi([photo.name])
+    await trashPhotosApi([photo.id])
     MessagePlugin.success(props.trashed ? '已恢复' : '已移至回收站')
     
     emit('total-count-change', -1)
@@ -421,7 +421,7 @@ const restorePhoto = async (photo: Photo) => {
     const isViewerOpen = photoGridRef.value.viewerVisible
     const currentIndex = photoGridRef.value.currentPhotoIndex
     
-    await trashPhotosApi([photo.name])
+    await trashPhotosApi([photo.id])
     MessagePlugin.success('已恢复')
     
     emit('total-count-change', -1)
@@ -444,7 +444,7 @@ const deletePhotoInViewer = async (photo: Photo) => {
   try {
     const currentIndex = photoGridRef.value?.currentPhotoIndex || 0
     
-    await trashPhotosApi([photo.name])
+    await trashPhotosApi([photo.id])
     MessagePlugin.success(props.trashed ? '已恢复' : '已移至回收站')
     
     emit('total-count-change', -1)
@@ -530,13 +530,13 @@ const batchToggleStar = async (photos: Photo[]) => {
 // 批量删除/恢复
 const batchTrash = async (photos: Photo[]) => {
   try {
-    const names = photos.map(p => p.name)
-    await trashPhotosApi(names)
+    const ids = photos.map(p => p.id)
+    await trashPhotosApi(ids)
     MessagePlugin.success(props.trashed 
-      ? `已恢复 ${names.length} 张照片`
-      : `已将 ${names.length} 张照片移至回收站`)
+      ? `已恢复 ${ids.length} 张照片`
+      : `已将 ${ids.length} 张照片移至回收站`)
     
-    emit('total-count-change', -names.length)
+    emit('total-count-change', -ids.length)
     photoGridRef.value?.clearSelection()
     refresh()
   } catch (error) {

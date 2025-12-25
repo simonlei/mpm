@@ -9,9 +9,9 @@ import (
 )
 
 func trashPhotos(c *gin.Context) {
-	var names []string
-	c.BindJSON(&names)
-	x := db().Exec(`update t_photos set trashed=!trashed where name in (?)`, names)
+	var ids []int
+	c.BindJSON(&ids)
+	x := db().Exec(`update t_photos set trashed=!trashed where id in (?)`, ids)
 	c.JSON(http.StatusOK, Response{0, x.RowsAffected})
 }
 

@@ -312,7 +312,7 @@ const toggleStarInViewer = async (photo: Photo) => {
 // 删除照片
 const trashPhoto = async (photo: Photo) => {
   try {
-    await trashPhotosApi([photo.name])
+    await trashPhotosApi([photo.id])
     MessagePlugin.success('已移至回收站')
     
     // 更新总数并刷新
@@ -329,7 +329,7 @@ const deletePhotoInViewer = async (photo: Photo) => {
   try {
     const currentIndex = photoGridRef.value?.currentPhotoIndex || 0
     
-    await trashPhotosApi([photo.name])
+    await trashPhotosApi([photo.id])
     MessagePlugin.success('已移至回收站')
     
     // 更新总数

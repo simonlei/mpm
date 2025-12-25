@@ -370,7 +370,7 @@ const deletePhoto = async () => {
   if (!selectedPhoto.value) return
   
   try {
-    await trashPhotosApi([selectedPhoto.value.name])
+    await trashPhotosApi([selectedPhoto.value.id])
     MessagePlugin.success('已移至回收站')
     drawerVisible.value = false
     // 重新加载地图标记

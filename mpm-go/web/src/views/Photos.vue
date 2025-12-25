@@ -406,7 +406,7 @@ const toggleStarInViewer = async (photo: Photo) => {
 // 删除照片
 const trashPhoto = async (photo: Photo) => {
   try {
-    await trashPhotosApi([photo.name])
+    await trashPhotosApi([photo.id])
     MessagePlugin.success('已移至回收站')
     
     // 更新总数并刷新
@@ -423,7 +423,7 @@ const deletePhotoInViewer = async (photo: Photo) => {
   try {
     const currentIndex = photoGridRef.value?.currentPhotoIndex || 0
     
-    await trashPhotosApi([photo.name])
+    await trashPhotosApi([photo.id])
     MessagePlugin.success('已移至回收站')
     
     // 更新总数
@@ -513,11 +513,11 @@ const batchToggleStar = async (photos: Photo[]) => {
 // 批量删除
 const batchTrash = async (photos: Photo[]) => {
   try {
-    const names = photos.map(p => p.name)
-    await trashPhotosApi(names)
-    MessagePlugin.success(`已将 ${names.length} 张照片移至回收站`)
+    const ids = photos.map(p => p.id)
+    await trashPhotosApi(ids)
+    MessagePlugin.success(`已将 ${ids.length} 张照片移至回收站`)
     
-    totalCount.value -= names.length
+    totalCount.value -= ids.length
     photoGridRef.value?.clearSelection()
     photoGridRef.value?.refresh()
   } catch (error) {

@@ -208,7 +208,7 @@ const restorePhoto = async (photo: Photo) => {
     const isViewerOpen = photoGridRef.value.viewerVisible
     const currentIndex = photoGridRef.value.currentPhotoIndex
     
-    await trashPhotosApi([photo.name])
+    await trashPhotosApi([photo.id])
     MessagePlugin.success('已恢复')
     
     // 减少计数
@@ -239,10 +239,10 @@ const batchRestore = async (photos: Photo[]) => {
   if (photos.length === 0) return
   
   try {
-    const namesToRestore = photos.map(p => p.name)
+    const idsToRestore = photos.map(p => p.id)
     
-    await trashPhotosApi(namesToRestore)
-    MessagePlugin.success(`已恢复 ${namesToRestore.length} 张照片`)
+    await trashPhotosApi(idsToRestore)
+    MessagePlugin.success(`已恢复 ${idsToRestore.length} 张照片`)
     
     // 重新加载
     await loadCount()
