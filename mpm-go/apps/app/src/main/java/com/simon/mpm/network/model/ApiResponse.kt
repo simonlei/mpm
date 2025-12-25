@@ -109,7 +109,7 @@ data class PicsResponse(
     val endRow: Int,
     
     @SerializedName("data")
-    val data: List<Photo>
+    val data: List<Photo>?
 )
 
 /**

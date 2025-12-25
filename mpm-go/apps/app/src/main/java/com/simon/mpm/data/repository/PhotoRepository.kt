@@ -74,9 +74,9 @@ class PhotoRepository @Inject constructor(
         val processedResult = when (result) {
             is Result.Success -> {
                 val processedData = result.data.copy(
-                    data = result.data.data.map { photo ->
+                    data = result.data.data?.map { photo ->
                         photo.copy(thumb = getFullImageUrl(photo.thumb))
-                    }
+                    } ?: emptyList()
                 )
                 Result.Success(processedData)
             }
@@ -192,11 +192,16 @@ class PhotoRepository @Inject constructor(
     fun trashPhotos(ids: List<Int>): Flow<Result<Unit>> = flow {
         emit(Result.Loading)
         
-        val result = safeApiCallUnit {
-            apiService.trashPhotos(TrashPhotosRequest(ids = ids.map { it.toString() }))
+        val result = safeApiCall {
+            apiService.trashPhotos(ids)
         }
         
-        emit(result)
+        // 将 Result<Int> 转换为 Result<Unit>
+        emit(when (result) {
+            is Result.Success -> Result.Success(Unit)
+            is Result.Error -> Result.Error(result.exception, result.message)
+            is Result.Loading -> Result.Loading
+        })
     }
 
     /**
@@ -205,11 +210,16 @@ class PhotoRepository @Inject constructor(
     fun restorePhotos(ids: List<Int>): Flow<Result<Unit>> = flow {
         emit(Result.Loading)
         
-        val result = safeApiCallUnit {
-            apiService.restorePhotos(RestorePhotosRequest(ids = ids.map { it.toString() }))
+        val result = safeApiCall {
+            apiService.restorePhotos(ids)
         }
         
-        emit(result)
+        // 将 Result<Int> 转换为 Result<Unit>
+        emit(when (result) {
+            is Result.Success -> Result.Success(Unit)
+            is Result.Error -> Result.Error(result.exception, result.message)
+            is Result.Loading -> Result.Loading
+        })
     }
 
     /**
@@ -218,11 +228,16 @@ class PhotoRepository @Inject constructor(
     fun deletePhotos(ids: List<Int>): Flow<Result<Unit>> = flow {
         emit(Result.Loading)
         
-        val result = safeApiCallUnit {
-            apiService.deletePhotos(DeletePhotosRequest(ids = ids.map { it.toString() }))
+        val result = safeApiCall {
+            apiService.deletePhotos(ids)
         }
         
-        emit(result)
+        // 将 Result<Int> 转换为 Result<Unit>
+        emit(when (result) {
+            is Result.Success -> Result.Success(Unit)
+            is Result.Error -> Result.Error(result.exception, result.message)
+            is Result.Loading -> Result.Loading
+        })
     }
 
     /**

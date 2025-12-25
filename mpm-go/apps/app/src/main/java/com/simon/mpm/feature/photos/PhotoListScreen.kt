@@ -23,11 +23,20 @@ fun PhotoListScreen(
     onPhotoClick: (Photo) -> Unit,
     onNavigateToTrash: () -> Unit = {},
     onLogout: () -> Unit = {},
+    shouldRefresh: Boolean = false,
     viewModel: PhotoListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val photos by viewModel.photos.collectAsState()
     var showMenu by remember { mutableStateOf(false) }
+
+    // 监听刷新信号
+    LaunchedEffect(shouldRefresh) {
+        if (shouldRefresh) {
+            android.util.Log.d("PhotoListScreen", "Received refresh signal, refreshing list")
+            viewModel.refresh()
+        }
+    }
 
     Scaffold(
         topBar = {

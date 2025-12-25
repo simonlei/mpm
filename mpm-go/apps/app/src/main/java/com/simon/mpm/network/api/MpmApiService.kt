@@ -47,8 +47,8 @@ interface MpmApiService {
      */
     @POST("/api/trashPhotos")
     suspend fun trashPhotos(
-        @Body request: TrashPhotosRequest
-    ): ApiResponse<Unit>
+        @Body ids: List<Int>
+    ): ApiResponse<Int>
     
     /**
      * 清空回收站
@@ -141,16 +141,16 @@ interface MpmApiService {
      */
     @POST("/api/restorePhotos")
     suspend fun restorePhotos(
-        @Body request: RestorePhotosRequest
-    ): ApiResponse<Unit>
+        @Body ids: List<Int>
+    ): ApiResponse<Int>
     
     /**
      * 删除照片
      */
     @POST("/api/deletePhotos")
     suspend fun deletePhotos(
-        @Body request: DeletePhotosRequest
-    ): ApiResponse<Unit>
+        @Body ids: List<Int>
+    ): ApiResponse<Int>
     
     /**
      * 获取文件夹树

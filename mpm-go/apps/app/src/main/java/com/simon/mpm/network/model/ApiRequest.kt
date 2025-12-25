@@ -96,7 +96,7 @@ data class UpdateImageRequest(
  */
 data class TrashPhotosRequest(
     @SerializedName("ids")
-    val ids: List<String>
+    val ids: List<Int>
 )
 
 /**
@@ -340,7 +340,7 @@ data class CreateOrUpdateUserRequest(
  */
 data class RestorePhotosRequest(
     @SerializedName("ids")
-    val ids: List<String>
+    val ids: List<Int>
 )
 
 /**
@@ -348,5 +348,5 @@ data class RestorePhotosRequest(
  */
 data class DeletePhotosRequest(
     @SerializedName("ids")
-    val ids: List<String>
+    val ids: List<Int>
 )
