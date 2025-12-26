@@ -208,7 +208,9 @@ fun PhotoDetailScreen(
                             imageUrl = photo.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",  // 使用原图，移除/thumb参数
                             contentDescription = photo.name,
                             rotate = photo.rotate.toFloat(),
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
+                            onRotateLeft = { viewModel.rotatePhoto(-90) },
+                            onRotateRight = { viewModel.rotatePhoto(90) }
                         )
                     }
                 }
@@ -218,7 +220,9 @@ fun PhotoDetailScreen(
                     imageUrl = displayPhoto.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",
                     contentDescription = displayPhoto.name,
                     rotate = displayPhoto.rotate.toFloat(),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    onRotateLeft = { viewModel.rotatePhoto(-90) },
+                    onRotateRight = { viewModel.rotatePhoto(90) }
                 )
             }
 
@@ -253,16 +257,20 @@ fun PhotoDetailScreen(
 /**
  * 可缩放的图片组件
  * 支持双指缩放和拖动，不拦截HorizontalPager的滑动手势
+ * 点击图片显示旋转按钮
  */
 @Composable
 fun ZoomableImage(
     imageUrl: String,
     contentDescription: String?,
     rotate: Float = 0f,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRotateLeft: () -> Unit = {},
+    onRotateRight: () -> Unit = {}
 ) {
     var scale by remember { mutableStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
+    var showRotateButtons by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -285,10 +293,14 @@ fun ZoomableImage(
                 )
                 .pointerInput(Unit) {
                     awaitEachGesture {
-                        awaitFirstDown(requireUnconsumed = false)
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        val downTime = System.currentTimeMillis()
+                        val downPosition = down.position
+                        var lastPosition = downPosition
                         
                         do {
                             val event = awaitPointerEvent()
+                            lastPosition = event.changes.first().position
                             
                             // 只有在双指或更多手指时才处理缩放
                             if (event.changes.size >= 2) {
@@ -316,9 +328,57 @@ fun ZoomableImage(
                             // 如果是单指且未缩放，不消费事件，让 Pager 处理
                             
                         } while (event.changes.any { it.pressed })
+                        
+                        // 检测单击（未缩放状态下）
+                        val upTime = System.currentTimeMillis()
+                        val clickDuration = upTime - downTime
+                        val distance = (lastPosition - downPosition).getDistance()
+                        if (scale == 1f && clickDuration < 300 && distance < 10f) {
+                            showRotateButtons = !showRotateButtons
+                        }
                     }
                 }
         )
+        
+        // 旋转按钮
+        if (showRotateButtons) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+                // 向左旋转按钮
+                FloatingActionButton(
+                    onClick = {
+                        onRotateLeft()
+                        showRotateButtons = false
+                    },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.RotateLeft,
+                        contentDescription = "向左旋转",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+                
+                // 向右旋转按钮
+                FloatingActionButton(
+                    onClick = {
+                        onRotateRight()
+                        showRotateButtons = false
+                    },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.RotateRight,
+                        contentDescription = "向右旋转",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
+        }
     }
 }
 
