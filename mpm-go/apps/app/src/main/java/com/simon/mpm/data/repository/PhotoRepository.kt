@@ -1,5 +1,6 @@
 ﻿package com.simon.mpm.data.repository
 
+import android.util.Log
 import com.simon.mpm.common.Constants
 import com.simon.mpm.common.Result
 import com.simon.mpm.data.datastore.PreferencesManager
@@ -24,6 +25,10 @@ class PhotoRepository @Inject constructor(
     private val apiService: MpmApiService,
     private val preferencesManager: PreferencesManager
 ) : BaseRepository() {
+
+    companion object {
+        private const val TAG = "PhotoRepository"
+    }
 
     /**
      * 获取完整的图片URL
@@ -312,10 +317,19 @@ class PhotoRepository @Inject constructor(
      * 获取所有标签列表
      */
     fun getAllTags(): Flow<Result<List<String>>> = flow {
+        Log.d(TAG, "getAllTags: 开始获取标签列表")
         emit(Result.Loading)
         
         val result = safeApiCall {
-            apiService.getAllTags()
+            Log.d(TAG, "getAllTags: 调用 API")
+            apiService.getAllTags(emptyMap())
+        }
+        
+        Log.d(TAG, "getAllTags: API 返回结果 - ${result.javaClass.simpleName}")
+        if (result is Result.Success) {
+            Log.d(TAG, "getAllTags: 成功获取 ${result.data.size} 个标签")
+        } else if (result is Result.Error) {
+            Log.e(TAG, "getAllTags: 获取失败 - ${result.exception.message}")
         }
         
         emit(result)

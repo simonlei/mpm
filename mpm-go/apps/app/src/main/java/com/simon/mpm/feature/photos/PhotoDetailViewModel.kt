@@ -1,5 +1,6 @@
 ﻿package com.simon.mpm.feature.photos
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,6 +21,10 @@ class PhotoDetailViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "PhotoDetailViewModel"
+    }
 
     // 从导航参数获取照片ID和来源
     private val photoId: Int = savedStateHandle.get<Int>("photoId") ?: 0
@@ -323,10 +328,15 @@ class PhotoDetailViewModel @Inject constructor(
      * 加载所有标签
      */
     private fun loadAllTags() {
+        Log.d(TAG, "loadAllTags: 开始加载标签列表")
         viewModelScope.launch {
             photoRepository.getAllTags().collect { result ->
+                Log.d(TAG, "loadAllTags: 收到结果 - ${result.javaClass.simpleName}")
                 if (result is Result.Success) {
+                    Log.d(TAG, "loadAllTags: 成功获取 ${result.data.size} 个标签")
                     _allTags.value = result.data
+                } else if (result is Result.Error) {
+                    Log.e(TAG, "loadAllTags: 获取标签失败 - ${result.exception.message}")
                 }
             }
         }
@@ -380,7 +390,15 @@ class PhotoDetailViewModel @Inject constructor(
      * 显示/隐藏编辑对话框
      */
     fun toggleEditDialog() {
-        _uiState.update { it.copy(showEditDialog = !it.showEditDialog) }
+        val newShowState = !_uiState.value.showEditDialog
+        Log.d(TAG, "toggleEditDialog: showEditDialog = $newShowState")
+        _uiState.update { it.copy(showEditDialog = newShowState) }
+        
+        // 如果是打开对话框，重新从服务端拉取最新的标签列表
+        if (newShowState) {
+            Log.d(TAG, "toggleEditDialog: 准备加载标签列表")
+            loadAllTags()
+        }
     }
 }
 
