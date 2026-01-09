@@ -72,6 +72,8 @@
           <t-date-picker
             v-model="newDate"
             enable-time-picker
+            format="YYYY-MM-DD HH:mm:ss"
+            value-type="YYYY-MM-DD HH:mm:ss"
             clearable
             style="width: 100%"
           />

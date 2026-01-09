@@ -51,7 +51,13 @@ func (t *DateTime) UnmarshalJSON(data []byte) error {
 	var err error
 	tt, err := time.ParseInLocation(`"2006-01-02"`, string(data), time.Local)
 	if err != nil {
-		return err
+		tt, err = time.ParseInLocation(`"2006-01-02 15:04:05"`, string(data), time.Local)
+		if err != nil {
+			return err
+		} else {
+			*t = DateTime(tt)
+			return nil
+		}
 	}
 	*t = DateTime(tt)
 	return nil

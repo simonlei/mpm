@@ -84,6 +84,8 @@
           <t-date-picker
             v-model="formData.startDate"
             enable-time-picker
+            format="YYYY-MM-DD HH:mm:ss"
+            value-type="YYYY-MM-DD HH:mm:ss"
             clearable
             style="width: 100%"
           />
@@ -93,6 +95,8 @@
           <t-date-picker
             v-model="formData.endDate"
             enable-time-picker
+            format="YYYY-MM-DD HH:mm:ss"
+            value-type="YYYY-MM-DD HH:mm:ss"
             clearable
             style="width: 100%"
           />

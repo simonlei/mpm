@@ -171,17 +171,17 @@ func getThumbUrl(name string, rotate int64) string {
 }
 
 type UpdateImageRequest struct {
-	ID          int        `json:"id"`
-	Star        *bool      `json:"star"`
-	Trashed     *bool      `json:"trashed"`
-	Activity    *int       `json:"activity"`
-	Longitude   *float64   `json:"longitude"`
-	Latitude    *float64   `json:"latitude"`
-	Tags        *string    `json:"tags"`
-	TakenDate   *time.Time `json:"taken_date"`
-	Description *string    `json:"description"`
-	Address     *string    `json:"address"`
-	Rotate      *int       `json:"rotate"`
+	ID          int              `json:"id"`
+	Star        *bool            `json:"star"`
+	Trashed     *bool            `json:"trashed"`
+	Activity    *int             `json:"activity"`
+	Longitude   *float64         `json:"longitude"`
+	Latitude    *float64         `json:"latitude"`
+	Tags        *string          `json:"tags"`
+	TakenDate   *model.DateTime  `json:"taken_date"`
+	Description *string          `json:"description"`
+	Address     *string          `json:"address"`
+	Rotate      *int             `json:"rotate"`
 }
 
 func updateImage(c *gin.Context) {
@@ -276,7 +276,8 @@ func updatePhotoActivity(req *UpdateImageRequest) {
 	endDate := time.Time(ac.EndDate)
 	if takeDate.Before(startDate) || takeDate.After(endDate.Add(24*time.Hour)) {
 		// 如果当前时间不在活动范围内，更改时间为活动开始时间
-		req.TakenDate = &startDate
+		startDateTime := model.DateTime(startDate)
+		req.TakenDate = &startDateTime
 	}
 	if photo.Latitude == 0 && photo.Longitude == 0 {
 		// 如果当前 GIS 是空，更改 GIS 为活动的 GIS
