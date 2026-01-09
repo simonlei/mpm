@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.simon.mpm.common.Result
 import com.simon.mpm.data.repository.PhotoRepository
+import com.simon.mpm.network.model.Activity
 import com.simon.mpm.network.model.Photo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -40,11 +41,21 @@ class PhotoDetailViewModel @Inject constructor(
     private val _currentPhotoIndex = MutableStateFlow(0)
     val currentPhotoIndex: StateFlow<Int> = _currentPhotoIndex.asStateFlow()
 
+    // 活动列表
+    private val _activities = MutableStateFlow<List<Activity>>(emptyList())
+    val activities: StateFlow<List<Activity>> = _activities.asStateFlow()
+
+    // 标签列表
+    private val _allTags = MutableStateFlow<List<String>>(emptyList())
+    val allTags: StateFlow<List<String>> = _allTags.asStateFlow()
+
     init {
         // 如果有photoId，加载照片详情和列表
         if (photoId > 0) {
             loadPhotoDetail()
             loadPhotoList()
+            loadActivities()
+            loadAllTags()
         }
     }
 
@@ -294,6 +305,83 @@ class PhotoDetailViewModel @Inject constructor(
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }
+
+    /**
+     * 加载活动列表
+     */
+    private fun loadActivities() {
+        viewModelScope.launch {
+            photoRepository.getActivities().collect { result ->
+                if (result is Result.Success) {
+                    _activities.value = result.data
+                }
+            }
+        }
+    }
+
+    /**
+     * 加载所有标签
+     */
+    private fun loadAllTags() {
+        viewModelScope.launch {
+            photoRepository.getAllTags().collect { result ->
+                if (result is Result.Success) {
+                    _allTags.value = result.data
+                }
+            }
+        }
+    }
+
+    /**
+     * 更新照片信息
+     */
+    fun updatePhotoInfo(editData: PhotoEditData) {
+        val currentPhoto = _photo.value ?: return
+        
+        viewModelScope.launch {
+            photoRepository.updatePhoto(
+                id = currentPhoto.id,
+                latitude = editData.latitude,
+                longitude = editData.longitude,
+                takenDate = editData.takenDate,
+                activity = editData.activity,
+                tags = editData.tags
+            ).collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        // 更新当前照片
+                        _photo.value = result.data
+                        
+                        // 更新列表中的照片
+                        val currentIndex = _currentPhotoIndex.value
+                        _photoList.update { list ->
+                            list.mapIndexed { index, photo ->
+                                if (index == currentIndex) {
+                                    result.data
+                                } else {
+                                    photo
+                                }
+                            }
+                        }
+                        
+                        // 关闭编辑对话框
+                        _uiState.update { it.copy(showEditDialog = false) }
+                    }
+                    is Result.Error -> {
+                        _uiState.update { it.copy(error = result.message) }
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    /**
+     * 显示/隐藏编辑对话框
+     */
+    fun toggleEditDialog() {
+        _uiState.update { it.copy(showEditDialog = !it.showEditDialog) }
+    }
 }
 
 /**
@@ -303,5 +391,6 @@ data class PhotoDetailUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val showInfoPanel: Boolean = false,
-    val photoDeleted: Boolean = false
+    val photoDeleted: Boolean = false,
+    val showEditDialog: Boolean = false
 )

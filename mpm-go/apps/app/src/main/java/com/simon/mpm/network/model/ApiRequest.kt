@@ -75,7 +75,7 @@ data class UpdateImageRequest(
     @SerializedName("longitude")
     val longitude: Double? = null,
     
-    @SerializedName("takenDate")
+    @SerializedName("taken_date")
     val takenDate: String? = null,
     
     @SerializedName("star")

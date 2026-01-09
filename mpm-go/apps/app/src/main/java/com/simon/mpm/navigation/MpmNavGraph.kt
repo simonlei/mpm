@@ -13,8 +13,8 @@ import com.simon.mpm.feature.auth.LoginScreen
 import com.simon.mpm.feature.home.HomeScreen
 import com.simon.mpm.feature.photos.PhotoDetailScreen
 import com.simon.mpm.feature.photos.PhotoListScreen
+import com.simon.mpm.feature.photos.TrashScreen
 import com.simon.mpm.feature.splash.SplashScreen
-import com.simon.mpm.feature.trash.TrashScreen
 
 /**
  * 应用导航图
@@ -82,31 +82,20 @@ fun MpmNavGraph(
                 }
             )
         ) { backStackEntry ->
-            // 监听从详情页返回的刷新信号
-            val shouldRefresh = backStackEntry.savedStateHandle
-                .getStateFlow("refresh_trash", false)
-                .collectAsState()
-            
             TrashScreen(
                 onBack = { 
                     // 返回到照片列表时也要刷新
                     navController.previousBackStackEntry?.savedStateHandle?.set("refresh_list", true)
                     navController.popBackStack()
                 },
-                onPhotoClick = { photo ->
-                    navController.navigate(Routes.photoDetail(photo.id, fromTrash = true))
-                },
-                shouldRefresh = shouldRefresh.value
+                onPhotoClick = { photoId ->
+                    navController.navigate(Routes.photoDetail(photoId, fromTrash = true))
+                }
             )
         }
         
         // 照片列表（主屏幕）
         composable(Routes.PHOTO_LIST) { backStackEntry ->
-            // 监听从详情页或回收站返回的刷新信号
-            val shouldRefresh = backStackEntry.savedStateHandle
-                .getStateFlow("refresh_list", false)
-                .collectAsState()
-            
             PhotoListScreen(
                 onPhotoClick = { photo ->
                     navController.navigate(Routes.photoDetail(photo.id))
@@ -118,8 +107,7 @@ fun MpmNavGraph(
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.PHOTO_LIST) { inclusive = true }
                     }
-                },
-                shouldRefresh = shouldRefresh.value
+                }
             )
         }
         

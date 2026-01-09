@@ -294,4 +294,30 @@ class PhotoRepository @Inject constructor(
         
         emit(result)
     }
+
+    /**
+     * 获取所有活动列表
+     */
+    fun getActivities(): Flow<Result<List<Activity>>> = flow {
+        emit(Result.Loading)
+        
+        val result = safeApiCall {
+            apiService.getActivities()
+        }
+        
+        emit(result)
+    }
+
+    /**
+     * 获取所有标签列表
+     */
+    fun getAllTags(): Flow<Result<List<String>>> = flow {
+        emit(Result.Loading)
+        
+        val result = safeApiCall {
+            apiService.getAllTags()
+        }
+        
+        emit(result)
+    }
 }

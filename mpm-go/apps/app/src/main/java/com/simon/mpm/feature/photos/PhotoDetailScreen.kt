@@ -95,6 +95,11 @@ fun PhotoDetailScreen(
                     }
                 },
                 actions = {
+                    // 编辑按钮
+                    IconButton(onClick = { viewModel.toggleEditDialog() }) {
+                        Icon(Icons.Default.Edit, "编辑")
+                    }
+
                     // 收藏按钮
                     IconButton(onClick = { viewModel.toggleStar() }) {
                         Icon(
@@ -232,6 +237,22 @@ fun PhotoDetailScreen(
                     photo = displayPhoto,
                     onDismiss = { viewModel.toggleInfoPanel() },
                     modifier = Modifier.align(Alignment.BottomCenter)
+                )
+            }
+
+            // 编辑对话框
+            if (uiState.showEditDialog) {
+                val activities by viewModel.activities.collectAsState()
+                val allTags by viewModel.allTags.collectAsState()
+                
+                PhotoEditDialog(
+                    photo = displayPhoto,
+                    activities = activities,
+                    allTags = allTags,
+                    onDismiss = { viewModel.toggleEditDialog() },
+                    onSave = { editData ->
+                        viewModel.updatePhotoInfo(editData)
+                    }
                 )
             }
 
