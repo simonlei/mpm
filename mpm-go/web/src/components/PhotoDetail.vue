@@ -361,7 +361,8 @@ const saveDateTime = async () => {
   
   savingDateTime.value = true
   try {
-    const localDateString = dayjs(editDateTimeValue.value).format('YYYY-MM-DDTHH:mm:ss+08:00')
+    // 使用 YYYY-MM-DD HH:mm:ss 格式发送给后端
+    const localDateString = dayjs(editDateTimeValue.value).format('YYYY-MM-DD HH:mm:ss')
     
     const response = await updateImageApi({
       id: props.photo.id,

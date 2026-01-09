@@ -142,6 +142,21 @@ MPM-GO 是一个照片管理系统的后端服务，基于 Gin 框架开发，�
     "idRank": 0           // 获取指定ID的排名
   }
   ```
+  排序字段如下：
+  ```js
+  const orderOptions = [
+    { label: 'ID 升序', value: 'id' },
+    { label: 'ID 降序', value: '-id' },
+    { label: '日期 升序', value: 'taken_date' },
+    { label: '日期 降序', value: '-taken_date' },
+    { label: '大小 升序', value: 'size' },
+    { label: '大小 降序', value: '-size' },
+    { label: '宽度 升序', value: 'width' },
+    { label: '宽度 降序', value: '-width' },
+    { label: '高度 升序', value: 'height' },
+    { label: '高度 降序', value: '-height' }
+  ```
+
 - **响应示例**:
   ```json
   {
@@ -244,7 +259,7 @@ MPM-GO 是一个照片管理系统的后端服务，基于 Gin 框架开发，�
 - **Method**: `POST`
 - **请求参数**:
   ```json
-  ["photo_name1.jpg", "photo_name2.jpg"]
+  [1, 23, 45]
   ```
 - **响应**: 返回影响的行数
 

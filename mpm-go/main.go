@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -75,6 +76,42 @@ func setupEngine() {
 
 func MpmMiddleWare() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// 记录请求开始时间
+		startTime := time.Now()
+		
+		// 读取请求体（需要保存原始请求体供后续使用）
+		var requestBody []byte
+		if c.Request.Body != nil {
+			requestBody, _ = io.ReadAll(c.Request.Body)
+			// 重新设置请求体，因为ReadAll会消耗掉原始的Body
+			c.Request.Body = io.NopCloser(bytes.NewBuffer(requestBody))
+		}
+		
+		// 记录请求详情
+		l.Infof("=== 请求开始 ===")
+		l.Infof("请求方法: %s", c.Request.Method)
+		l.Infof("请求URL: %s", c.Request.URL.String())
+		l.Infof("请求IP: %s", c.ClientIP())
+		l.Infof("User-Agent: %s", c.GetHeader("User-Agent"))
+		l.Infof("Content-Type: %s", c.GetHeader("Content-Type"))
+		
+		// 记录重要的请求头
+		if signature := c.GetHeader("Signature"); signature != "" {
+			l.Infof("请求签名: %s", signature)
+		}
+		if account := c.GetHeader("Account"); account != "" {
+			l.Infof("请求账号: %s", account)
+		}
+		
+		// 记录请求体（只记录前500字符，避免日志过长）
+		if len(requestBody) > 0 {
+			bodyStr := string(requestBody)
+			if len(bodyStr) > 500 {
+				bodyStr = bodyStr[:500] + "...(truncated)"
+			}
+			l.Infof("请求体: %s", bodyStr)
+		}
+		
 		// hasRight := AuthFilter(c)
 		hasRight := true
 		url := c.Request.URL.String()
@@ -85,6 +122,7 @@ func MpmMiddleWare() gin.HandlerFunc {
 		bodyWriter := &BodyWriter{buf: &bytes.Buffer{}, ResponseWriter: c.Writer}
 
 		if !hasRight {
+			l.Warnf("权限验证失败 - URL: %s, Account: %s", url, c.GetHeader("Account"))
 			c.String(http.StatusForbidden, "签名不对，不允许访问 API")
 			c.Abort()
 		} else {
@@ -102,7 +140,39 @@ func MpmMiddleWare() gin.HandlerFunc {
 				}
 			}
 		}
-
+		
+		// 记录响应详情
+		endTime := time.Now()
+		duration := endTime.Sub(startTime)
+		
+		l.Infof("=== 请求结束 ===")
+		l.Infof("响应状态码: %d", c.Writer.Status())
+		l.Infof("响应大小: %d bytes", c.Writer.Size())
+		l.Infof("处理耗时: %v", duration)
+		
+		// 记录响应体（只记录前500字符，避免日志过长）
+		// 对于二进制内容（图片、视频等）不记录响应体
+		if bodyWriter.buf != nil && bodyWriter.buf.Len() > 0 {
+			contentType := c.Writer.Header().Get("Content-Type")
+			isBinaryContent := isBinaryContentType(contentType)
+			
+			if isBinaryContent {
+				l.Infof("响应体: [二进制内容，已跳过记录] Content-Type: %s", contentType)
+			} else {
+				responseBody := bodyWriter.buf.String()
+				if len(responseBody) > 500 {
+					responseBody = responseBody[:500] + "...(truncated)"
+				}
+				l.Infof("响应体: %s", responseBody)
+			}
+		}
+		
+		// 记录响应头中的重要信息
+		if contentType := c.Writer.Header().Get("Content-Type"); contentType != "" {
+			l.Infof("响应Content-Type: %s", contentType)
+		}
+		
+		l.Infof("==================")
 	}
 }
 
@@ -146,4 +216,49 @@ func (cw BodyWriter) wrapJsonRpc(_ *gin.Context) {
 
 func (cw BodyWriter) directWrite() {
 	cw.ResponseWriter.Write(cw.buf.Bytes())
+}
+
+// isBinaryContentType 判断是否为二进制内容类型
+func isBinaryContentType(contentType string) bool {
+	if contentType == "" {
+		return false
+	}
+	
+	// 转换为小写进行比较
+	contentType = strings.ToLower(contentType)
+	
+	// 定义二进制内容类型列表
+	binaryTypes := []string{
+		// 图片类型
+		"image/",
+		// 视频类型
+		"video/",
+		// 音频类型
+		"audio/",
+		// 应用程序二进制类型
+		"application/octet-stream",
+		"application/pdf",
+		"application/zip",
+		"application/x-rar-compressed",
+		"application/x-7z-compressed",
+		"application/x-tar",
+		"application/gzip",
+		// 字体文件
+		"font/",
+		"application/font-woff",
+		"application/font-woff2",
+		// 其他二进制格式
+		"application/vnd.ms-excel",
+		"application/vnd.openxmlformats-officedocument",
+		"application/msword",
+	}
+	
+	// 检查是否匹配任何二进制类型
+	for _, binaryType := range binaryTypes {
+		if strings.HasPrefix(contentType, binaryType) {
+			return true
+		}
+	}
+	
+	return false
 }
