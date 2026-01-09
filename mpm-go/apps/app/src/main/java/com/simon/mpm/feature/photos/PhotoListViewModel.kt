@@ -73,11 +73,12 @@ class PhotoListViewModel @Inject constructor(
                     }
                     is Result.Success -> {
                         val response = result.data
-                        android.util.Log.d("PhotoListViewModel", "Success: totalRows=${response.totalRows}, data size=${response.data.size}")
+                        val photoList = response.data ?: emptyList()
+                        android.util.Log.d("PhotoListViewModel", "Success: totalRows=${response.totalRows}, data size=${photoList.size}")
                         val newPhotos = if (refresh) {
-                            response.data
+                            photoList
                         } else {
-                            _photos.value + response.data
+                            _photos.value + photoList
                         }
                         
                         _photos.value = newPhotos
@@ -164,6 +165,22 @@ class PhotoListViewModel @Inject constructor(
         }
         refresh()
     }
+    
+    /**
+     * 切换收藏筛选
+     */
+    fun toggleStarFilter() {
+        _uiState.update { it.copy(filterStar = !it.filterStar) }
+        refresh()
+    }
+    
+    /**
+     * 切换视频筛选
+     */
+    fun toggleVideoFilter() {
+        _uiState.update { it.copy(filterVideo = !it.filterVideo) }
+        refresh()
+    }
 
     /**
      * 设置排序方式
@@ -205,6 +222,7 @@ class PhotoListViewModel @Inject constructor(
 
     /**
      * 恢复照片（回收站使用）
+     * 使用trashPhotos接口，该接口会反转照片的trashed状态
      */
     fun restorePhotos(photoIds: List<Int>) {
         if (!isTrashed) return
@@ -212,7 +230,7 @@ class PhotoListViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
-            photoRepository.restorePhotos(photoIds).collect { result ->
+            photoRepository.trashPhotos(photoIds).collect { result ->
                 when (result) {
                     is Result.Success -> {
                         // 从列表中移除已恢复的照片

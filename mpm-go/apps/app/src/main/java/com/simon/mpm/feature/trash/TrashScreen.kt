@@ -24,6 +24,7 @@ import com.simon.mpm.feature.photos.TrashPhotoGridItem
 fun TrashScreen(
     onBack: () -> Unit,
     onPhotoClick: (com.simon.mpm.network.model.Photo) -> Unit = {},
+    shouldRefresh: Boolean = false,
     viewModel: PhotoListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -31,6 +32,14 @@ fun TrashScreen(
     val totalCount by viewModel.totalCount.collectAsStateWithLifecycle()
     
     val serverUrl = "http://127.0.0.1:8080" // 临时硬编码，实际应该从PreferencesManager获取
+    
+    // 监听刷新信号
+    LaunchedEffect(shouldRefresh) {
+        if (shouldRefresh) {
+            android.util.Log.d("TrashScreen", "Received refresh signal, refreshing trash list")
+            viewModel.refresh()
+        }
+    }
     
     // 显示操作结果
     LaunchedEffect(uiState.restoreSuccess) {

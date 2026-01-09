@@ -54,18 +54,18 @@ class PhotoRepository @Inject constructor(
         val result = safeApiCall {
             apiService.getPics(
                 GetPicsRequest(
-                    star = star,
-                    video = video,
+                    star = if (star) true else null,  // 只有为true时才传递，false时传null表示不筛选
+                    video = if (video) true else null,  // 只有为true时才传递，false时传null表示不筛选
                     trashed = trashed,
                     idOnly = false,
                     start = start,
                     size = size,
-                    dateKey = dateKey,
-                    path = path,
-                    tag = tag,
-                    faceId = faceId,
+                    dateKey = dateKey.ifEmpty { null },
+                    path = path.ifEmpty { null },
+                    tag = tag.ifEmpty { null },
+                    faceId = if (faceId > 0) faceId else null,
                     order = order,
-                    idRank = 0
+                    idRank = null
                 )
             )
         }
@@ -74,9 +74,9 @@ class PhotoRepository @Inject constructor(
         val processedResult = when (result) {
             is Result.Success -> {
                 val processedData = result.data.copy(
-                    data = result.data.data.map { photo ->
+                    data = result.data.data?.map { photo ->
                         photo.copy(thumb = getFullImageUrl(photo.thumb))
-                    }
+                    } ?: emptyList()
                 )
                 Result.Success(processedData)
             }
@@ -192,11 +192,16 @@ class PhotoRepository @Inject constructor(
     fun trashPhotos(ids: List<Int>): Flow<Result<Unit>> = flow {
         emit(Result.Loading)
         
-        val result = safeApiCallUnit {
-            apiService.trashPhotos(TrashPhotosRequest(ids = ids.map { it.toString() }))
+        val result = safeApiCall {
+            apiService.trashPhotos(ids)
         }
         
-        emit(result)
+        // 将 Result<Int> 转换为 Result<Unit>
+        emit(when (result) {
+            is Result.Success -> Result.Success(Unit)
+            is Result.Error -> Result.Error(result.exception, result.message)
+            is Result.Loading -> Result.Loading
+        })
     }
 
     /**
@@ -205,11 +210,16 @@ class PhotoRepository @Inject constructor(
     fun restorePhotos(ids: List<Int>): Flow<Result<Unit>> = flow {
         emit(Result.Loading)
         
-        val result = safeApiCallUnit {
-            apiService.restorePhotos(RestorePhotosRequest(ids = ids.map { it.toString() }))
+        val result = safeApiCall {
+            apiService.restorePhotos(ids)
         }
         
-        emit(result)
+        // 将 Result<Int> 转换为 Result<Unit>
+        emit(when (result) {
+            is Result.Success -> Result.Success(Unit)
+            is Result.Error -> Result.Error(result.exception, result.message)
+            is Result.Loading -> Result.Loading
+        })
     }
 
     /**
@@ -218,11 +228,16 @@ class PhotoRepository @Inject constructor(
     fun deletePhotos(ids: List<Int>): Flow<Result<Unit>> = flow {
         emit(Result.Loading)
         
-        val result = safeApiCallUnit {
-            apiService.deletePhotos(DeletePhotosRequest(ids = ids.map { it.toString() }))
+        val result = safeApiCall {
+            apiService.deletePhotos(ids)
         }
         
-        emit(result)
+        // 将 Result<Int> 转换为 Result<Unit>
+        emit(when (result) {
+            is Result.Success -> Result.Success(Unit)
+            is Result.Error -> Result.Error(result.exception, result.message)
+            is Result.Loading -> Result.Loading
+        })
     }
 
     /**

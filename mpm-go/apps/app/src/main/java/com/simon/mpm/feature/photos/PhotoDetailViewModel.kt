@@ -20,8 +20,9 @@ class PhotoDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    // 从导航参数获取照片ID
+    // 从导航参数获取照片ID和来源
     private val photoId: Int = savedStateHandle.get<Int>("photoId") ?: 0
+    val fromTrash: Boolean = savedStateHandle.get<Boolean>("fromTrash") ?: false
 
     // UI状态
     private val _uiState = MutableStateFlow(PhotoDetailUiState())
@@ -78,23 +79,24 @@ class PhotoDetailViewModel @Inject constructor(
      */
     private fun loadPhotoList() {
         viewModelScope.launch {
-            android.util.Log.d("PhotoDetailVM", "Loading photo list for photoId: $photoId")
-            // 加载当前照片所在的照片列表
+            android.util.Log.d("PhotoDetailVM", "Loading photo list for photoId: $photoId, fromTrash: $fromTrash")
+            // 根据来源加载对应的照片列表
             photoRepository.getPhotos(
                 star = false,
                 video = false,
-                trashed = false,
+                trashed = fromTrash,  // 关键：根据fromTrash参数决定加载哪个列表
                 start = 0,
-                size = 1000, // 加载足够多的照片
+                size = 100, // 加载附近的照片用于左右滑动
                 dateKey = "",
                 order = "-id"
             ).collect { result ->
                 when (result) {
                     is Result.Success -> {
-                        _photoList.value = result.data.data
-                        android.util.Log.d("PhotoDetailVM", "Photo list loaded: ${result.data.data.size} photos")
+                        val photoList = result.data.data ?: emptyList()
+                        _photoList.value = photoList
+                        android.util.Log.d("PhotoDetailVM", "Photo list loaded: ${photoList.size} photos (trashed=$fromTrash)")
                         // 找到当前照片的索引
-                        val index = result.data.data.indexOfFirst { it.id == photoId }
+                        val index = photoList.indexOfFirst { it.id == photoId }
                         android.util.Log.d("PhotoDetailVM", "Current photo index: $index")
                         if (index >= 0) {
                             _currentPhotoIndex.value = index
@@ -167,7 +169,8 @@ class PhotoDetailViewModel @Inject constructor(
             photoRepository.trashPhotos(listOf(currentPhoto.id)).collect { result ->
                 when (result) {
                     is Result.Success -> {
-                        _uiState.update { it.copy(photoDeleted = true) }
+                        android.util.Log.d("PhotoDetailVM", "Photo moved to trash, handling navigation")
+                        handlePhotoDeleted()
                     }
                     is Result.Error -> {
                         _uiState.update { it.copy(error = result.message) }
@@ -175,6 +178,93 @@ class PhotoDetailViewModel @Inject constructor(
                     else -> {}
                 }
             }
+        }
+    }
+
+    /**
+     * 恢复照片（从回收站）
+     * 使用trashPhotos接口，该接口会反转照片的trashed状态
+     */
+    fun restorePhoto() {
+        val currentPhoto = _photo.value ?: return
+        
+        viewModelScope.launch {
+            photoRepository.trashPhotos(listOf(currentPhoto.id)).collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        android.util.Log.d("PhotoDetailVM", "Photo restored, handling navigation")
+                        handlePhotoDeleted()
+                    }
+                    is Result.Error -> {
+                        _uiState.update { it.copy(error = result.message) }
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    /**
+     * 永久删除照片（从回收站）
+     */
+    fun permanentlyDelete() {
+        val currentPhoto = _photo.value ?: return
+        
+        viewModelScope.launch {
+            photoRepository.deletePhotos(listOf(currentPhoto.id)).collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        android.util.Log.d("PhotoDetailVM", "Photo permanently deleted, handling navigation")
+                        handlePhotoDeleted()
+                    }
+                    is Result.Error -> {
+                        _uiState.update { it.copy(error = result.message) }
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    /**
+     * 处理照片删除后的逻辑
+     * 1. 从列表中移除被删除的照片
+     * 2. 切换到下一张照片（如果是最后一张则切换到前一张）
+     * 3. 如果没有照片了才退出详情页
+     */
+    private fun handlePhotoDeleted() {
+        val currentIndex = _currentPhotoIndex.value
+        val currentList = _photoList.value.toMutableList()
+        
+        android.util.Log.d("PhotoDetailVM", "handlePhotoDeleted: currentIndex=$currentIndex, listSize=${currentList.size}")
+        
+        // 从列表中移除当前照片
+        if (currentIndex >= 0 && currentIndex < currentList.size) {
+            currentList.removeAt(currentIndex)
+            _photoList.value = currentList
+            
+            android.util.Log.d("PhotoDetailVM", "Photo removed, new listSize=${currentList.size}")
+            
+            // 如果列表为空，标记需要退出
+            if (currentList.isEmpty()) {
+                android.util.Log.d("PhotoDetailVM", "No more photos, marking for exit")
+                _uiState.update { it.copy(photoDeleted = true) }
+                return
+            }
+            
+            // 确定下一张照片的索引
+            val nextIndex = when {
+                currentIndex < currentList.size -> currentIndex // 显示下一张（当前位置）
+                currentIndex > 0 -> currentIndex - 1 // 已经是最后一张，显示前一张
+                else -> 0 // 保险起见
+            }
+            
+            android.util.Log.d("PhotoDetailVM", "Switching to nextIndex=$nextIndex")
+            
+            // 更新索引并加载新照片
+            _currentPhotoIndex.value = nextIndex
+            val nextPhoto = currentList[nextIndex]
+            loadPhotoDetail(nextPhoto.id)
         }
     }
 

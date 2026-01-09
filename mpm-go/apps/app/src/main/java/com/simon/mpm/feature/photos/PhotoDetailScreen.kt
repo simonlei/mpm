@@ -121,6 +121,7 @@ fun PhotoDetailScreen(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
                     ) {
+                        // 旋转功能（所有照片都可用）
                         DropdownMenuItem(
                             text = { Text("向右旋转") },
                             onClick = {
@@ -142,16 +143,43 @@ fun PhotoDetailScreen(
                             }
                         )
                         Divider()
-                        DropdownMenuItem(
-                            text = { Text("移到回收站") },
-                            onClick = {
-                                viewModel.moveToTrash()
-                                showMenu = false
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Default.Delete, null)
-                            }
-                        )
+                        
+                        // 根据来源显示不同的操作
+                        if (viewModel.fromTrash) {
+                            // 回收站照片：显示恢复和永久删除
+                            DropdownMenuItem(
+                                text = { Text("恢复照片") },
+                                onClick = {
+                                    viewModel.restorePhoto()
+                                    showMenu = false
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.RestoreFromTrash, null)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("永久删除") },
+                                onClick = {
+                                    viewModel.permanentlyDelete()
+                                    showMenu = false
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.DeleteForever, null)
+                                }
+                            )
+                        } else {
+                            // 普通照片：显示移到回收站
+                            DropdownMenuItem(
+                                text = { Text("移到回收站") },
+                                onClick = {
+                                    viewModel.moveToTrash()
+                                    showMenu = false
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Delete, null)
+                                }
+                            )
+                        }
                     }
                 }
             )
