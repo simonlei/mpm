@@ -31,6 +31,21 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
+ * 判断照片是否为视频
+ */
+fun Photo.isVideo(): Boolean {
+    return mediaType == "video"
+}
+
+/**
+ * 获取视频URL
+ * 视频地址格式: /cos/video_t/${photo.name}.mp4
+ */
+fun Photo.getVideoUrl(serverUrl: String): String {
+    return "$serverUrl/cos/video_t/${name}.mp4"
+}
+
+/**
  * 照片详情屏幕
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -208,27 +223,47 @@ fun PhotoDetailScreen(
                 ) { page ->
                     val photo = photoList.getOrNull(page)
                     if (photo != null) {
-                        // 照片查看器（支持缩放和拖动）
-                        ZoomableImage(
-                            imageUrl = photo.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",  // 使用原图，移除/thumb参数
-                            contentDescription = photo.name,
-                            rotate = photo.rotate.toFloat(),
-                            modifier = Modifier.fillMaxSize(),
-                            onRotateLeft = { viewModel.rotatePhoto(-90) },
-                            onRotateRight = { viewModel.rotatePhoto(90) }
-                        )
+                        // 根据照片类型显示不同的内容
+                        if (photo.isVideo()) {
+                            // 视频播放器
+                            val serverUrl = photo.thumb?.substringBefore("/cos/") ?: ""
+                            VideoPlayer(
+                                videoUrl = photo.getVideoUrl(serverUrl),
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            // 照片查看器（支持缩放和拖动）
+                            ZoomableImage(
+                                imageUrl = photo.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",
+                                contentDescription = photo.name,
+                                rotate = photo.rotate.toFloat(),
+                                modifier = Modifier.fillMaxSize(),
+                                onRotateLeft = { viewModel.rotatePhoto(-90) },
+                                onRotateRight = { viewModel.rotatePhoto(90) }
+                            )
+                        }
                     }
                 }
             } else {
                 // 如果列表还没加载，显示单张照片
-                ZoomableImage(
-                    imageUrl = displayPhoto.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",
-                    contentDescription = displayPhoto.name,
-                    rotate = displayPhoto.rotate.toFloat(),
-                    modifier = Modifier.fillMaxSize(),
-                    onRotateLeft = { viewModel.rotatePhoto(-90) },
-                    onRotateRight = { viewModel.rotatePhoto(90) }
-                )
+                if (displayPhoto.isVideo()) {
+                    // 视频播放器
+                    val serverUrl = displayPhoto.thumb?.substringBefore("/cos/") ?: ""
+                    VideoPlayer(
+                        videoUrl = displayPhoto.getVideoUrl(serverUrl),
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    // 照片查看器
+                    ZoomableImage(
+                        imageUrl = displayPhoto.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",
+                        contentDescription = displayPhoto.name,
+                        rotate = displayPhoto.rotate.toFloat(),
+                        modifier = Modifier.fillMaxSize(),
+                        onRotateLeft = { viewModel.rotatePhoto(-90) },
+                        onRotateRight = { viewModel.rotatePhoto(90) }
+                    )
+                }
             }
 
             // 信息面板
@@ -442,6 +477,9 @@ fun PhotoInfoPanel(
 
             // 照片信息列表
             InfoRow("文件名", photo.name)
+            photo.mediaType?.let { 
+                InfoRow("类型", if (it == "video") "视频" else "图片")
+            }
             photo.takenDate?.let { InfoRow("拍摄时间", formatDate(it)) }
             InfoRow("尺寸", "${photo.width} × ${photo.height}")
             

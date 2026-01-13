@@ -92,7 +92,10 @@ data class Photo(
     val activityDesc: String?,
     
     @SerializedName("tag")
-    val tag: String?
+    val tag: String?,
+    
+    @SerializedName("media_type")
+    val mediaType: String? = null
 )
 
 /**

@@ -297,6 +297,15 @@ MPM (My Photo Manager) Android应用开发项目，基于现有的后台API和We
    - 回收站页面标题显示总数：`回收站 (总数)`
    - 使用 `PhotoListUiState.totalRows` 和 `totalCount` 获取数据
 
+9. ✅ 实现视频播放功能 (2026-01-13)
+   - 在Photo模型中添加`mediaType`字段
+   - 添加Media3 ExoPlayer依赖（版本1.2.1）
+   - 创建VideoPlayer组件（支持播放/暂停控制）
+   - 在PhotoDetailScreen中根据`mediaType`判断显示视频播放器或图片查看器
+   - 在PhotoInfoPanel中显示媒体类型（视频/图片）
+   - 支持在照片详情页左右滑动切换视频和图片
+   - 视频URL格式：`/cos/video_t/${photo.name}.mp4`
+
 ---
 
 ### ✅ 任务8：实现照片基础编辑功能
