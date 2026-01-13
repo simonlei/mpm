@@ -99,6 +99,8 @@ dependencies {
     // Media3 ExoPlayer
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.ui)
+    implementation(libs.media3.datasource)
+    implementation(libs.media3.database)
     
     // Room
     implementation(libs.room.runtime)
