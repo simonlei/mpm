@@ -36,20 +36,31 @@ class SplashViewModel @Inject constructor(
      */
     private fun checkLoginStatus() {
         viewModelScope.launch {
-            // 验证和修复服务器URL
-            validateAndFixServerUrl()
-            
-            // 显示启动画面至少1秒
-            delay(1000)
-            
-            // 检查是否已登录
-            val isLoggedIn = authRepository.isLoggedIn().first()
-            
-            if (isLoggedIn) {
-                // 已登录，验证认证信息是否有效
-                _uiState.value = SplashUiState.NavigateToHome
-            } else {
-                // 未登录，跳转到登录页
+            try {
+                Log.d(TAG, "Starting login status check...")
+                
+                // 验证和修复服务器URL
+                validateAndFixServerUrl()
+                
+                // 显示启动画面至少1秒
+                delay(1000)
+                
+                // 检查是否已登录
+                val isLoggedIn = authRepository.isLoggedIn().first()
+                Log.d(TAG, "Is logged in: $isLoggedIn")
+                
+                if (isLoggedIn) {
+                    // 已登录，跳转到主页
+                    Log.d(TAG, "User is logged in, navigating to Home")
+                    _uiState.value = SplashUiState.NavigateToHome
+                } else {
+                    // 未登录，跳转到登录页
+                    Log.d(TAG, "User is not logged in, navigating to Login")
+                    _uiState.value = SplashUiState.NavigateToLogin
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking login status", e)
+                // 发生错误时，默认跳转到登录页
                 _uiState.value = SplashUiState.NavigateToLogin
             }
         }
@@ -61,7 +72,7 @@ class SplashViewModel @Inject constructor(
     private suspend fun validateAndFixServerUrl() {
         try {
             val currentUrl = preferencesManager.serverUrl.first()
-            Log.d("SplashViewModel", "Current server URL: $currentUrl")
+            Log.d(TAG, "Current server URL: $currentUrl")
             
             // 验证URL格式
             val isValid = currentUrl.isNotBlank() && 
@@ -71,14 +82,18 @@ class SplashViewModel @Inject constructor(
             if (!isValid) {
                 // URL格式不正确，重置为默认值
                 val defaultUrl = "http://10.0.2.2:8080"
-                Log.w("SplashViewModel", "Invalid URL detected: $currentUrl, resetting to: $defaultUrl")
+                Log.w(TAG, "Invalid URL detected: $currentUrl, resetting to: $defaultUrl")
                 preferencesManager.setServerUrl(defaultUrl)
             }
         } catch (e: Exception) {
-            Log.e("SplashViewModel", "Error validating server URL", e)
+            Log.e(TAG, "Error validating server URL", e)
             // 发生错误时，重置为默认值
             preferencesManager.setServerUrl("http://10.0.2.2:8080")
         }
+    }
+    
+    companion object {
+        private const val TAG = "SplashViewModel"
     }
 }
 
