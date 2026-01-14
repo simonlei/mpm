@@ -2,7 +2,12 @@
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculateCentroid
+import androidx.compose.foundation.gestures.calculateCentroidSize
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -24,6 +29,21 @@ import coil.compose.AsyncImage
 import com.simon.mpm.network.model.Photo
 import java.text.SimpleDateFormat
 import java.util.*
+
+/**
+ * 判断照片是否为视频
+ */
+fun Photo.isVideo(): Boolean {
+    return mediaType == "video"
+}
+
+/**
+ * 获取视频URL
+ * 视频地址格式: /cos/video_t/${photo.name}.mp4
+ */
+fun Photo.getVideoUrl(serverUrl: String): String {
+    return "$serverUrl/cos/video_t/${name}.mp4"
+}
 
 /**
  * 照片详情屏幕
@@ -90,6 +110,11 @@ fun PhotoDetailScreen(
                     }
                 },
                 actions = {
+                    // 编辑按钮
+                    IconButton(onClick = { viewModel.toggleEditDialog() }) {
+                        Icon(Icons.Default.Edit, "编辑")
+                    }
+
                     // 收藏按钮
                     IconButton(onClick = { viewModel.toggleStar() }) {
                         Icon(
@@ -198,21 +223,47 @@ fun PhotoDetailScreen(
                 ) { page ->
                     val photo = photoList.getOrNull(page)
                     if (photo != null) {
-                        // 照片查看器（支持缩放和拖动）
-                        ZoomableImage(
-                            imageUrl = photo.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",  // 使用原图，移除/thumb及 rotate参数
-                            contentDescription = photo.name,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                        // 根据照片类型显示不同的内容
+                        if (photo.isVideo()) {
+                            // 视频播放器
+                            val serverUrl = photo.thumb?.substringBefore("/cos/") ?: ""
+                            VideoPlayer(
+                                videoUrl = photo.getVideoUrl(serverUrl),
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            // 照片查看器（支持缩放和拖动）
+                            ZoomableImage(
+                                imageUrl = photo.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",
+                                contentDescription = photo.name,
+                                rotate = photo.rotate.toFloat(),
+                                modifier = Modifier.fillMaxSize(),
+                                onRotateLeft = { viewModel.rotatePhoto(-90) },
+                                onRotateRight = { viewModel.rotatePhoto(90) }
+                            )
+                        }
                     }
                 }
             } else {
                 // 如果列表还没加载，显示单张照片
-                ZoomableImage(
-                    imageUrl = displayPhoto.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",
-                    contentDescription = displayPhoto.name,
-                    modifier = Modifier.fillMaxSize()
-                )
+                if (displayPhoto.isVideo()) {
+                    // 视频播放器
+                    val serverUrl = displayPhoto.thumb?.substringBefore("/cos/") ?: ""
+                    VideoPlayer(
+                        videoUrl = displayPhoto.getVideoUrl(serverUrl),
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    // 照片查看器
+                    ZoomableImage(
+                        imageUrl = displayPhoto.thumb?.replace(Regex("/thumb\\d*$"), "") ?: "",
+                        contentDescription = displayPhoto.name,
+                        rotate = displayPhoto.rotate.toFloat(),
+                        modifier = Modifier.fillMaxSize(),
+                        onRotateLeft = { viewModel.rotatePhoto(-90) },
+                        onRotateRight = { viewModel.rotatePhoto(90) }
+                    )
+                }
             }
 
             // 信息面板
@@ -221,6 +272,22 @@ fun PhotoDetailScreen(
                     photo = displayPhoto,
                     onDismiss = { viewModel.toggleInfoPanel() },
                     modifier = Modifier.align(Alignment.BottomCenter)
+                )
+            }
+
+            // 编辑对话框
+            if (uiState.showEditDialog) {
+                val activities by viewModel.activities.collectAsState()
+                val allTags by viewModel.allTags.collectAsState()
+                
+                PhotoEditDialog(
+                    photo = displayPhoto,
+                    activities = activities,
+                    allTags = allTags,
+                    onDismiss = { viewModel.toggleEditDialog() },
+                    onSave = { editData ->
+                        viewModel.updatePhotoInfo(editData)
+                    }
                 )
             }
 
@@ -245,16 +312,21 @@ fun PhotoDetailScreen(
 
 /**
  * 可缩放的图片组件
- * 使用双击缩放，避免拦截HorizontalPager的滑动手势
+ * 支持双指缩放和拖动，不拦截HorizontalPager的滑动手势
+ * 点击图片显示旋转按钮
  */
 @Composable
 fun ZoomableImage(
     imageUrl: String,
     contentDescription: String?,
-    modifier: Modifier = Modifier
+    rotate: Float = 0f,
+    modifier: Modifier = Modifier,
+    onRotateLeft: () -> Unit = {},
+    onRotateRight: () -> Unit = {}
 ) {
     var scale by remember { mutableStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
+    var showRotateButtons by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -272,9 +344,97 @@ fun ZoomableImage(
                     scaleX = scale,
                     scaleY = scale,
                     translationX = offset.x,
-                    translationY = offset.y
+                    translationY = offset.y,
+                    rotationZ = rotate
                 )
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        val downTime = System.currentTimeMillis()
+                        val downPosition = down.position
+                        var lastPosition = downPosition
+                        
+                        do {
+                            val event = awaitPointerEvent()
+                            lastPosition = event.changes.first().position
+                            
+                            // 只有在双指或更多手指时才处理缩放
+                            if (event.changes.size >= 2) {
+                                // 消费事件，防止传递给 Pager
+                                event.changes.forEach { it.consume() }
+                                
+                                val zoom = event.calculateZoom()
+                                val pan = event.calculatePan()
+                                
+                                // 更新缩放
+                                scale = (scale * zoom).coerceIn(1f, 5f)
+                                
+                                // 更新偏移
+                                if (scale > 1f) {
+                                    offset += pan
+                                } else {
+                                    offset = Offset.Zero
+                                }
+                            } else if (scale > 1f) {
+                                // 如果已经缩放了，单指拖动也要消费事件
+                                event.changes.forEach { it.consume() }
+                                val pan = event.calculatePan()
+                                offset += pan
+                            }
+                            // 如果是单指且未缩放，不消费事件，让 Pager 处理
+                            
+                        } while (event.changes.any { it.pressed })
+                        
+                        // 检测单击（未缩放状态下）
+                        val upTime = System.currentTimeMillis()
+                        val clickDuration = upTime - downTime
+                        val distance = (lastPosition - downPosition).getDistance()
+                        if (scale == 1f && clickDuration < 300 && distance < 10f) {
+                            showRotateButtons = !showRotateButtons
+                        }
+                    }
+                }
         )
+        
+        // 旋转按钮
+        if (showRotateButtons) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+                // 向左旋转按钮
+                FloatingActionButton(
+                    onClick = {
+                        onRotateLeft()
+                        showRotateButtons = false
+                    },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.RotateLeft,
+                        contentDescription = "向左旋转",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+                
+                // 向右旋转按钮
+                FloatingActionButton(
+                    onClick = {
+                        onRotateRight()
+                        showRotateButtons = false
+                    },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.RotateRight,
+                        contentDescription = "向右旋转",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -317,6 +477,9 @@ fun PhotoInfoPanel(
 
             // 照片信息列表
             InfoRow("文件名", photo.name)
+            photo.mediaType?.let { 
+                InfoRow("类型", if (it == "video") "视频" else "图片")
+            }
             photo.takenDate?.let { InfoRow("拍摄时间", formatDate(it)) }
             InfoRow("尺寸", "${photo.width} × ${photo.height}")
             

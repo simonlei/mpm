@@ -1,20 +1,16 @@
 package com.simon.mpm.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.simon.mpm.network.model.Photo
 import com.simon.mpm.feature.auth.LoginScreen
 import com.simon.mpm.feature.home.HomeScreen
 import com.simon.mpm.feature.photos.PhotoDetailScreen
-import com.simon.mpm.feature.photos.PhotoListScreen
+import com.simon.mpm.feature.photos.TrashScreen
 import com.simon.mpm.feature.splash.SplashScreen
-import com.simon.mpm.feature.trash.TrashScreen
 
 /**
  * 应用导航图
@@ -37,7 +33,7 @@ fun MpmNavGraph(
                     }
                 },
                 onNavigateToHome = {
-                    navController.navigate(Routes.PHOTO_LIST) {
+                    navController.navigate(Routes.HOME) {
                         popUpTo(Routes.SPLASH) { inclusive = true }
                     }
                 }
@@ -48,14 +44,14 @@ fun MpmNavGraph(
         composable(Routes.LOGIN) {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate(Routes.PHOTO_LIST) {
+                    navController.navigate(Routes.HOME) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
                 }
             )
         }
         
-        // 主页
+        // 主页（包含底部导航）
         composable(Routes.HOME) {
             HomeScreen(
                 onLogout = {
@@ -63,8 +59,8 @@ fun MpmNavGraph(
                         popUpTo(Routes.HOME) { inclusive = true }
                     }
                 },
-                onNavigateToPhotos = {
-                    navController.navigate(Routes.PHOTO_LIST)
+                onNavigateToPhotoDetail = { photoId ->
+                    navController.navigate(Routes.photoDetail(photoId))
                 },
                 onNavigateToTrash = {
                     navController.navigate(Routes.trash())
@@ -82,44 +78,15 @@ fun MpmNavGraph(
                 }
             )
         ) { backStackEntry ->
-            // 监听从详情页返回的刷新信号
-            val shouldRefresh = backStackEntry.savedStateHandle
-                .getStateFlow("refresh_trash", false)
-                .collectAsState()
-            
             TrashScreen(
                 onBack = { 
                     // 返回到照片列表时也要刷新
                     navController.previousBackStackEntry?.savedStateHandle?.set("refresh_list", true)
                     navController.popBackStack()
                 },
-                onPhotoClick = { photo ->
-                    navController.navigate(Routes.photoDetail(photo.id, fromTrash = true))
-                },
-                shouldRefresh = shouldRefresh.value
-            )
-        }
-        
-        // 照片列表（主屏幕）
-        composable(Routes.PHOTO_LIST) { backStackEntry ->
-            // 监听从详情页或回收站返回的刷新信号
-            val shouldRefresh = backStackEntry.savedStateHandle
-                .getStateFlow("refresh_list", false)
-                .collectAsState()
-            
-            PhotoListScreen(
-                onPhotoClick = { photo ->
-                    navController.navigate(Routes.photoDetail(photo.id))
-                },
-                onNavigateToTrash = {
-                    navController.navigate(Routes.trash())
-                },
-                onLogout = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.PHOTO_LIST) { inclusive = true }
-                    }
-                },
-                shouldRefresh = shouldRefresh.value
+                onPhotoClick = { photoId ->
+                    navController.navigate(Routes.photoDetail(photoId, fromTrash = true))
+                }
             )
         }
         

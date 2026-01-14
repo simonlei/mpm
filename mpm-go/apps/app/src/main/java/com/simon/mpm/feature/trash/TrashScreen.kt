@@ -58,7 +58,15 @@ fun TrashScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("回收站") },
+                title = { 
+                    Text(
+                        text = if (totalCount > 0) {
+                            "回收站 ($totalCount)"
+                        } else {
+                            "回收站"
+                        }
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "返回")

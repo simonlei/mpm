@@ -38,11 +38,22 @@ class PhotoListViewModel @Inject constructor(
     private val _totalCount = MutableStateFlow(0)
     val totalCount: StateFlow<Int> = _totalCount.asStateFlow()
 
+    // 活动列表
+    private val _activities = MutableStateFlow<List<com.simon.mpm.network.model.Activity>>(emptyList())
+    val activities: StateFlow<List<com.simon.mpm.network.model.Activity>> = _activities.asStateFlow()
+
+    // 标签列表
+    private val _allTags = MutableStateFlow<List<String>>(emptyList())
+    val allTags: StateFlow<List<String>> = _allTags.asStateFlow()
+
     init {
         loadPhotos()
         if (isTrashed) {
             loadTotalCount()
         }
+        // 加载活动和标签列表
+        loadActivities()
+        loadAllTags()
     }
 
     /**
@@ -57,13 +68,15 @@ class PhotoListViewModel @Inject constructor(
             // 如果是刷新，重置分页
             val start = if (refresh) 0 else currentState.currentPage * PAGE_SIZE
             
-            photoRepository.getPhotos(
+    photoRepository.getPhotos(
                 star = currentState.filterStar,
                 video = currentState.filterVideo,
                 trashed = currentState.filterTrashed,
                 start = start,
                 size = PAGE_SIZE,
                 dateKey = currentState.filterDateKey,
+                tag = currentState.filterTag,
+                path = currentState.filterPath,
                 order = currentState.sortOrder
             ).collect { result ->
                 when (result) {
@@ -153,14 +166,18 @@ class PhotoListViewModel @Inject constructor(
         star: Boolean? = null,
         video: Boolean? = null,
         trashed: Boolean? = null,
-        dateKey: String? = null
+        dateKey: String? = null,
+        tag: String? = null,
+        path: String? = null
     ) {
         _uiState.update {
             it.copy(
                 filterStar = star ?: it.filterStar,
                 filterVideo = video ?: it.filterVideo,
                 filterTrashed = trashed ?: it.filterTrashed,
-                filterDateKey = dateKey ?: it.filterDateKey
+                filterDateKey = dateKey ?: it.filterDateKey,
+                filterTag = tag ?: it.filterTag,
+                filterPath = path ?: it.filterPath
             )
         }
         refresh()
@@ -187,6 +204,36 @@ class PhotoListViewModel @Inject constructor(
      */
     fun setSortOrder(order: String) {
         _uiState.update { it.copy(sortOrder = order) }
+        refresh()
+    }
+
+    /**
+     * 应用高级筛选
+     */
+    fun applyAdvancedFilters(dateKey: String, tag: String, path: String) {
+        _uiState.update {
+            it.copy(
+                filterDateKey = dateKey,
+                filterTag = tag,
+                filterPath = path
+            )
+        }
+        refresh()
+    }
+
+    /**
+     * 清除所有筛选条件
+     */
+    fun clearAllFilters() {
+        _uiState.update {
+            it.copy(
+                filterStar = false,
+                filterVideo = false,
+                filterDateKey = "",
+                filterTag = "",
+                filterPath = ""
+            )
+        }
         refresh()
     }
 
@@ -353,6 +400,44 @@ class PhotoListViewModel @Inject constructor(
     }
 
     /**
+     * 加载活动列表
+     */
+    private fun loadActivities() {
+        viewModelScope.launch {
+            photoRepository.getActivities().collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        _activities.value = result.data
+                    }
+                    is Result.Error -> {
+                        android.util.Log.e("PhotoListViewModel", "加载活动列表失败: ${result.message}")
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    /**
+     * 加载标签列表
+     */
+    private fun loadAllTags() {
+        viewModelScope.launch {
+            photoRepository.getAllTags().collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        _allTags.value = result.data
+                    }
+                    is Result.Error -> {
+                        android.util.Log.e("PhotoListViewModel", "加载标签列表失败: ${result.message}")
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    /**
      * 退出登录
      */
     fun logout() {
@@ -382,6 +467,8 @@ data class PhotoListUiState(
     val filterVideo: Boolean = false,
     val filterTrashed: Boolean = false,
     val filterDateKey: String = "",
+    val filterTag: String = "",
+    val filterPath: String = "",
     
     // 排序方式
     val sortOrder: String = "-id",  // 默认按ID降序
@@ -392,4 +479,10 @@ data class PhotoListUiState(
     val emptyTrashProgress: Int = 0,
     val emptyTrashTotal: Int = 0,
     val emptyTrashCompleted: Boolean = false
-)
+) {
+    /**
+     * 是否有活动的筛选条件（除了star和video）
+     */
+    val hasActiveFilters: Boolean
+        get() = filterDateKey.isNotEmpty() || filterTag.isNotEmpty() || filterPath.isNotEmpty()
+}

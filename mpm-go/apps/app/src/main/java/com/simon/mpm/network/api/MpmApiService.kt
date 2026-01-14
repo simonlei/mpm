@@ -4,11 +4,13 @@ import com.simon.mpm.network.model.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.*
+import kotlin.jvm.JvmSuppressWildcards
 
 /**
  * MPM API服务接口
  */
 interface MpmApiService {
+
     
     /**
      * 检查密码（登录）
@@ -71,7 +73,8 @@ interface MpmApiService {
     @POST("/api/uploadPhoto")
     suspend fun uploadPhoto(
         @Part file: MultipartBody.Part,
-        @Part("batchId") batchId: RequestBody
+        @Part("batchId") batchId: RequestBody,
+        @Part("lastModified") lastModified: RequestBody
     ): ApiResponse<Unit>
     
     /**
@@ -162,13 +165,15 @@ interface MpmApiService {
      * 获取所有标签
      */
     @POST("/api/getAllTags")
-    suspend fun getAllTags(@Body request: Map<String, Any> = emptyMap()): ApiResponse<List<String>>
+    suspend fun getAllTags(@Body request: Map<String, @JvmSuppressWildcards Any>): ApiResponse<List<String>>
     
     /**
      * 获取已命名的人脸列表
      */
     @POST("/api/getFacesWithName")
-    suspend fun getFacesWithName(@Body request: Map<String, Any> = emptyMap()): ApiResponse<List<NamedFace>>
+    suspend fun getFacesWithName(@Body request: Map<String, @JvmSuppressWildcards Any>): ApiResponse<List<NamedFace>>
+    
+
     
     /**
      * 获取照片的人脸信息

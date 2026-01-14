@@ -27,11 +27,17 @@ fun SplashScreen(
     
     // 根据状态导航
     LaunchedEffect(uiState) {
-        when (uiState) {
-            is SplashUiState.NavigateToLogin -> onNavigateToLogin()
-            is SplashUiState.NavigateToHome -> onNavigateToHome()
+        when (val state = uiState) {
+            is SplashUiState.NavigateToLogin -> {
+                android.util.Log.d("SplashScreen", "Navigating to Login")
+                onNavigateToLogin()
+            }
+            is SplashUiState.NavigateToHome -> {
+                android.util.Log.d("SplashScreen", "Navigating to Home")
+                onNavigateToHome()
+            }
             is SplashUiState.Loading -> {
-                // 继续显示加载状态
+                android.util.Log.d("SplashScreen", "Loading...")
             }
         }
     }
@@ -40,13 +46,6 @@ fun SplashScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        when (uiState) {
-            is SplashUiState.Loading -> {
-                CircularProgressIndicator()
-            }
-            else -> {
-                // 导航时显示空白
-            }
-        }
+        CircularProgressIndicator()
     }
 }
