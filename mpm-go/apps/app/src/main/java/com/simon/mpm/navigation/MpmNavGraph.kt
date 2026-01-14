@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.simon.mpm.feature.activities.ActivityDetailScreen
 import com.simon.mpm.feature.auth.LoginScreen
 import com.simon.mpm.feature.home.HomeScreen
 import com.simon.mpm.feature.photos.PhotoDetailScreen
@@ -64,6 +65,9 @@ fun MpmNavGraph(
                 },
                 onNavigateToTrash = {
                     navController.navigate(Routes.trash())
+                },
+                onNavigateToActivityDetail = { activityId ->
+                    navController.navigate(Routes.activityDetail(activityId))
                 }
             )
         }
@@ -86,6 +90,25 @@ fun MpmNavGraph(
                 },
                 onPhotoClick = { photoId ->
                     navController.navigate(Routes.photoDetail(photoId, fromTrash = true))
+                }
+            )
+        }
+        
+        // 活动详情
+        composable(
+            route = Routes.ACTIVITY_DETAIL,
+            arguments = listOf(
+                navArgument("activityId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val activityId = backStackEntry.arguments?.getInt("activityId") ?: 0
+            
+            ActivityDetailScreen(
+                activityId = activityId,
+                onBack = {
+                    // 返回时通知活动列表刷新
+                    navController.previousBackStackEntry?.savedStateHandle?.set("refresh_activities", true)
+                    navController.popBackStack()
                 }
             )
         }

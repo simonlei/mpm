@@ -19,7 +19,9 @@ object Routes {
     const val PHOTO_LIST = "photo_list"
     const val PHOTO_DETAIL = "photo_detail/{photoId}?fromTrash={fromTrash}"
     const val TRASH = "trash?trashed={trashed}"
+    const val ACTIVITY_DETAIL = "activity_detail/{activityId}"
     
     fun photoDetail(photoId: Int, fromTrash: Boolean = false) = "photo_detail/$photoId?fromTrash=$fromTrash"
     fun trash() = "trash?trashed=true"
+    fun activityDetail(activityId: Int) = "activity_detail/$activityId"
 }

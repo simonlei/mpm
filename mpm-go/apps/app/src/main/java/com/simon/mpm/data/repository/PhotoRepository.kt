@@ -311,7 +311,7 @@ class PhotoRepository @Inject constructor(
         emit(Result.Loading)
         
         val result = safeApiCall {
-            apiService.getActivities()
+            apiService.getActivities(emptyMap())
         }
         
         emit(result)

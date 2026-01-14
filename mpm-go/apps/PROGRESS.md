@@ -3,7 +3,7 @@
 ## 项目概述
 MPM (My Photo Manager) Android应用开发项目，基于现有的后台API和Web应用，实现功能完整的移动端照片管理应用。
 
-## 已完成任务 (15/30)
+## 已完成任务 (14/30)
 
 ### ✅ 任务1：初始化项目结构和核心配置
 **完成时间**: 2025-12-19
@@ -632,7 +632,73 @@ MPM (My Photo Manager) Android应用开发项目，基于现有的后台API和We
 
 ---
 
-## 待完成任务 (15/30)
+### ✅ 任务15：实现活动列表和详情
+**完成时间**: 2026-01-14
+
+**完成内容**:
+1. ✅ 创建ActivityRepository
+   - 实现getActivities方法（获取活动列表）
+   - 实现createActivity方法（创建活动）
+   - 实现updateActivity方法（更新活动）
+   - 实现deleteActivity方法（删除活动）
+
+2. ✅ 创建ActivitiesViewModel
+   - 管理活动列表状态
+   - **在init块中自动加载活动列表**
+   - 实现活动列表加载
+   - 实现活动删除功能
+   - 错误处理和状态管理
+
+3. ✅ 更新ActivitiesScreen
+   - 使用LazyColumn展示活动列表
+   - **页面打开时自动从后端拉取活动数据**
+   - 显示活动名称、描述、日期、位置、照片数量
+   - 添加FloatingActionButton创建活动
+   - 实现活动删除确认对话框
+   - 空状态提示（如果后端没有活动数据）
+   - 加载状态指示器
+   - 点击活动跳转到详情页
+
+4. ✅ 创建ActivityDetailScreen
+   - 实现活动创建/编辑表单
+   - 输入活动名称（必填）
+   - 输入描述、开始日期、结束日期
+   - 输入地理位置（纬度、经度）
+   - 表单验证
+   - 保存按钮和返回按钮
+
+5. ✅ 创建ActivityDetailViewModel
+   - 管理活动详情状态
+   - 实现活动数据加载
+   - 实现表单字段更新
+   - 实现活动保存（创建/更新）
+   - 表单验证逻辑
+
+6. ✅ 更新导航系统
+   - 在Routes中添加ACTIVITY_DETAIL路由
+   - 在MpmNavGraph中添加活动详情页面配置
+   - 在HomeScreen中添加活动详情导航参数
+   - 支持从活动列表跳转到详情页
+   - 支持创建新活动（activityId=0）
+
+**技术要点**:
+- 使用Hilt依赖注入管理Repository和ViewModel
+- 使用StateFlow管理UI状态
+- Material Design 3组件（Card、FloatingActionButton、AlertDialog）
+- 表单验证和错误提示
+- 导航参数传递和状态刷新
+- 支持创建和编辑两种模式
+
+**用户体验优化**:
+- 活动列表显示照片数量
+- 删除前弹出确认对话框
+- 空状态友好提示
+- 加载状态指示器
+- 保存成功后自动返回并刷新列表
+
+---
+
+## 待完成任务 (14/30)
 
 ### 🔄 第二阶段：用户认证模块 (P0 - MVP核心)
 已完成所有任务 ✅
@@ -654,7 +720,7 @@ MPM (My Photo Manager) Android应用开发项目，基于现有的后台API和We
 - [ ] 任务14：实现后台上传和通知
 
 ### 🔄 第八阶段：活动管理 (P1 - 核心功能)
-- [ ] 任务15：实现活动列表和详情
+- [x] 任务15：实现活动列表和详情 ✅
 - [ ] 任务16：实现活动创建和编辑
 
 ### 🔄 第九阶段：相册视图 (P1 - 核心功能)
@@ -788,9 +854,9 @@ apps/
 ## 项目统计
 
 - **总任务数**: 30
-- **已完成**: 13 (43%)
+- **已完成**: 14 (47%)
 - **进行中**: 0
-- **待开始**: 17 (57%)
+- **待开始**: 16 (53%)
 - **预计完成时间**: 根据开发进度持续更新
 
 ---
@@ -854,6 +920,64 @@ apps/
 
 ## 🔧 Bug修复记录
 
+### 2026-01-14: 修复Retrofit接口参数类型问题
+
+**问题描述**:
+- 加载活动列表时报错：`Parameter type must not include a type variable or wildcard: java.util.Map<java.lang.String, ?>`
+- 原因是 `MpmApiService.getActivities()` 方法的参数类型 `Map<String, Any>` 被 Kotlin 编译器推断为 `Map<String, ?>`（通配符类型）
+- Retrofit 不支持通配符类型的参数
+
+**修复方案**:
+- 在 `getActivities()` 方法的参数上添加 `@JvmSuppressWildcards` 注解
+- 修改为：`@Body request: Map<String, @JvmSuppressWildcards Any>`
+- 这个注解告诉 Kotlin 编译器不要将 `Any` 类型转换为通配符 `?`
+- 参考了同文件中 `getAllTags()` 和 `getFacesWithName()` 方法的实现
+
+**影响范围**:
+- ✅ 活动列表现在可以正常加载
+- ✅ 照片编辑页面的活动下拉列表可以正常工作
+- ✅ 照片列表的活动筛选功能可以正常工作
+
+**相关文件**:
+- `MpmApiService.kt` - 添加 `@JvmSuppressWildcards` 注解
+
+**技术要点**:
+- Kotlin 的泛型类型在编译为 Java 字节码时可能会被转换为通配符类型
+- `@JvmSuppressWildcards` 注解可以抑制这种转换
+- Retrofit 要求参数类型必须是具体类型，不能是通配符类型
+- 对于 `Map<String, Any>` 类型的参数，必须使用 `@JvmSuppressWildcards` 注解
+
+---
+
+### 2026-01-14: 修复活动创建成功后报错"data is null"问题
+
+**问题描述**:
+- 创建活动成功后，前端报错"data is null"
+- 原因是后端创建活动成功后返回的`ApiResponse<Activity>`中`data`字段为`null`
+- `ApiResponse.getDataOrThrow()`方法会在`data`为`null`时抛出异常
+
+**修复方案**:
+- 修改`ActivityRepository.createActivity()`方法，返回类型从`Flow<Result<Activity>>`改为`Flow<Result<Unit>>`
+- 修改`ActivityRepository.updateActivity()`方法，返回类型从`Flow<Result<Activity>>`改为`Flow<Result<Unit>>`
+- 不再使用`safeApiCall`，而是直接调用API并检查`response.isSuccess()`
+- 创建/更新成功后返回`Result.Success(Unit)`，不依赖后端返回的`data`字段
+- 添加`NetworkErrorHandler`的import以处理异常
+
+**影响范围**:
+- ✅ 活动创建功能现在可以正常工作
+- ✅ 活动更新功能也得到修复
+- ✅ 创建/更新成功后会自动返回并刷新活动列表
+
+**相关文件**:
+- `ActivityRepository.kt` - 修改创建和更新方法的返回类型和实现逻辑
+
+**技术要点**:
+- 后端某些API在成功时不返回data字段，只返回code=0表示成功
+- 前端需要适配这种情况，不能强制要求data字段存在
+- 使用`Result.Success(Unit)`表示操作成功但无返回数据
+
+---
+
 ### 2026-01-14: 修复HTTPS视频播放SSL证书验证失败问题
 
 **问题描述**:
@@ -905,4 +1029,4 @@ apps/
 
 ---
 
-*最后更新时间: 2026-01-14 14:15*
+*最后更新时间: 2026-01-14 15:45*

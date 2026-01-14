@@ -81,7 +81,7 @@ interface MpmApiService {
      * 获取活动列表
      */
     @POST("/api/getActivities")
-    suspend fun getActivities(@Body request: Map<String, Any> = emptyMap()): ApiResponse<List<Activity>>
+    suspend fun getActivities(@Body request: Map<String, @JvmSuppressWildcards Any>): ApiResponse<List<Activity>>
     
     /**
      * 创建或更新活动

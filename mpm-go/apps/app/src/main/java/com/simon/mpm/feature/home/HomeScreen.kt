@@ -30,6 +30,7 @@ fun HomeScreen(
     onLogout: () -> Unit,
     onNavigateToPhotoDetail: (Int) -> Unit,
     onNavigateToTrash: () -> Unit,
+    onNavigateToActivityDetail: (Int) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
@@ -50,6 +51,7 @@ fun HomeScreen(
             onLogout = onLogout,
             onNavigateToPhotoDetail = onNavigateToPhotoDetail,
             onNavigateToTrash = onNavigateToTrash,
+            onNavigateToActivityDetail = onNavigateToActivityDetail,
             onNavigateToSettings = {
                 navController.navigate(Routes.SETTINGS) {
                     launchSingleTop = true
@@ -108,6 +110,7 @@ private fun HomeNavGraph(
     onLogout: () -> Unit,
     onNavigateToPhotoDetail: (Int) -> Unit,
     onNavigateToTrash: () -> Unit,
+    onNavigateToActivityDetail: (Int) -> Unit,
     onNavigateToSettings: () -> Unit,
     homeViewModel: HomeViewModel
 ) {
@@ -133,7 +136,11 @@ private fun HomeNavGraph(
         
         // 活动页面
         composable(Routes.ACTIVITIES) {
-            ActivitiesScreen()
+            ActivitiesScreen(
+                onActivityClick = { activityId ->
+                    onNavigateToActivityDetail(activityId)
+                }
+            )
         }
         
         // 相册页面
