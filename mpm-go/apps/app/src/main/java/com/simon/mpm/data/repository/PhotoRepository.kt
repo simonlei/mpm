@@ -56,6 +56,8 @@ class PhotoRepository @Inject constructor(
     ): Flow<Result<PicsResponse>> = flow {
         emit(Result.Loading)
         
+        Log.d(TAG, "getPhotos: star=$star, video=$video, trashed=$trashed, dateKey=$dateKey, tag=$tag, path=$path, order=$order")
+        
         val result = safeApiCall {
             apiService.getPics(
                 GetPicsRequest(
