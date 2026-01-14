@@ -1,5 +1,6 @@
 package com.simon.mpm.feature.activities
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavBackStackEntry
 import com.simon.mpm.network.model.Activity
 
 /**
@@ -28,6 +30,15 @@ fun ActivitiesScreen(
     onActivityClick: (Int) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    
+    Log.d(TAG, "[ActivitiesScreen] Composable 重组, activities.size=${uiState.activities.size}, isLoading=${uiState.isLoading}")
+    
+    // 页面显示时自动加载列表
+    LaunchedEffect(Unit) {
+        Log.d(TAG, "[ActivitiesScreen] LaunchedEffect(Unit) 触发")
+        viewModel.loadActivities()
+        Log.d(TAG, "[ActivitiesScreen] LaunchedEffect(Unit) viewModel.loadActivities() 已调用")
+    }
     
     // 显示错误消息
     uiState.error?.let { error ->
@@ -241,8 +252,10 @@ private fun ActivityItem(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        Log.d(TAG, "[ActivityItem] 用户确认删除活动: ${activity.name} (ID: ${activity.id})")
                         showDeleteDialog = false
                         onDelete()
+                        Log.d(TAG, "[ActivityItem] onDelete() 已调用")
                     }
                 ) {
                     Text("删除", color = MaterialTheme.colorScheme.error)
@@ -256,3 +269,5 @@ private fun ActivityItem(
         )
     }
 }
+
+private const val TAG = "ActivitiesScreen"

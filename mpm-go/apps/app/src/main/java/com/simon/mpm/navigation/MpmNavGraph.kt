@@ -93,7 +93,7 @@ fun MpmNavGraph(
                 }
             )
         }
-        
+
         // 活动详情
         composable(
             route = Routes.ACTIVITY_DETAIL,
@@ -106,13 +106,11 @@ fun MpmNavGraph(
             ActivityDetailScreen(
                 activityId = activityId,
                 onBack = {
-                    // 返回时通知活动列表刷新
-                    navController.previousBackStackEntry?.savedStateHandle?.set("refresh_activities", true)
                     navController.popBackStack()
                 }
             )
         }
-        
+
         // 照片详情
         composable(
             route = Routes.PHOTO_DETAIL,
