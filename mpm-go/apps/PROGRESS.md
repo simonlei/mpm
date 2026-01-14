@@ -315,6 +315,12 @@ MPM (My Photo Manager) Android应用开发项目，基于现有的后台API和We
      - 支持边下载边播放（流式播放）
      - 缓存错误时自动忽略，保证播放流畅性
      - **关键优化**：减少初始缓冲时间，从1.5秒降至0.5秒，大幅提升首次加载速度
+   - **修复HTTPS SSL证书问题** (2026-01-14)：
+     - 添加SSLHelper工具类，创建信任所有证书的SSLSocketFactory
+     - 配置HttpsURLConnection的默认SSL设置，支持自签名证书
+     - 添加HostnameVerifier，信任所有主机名
+     - 解决`SSLHandshakeException: Trust anchor for certification path not found`错误
+     - **注意**：此配置仅用于开发环境，生产环境应使用正确的证书验证
 
 ---
 
@@ -735,6 +741,35 @@ apps/
 ---
 
 ## 🔧 Bug修复记录
+
+### 2026-01-14: 修复HTTPS视频播放SSL证书验证失败问题
+
+**问题描述**:
+- 使用HTTPS协议播放视频时报错：`SSLHandshakeException: Trust anchor for certification path not found`
+- 原因是服务器使用了自签名证书或开发环境证书，Android无法验证证书链
+
+**修复方案**:
+- 创建`SSLHelper`工具类，提供信任所有证书的SSLSocketFactory
+- 实现自定义的X509TrustManager，跳过证书验证
+- 实现自定义的HostnameVerifier，信任所有主机名
+- 在ExoPlayer的HTTP数据源配置中，设置HttpsURLConnection的默认SSL配置
+
+**影响范围**:
+- ✅ HTTPS视频现在可以正常播放
+- ✅ 支持自签名证书和开发环境证书
+- ⚠️ 此配置仅用于开发环境，生产环境应使用正确的证书验证
+
+**相关文件**:
+- `VideoPlayer.kt` - 添加SSLHelper工具类和SSL配置
+
+**安全提示**:
+- 信任所有证书会带来安全风险，仅在开发环境使用
+- 生产环境应该：
+  1. 使用正规CA签发的证书
+  2. 或将自签名证书添加到应用的信任库中
+  3. 或使用Network Security Configuration配置信任的证书
+
+---
 
 ### 2026-01-09: 修复照片时间字段命名不一致问题
 

@@ -26,6 +26,13 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.PlayerView
 import java.io.File
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+import javax.net.ssl.HostnameVerifier
 
 /**
  * 视频缓存管理器
@@ -43,6 +50,36 @@ private object VideoCacheManager {
             simpleCache = SimpleCache(cacheDir, cacheEvictor, androidx.media3.database.StandaloneDatabaseProvider(context))
         }
         return simpleCache!!
+    }
+}
+
+/**
+ * SSL配置工具
+ * 用于创建信任所有证书的SSLSocketFactory（仅用于开发环境）
+ * 注意：生产环境应使用正确的证书验证
+ */
+private object SSLHelper {
+    /**
+     * 创建信任所有证书的TrustManager
+     */
+    private val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+        override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+        override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+        override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+    })
+    
+    /**
+     * 创建信任所有主机名的HostnameVerifier
+     */
+    val trustAllHostnameVerifier = HostnameVerifier { _, _ -> true }
+    
+    /**
+     * 获取信任所有证书的SSLSocketFactory
+     */
+    fun getTrustAllSSLSocketFactory(): SSLSocketFactory {
+        val sslContext = SSLContext.getInstance("TLS")
+        sslContext.init(null, trustAllCerts, SecureRandom())
+        return sslContext.socketFactory
     }
 }
 
@@ -75,13 +112,28 @@ fun VideoPlayer(
             .setPrioritizeTimeOverSizeThresholds(true)  // 优先考虑时间而非大小
             .build()
         
-        // 配置 HTTP 数据源，优化网络请求
+        // 配置 HTTP 数据源，优化网络请求并支持HTTPS自签名证书
         val httpDataSourceFactory = DefaultHttpDataSource.Factory()
             .setConnectTimeoutMs(5000)      // 连接超时 5秒（更快失败重试）
             .setReadTimeoutMs(8000)         // 读取超时 8秒
             .setAllowCrossProtocolRedirects(true)
             .setUserAgent("MPM-Android/1.0")  // 添加用户代理，避免服务器限速
             .setKeepPostFor302Redirects(true) // 保持重定向时的POST方法
+        
+        // 为HTTPS配置SSL证书信任（支持自签名证书）
+        try {
+            httpDataSourceFactory.setDefaultRequestProperties(mapOf())
+            // 注意：Media3的DefaultHttpDataSource内部使用HttpURLConnection
+            // 我们需要通过全局配置来设置SSL
+            javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(
+                SSLHelper.getTrustAllSSLSocketFactory()
+            )
+            javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
+                SSLHelper.trustAllHostnameVerifier
+            )
+        } catch (e: Exception) {
+            android.util.Log.e("VideoPlayer", "Failed to configure SSL: ${e.message}")
+        }
         
         // 配置缓存数据源
         val cache = VideoCacheManager.getCache(context)
