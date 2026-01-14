@@ -7,11 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func getActivitiesApi(c *gin.Context) {
-	var as []model.TActivity
+type ActivityWithCount struct {
+	model.TActivity
+	PhotoCount int64 `json:"photo_count"`
+}
 
-	db().Find(&as)
-	c.JSON(http.StatusOK, Response{0, as})
+func getActivitiesApi(c *gin.Context) {
+	var result []ActivityWithCount
+
+	// 使用 LEFT JOIN 和 GROUP BY 一次性查询所有活动及其照片数量
+	db().Table("t_activity").
+		Select("t_activity.*, COALESCE(COUNT(t_photos.id), 0) as photo_count").
+		Joins("LEFT JOIN t_photos ON t_activity.id = t_photos.activity").
+		Group("t_activity.id").
+		Scan(&result)
+
+	c.JSON(http.StatusOK, Response{0, result})
 }
 
 type ActivityParam struct {
