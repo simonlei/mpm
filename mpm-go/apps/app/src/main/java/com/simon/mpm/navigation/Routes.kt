@@ -12,6 +12,7 @@ object Routes {
     const val PHOTOS = "photos"
     const val ACTIVITIES = "activities"
     const val ALBUMS = "albums"
+    const val UPLOAD = "upload"
     const val SETTINGS = "settings"
     
     // 详情页路由

@@ -15,6 +15,7 @@ import com.simon.mpm.feature.activities.ActivitiesScreen
 import com.simon.mpm.feature.albums.AlbumsScreen
 import com.simon.mpm.feature.photos.PhotoListScreen
 import com.simon.mpm.feature.settings.SettingsScreen
+import com.simon.mpm.feature.upload.UploadScreen
 import com.simon.mpm.navigation.BottomNavItem
 import com.simon.mpm.navigation.Routes
 
@@ -117,6 +118,11 @@ private fun HomeNavGraph(
         // 相册页面
         composable(Routes.ALBUMS) {
             AlbumsScreen()
+        }
+        
+        // 上传页面
+        composable(Routes.UPLOAD) {
+            UploadScreen()
         }
         
         // 设置页面

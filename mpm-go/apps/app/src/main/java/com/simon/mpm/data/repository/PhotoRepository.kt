@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -335,5 +337,64 @@ class PhotoRepository @Inject constructor(
         }
         
         emit(result)
+    }
+
+    /**
+     * 上传照片
+     * @param uri 照片URI
+     * @param fileName 文件名
+     * @param lastModified 最后修改时间（毫秒时间戳）
+     * @param batchId 批次ID
+     */
+    suspend fun uploadPhoto(
+        uri: android.net.Uri,
+        fileName: String,
+        lastModified: Long,
+        batchId: String,
+        context: android.content.Context
+    ): Result<Unit> {
+        return try {
+            Log.d(TAG, "uploadPhoto: 开始上传 $fileName")
+            
+            // 读取文件内容
+            val inputStream = context.contentResolver.openInputStream(uri)
+                ?: return Result.Error(Exception("无法打开文件"), "无法打开文件")
+            
+            val bytes = inputStream.readBytes()
+            inputStream.close()
+            
+            // 创建RequestBody
+            val requestBody = bytes.toRequestBody(
+                "image/*".toMediaTypeOrNull()
+            )
+            
+            // 创建MultipartBody.Part
+            val filePart = okhttp3.MultipartBody.Part.createFormData(
+                "file",
+                fileName,
+                requestBody
+            )
+            
+            // 创建batchId的RequestBody
+            val batchIdBody = batchId.toRequestBody(
+                "text/plain".toMediaTypeOrNull()
+            )
+            
+            // 创建lastModified的RequestBody
+            val lastModifiedBody = lastModified.toString().toRequestBody(
+                "text/plain".toMediaTypeOrNull()
+            )
+            
+            // 调用API
+            val result = safeApiCallUnit {
+                apiService.uploadPhoto(filePart, batchIdBody, lastModifiedBody)
+            }
+            
+            Log.d(TAG, "uploadPhoto: 上传完成 $fileName - ${result.javaClass.simpleName}")
+            result
+        } catch (e: Exception) {
+            Log.e(TAG, "uploadPhoto: 上传失败 $fileName", e)
+            Result.Error(e, "上传失败: ${e.message}")
+        }
     }
 }

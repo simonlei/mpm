@@ -73,7 +73,8 @@ interface MpmApiService {
     @POST("/api/uploadPhoto")
     suspend fun uploadPhoto(
         @Part file: MultipartBody.Part,
-        @Part("batchId") batchId: RequestBody
+        @Part("batchId") batchId: RequestBody,
+        @Part("lastModified") lastModified: RequestBody
     ): ApiResponse<Unit>
     
     /**
