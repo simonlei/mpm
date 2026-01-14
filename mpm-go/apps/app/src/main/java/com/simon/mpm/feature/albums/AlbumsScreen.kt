@@ -10,25 +10,36 @@ import androidx.compose.ui.unit.dp
 /**
  * 相册页面（占位）
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlbumsScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("相册") }
+            )
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "相册视图",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Text(
-                text = "功能开发中...",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "相册视图",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Text(
+                    text = "功能开发中...",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

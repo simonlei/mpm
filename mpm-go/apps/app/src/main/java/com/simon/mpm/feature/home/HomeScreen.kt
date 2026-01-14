@@ -1,9 +1,12 @@
 ﻿package com.simon.mpm.feature.home
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -26,21 +29,33 @@ import com.simon.mpm.navigation.Routes
 fun HomeScreen(
     onLogout: () -> Unit,
     onNavigateToPhotoDetail: (Int) -> Unit,
-    onNavigateToTrash: () -> Unit
+    onNavigateToTrash: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
     
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController = navController)
+            // 只在非设置页面显示底部导航栏
+            if (currentRoute != Routes.SETTINGS) {
+                BottomNavigationBar(navController = navController)
+            }
         }
     ) { paddingValues ->
         HomeNavGraph(
             navController = navController,
-            modifier = Modifier.padding(paddingValues),
+            navPaddingValues = paddingValues,
             onLogout = onLogout,
             onNavigateToPhotoDetail = onNavigateToPhotoDetail,
-            onNavigateToTrash = onNavigateToTrash
+            onNavigateToTrash = onNavigateToTrash,
+            onNavigateToSettings = {
+                navController.navigate(Routes.SETTINGS) {
+                    launchSingleTop = true
+                }
+            },
+            homeViewModel = viewModel
         )
     }
 }
@@ -89,15 +104,17 @@ private fun BottomNavigationBar(
 @Composable
 private fun HomeNavGraph(
     navController: NavHostController,
-    modifier: Modifier = Modifier,
+    navPaddingValues: PaddingValues,
     onLogout: () -> Unit,
     onNavigateToPhotoDetail: (Int) -> Unit,
-    onNavigateToTrash: () -> Unit
+    onNavigateToTrash: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    homeViewModel: HomeViewModel
 ) {
     NavHost(
         navController = navController,
         startDestination = Routes.PHOTOS,
-        modifier = modifier
+        modifier = Modifier.padding(navPaddingValues)
     ) {
         // 照片页面
         composable(Routes.PHOTOS) {
@@ -106,7 +123,11 @@ private fun HomeNavGraph(
                     onNavigateToPhotoDetail(photo.id)
                 },
                 onNavigateToTrash = onNavigateToTrash,
-                onLogout = onLogout
+                onNavigateToSettings = onNavigateToSettings,
+                onLogout = {
+                    homeViewModel.logout()
+                    onLogout()
+                }
             )
         }
         

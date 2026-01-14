@@ -21,6 +21,7 @@ import com.simon.mpm.network.model.Photo
 fun PhotoListScreen(
     onPhotoClick: (Photo) -> Unit,
     onNavigateToTrash: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
     onLogout: () -> Unit = {},
     viewModel: PhotoListViewModel = hiltViewModel()
 ) {
@@ -234,10 +235,25 @@ fun PhotoListScreen(
                             Divider()
                             
                             DropdownMenuItem(
+                                text = { Text("设置") },
+                                onClick = {
+                                    showMenu = false
+                                    onNavigateToSettings()
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                            
+                            Divider()
+                            
+                            DropdownMenuItem(
                                 text = { Text("退出登录") },
                                 onClick = {
                                     showMenu = false
-                                    viewModel.logout()
                                     onLogout()
                                 },
                                 leadingIcon = {

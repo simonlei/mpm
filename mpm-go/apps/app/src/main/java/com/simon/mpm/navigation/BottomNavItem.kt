@@ -36,13 +36,7 @@ sealed class BottomNavItem(
         icon = Icons.Default.CloudUpload
     )
     
-    object Settings : BottomNavItem(
-        route = Routes.SETTINGS,
-        title = "设置",
-        icon = Icons.Default.Settings
-    )
-    
     companion object {
-        val items = listOf(Photos, Activities, Albums, Upload, Settings)
+        val items = listOf(Photos, Activities, Albums, Upload)
     }
 }
