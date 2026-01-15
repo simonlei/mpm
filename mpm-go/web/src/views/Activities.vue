@@ -17,11 +17,11 @@
         @page-change="loadActivities"
       >
         <template #startDate="{ row }">
-          {{ formatDate(row.startDate) }}
+          {{ formatDate(row.start_date) }}
         </template>
         
         <template #endDate="{ row }">
-          {{ formatDate(row.endDate) }}
+          {{ formatDate(row.end_date) }}
         </template>
         
         <template #location="{ row }">
@@ -80,9 +80,9 @@
           />
         </t-form-item>
         
-        <t-form-item label="开始日期" name="startDate">
+        <t-form-item label="开始日期" name="start_date">
           <t-date-picker
-            v-model="formData.startDate"
+            v-model="formData.start_date"
             enable-time-picker
             format="YYYY-MM-DD HH:mm:ss"
             value-type="YYYY-MM-DD HH:mm:ss"
@@ -91,9 +91,9 @@
           />
         </t-form-item>
         
-        <t-form-item label="结束日期" name="endDate">
+        <t-form-item label="结束日期" name="end_date">
           <t-date-picker
-            v-model="formData.endDate"
+            v-model="formData.end_date"
             enable-time-picker
             format="YYYY-MM-DD HH:mm:ss"
             value-type="YYYY-MM-DD HH:mm:ss"
@@ -161,16 +161,16 @@ const formRef = ref()
 const formData = reactive({
   name: '',
   description: '',
-  startDate: '',
-  endDate: '',
+  start_date: '',
+  end_date: '',
   latitude: 0,
   longitude: 0
 })
 
 const rules = {
   name: [{ required: true, message: '请输入活动名称' }],
-  startDate: [{ required: true, message: '请选择开始日期' }],
-  endDate: [{ required: true, message: '请选择结束日期' }]
+  start_date: [{ required: true, message: '请选择开始日期' }],
+  end_date: [{ required: true, message: '请选择结束日期' }]
 }
 
 const loadActivities = async () => {
@@ -193,8 +193,8 @@ const createActivity = () => {
   Object.assign(formData, {
     name: '',
     description: '',
-    startDate: '',
-    endDate: '',
+    start_date: '',
+    end_date: '',
     latitude: 0,
     longitude: 0
   })
@@ -206,8 +206,8 @@ const editActivity = (activity: Activity) => {
   Object.assign(formData, {
     name: activity.name,
     description: activity.description,
-    startDate: activity.startDate,
-    endDate: activity.endDate,
+    start_date: activity.start_date,
+    end_date: activity.end_date,
     latitude: activity.latitude,
     longitude: activity.longitude
   })
@@ -224,8 +224,8 @@ const saveActivity = async () => {
       id: editingActivity.value?.id || 0,
       name: formData.name,
       description: formData.description,
-      startDate: formData.startDate,
-      endDate: formData.endDate,
+      start_date: formData.start_date,
+      end_date: formData.end_date,
       latitude: formData.latitude,
       longitude: formData.longitude
     }

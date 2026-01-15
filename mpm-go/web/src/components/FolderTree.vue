@@ -81,7 +81,7 @@ const loadRootNodes = async () => {
     const res = await getFoldersDataApi({
       trashed: false,
       star: props.star,
-      parentId: -1
+      parent_id: -1
     })
     
     if (res.code === 0) {
@@ -119,7 +119,7 @@ const loadChildren = async (node: any): Promise<TreeNode[]> => {
     const res = await getFoldersDataApi({
       trashed: false,
       star: props.star,
-      parentId: nodeId
+      parent_id: nodeId
     })
     
     if (res.code === 0) {

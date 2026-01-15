@@ -17,7 +17,7 @@ object Routes {
     
     // 详情页路由
     const val PHOTO_LIST = "photo_list"
-    const val PHOTO_DETAIL = "photo_detail/{photoId}?fromTrash={fromTrash}"
+    const val PHOTO_DETAIL = "photo_detail/{photo_id}?fromTrash={fromTrash}"
     const val TRASH = "trash?trashed={trashed}"
     const val ACTIVITY_DETAIL = "activity_detail/{activityId}"
     

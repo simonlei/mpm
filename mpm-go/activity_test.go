@@ -17,7 +17,7 @@ import (
 
 func TestCreateOrUpdateActivity(t *testing.T) {
 	// 设置请求体
-	c, w := createGinTest(`{"activity":{"startDate":"2023-10-16 16:54:32","endDate":"2023-10-16 16:54:32","latitude":null,"longitude":null,"fromPhoto":1253,"name":"aaaa","description":"bbbbbb"},"fromPhoto":1253}`)
+	c, w := createGinTest(`{"activity":{"start_date":"2023-10-16 16:54:32","end_date":"2023-10-16 16:54:32","latitude":null,"longitude":null,"fromPhoto":1253,"name":"aaaa","description":"bbbbbb"},"fromPhoto":1253}`)
 	// 调用待测函数
 	createOrUpdateActivity(c)
 	// 检查响应状态码

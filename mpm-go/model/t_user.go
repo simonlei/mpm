@@ -6,8 +6,8 @@ type TUser struct {
 	Name      string `gorm:"column:name" json:"name"`
 	Salt      string `gorm:"column:salt" json:"salt"`
 	Passwd    string `gorm:"column:passwd" json:"passwd"`
-	FaceId    int64  `gorm:"column:faceId" json:"faceId"`
-	IsAdmin   *bool  `gorm:"column:isAdmin" json:"isAdmin"`
+	FaceId    int64  `gorm:"column:face_id" json:"face_id"`
+	IsAdmin   *bool  `gorm:"column:is_admin" json:"is_admin"`
 	Signature string `gorm:"-" json:"signature"`
 }
 

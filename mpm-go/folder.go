@@ -18,7 +18,7 @@ type FoldersResp struct {
 	Id       int    `json:"id"`
 	Path     string `json:"path"`
 	Title    string `json:"title"`
-	ParentId int    `json:"parentid"`
+	ParentId int    `json:"parent_id"`
 }
 
 func getFoldersData(c *gin.Context) {
@@ -28,21 +28,21 @@ func getFoldersData(c *gin.Context) {
 		l.Info("Can't bind request:", err)
 		return
 	}
-	sql := `select f.id, f.path, concat(f.name,'(',count(distinct p.id),')') title, f.parentId parent_id
+	sql := `select f.id, f.path, concat(f.name,'(',count(distinct p.id),')') title, f.parent_id parent_id
 	               from t_files f
 	               left join t_files fp on fp.path like concat(f.path, '%%')
-	               left join t_photos p  on fp.photoId=p.id
-	               where f.isFolder=true and %s
+	               left join t_photos p  on fp.photo_id=p.id
+	               where f.is_folder=true and %s
 	               and p.trashed=? %s
 	               group by f.id
 	               order by `
 	var parentIdCnd string
 	if req.ParentId <= 0 {
 		sql += "f.id"
-		parentIdCnd = " f.parentId=-1"
+		parentIdCnd = " f.parent_id=-1"
 	} else {
 		sql += "f.name"
-		parentIdCnd = fmt.Sprintf(" f.parentId=%d", req.ParentId)
+		parentIdCnd = fmt.Sprintf(" f.parent_id=%d", req.ParentId)
 	}
 	starCnd := ""
 	if req.Star {
@@ -66,7 +66,7 @@ func switchTrashFolder(c *gin.Context) {
 	c.BindJSON(&req)
 	affected := db().Exec(`
 		update t_photos
-		inner join t_files on t_photos.id=t_files.photoId
+		inner join t_files on t_photos.id=t_files.photo_id
 		SET trashed = ?
 		where t_files.path like ? and trashed != ?
 	`, req.To, req.Path+"%", req.To).RowsAffected
@@ -75,7 +75,7 @@ func switchTrashFolder(c *gin.Context) {
 
 type UpdateFolderDateSchema struct {
 	Path   string `json:"path"`
-	ToDate string `json:"toDate"`
+	ToDate string `json:"to_date"`
 }
 
 func updateFolderDate(c *gin.Context) {
@@ -83,7 +83,7 @@ func updateFolderDate(c *gin.Context) {
 	c.BindJSON(&req)
 	affected := db().Exec(`
 		update t_photos
-	    inner join t_files on t_photos.id=t_files.photoId
+	    inner join t_files on t_photos.id=t_files.photo_id
 	     SET taken_date = ?
 	     where t_files.path like ?
 	`, req.ToDate, req.Path+"%").RowsAffected
@@ -102,7 +102,7 @@ func updateFolderGis(c *gin.Context) {
 	address := getGisAddress(req.Latitude, req.Longitude)
 	affected := db().Exec(`
 		update t_photos
-		inner join t_files on t_photos.id=t_files.photoId
+		inner join t_files on t_photos.id=t_files.photo_id
 		SET latitude = ?, longitude=?, address=?
 		where t_files.path like ?
 	`, req.Latitude, req.Longitude, address, req.Path+"%").RowsAffected
@@ -110,8 +110,8 @@ func updateFolderGis(c *gin.Context) {
 }
 
 type FolderActionSchema struct {
-	FromPath string `json:"fromPath"`
-	ToId     string `json:"toId"`
+	FromPath string `json:"from_path"`
+	ToId     string `json:"to_id"`
 	Merge    bool   `json:"merge"`
 }
 
@@ -138,7 +138,7 @@ func moveFolderTo(child *model.TFile, newParent *model.TFile) {
 	l.Infof("Child {} parent id {}", child.ID, newParent.ID)
 	// 如果 newParent 下面有同名 node，那么将node merge到newParent下的同名node下
 	var sameNode model.TFile
-	db().Where("parentId =? and name =?", newParent.ID, child.Name).Find(&sameNode)
+	db().Where("parent_id =? and name =?", newParent.ID, child.Name).Find(&sameNode)
 	if !child.IsFolder || sameNode.ID == 0 || sameNode.ID == child.ID {
 		child.ParentID = newParent.ID
 		newPath := newParent.Path + "/" + child.Name
@@ -146,7 +146,7 @@ func moveFolderTo(child *model.TFile, newParent *model.TFile) {
 		child.Path = newPath
 		db().Save(child)
 		var children []model.TFile
-		db().Where("parentId =?", child.ID).Find(&children)
+		db().Where("parent_id =?", child.ID).Find(&children)
 		for _, sub := range children {
 			moveFolderTo(&sub, child)
 		}
@@ -162,7 +162,7 @@ func mergeTo(node *model.TFile, newParent *model.TFile) {
 	}
 	l.Infof("New parent id {}", newParent.ID)
 	var children []model.TFile
-	db().Where("parentId =?", node.ID).Find(&children)
+	db().Where("parent_id =?", node.ID).Find(&children)
 	for _, sub := range children {
 		moveFolderTo(&sub, newParent)
 	}

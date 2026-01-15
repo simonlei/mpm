@@ -52,7 +52,7 @@ data class GetPicsRequest(
     @SerializedName("tag")
     val tag: String? = null,
     
-    @SerializedName("faceId")
+    @SerializedName("face_id")
     val faceId: Int? = null,
     
     @SerializedName("order")
@@ -120,10 +120,10 @@ data class ActivityData(
     @SerializedName("description")
     val description: String? = null,
     
-    @SerializedName("startDate")
+    @SerializedName("start_date")
     val startDate: String? = null,
     
-    @SerializedName("endDate")
+    @SerializedName("end_date")
     val endDate: String? = null,
     
     @SerializedName("latitude")
@@ -162,13 +162,13 @@ data class GetFacesRequest(
  * 更新人脸信息请求参数
  */
 data class UpdateFaceRequest(
-    @SerializedName("faceId")
+    @SerializedName("face_id")
     val faceId: Int,
     
     @SerializedName("name")
     val name: String? = null,
     
-    @SerializedName("selectedFace")
+    @SerializedName("selected_face")
     val selectedFace: Int? = null,
     
     @SerializedName("hidden")
@@ -210,7 +210,7 @@ data class GetFoldersDataRequest(
     @SerializedName("star")
     val star: Boolean? = null,
     
-    @SerializedName("parentId")
+    @SerializedName("parent_id")
     val parentId: Int? = null
 )
 
@@ -328,10 +328,10 @@ data class CreateOrUpdateUserRequest(
     @SerializedName("passwd")
     val passwd: String? = null,
     
-    @SerializedName("isAdmin")
+    @SerializedName("is_admin")
     val isAdmin: Boolean = false,
     
-    @SerializedName("faceId")
+    @SerializedName("face_id")
     val faceId: Int? = null
 )
 

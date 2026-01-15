@@ -51,14 +51,14 @@ func getPics(c *gin.Context) {
 	params["a"] = 1
 
 	if req.Path != "" {
-		joinSql += "inner join t_files on t_photos.id = t_files.photoId "
+		joinSql += "inner join t_files on t_photos.id = t_files.photo_id "
 		cnds = append(cnds, "t_files.path like @filePath")
 		params["filePath"] = req.Path + "%"
 	}
 	if req.FaceId > 0 {
-		joinSql += "inner join photo_face_info f on t_photos.id=f.photoId "
-		cnds = append(cnds, "f.faceId = @faceId")
-		params["faceId"] = req.FaceId
+		joinSql += "inner join photo_face_info f on t_photos.id=f.photo_id "
+		cnds = append(cnds, "f.face_id = @face_id")
+		params["face_id"] = req.FaceId
 	}
 	cnds = append(cnds, "trashed = "+strconv.FormatBool(req.Trashed))
 	if req.Star {
@@ -95,7 +95,7 @@ func getPics(c *gin.Context) {
 			sql += "distinct t_photos.id"
 		} else {
 			sql += "distinct t_photos.*, " +
-				"concat(t_activity.startDate, ' ', t_activity.name, ' ', t_activity.description) as activity_desc "
+				"concat(t_activity.start_date, ' ', t_activity.name, ' ', t_activity.description) as activity_desc "
 		}
 		sql += " from t_photos " + joinSql + " where "
 		sql += strings.Join(cnds, " and ")
@@ -237,7 +237,7 @@ func getPhotoById(c *gin.Context) {
 	var photo model.TPhoto
 	result := db().Raw(`
 		select t_photos.*, 
-		concat(t_activity.startDate, ' ', t_activity.name, ' ', t_activity.description) as activity_desc
+		concat(t_activity.start_date, ' ', t_activity.name, ' ', t_activity.description) as activity_desc
 		from t_photos
 		left join t_activity on t_activity.id=t_photos.activity
 		where t_photos.id=?

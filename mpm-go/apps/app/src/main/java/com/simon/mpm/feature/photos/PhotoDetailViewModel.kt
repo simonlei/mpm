@@ -27,7 +27,7 @@ class PhotoDetailViewModel @Inject constructor(
     }
 
     // 从导航参数获取照片ID和来源
-    private val photoId: Int = savedStateHandle.get<Int>("photoId") ?: 0
+    private val photoId: Int = savedStateHandle.get<Int>("photo_id") ?: 0
     val fromTrash: Boolean = savedStateHandle.get<Boolean>("fromTrash") ?: false
 
     // UI状态

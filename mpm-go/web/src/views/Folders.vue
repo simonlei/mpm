@@ -155,7 +155,7 @@ const loadFolders = async () => {
     const res = await getFoldersDataApi({
       trashed: false,
       star: showStar.value,
-      parentId: -1
+      parent_id: -1
     })
     
     if (res.code === 0) {
@@ -192,7 +192,7 @@ const confirmUpdateDate = async () => {
   try {
     const res = await updateFolderDateApi({
       path: currentFolder.value.path,
-      toDate: newDate.value
+      to_date: newDate.value
     })
     
     if (res.code === 0) {

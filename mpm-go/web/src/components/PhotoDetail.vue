@@ -287,7 +287,7 @@ const currentPhotoTags = ref<string[]>([])
 const editFaceNameVisible = ref(false)
 const savingFaceName = ref(false)
 const editFaceNameForm = ref({
-  faceId: 0,
+  face_id: 0,
   name: ''
 })
 
@@ -444,7 +444,7 @@ const getFaceBoxStyle = (face: FaceForPhoto) => {
 // 编辑人脸名字
 const editFaceName = (face: FaceForPhoto) => {
   editFaceNameForm.value = {
-    faceId: face.faceId,
+    face_id: face.face_id,
     name: face.name || ''
   }
   editFaceNameVisible.value = true
@@ -457,11 +457,11 @@ const saveFaceName = async () => {
   savingFaceName.value = true
   try {
     await updateFaceApi({
-      faceId: editFaceNameForm.value.faceId,
+      face_id: editFaceNameForm.value.face_id,
       name: editFaceNameForm.value.name || undefined
     })
     
-    const faceIndex = facesForPhoto.value.findIndex(f => f.faceId === editFaceNameForm.value.faceId)
+    const faceIndex = facesForPhoto.value.findIndex(f => f.face_id === editFaceNameForm.value.face_id)
     if (faceIndex !== -1) {
       facesForPhoto.value[faceIndex].name = editFaceNameForm.value.name
     }

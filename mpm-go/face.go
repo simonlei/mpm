@@ -20,34 +20,34 @@ import (
 )
 
 type FaceGetRequest struct {
-	ShowHidden bool `json:"showHidden"`
+	ShowHidden bool `json:"show_hidden"`
 	Page       int
 	Size       int
-	NameFilter string `json:"nameFilter"`
+	NameFilter string `json:"name_filter"`
 }
 
 type FaceGetResp struct {
-	PersonId     string `gorm:"column:personId" json:"personId"`
-	FaceId       int    `gorm:"column:faceId" json:"faceId"`
+	PersonId     string `gorm:"column:person_id" json:"person_id"`
+	FaceId       int    `gorm:"column:face_id" json:"face_id"`
 	Name         string `json:"name"`
-	SelectedFace int    `gorm:"column:selectedFace" json:"selectedFace"`
+	SelectedFace int    `gorm:"column:selected_face" json:"selected_face"`
 	Collected    int    `json:"collected"`
 	Hidden       int    `json:"hidden"`
 	Count        int    `json:"count"`
 }
 
 type FaceNameResp struct {
-	FaceId int    `gorm:"column:faceId" json:"faceId"`
+	FaceId int    `gorm:"column:face_id" json:"face_id"`
 	Name   string `gorm:"column:name" json:"name"`
 }
 
 func getFaces(c *gin.Context) {
 	var req FaceGetRequest
 	c.BindJSON(&req)
-	sqlStr := `select personId, i.faceId, name, selectedFace, collected, hidden, count(*) as count
+	sqlStr := `select person_id, i.face_id, name, selected_face, collected, hidden, count(*) as count
 	    	from photo_face_info i
-	    	left join t_face on t_face.id=i.faceId
-	    	where personId is not null`
+	    	left join t_face on t_face.id=i.face_id
+	    	where person_id is not null`
 	sqlStr = setConditions(req.ShowHidden, req.NameFilter, sqlStr)
 
 	countSql := "select count(*) c from (" + sqlStr + ") t"
@@ -71,13 +71,13 @@ func setConditions(showHidden bool, nameFilter, s string) string {
 	if strings.TrimSpace(nameFilter) != "" {
 		s = s + " and name like '%" + strings.TrimSpace(nameFilter) + "%'"
 	}
-	return s + " group by i.faceId order by collected desc, count(*) desc, i.faceId"
+	return s + " group by i.face_id order by collected desc, count(*) desc, i.face_id"
 }
 
 func getFacesWithName(c *gin.Context) {
-	s := `select t_face.id as faceId, name
+	s := `select t_face.id as face_id, name
         	from t_face
-        	left join photo_face_info p on p.faceId=t_face.id
+        	left join photo_face_info p on p.face_id=t_face.id
             where name is not null
             group by t_face.id
             order by count(*) desc`
@@ -92,7 +92,7 @@ type IdReq struct {
 
 type FacesForPhotoResp struct {
 	Id     int    `gorm:"column:id" json:"id"`
-	FaceId int    `gorm:"column:faceId" json:"faceId"`
+	FaceId int    `gorm:"column:face_id" json:"face_id"`
 	X      int    `gorm:"column:x" json:"x"`
 	Y      int    `gorm:"column:y" json:"y"`
 	Width  int    `gorm:"column:width" json:"width"`
@@ -103,10 +103,10 @@ type FacesForPhotoResp struct {
 func getFacesForPhoto(c *gin.Context) {
 	var req IdReq
 	c.BindJSON(&req)
-	s := `select pf.id, pf.faceId, x, y, width, height, name
+	s := `select pf.id, pf.face_id, x, y, width, height, name
 	        from photo_face_info pf
-            inner join t_face f on f.id=pf.faceId
-            where pf.photoId=%d`
+            inner join t_face f on f.id=pf.face_id
+            where pf.photo_id=%d`
 	var data []FacesForPhotoResp
 	db().Raw(fmt.Sprintf(s, req.Id)).Find(&data)
 	c.JSON(http.StatusOK, Response{0, data})
@@ -117,7 +117,7 @@ func getFaceImg(c *gin.Context) {
 	infoId, _ := strconv.Atoi(c.Param("infoId"))
 	var x *gorm.DB
 	if infoId <= 0 {
-		x = db().Raw("select * from photo_face_info where faceId=? order by height desc limit 1", faceId)
+		x = db().Raw("select * from photo_face_info where face_id=? order by height desc limit 1", faceId)
 	} else {
 		x = db().Raw("select * from photo_face_info where id=?", infoId)
 	}
@@ -166,9 +166,9 @@ func getWiderFace(photo *model.TPhoto, faceInfo *model.PhotoFaceInfo) {
 }
 
 type FaceUpdateParam struct {
-	FaceId       int    `json:"faceId"`
+	FaceId       int    `json:"face_id"`
 	Name         string `json:"name"`
-	SelectedFace int64  `json:"selectedFace"`
+	SelectedFace int64  `json:"selected_face"`
 	Hidden       *bool  `json:"hidden"`
 	Collected    *bool  `json:"collected"`
 }
@@ -194,7 +194,7 @@ func updateFace(c *gin.Context) {
 	if face.SelectedFace > 0 {
 		// 设置对应的图片当中的人脸来当做默认人脸
 		var faceInfo model.PhotoFaceInfo
-		db().First(&faceInfo, "photoId=? and faceId=?", face.SelectedFace, face.FaceId)
+		db().First(&faceInfo, "photo_id=? and face_id=?", face.SelectedFace, face.FaceId)
 		if faceInfo.ID > 0 {
 			entityFace.SelectedFace = faceInfo.ID
 		}
@@ -228,7 +228,7 @@ func mergeFace(c *gin.Context) {
 	l.Infof("Delete person from group response:{}, err:{}", resp, err)
 	db().Transaction(func(tx *gorm.DB) error {
 		tx.Exec("delete from t_face where id=?", r.From)
-		tx.Exec("update photo_face_info set faceId=? where faceId=?", r.To, r.From)
+		tx.Exec("update photo_face_info set face_id=? where face_id=?", r.To, r.From)
 		return nil
 	})
 	c.JSON(http.StatusOK, Response{0, true})
@@ -267,7 +267,7 @@ func detectFaceIn(photo model.TPhoto) {
 		return
 	}
 	db().Transaction(func(tx *gorm.DB) error {
-		tx.Exec("delete from photo_face_info where photoId=?", photo.ID)
+		tx.Exec("delete from photo_face_info where photo_id=?", photo.ID)
 		for _, faceInfo := range faceInfos {
 			if *faceInfo.Width <= 64 || *faceInfo.Height <= 64 || *faceInfo.X < 0 || *faceInfo.Y < 0 {
 				continue
@@ -310,7 +310,7 @@ func addFaceToGroup(tx *gorm.DB, photo model.TPhoto, info model.PhotoFaceInfo) {
 	var face model.TFace
 	if similarPersonId != nil {
 		l.Infof("face info %s's similar person id %s ", photo.Name, *similarPersonId)
-		tx.Where("personId=?", similarPersonId).First(&face)
+		tx.Where("person_id=?", similarPersonId).First(&face)
 	}
 	if face.ID == 0 {
 		face = model.TFace{

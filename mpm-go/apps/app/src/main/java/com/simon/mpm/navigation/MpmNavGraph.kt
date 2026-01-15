@@ -115,14 +115,14 @@ fun MpmNavGraph(
         composable(
             route = Routes.PHOTO_DETAIL,
             arguments = listOf(
-                navArgument("photoId") { type = NavType.IntType },
+                navArgument("photo_id") { type = NavType.IntType },
                 navArgument("fromTrash") { 
                     type = NavType.BoolType
                     defaultValue = false
                 }
             )
         ) { backStackEntry ->
-            val photoId = backStackEntry.arguments?.getInt("photoId") ?: 0
+            val photoId = backStackEntry.arguments?.getInt("photo_id") ?: 0
             val fromTrash = backStackEntry.arguments?.getBoolean("fromTrash") ?: false
             
             PhotoDetailScreen(

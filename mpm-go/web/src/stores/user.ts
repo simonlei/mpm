@@ -5,8 +5,8 @@ interface User {
   id: number
   account: string
   name: string
-  isAdmin: boolean
-  faceId: number
+  is_admin: boolean
+  face_id: number
   signature: string
 }
 

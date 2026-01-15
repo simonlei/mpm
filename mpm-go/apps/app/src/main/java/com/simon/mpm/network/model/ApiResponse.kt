@@ -181,10 +181,10 @@ data class Activity(
     @SerializedName("description")
     val description: String?,
     
-    @SerializedName("startDate")
+    @SerializedName("start_date")
     val startDate: String?,
     
-    @SerializedName("endDate")
+    @SerializedName("end_date")
     val endDate: String?,
     
     @SerializedName("latitude")
@@ -246,7 +246,7 @@ data class NamedFace(
  * 照片人脸
  */
 data class PhotoFace(
-    @SerializedName("faceId")
+    @SerializedName("face_id")
     val faceId: Int,
     
     @SerializedName("name")
@@ -330,7 +330,7 @@ data class GeoGeometry(
  * GeoJSON属性
  */
 data class GeoProperties(
-    @SerializedName("photoId")
+    @SerializedName("photo_id")
     val photoId: Int,
     
     @SerializedName("thumbnailUrl")

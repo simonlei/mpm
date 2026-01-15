@@ -23,14 +23,14 @@
         <div v-loading="loading" class="faces-list">
           <div
             v-for="face in faceData.faces"
-            :key="face.faceId"
+            :key="face.face_id"
             class="face-item"
-            :class="{ 'face-item-active': selectedFace?.faceId === face.faceId }"
+            :class="{ 'face-item-active': selectedFace?.face_id === face.face_id }"
             @click="selectFace(face)"
           >
             <div class="face-avatar-small">
               <img
-                :src="`/get_face_img/${face.faceId}/0`"
+                :src="`/get_face_img/${face.face_id}/0`"
                 :alt="face.name || '未命名'"
                 @error="handleImageError"
               />
@@ -157,7 +157,7 @@ const pagination = reactive({
 const editVisible = ref(false)
 const saving = ref(false)
 const editForm = reactive({
-  faceId: 0,
+  face_id: 0,
   name: '',
   hidden: false,
   collected: false
@@ -173,7 +173,7 @@ const emptyText = computed(() => {
 // 加载照片的参数
 const loadPhotosParams = computed(() => {
   if (selectedFace.value) {
-    return { faceId: selectedFace.value.faceId }
+    return { face_id: selectedFace.value.face_id }
   }
   return {}
 })
@@ -183,10 +183,10 @@ const loadFaces = async () => {
   loading.value = true
   try {
     const res = await getFacesApi({
-      showHidden: showHidden.value,
+      show_hidden: showHidden.value,
       page: pagination.current,
       size: pagination.pageSize,
-      nameFilter: nameFilter.value
+      name_filter: nameFilter.value
     })
     
     if (res.code === 0) {
@@ -243,7 +243,7 @@ const handleTotalCountChange = (delta: number) => {
 
 // 编辑人脸
 const editFace = (face: Face) => {
-  editForm.faceId = face.faceId
+  editForm.face_id = face.face_id
   editForm.name = face.name
   editForm.hidden = !!face.hidden
   editForm.collected = !!face.collected
@@ -255,7 +255,7 @@ const saveFace = async () => {
   saving.value = true
   try {
     await updateFaceApi({
-      faceId: editForm.faceId,
+      face_id: editForm.face_id,
       name: editForm.name || undefined,
       hidden: editForm.hidden,
       collected: editForm.collected
@@ -274,7 +274,7 @@ const saveFace = async () => {
 const toggleCollect = async (face: Face) => {
   try {
     await updateFaceApi({
-      faceId: face.faceId,
+      face_id: face.face_id,
       collected: !face.collected
     })
     face.collected = face.collected ? 0 : 1

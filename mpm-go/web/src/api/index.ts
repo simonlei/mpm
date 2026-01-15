@@ -10,8 +10,8 @@ export interface UserInfo {
   id: number
   account: string
   name: string
-  isAdmin: boolean
-  faceId: number
+  is_admin: boolean
+  face_id: number
   signature: string
 }
 
@@ -55,7 +55,7 @@ export interface GetPicsParams {
   dateKey?: string
   path?: string
   tag?: string
-  faceId?: number
+  face_id?: number
   order?: string
   idRank?: number
 }
@@ -115,10 +115,10 @@ export interface FolderData {
   id: number
   path: string
   title: string
-  parentid: number
+  parent_id: number
 }
 
-export const getFoldersDataApi = (data: { trashed: boolean; star: boolean; parentId: number }) => {
+export const getFoldersDataApi = (data: { trashed: boolean; star: boolean; parent_id: number }) => {
   return request.post<ApiResponse<FolderData[]>>('/api/getFoldersData', data)
 }
 
@@ -126,7 +126,7 @@ export const switchTrashFolderApi = (data: { to: boolean; path: string }) => {
   return request.post<ApiResponse<number>>('/api/switchTrashFolder', data)
 }
 
-export const updateFolderDateApi = (data: { path: string; toDate: string }) => {
+export const updateFolderDateApi = (data: { path: string; to_date: string }) => {
   return request.post<ApiResponse<number>>('/api/updateFolderDate', data)
 }
 
@@ -134,16 +134,16 @@ export const updateFolderGisApi = (data: { path: string; latitude: number; longi
   return request.post<ApiResponse<number>>('/api/updateFolderGis', data)
 }
 
-export const moveFolderApi = (data: { fromPath: string; toId: string; merge: boolean }) => {
+export const moveFolderApi = (data: { from_path: string; to_id: string; merge: boolean }) => {
   return request.post<ApiResponse<boolean>>('/api/moveFolder', data)
 }
 
 // ============ 人脸相关 ============
 export interface Face {
-  personId: string
-  faceId: number
+  person_id: string
+  face_id: number
   name: string
-  selectedFace: number
+  selected_face: number
   collected: number
   hidden: number
   count: number
@@ -154,12 +154,12 @@ export interface FacesResponse {
   faces: Face[]
 }
 
-export const getFacesApi = (data: { showHidden: boolean; page: number; size: number; nameFilter: string }) => {
+export const getFacesApi = (data: { show_hidden: boolean; page: number; size: number; name_filter: string }) => {
   return request.post<ApiResponse<FacesResponse>>('/api/getFaces', data)
 }
 
 export interface FaceWithName {
-  faceId: number
+  face_id: number
   name: string
 }
 
@@ -169,7 +169,7 @@ export const getFacesWithNameApi = () => {
 
 export interface FaceForPhoto {
   id: number
-  faceId: number
+  face_id: number
   x: number
   y: number
   width: number
@@ -182,9 +182,9 @@ export const getFacesForPhotoApi = (data: { id: number }) => {
 }
 
 export const updateFaceApi = (data: {
-  faceId: number
+  face_id: number
   name?: string
-  selectedFace?: number
+  selected_face?: number
   hidden?: boolean
   collected?: boolean
 }) => {
@@ -208,8 +208,8 @@ export interface Activity {
   id: number
   name: string
   description: string
-  startDate: string
-  endDate: string
+  start_date: string
+  end_date: string
   latitude: number
   longitude: number
 }

@@ -79,8 +79,8 @@ func realDelete(p *model.TPhoto) {
 		}
 		tx.Create(&bl)
 		tx.Delete(&p)
-		tx.Delete(&model.TFile{}, "photoId = ?", p.ID)
-		tx.Delete(&model.PhotoFaceInfo{}, "photoId =?", p.ID)
+		tx.Delete(&model.TFile{}, "photo_id = ?", p.ID)
+		tx.Delete(&model.PhotoFaceInfo{}, "photo_id =?", p.ID)
 		return nil
 	})
 }

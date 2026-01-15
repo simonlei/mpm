@@ -46,13 +46,13 @@ func addActivities(activities []*PhotoDate, months map[int]*TreeNode) {
 }
 
 func getActivities(trashed bool, star bool) []*PhotoDate {
-	sql := `select year(startDate) as year, month(startDate) as month, t_activity.id as activity_id,
-                  count(t_photos.id) as photo_count, day(startDate) as day, t_activity.name as name
+	sql := `select year(start_date) as year, month(start_date) as month, t_activity.id as activity_id,
+                  count(t_photos.id) as photo_count, day(start_date) as day, t_activity.name as name
                 from t_activity
                 left join t_photos on t_photos.activity=t_activity.id
                 where trashed = %t %s
                 group by year, month, activity_id
-                order by year desc, month desc, startDate`
+                order by year desc, month desc, start_date`
 	return queryDates(trashed, star, sql)
 }
 
