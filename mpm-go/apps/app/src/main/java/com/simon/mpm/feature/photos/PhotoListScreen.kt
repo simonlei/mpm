@@ -35,306 +35,327 @@ fun PhotoListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { 
-                    Text(
-                        text = if (uiState.totalRows > 0) {
-                            "照片 (${uiState.totalRows})"
-                        } else {
-                            "照片"
-                        }
-                    )
-                },
-                actions = {
-                    // 筛选按钮
-                    IconButton(onClick = { showFilterDialog = true }) {
-                        Badge(
-                            containerColor = if (uiState.hasActiveFilters) {
-                                MaterialTheme.colorScheme.primary
+            Column {
+                TopAppBar(
+                    title = { 
+                        Text(
+                            text = if (uiState.totalRows > 0) {
+                                "照片 (${uiState.totalRows})"
                             } else {
-                                MaterialTheme.colorScheme.surfaceVariant
+                                "照片"
                             }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.FilterList,
-                                contentDescription = "筛选"
-                            )
-                        }
-                    }
-                    
-                    // 排序按钮
-                    Box {
-                        IconButton(onClick = { showSortMenu = true }) {
-                            Icon(
-                                imageVector = Icons.Default.Sort,
-                                contentDescription = "排序"
-                            )
-                        }
-                        
-                        DropdownMenu(
-                            expanded = showSortMenu,
-                            onDismissRequest = { showSortMenu = false }
-                        ) {
-                            // ID排序
-                            DropdownMenuItem(
-                                text = { Text("ID 降序") },
-                                onClick = {
-                                    showSortMenu = false
-                                    viewModel.setSortOrder("-id")
-                                },
-                                trailingIcon = if (uiState.sortOrder == "-id") {
-                                    { Icon(Icons.Default.Check, contentDescription = null) }
-                                } else null
-                            )
-                            DropdownMenuItem(
-                                text = { Text("ID 升序") },
-                                onClick = {
-                                    showSortMenu = false
-                                    viewModel.setSortOrder("id")
-                                },
-                                trailingIcon = if (uiState.sortOrder == "id") {
-                                    { Icon(Icons.Default.Check, contentDescription = null) }
-                                } else null
-                            )
-                            
-                            Divider()
-                            
-                            // 拍摄日期排序
-                            DropdownMenuItem(
-                                text = { Text("日期 降序") },
-                                onClick = {
-                                    showSortMenu = false
-                                    viewModel.setSortOrder("-taken_date")
-                                },
-                                trailingIcon = if (uiState.sortOrder == "-taken_date") {
-                                    { Icon(Icons.Default.Check, contentDescription = null) }
-                                } else null
-                            )
-                            DropdownMenuItem(
-                                text = { Text("日期 升序") },
-                                onClick = {
-                                    showSortMenu = false
-                                    viewModel.setSortOrder("taken_date")
-                                },
-                                trailingIcon = if (uiState.sortOrder == "taken_date") {
-                                    { Icon(Icons.Default.Check, contentDescription = null) }
-                                } else null
-                            )
-                            
-                            Divider()
-                            
-                            // 文件大小排序
-                            DropdownMenuItem(
-                                text = { Text("大小 降序") },
-                                onClick = {
-                                    showSortMenu = false
-                                    viewModel.setSortOrder("-size")
-                                },
-                                trailingIcon = if (uiState.sortOrder == "-size") {
-                                    { Icon(Icons.Default.Check, contentDescription = null) }
-                                } else null
-                            )
-                            DropdownMenuItem(
-                                text = { Text("大小 升序") },
-                                onClick = {
-                                    showSortMenu = false
-                                    viewModel.setSortOrder("size")
-                                },
-                                trailingIcon = if (uiState.sortOrder == "size") {
-                                    { Icon(Icons.Default.Check, contentDescription = null) }
-                                } else null
-                            )
-                            
-                            Divider()
-                            
-                            // 宽度排序
-                            DropdownMenuItem(
-                                text = { Text("宽度 降序") },
-                                onClick = {
-                                    showSortMenu = false
-                                    viewModel.setSortOrder("-width")
-                                },
-                                trailingIcon = if (uiState.sortOrder == "-width") {
-                                    { Icon(Icons.Default.Check, contentDescription = null) }
-                                } else null
-                            )
-                            DropdownMenuItem(
-                                text = { Text("宽度 升序") },
-                                onClick = {
-                                    showSortMenu = false
-                                    viewModel.setSortOrder("width")
-                                },
-                                trailingIcon = if (uiState.sortOrder == "width") {
-                                    { Icon(Icons.Default.Check, contentDescription = null) }
-                                } else null
-                            )
-                            
-                            Divider()
-                            
-                            // 高度排序
-                            DropdownMenuItem(
-                                text = { Text("高度 降序") },
-                                onClick = {
-                                    showSortMenu = false
-                                    viewModel.setSortOrder("-height")
-                                },
-                                trailingIcon = if (uiState.sortOrder == "-height") {
-                                    { Icon(Icons.Default.Check, contentDescription = null) }
-                                } else null
-                            )
-                            DropdownMenuItem(
-                                text = { Text("高度 升序") },
-                                onClick = {
-                                    showSortMenu = false
-                                    viewModel.setSortOrder("height")
-                                },
-                                trailingIcon = if (uiState.sortOrder == "height") {
-                                    { Icon(Icons.Default.Check, contentDescription = null) }
-                                } else null
-                            )
-                        }
-                    }
-                    // 刷新按钮
-                    IconButton(
-                        onClick = { viewModel.refresh() },
-                        enabled = !uiState.isRefreshing
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "刷新"
                         )
-                    }
-                    
-                    // 更多菜单
-                    Box {
-                        IconButton(onClick = { showMenu = true }) {
+                    },
+                    actions = {
+                        // 收藏筛选按钮
+                        IconButton(onClick = { viewModel.toggleStarFilter() }) {
+                            Badge(
+                                containerColor = if (uiState.filterStar) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "收藏"
+                                )
+                            }
+                        }
+                        
+                        // 视频筛选按钮
+                        IconButton(onClick = { viewModel.toggleVideoFilter() }) {
+                            Badge(
+                                containerColor = if (uiState.filterVideo) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.VideoLibrary,
+                                    contentDescription = "视频"
+                                )
+                            }
+                        }
+                        
+                        // 高级筛选按钮
+                        IconButton(onClick = { showFilterDialog = true }) {
+                            Badge(
+                                containerColor = if (uiState.hasActiveFilters) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.FilterList,
+                                    contentDescription = "高级筛选"
+                                )
+                            }
+                        }
+                        
+                        // 排序按钮
+                        Box {
+                            IconButton(onClick = { showSortMenu = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.Sort,
+                                    contentDescription = "排序"
+                                )
+                            }
+                            
+                            DropdownMenu(
+                                expanded = showSortMenu,
+                                onDismissRequest = { showSortMenu = false }
+                            ) {
+                                // ID排序
+                                DropdownMenuItem(
+                                    text = { Text("ID 降序") },
+                                    onClick = {
+                                        showSortMenu = false
+                                        viewModel.setSortOrder("-id")
+                                    },
+                                    trailingIcon = if (uiState.sortOrder == "-id") {
+                                        { Icon(Icons.Default.Check, contentDescription = null) }
+                                    } else null
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("ID 升序") },
+                                    onClick = {
+                                        showSortMenu = false
+                                        viewModel.setSortOrder("id")
+                                    },
+                                    trailingIcon = if (uiState.sortOrder == "id") {
+                                        { Icon(Icons.Default.Check, contentDescription = null) }
+                                    } else null
+                                )
+                                
+                                Divider()
+                                
+                                // 拍摄日期排序
+                                DropdownMenuItem(
+                                    text = { Text("日期 降序") },
+                                    onClick = {
+                                        showSortMenu = false
+                                        viewModel.setSortOrder("-taken_date")
+                                    },
+                                    trailingIcon = if (uiState.sortOrder == "-taken_date") {
+                                        { Icon(Icons.Default.Check, contentDescription = null) }
+                                    } else null
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("日期 升序") },
+                                    onClick = {
+                                        showSortMenu = false
+                                        viewModel.setSortOrder("taken_date")
+                                    },
+                                    trailingIcon = if (uiState.sortOrder == "taken_date") {
+                                        { Icon(Icons.Default.Check, contentDescription = null) }
+                                    } else null
+                                )
+                                
+                                Divider()
+                                
+                                // 文件大小排序
+                                DropdownMenuItem(
+                                    text = { Text("大小 降序") },
+                                    onClick = {
+                                        showSortMenu = false
+                                        viewModel.setSortOrder("-size")
+                                    },
+                                    trailingIcon = if (uiState.sortOrder == "-size") {
+                                        { Icon(Icons.Default.Check, contentDescription = null) }
+                                    } else null
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("大小 升序") },
+                                    onClick = {
+                                        showSortMenu = false
+                                        viewModel.setSortOrder("size")
+                                    },
+                                    trailingIcon = if (uiState.sortOrder == "size") {
+                                        { Icon(Icons.Default.Check, contentDescription = null) }
+                                    } else null
+                                )
+                                
+                                Divider()
+                                
+                                // 宽度排序
+                                DropdownMenuItem(
+                                    text = { Text("宽度 降序") },
+                                    onClick = {
+                                        showSortMenu = false
+                                        viewModel.setSortOrder("-width")
+                                    },
+                                    trailingIcon = if (uiState.sortOrder == "-width") {
+                                        { Icon(Icons.Default.Check, contentDescription = null) }
+                                    } else null
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("宽度 升序") },
+                                    onClick = {
+                                        showSortMenu = false
+                                        viewModel.setSortOrder("width")
+                                    },
+                                    trailingIcon = if (uiState.sortOrder == "width") {
+                                        { Icon(Icons.Default.Check, contentDescription = null) }
+                                    } else null
+                                )
+                                
+                                Divider()
+                                
+                                // 高度排序
+                                DropdownMenuItem(
+                                    text = { Text("高度 降序") },
+                                    onClick = {
+                                        showSortMenu = false
+                                        viewModel.setSortOrder("-height")
+                                    },
+                                    trailingIcon = if (uiState.sortOrder == "-height") {
+                                        { Icon(Icons.Default.Check, contentDescription = null) }
+                                    } else null
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("高度 升序") },
+                                    onClick = {
+                                        showSortMenu = false
+                                        viewModel.setSortOrder("height")
+                                    },
+                                    trailingIcon = if (uiState.sortOrder == "height") {
+                                        { Icon(Icons.Default.Check, contentDescription = null) }
+                                    } else null
+                                )
+                            }
+                        }
+                        // 刷新按钮
+                        IconButton(
+                            onClick = { viewModel.refresh() },
+                            enabled = !uiState.isRefreshing
+                        ) {
                             Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "更多"
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "刷新"
                             )
                         }
                         
-                        DropdownMenu(
-                            expanded = showMenu,
-                            onDismissRequest = { showMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("回收站") },
-                                onClick = {
-                                    showMenu = false
-                                    onNavigateToTrash()
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = null
-                                    )
-                                }
-                            )
+                        // 更多菜单
+                        Box {
+                            IconButton(onClick = { showMenu = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = "更多"
+                                )
+                            }
                             
-                            Divider()
-                            
-                            DropdownMenuItem(
-                                text = { Text("设置") },
-                                onClick = {
-                                    showMenu = false
-                                    onNavigateToSettings()
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Settings,
-                                        contentDescription = null
-                                    )
-                                }
-                            )
-                            
-                            Divider()
-                            
-                            DropdownMenuItem(
-                                text = { Text("退出登录") },
-                                onClick = {
-                                    showMenu = false
-                                    onLogout()
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.ExitToApp,
-                                        contentDescription = null
-                                    )
-                                }
-                            )
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("回收站") },
+                                    onClick = {
+                                        showMenu = false
+                                        onNavigateToTrash()
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = null
+                                        )
+                                    }
+                                )
+                                
+                                Divider()
+                                
+                                DropdownMenuItem(
+                                    text = { Text("设置") },
+                                    onClick = {
+                                        showMenu = false
+                                        onNavigateToSettings()
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Settings,
+                                            contentDescription = null
+                                        )
+                                    }
+                                )
+                                
+                                Divider()
+                                
+                                DropdownMenuItem(
+                                    text = { Text("退出登录") },
+                                    onClick = {
+                                        showMenu = false
+                                        onLogout()
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.ExitToApp,
+                                            contentDescription = null
+                                        )
+                                    }
+                                )
+                            }
                         }
                     }
+                )
+                
+                // 活动筛选条件显示
+                if (uiState.hasActiveFilters) {
+                    ActiveFiltersBar(
+                        uiState = uiState,
+                        activities = activities,
+                        onClearFilters = { viewModel.clearAllFilters() }
+                    )
                 }
-            )
+            }
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 筛选栏
-            FilterBar(
-                filterStar = uiState.filterStar,
-                filterVideo = uiState.filterVideo,
-                onFilterStarChange = { viewModel.toggleStarFilter() },
-                onFilterVideoChange = { viewModel.toggleVideoFilter() }
-            )
-            
-            // 活动筛选条件显示
-            if (uiState.hasActiveFilters) {
-                ActiveFiltersBar(
-                    uiState = uiState,
-                    activities = activities,
-                    onClearFilters = { viewModel.clearAllFilters() }
-                )
-            }
-            
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                // 使用通用PhotoGrid组件
-                PhotoGrid(
-                    photos = photos,
-                    isLoading = uiState.isLoading,
-                    hasMore = uiState.hasMore,
-                    emptyText = "暂无照片",
-                    onPhotoClick = onPhotoClick,
-                    onLoadMore = { viewModel.loadMore() },
-                    onRefresh = { viewModel.refresh() },
-                    photoItemContent = { photo ->
-                        StandardPhotoGridItem(
-                            photo = photo,
-                            onStarClick = { viewModel.toggleStar(photo) }
-                        )
-                    }
-                )
-
-                // 刷新指示器
-                if (uiState.isRefreshing) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(48.dp)
+            // 使用通用PhotoGrid组件
+            PhotoGrid(
+                photos = photos,
+                isLoading = uiState.isLoading,
+                hasMore = uiState.hasMore,
+                emptyText = "暂无照片",
+                onPhotoClick = onPhotoClick,
+                onLoadMore = { viewModel.loadMore() },
+                onRefresh = { viewModel.refresh() },
+                photoItemContent = { photo ->
+                    StandardPhotoGridItem(
+                        photo = photo,
+                        onStarClick = { viewModel.toggleStar(photo) }
                     )
                 }
+            )
 
-                // 错误提示
-                uiState.error?.let { error ->
-                    Snackbar(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(16.dp),
-                        action = {
-                            TextButton(onClick = { viewModel.clearError() }) {
-                                Text("关闭")
-                            }
+            // 刷新指示器
+            if (uiState.isRefreshing) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(48.dp)
+                )
+            }
+
+            // 错误提示
+            uiState.error?.let { error ->
+                Snackbar(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
+                    action = {
+                        TextButton(onClick = { viewModel.clearError() }) {
+                            Text("关闭")
                         }
-                    ) {
-                        Text(error)
                     }
+                ) {
+                    Text(error)
                 }
             }
         }

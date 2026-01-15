@@ -193,7 +193,7 @@ data class Activity(
     @SerializedName("longitude")
     val longitude: Double?,
     
-    @SerializedName("photoCount")
+    @SerializedName("photo_count")
     val photoCount: Int
 )
 
