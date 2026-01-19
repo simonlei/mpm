@@ -49,7 +49,6 @@ data class UploadUiState(
     val files: List<UploadFile> = emptyList(),
     val isUploading: Boolean = false,
     val uploadedCount: Int = 0,
-    val batchId: String = "",
     val errorMessage: String? = null
 )
 
@@ -115,7 +114,6 @@ class UploadViewModel @Inject constructor(
                 state.copy(
                     isUploading = true,
                     uploadedCount = 0,
-                    batchId = System.currentTimeMillis().toString(),
                     errorMessage = null
                 )
             }
@@ -134,7 +132,6 @@ class UploadViewModel @Inject constructor(
                     uri = file.uri,
                     fileName = targetPath,
                     lastModified = file.lastModified,
-                    batchId = _uiState.value.batchId,
                     context = context
                 )
                 

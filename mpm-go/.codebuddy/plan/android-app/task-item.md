@@ -116,7 +116,7 @@
 - [ ] 13. 实现照片选择和上传
    - 实现照片选择器（使用ActivityResultContract选择多张照片）
    - 创建UploadScreen UI（待上传列表、进度显示）
-   - 实现UploadViewModel（生成batchId、管理上传队列）
+   - 实现UploadViewModel（管理上传队列）
    - 实现照片上传（调用/api/uploadPhoto接口，multipart/form-data）
    - 实现上传进度显示（单张和整体进度）
    - 实现上传失败重试和取消功能

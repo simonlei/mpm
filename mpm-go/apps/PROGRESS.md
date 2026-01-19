@@ -528,12 +528,12 @@ MPM (My Photo Manager) Android应用开发项目，基于现有的后台API和We
    - 添加uploadPhoto方法
    - 支持从URI读取文件内容
    - 使用Multipart上传文件
-   - 传递lastModified和batchId参数
+   - 传递lastModified参数
 
 2. ✅ 修改API接口
    - 在MpmApiService中添加lastModified参数
    - 支持multipart/form-data上传
-   - 传递file、batchId、lastModified三个参数
+   - 传递file、lastModified两个参数
 
 3. ✅ 创建UploadViewModel
    - 管理上传文件列表状态

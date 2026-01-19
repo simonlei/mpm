@@ -344,13 +344,11 @@ class PhotoRepository @Inject constructor(
      * @param uri 照片URI
      * @param fileName 文件名
      * @param lastModified 最后修改时间（毫秒时间戳）
-     * @param batchId 批次ID
      */
     suspend fun uploadPhoto(
         uri: android.net.Uri,
         fileName: String,
         lastModified: Long,
-        batchId: String,
         context: android.content.Context
     ): Result<Unit> {
         return try {
@@ -375,11 +373,6 @@ class PhotoRepository @Inject constructor(
                 requestBody
             )
             
-            // 创建batchId的RequestBody
-            val batchIdBody = batchId.toRequestBody(
-                "text/plain".toMediaTypeOrNull()
-            )
-            
             // 创建lastModified的RequestBody
             val lastModifiedBody = lastModified.toString().toRequestBody(
                 "text/plain".toMediaTypeOrNull()
@@ -387,7 +380,7 @@ class PhotoRepository @Inject constructor(
             
             // 调用API
             val result = safeApiCallUnit {
-                apiService.uploadPhoto(filePart, batchIdBody, lastModifiedBody)
+                apiService.uploadPhoto(filePart, lastModifiedBody)
             }
             
             Log.d(TAG, "uploadPhoto: 上传完成 $fileName - ${result.javaClass.simpleName}")

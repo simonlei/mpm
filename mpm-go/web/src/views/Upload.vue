@@ -108,7 +108,6 @@ const userStore = useUserStore()
 const files = ref<UploadFile[]>([])
 const uploading = ref(false)
 const uploadedCount = ref(0)
-const batchId = ref('')
 
 const uploadProgress = computed(() => {
   if (files.value.length === 0) return 0
@@ -132,7 +131,6 @@ const startUpload = async () => {
   
   uploading.value = true
   uploadedCount.value = 0
-  batchId.value = Date.now().toString()
   
   for (let i = 0; i < files.value.length; i++) {
     const file = files.value[i]
@@ -155,7 +153,6 @@ const startUpload = async () => {
 const uploadFile = async (file: File) => {
   const formData = new FormData()
   formData.append('file', file)
-  formData.append('batchId', batchId.value)
   formData.append('lastModified', file.lastModified.toString())
   
   await axios.post('/api/uploadPhoto', formData, {

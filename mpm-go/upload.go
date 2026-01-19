@@ -12,14 +12,13 @@ import (
 
 func uploadPhoto(c *gin.Context) {
 	lastModified := c.PostForm("lastModified")
-	batchId := c.PostForm("batchId")
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
 		panic(err)
 	}
 	defer file.Close()
 	l.Info("total files %d with %d", header.Size, lastModified)
-	key := "upload/" + batchId + "_" + getFullPathName(header.Header.Get("Content-Disposition"))
+	key := "upload/" + getFullPathName(header.Header.Get("Content-Disposition"))
 	tmpFile, err := os.CreateTemp("", "mpm*"+header.Filename)
 
 	if err != nil {
@@ -63,12 +62,12 @@ func uploadFile(key, lastModified, contentType string, size int64, fileName stri
 	file, _ := os.Open(fileName)
 	defer file.Close()
 	l.Info("Key is	", key)
-	// upload/1616851720630_tmpupload/七上1025义工/IMG_002.jpg
+	// upload/tmpupload/七上1025义工/IMG_002.jpg
 	paths := strings.Split(key, "/")
 	path := "/" + paths[1]
-	// name: 1616851720630_tmpupload 去掉前面的 1616851720630_
-	parent := existOrCreate(nil, path, paths[1][14:], true)
-	// skip upload, 1616851720630_tmpupload and last one
+	// name: tmpupload
+	parent := existOrCreate(nil, path, paths[1], true)
+	// skip upload, tmpupload and last one
 	if len(paths) > 2 {
 		for i := 2; i < len(paths)-1; i++ {
 			path += "/" + paths[i]

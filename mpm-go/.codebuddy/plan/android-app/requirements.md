@@ -104,7 +104,6 @@ Android应用将基于现有的后台API（详见API文档.md）进行开发，�
 
 1. WHEN 用户点击上传按钮 THEN 系统 SHALL 显示照片选择器，支持从相册选择多张照片
 2. WHEN 用户选择照片后 THEN 系统 SHALL 显示待上传照片列表，包含缩略图和文件名
-3. WHEN 用户点击开始上传 THEN 系统 SHALL 为本次上传生成唯一的 `batchId`
 4. WHEN 上传照片时 THEN 系统 SHALL 调用 `/api/uploadPhoto` 接口，使用 `multipart/form-data` 格式
 5. WHEN 上传进行中 THEN 系统 SHALL 显示每张照片的上传进度条和整体进度
 6. IF 某张照片上传失败 THEN 系统 SHALL 标记该照片为失败状态，并允许重试
