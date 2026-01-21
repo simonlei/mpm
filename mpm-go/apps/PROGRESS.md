@@ -3,7 +3,7 @@
 ## 项目概述
 MPM (My Photo Manager) Android应用开发项目，基于现有的后台API和Web应用，实现功能完整的移动端照片管理应用。
 
-## 已完成任务 (15/30)
+## 已完成任务 (16/30)
 
 ### ✅ 任务1：初始化项目结构和核心配置
 **完成时间**: 2025-12-19
@@ -578,6 +578,91 @@ MPM (My Photo Manager) Android应用开发项目，基于现有的后台API和We
 
 ---
 
+### ✅ 任务14：实现后台上传和通知
+**完成时间**: 2026-01-21
+
+**完成内容**:
+1. ✅ 添加权限和服务声明
+   - 添加FOREGROUND_SERVICE权限
+   - 添加FOREGROUND_SERVICE_DATA_SYNC权限
+   - 添加POST_NOTIFICATIONS权限（Android 13+）
+   - 在AndroidManifest中声明PhotoUploadService
+
+2. ✅ 创建NotificationHelper工具类
+   - 创建通知渠道（Android 8.0+）
+   - 实现上传进度通知（显示已上传/总数）
+   - 实现上传完成通知（显示成功和失败数量）
+   - 实现上传失败通知
+   - 支持通知点击跳转到应用
+
+3. ✅ 创建BackgroundRestrictionChecker工具类
+   - 检测系统后台限制（Android 9.0+）
+   - 检测省电模式
+   - 识别国产手机品牌（小米、OPPO、vivo、华为等）
+   - 判断是否需要显示权限引导
+
+4. ✅ 创建PhotoUploadService前台服务
+   - 使用Foreground Service实现后台上传
+   - 在5秒内调用startForeground显示持久通知
+   - 支持接收文件URI、文件名、大小、修改时间
+   - 实时更新上传进度通知
+   - 上传完成后显示结果通知
+   - 使用CoroutineScope管理异步任务
+
+5. ✅ 创建BackgroundPermissionGuideDialog组件
+   - 根据手机品牌显示不同的设置引导
+   - 支持vivo、OPPO、小米、华为等品牌
+   - 提供"去设置"按钮跳转到应用详情页
+   - 提供"稍后"按钮延迟设置
+
+6. ✅ 扩展UploadViewModel
+   - 添加后台上传状态管理
+   - 添加showBackgroundPermissionGuide状态
+   - 实现startBackgroundUpload方法（检查后台限制）
+   - 实现forceStartBackgroundUpload方法（强制启动）
+   - 实现dismissBackgroundPermissionGuide方法
+   - 实现resetBackgroundUploadState方法
+   - 前台上传改名为startUpload（保持应用在前台）
+
+7. ✅ 更新UploadScreen UI
+   - 添加"前台上传"和"后台上传"两个按钮
+   - 后台上传按钮使用secondary颜色区分
+   - 显示后台上传提示卡片（可离开页面或锁屏）
+   - 集成BackgroundPermissionGuideDialog
+   - 用户关闭引导后仍尝试启动后台上传
+
+**技术要点**:
+- 使用Foreground Service确保后台任务不被杀死
+- 必须在5秒内调用startForeground，否则会崩溃
+- 使用NotificationCompat兼容不同Android版本
+- 通知优先级设置为LOW，避免打扰用户
+- 服务类型声明为dataSync（数据同步）
+- 使用SupervisorJob确保单个上传失败不影响其他任务
+
+**国产手机适配**:
+- 检测小米、OPPO、vivo、华为等品牌
+- 提供针对性的权限设置引导
+- 引导用户关闭省电优化
+- 引导用户允许后台运行和自启动
+- 即使有后台限制，仍尝试启动服务
+
+**用户体验优化**:
+- 前台上传：适合少量文件，需要保持应用在前台
+- 后台上传：适合大量文件，可以锁屏或切换应用
+- 显示持久通知，实时更新上传进度
+- 上传完成后显示结果通知（成功/失败数量）
+- 通知可点击跳转回应用
+- 后台上传启动后显示提示卡片
+
+**注意事项**:
+- Android 13+需要请求POST_NOTIFICATIONS权限
+- 国产手机可能需要用户手动设置白名单
+- 即使使用Foreground Service，某些厂商仍可能限制
+- 建议用户在设置中关闭省电优化
+- 后台上传时文件列表会被清空（已交给服务处理）
+
+---
+
 ### ✅ 任务15：优化导航架构 - 设置页移至右上角
 **完成时间**: 2026-01-14
 
@@ -749,7 +834,7 @@ MPM (My Photo Manager) Android应用开发项目，基于现有的后台API和We
 
 ---
 
-## 待完成任务 (13/30)
+## 待完成任务 (14/30)
 
 ### 🔄 第二阶段：用户认证模块 (P0 - MVP核心)
 已完成所有任务 ✅
@@ -766,9 +851,9 @@ MPM (My Photo Manager) Android应用开发项目，基于现有的后台API和We
 ### ✅ 第六阶段：照片筛选和搜索 (P1 - 核心功能)
 已完成所有任务 ✅
 
-### 🔄 第七阶段：照片上传功能 (P1 - 核心功能)
+### ✅ 第七阶段：照片上传功能 (P1 - 核心功能)
 - [x] 任务13：实现照片选择和上传 ✅
-- [ ] 任务14：实现后台上传和通知
+- [x] 任务14：实现后台上传和通知 ✅
 
 ### 🔄 第八阶段：活动管理 (P1 - 核心功能)
 - [x] 任务15：实现活动列表和详情 ✅
@@ -905,9 +990,9 @@ apps/
 ## 项目统计
 
 - **总任务数**: 30
-- **已完成**: 15 (50%)
+- **已完成**: 16 (53%)
 - **进行中**: 0
-- **待开始**: 15 (50%)
+- **待开始**: 14 (47%)
 - **预计完成时间**: 根据开发进度持续更新
 
 ---
@@ -1080,4 +1165,4 @@ apps/
 
 ---
 
-*最后更新时间: 2026-01-21 16:15*
+*最后更新时间: 2026-01-21 17:02*

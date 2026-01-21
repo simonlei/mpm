@@ -37,6 +37,19 @@ fun UploadScreen(
         }
     }
     
+    // 显示后台权限引导对话框
+    if (uiState.showBackgroundPermissionGuide) {
+        val checker = com.simon.mpm.util.BackgroundRestrictionChecker(context)
+        BackgroundPermissionGuideDialog(
+            manufacturer = checker.getManufacturer(),
+            onDismiss = {
+                viewModel.dismissBackgroundPermissionGuide()
+                // 用户关闭对话框后，仍然尝试启动后台上传
+                viewModel.forceStartBackgroundUpload(context)
+            }
+        )
+    }
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -106,6 +119,49 @@ fun UploadScreen(
                 }
             }
             
+            // 后台上传提示
+            if (uiState.isUploadingInBackground) {
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CloudDone,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "正在后台上传",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                            Text(
+                                text = "您可以离开此页面或锁屏，上传会在后台继续进行",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+                        TextButton(
+                            onClick = { viewModel.resetBackgroundUploadState() }
+                        ) {
+                            Text("知道了")
+                        }
+                    }
+                }
+            }
+            
             // 操作按钮和进度
             if (uiState.files.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -128,7 +184,23 @@ fun UploadScreen(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("开始上传 (${uiState.files.size})")
+                            Text("前台上传 (${uiState.files.size})")
+                        }
+                        
+                        Button(
+                            onClick = { viewModel.startBackgroundUpload(context) },
+                            enabled = !uiState.isUploading && uiState.files.isNotEmpty(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CloudUpload,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("后台上传")
                         }
                         
                         OutlinedButton(

@@ -49,7 +49,9 @@ data class UploadUiState(
     val files: List<UploadFile> = emptyList(),
     val isUploading: Boolean = false,
     val uploadedCount: Int = 0,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isUploadingInBackground: Boolean = false,
+    val showBackgroundPermissionGuide: Boolean = false
 )
 
 /**
@@ -102,7 +104,7 @@ class UploadViewModel @Inject constructor(
     }
 
     /**
-     * 开始上传
+     * 开始前台上传（保持应用在前台）
      */
     fun startUpload(context: Context) {
         if (_uiState.value.isUploading || _uiState.value.files.isEmpty()) {
@@ -155,6 +157,79 @@ class UploadViewModel @Inject constructor(
             _uiState.update { state ->
                 state.copy(isUploading = false)
             }
+        }
+    }
+
+    /**
+     * 开始后台上传（可以离开应用）
+     */
+    fun startBackgroundUpload(context: Context) {
+        if (_uiState.value.files.isEmpty()) {
+            return
+        }
+
+        // 检查后台限制
+        val checker = com.simon.mpm.util.BackgroundRestrictionChecker(context)
+        if (checker.shouldShowWarning()) {
+            _uiState.update { state ->
+                state.copy(showBackgroundPermissionGuide = true)
+            }
+            return
+        }
+
+        // 启动后台上传服务
+        startBackgroundUploadService(context)
+    }
+
+    /**
+     * 强制启动后台上传（用户已确认权限设置）
+     */
+    fun forceStartBackgroundUpload(context: Context) {
+        startBackgroundUploadService(context)
+    }
+
+    /**
+     * 启动后台上传服务
+     */
+    private fun startBackgroundUploadService(context: Context) {
+        val fileUris = _uiState.value.files.map { it.uri.toString() }
+        val fileNames = _uiState.value.files.map { it.fileName }
+        val fileSizes = _uiState.value.files.map { it.size }
+        val fileModifiedTimes = _uiState.value.files.map { it.lastModified }
+
+        com.simon.mpm.service.PhotoUploadService.start(
+            context = context,
+            fileUris = fileUris,
+            fileNames = fileNames,
+            fileSizes = fileSizes,
+            fileModifiedTimes = fileModifiedTimes
+        )
+
+        _uiState.update { state ->
+            state.copy(
+                isUploadingInBackground = true,
+                files = emptyList() // 清空列表，因为已经交给后台服务处理
+            )
+        }
+
+        Log.d(TAG, "后台上传服务已启动")
+    }
+
+    /**
+     * 关闭后台权限引导对话框
+     */
+    fun dismissBackgroundPermissionGuide() {
+        _uiState.update { state ->
+            state.copy(showBackgroundPermissionGuide = false)
+        }
+    }
+
+    /**
+     * 重置后台上传状态
+     */
+    fun resetBackgroundUploadState() {
+        _uiState.update { state ->
+            state.copy(isUploadingInBackground = false)
         }
     }
 
