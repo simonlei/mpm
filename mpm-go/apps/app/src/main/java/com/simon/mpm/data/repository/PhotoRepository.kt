@@ -352,7 +352,10 @@ class PhotoRepository @Inject constructor(
         context: android.content.Context
     ): Result<Unit> {
         return try {
-            Log.d(TAG, "uploadPhoto: 开始上传 $fileName")
+            Log.d(TAG, "uploadPhoto: 开始上传")
+            Log.d(TAG, "  - uri: $uri")
+            Log.d(TAG, "  - fileName: $fileName")
+            Log.d(TAG, "  - lastModified: $lastModified")
             
             // 读取文件内容
             val inputStream = context.contentResolver.openInputStream(uri)
@@ -360,6 +363,8 @@ class PhotoRepository @Inject constructor(
             
             val bytes = inputStream.readBytes()
             inputStream.close()
+            
+            Log.d(TAG, "  - 文件大小: ${bytes.size} bytes")
             
             // 创建RequestBody
             val requestBody = bytes.toRequestBody(
@@ -373,18 +378,26 @@ class PhotoRepository @Inject constructor(
                 requestBody
             )
             
+            Log.d(TAG, "  - MultipartBody.Part 创建完成，filename=$fileName")
+            
             // 创建lastModified的RequestBody
             val lastModifiedBody = lastModified.toString().toRequestBody(
                 "text/plain".toMediaTypeOrNull()
             )
             
-            // 调用API
-            val result = safeApiCallUnit {
+            // 调用API（后端返回 {"code":0,"data":0}，data 是 Int 类型）
+            val result = safeApiCall {
                 apiService.uploadPhoto(filePart, lastModifiedBody)
             }
             
             Log.d(TAG, "uploadPhoto: 上传完成 $fileName - ${result.javaClass.simpleName}")
-            result
+            
+            // 将 Result<Int> 转换为 Result<Unit>
+            when (result) {
+                is Result.Success -> Result.Success(Unit)
+                is Result.Error -> result
+                else -> result as Result<Unit>
+            }
         } catch (e: Exception) {
             Log.e(TAG, "uploadPhoto: 上传失败 $fileName", e)
             Result.Error(e, "上传失败: ${e.message}")

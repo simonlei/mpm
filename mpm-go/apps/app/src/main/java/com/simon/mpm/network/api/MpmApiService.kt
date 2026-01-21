@@ -74,7 +74,7 @@ interface MpmApiService {
     suspend fun uploadPhoto(
         @Part file: MultipartBody.Part,
         @Part("lastModified") lastModified: RequestBody
-    ): ApiResponse<Unit>
+    ): ApiResponse<Int>
     
     /**
      * 获取活动列表
