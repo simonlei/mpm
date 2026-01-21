@@ -188,7 +188,7 @@ private fun ActivityItem(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 // 日期
-                if (!activity.start_date.isNullOrBlank() || !activity.end_date.isNullOrBlank()) {
+                if (!activity.startDate.isNullOrBlank() || !activity.endDate.isNullOrBlank()) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -201,10 +201,10 @@ private fun ActivityItem(
                         )
                         Text(
                             text = when {
-                                !activity.start_date.isNullOrBlank() && !activity.end_date.isNullOrBlank() ->
-                                    "${activity.start_date} ~ ${activity.end_date}"
-                                !activity.start_date.isNullOrBlank() -> activity.start_date
-                                else -> activity.end_date ?: ""
+                                !activity.startDate.isNullOrBlank() && !activity.endDate.isNullOrBlank() ->
+                                    "${activity.startDate} ~ ${activity.endDate}"
+                                !activity.startDate.isNullOrBlank() -> activity.startDate
+                                else -> activity.endDate ?: ""
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
