@@ -826,7 +826,17 @@ MPM (My Photo Manager) Android应用开发项目，基于现有的后台API和We
    - 更新最后同步时间
    - 扩展NotificationHelper支持同步通知
 
-5. ⬜ 创建WorkManager任务
+5. ✅ 创建WorkManager任务
+   - 创建PhotoSyncWorker实现定期同步
+   - 使用@HiltWorker支持依赖注入
+   - 支持约束条件（WiFi、充电、电量充足）
+   - 支持重试策略（最多3次）
+   - 创建SyncWorkManager管理同步任务
+   - 支持调度、取消、查询任务状态
+   - 配置HiltWorkerFactory
+   - 禁用WorkManager默认初始化
+
+6. ⬜ 创建SyncViewModel
    - 使用Foreground Service实现后台同步
    - 定期扫描配置的目录（使用WorkManager）
    - 检测新增和修改的文件
