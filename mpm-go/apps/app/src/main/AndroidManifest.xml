@@ -41,6 +41,12 @@
             android:name=".service.PhotoUploadService"
             android:foregroundServiceType="dataSync"
             android:exported="false" />
+        
+        <!-- 照片自动同步前台服务 -->
+        <service
+            android:name=".service.PhotoSyncService"
+            android:foregroundServiceType="dataSync"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -816,7 +816,17 @@ MPM (My Photo Manager) Android应用开发项目，基于现有的后台API和We
    - SyncDirectory实体：记录同步目录配置
      * 目录路径、是否启用、最后扫描时间
 
-4. ⬜ 创建PhotoSyncService后台服务
+4. ✅ 创建PhotoSyncService后台服务
+   - 使用Foreground Service实现后台同步
+   - 扫描配置的目录并检测新增和修改的文件
+   - 自动上传到服务器
+   - 显示同步进度通知
+   - 支持WiFi网络检测
+   - 支持暂停和停止同步
+   - 更新最后同步时间
+   - 扩展NotificationHelper支持同步通知
+
+5. ⬜ 创建WorkManager任务
    - 使用Foreground Service实现后台同步
    - 定期扫描配置的目录（使用WorkManager）
    - 检测新增和修改的文件
