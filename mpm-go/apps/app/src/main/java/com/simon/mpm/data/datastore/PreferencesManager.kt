@@ -35,6 +35,14 @@ class PreferencesManager @Inject constructor(
         val IMAGE_QUALITY = stringPreferencesKey(Constants.PREF_IMAGE_QUALITY)
         val THEME_MODE = stringPreferencesKey(Constants.PREF_THEME_MODE)
         val UPLOAD_WIFI_ONLY = booleanPreferencesKey(Constants.PREF_UPLOAD_WIFI_ONLY)
+        
+        // 自动同步相关
+        val AUTO_SYNC_ENABLED = booleanPreferencesKey(Constants.PREF_AUTO_SYNC_ENABLED)
+        val SYNC_DIRECTORIES = stringPreferencesKey(Constants.PREF_SYNC_DIRECTORIES)
+        val SYNC_INTERVAL = stringPreferencesKey(Constants.PREF_SYNC_INTERVAL)
+        val SYNC_WIFI_ONLY = booleanPreferencesKey(Constants.PREF_SYNC_WIFI_ONLY)
+        val SYNC_FILE_TYPES = stringPreferencesKey(Constants.PREF_SYNC_FILE_TYPES)
+        val LAST_SYNC_TIME = stringPreferencesKey(Constants.PREF_LAST_SYNC_TIME)
     }
     
     // 服务器地址
@@ -118,6 +126,73 @@ class PreferencesManager @Inject constructor(
         dataStore.edit { preferences ->
             preferences.remove(PreferencesKeys.ACCOUNT)
             preferences.remove(PreferencesKeys.SIGNATURE)
+        }
+    }
+    
+    // 自动同步开关
+    val autoSyncEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.AUTO_SYNC_ENABLED] ?: false
+    }
+    
+    suspend fun setAutoSyncEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.AUTO_SYNC_ENABLED] = enabled
+        }
+    }
+    
+    // 同步目录列表（使用分号分隔）
+    val syncDirectories: Flow<List<String>> = dataStore.data.map { preferences ->
+        val directoriesString = preferences[PreferencesKeys.SYNC_DIRECTORIES] ?: ""
+        if (directoriesString.isEmpty()) emptyList() else directoriesString.split(";")
+    }
+    
+    suspend fun setSyncDirectories(directories: List<String>) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SYNC_DIRECTORIES] = directories.joinToString(";")
+        }
+    }
+    
+    // 同步间隔
+    val syncInterval: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SYNC_INTERVAL] ?: Constants.SYNC_INTERVAL_WIFI_ONLY
+    }
+    
+    suspend fun setSyncInterval(interval: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SYNC_INTERVAL] = interval
+        }
+    }
+    
+    // 仅WiFi同步
+    val syncWifiOnly: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SYNC_WIFI_ONLY] ?: true
+    }
+    
+    suspend fun setSyncWifiOnly(wifiOnly: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SYNC_WIFI_ONLY] = wifiOnly
+        }
+    }
+    
+    // 同步文件类型
+    val syncFileTypes: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SYNC_FILE_TYPES] ?: Constants.SYNC_FILE_TYPE_ALL
+    }
+    
+    suspend fun setSyncFileTypes(fileTypes: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SYNC_FILE_TYPES] = fileTypes
+        }
+    }
+    
+    // 最后同步时间
+    val lastSyncTime: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.LAST_SYNC_TIME]
+    }
+    
+    suspend fun setLastSyncTime(time: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LAST_SYNC_TIME] = time
         }
     }
     

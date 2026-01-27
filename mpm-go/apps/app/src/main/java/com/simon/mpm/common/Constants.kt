@@ -16,6 +16,14 @@ object Constants {
     const val PREF_THEME_MODE = "theme_mode"
     const val PREF_UPLOAD_WIFI_ONLY = "upload_wifi_only"
     
+    // 自动同步相关
+    const val PREF_AUTO_SYNC_ENABLED = "auto_sync_enabled"
+    const val PREF_SYNC_DIRECTORIES = "sync_directories"
+    const val PREF_SYNC_INTERVAL = "sync_interval"
+    const val PREF_SYNC_WIFI_ONLY = "sync_wifi_only"
+    const val PREF_SYNC_FILE_TYPES = "sync_file_types"
+    const val PREF_LAST_SYNC_TIME = "last_sync_time"
+    
     // 图片质量
     const val IMAGE_QUALITY_ORIGINAL = "original"
     const val IMAGE_QUALITY_HIGH = "high"
@@ -25,6 +33,17 @@ object Constants {
     const val THEME_MODE_SYSTEM = "system"
     const val THEME_MODE_LIGHT = "light"
     const val THEME_MODE_DARK = "dark"
+    
+    // 同步间隔
+    const val SYNC_INTERVAL_IMMEDIATE = "immediate"
+    const val SYNC_INTERVAL_HOURLY = "hourly"
+    const val SYNC_INTERVAL_DAILY = "daily"
+    const val SYNC_INTERVAL_WIFI_ONLY = "wifi_only"
+    
+    // 同步文件类型
+    const val SYNC_FILE_TYPE_ALL = "all"
+    const val SYNC_FILE_TYPE_IMAGES = "images"
+    const val SYNC_FILE_TYPE_VIDEOS = "videos"
     
     // API路径
     const val API_CHECK_PASSWORD = "/api/checkPassword"
