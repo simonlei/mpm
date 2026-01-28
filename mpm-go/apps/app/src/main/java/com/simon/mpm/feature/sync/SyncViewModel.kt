@@ -9,6 +9,7 @@ import com.simon.mpm.data.database.entity.SyncFile
 import com.simon.mpm.data.database.entity.SyncStatus
 import com.simon.mpm.data.datastore.PreferencesManager
 import com.simon.mpm.data.repository.SyncRepository
+import com.simon.mpm.service.MediaContentObserver
 import com.simon.mpm.service.PhotoSyncService
 import com.simon.mpm.util.SyncWorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,7 +50,8 @@ data class SyncUiState(
 class SyncViewModel @Inject constructor(
     private val syncRepository: SyncRepository,
     private val preferencesManager: PreferencesManager,
-    private val syncWorkManager: SyncWorkManager
+    private val syncWorkManager: SyncWorkManager,
+    private val mediaContentObserver: MediaContentObserver
 ) : ViewModel() {
 
     companion object {
@@ -159,10 +161,14 @@ class SyncViewModel @Inject constructor(
                         requireCharging = false,
                         requireBatteryNotLow = true
                     )
-                    Log.d(TAG, "自动同步已启用，任务已调度")
+                    // 注册媒体内容观察者
+                    mediaContentObserver.register()
+                    Log.d(TAG, "自动同步已启用，任务已调度，观察者已注册")
                 } else {
                     syncWorkManager.cancelSyncWork()
-                    Log.d(TAG, "自动同步已禁用，任务已取消")
+                    // 取消注册媒体内容观察者
+                    mediaContentObserver.unregister()
+                    Log.d(TAG, "自动同步已禁用，任务已取消，观察者已取消注册")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "切换自动同步失败", e)
