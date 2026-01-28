@@ -2014,4 +2014,82 @@ keytool -genkey -v -keystore mpm-release.keystore -alias mpm -keyalg RSA -keysiz
 
 ---
 
-*最后更新时间: 2026-01-28 13:15*
+### 2026-01-28: 修复第一次添加同步目录时不同步已有文件的问题
+
+**问题描述**:
+- 用户第一次添加一个目录到自动同步列表时
+- 该目录下已存在的照片和视频不会被同步
+- 只有之后新增的文件才会被同步
+- 不符合用户期望（第一次应该同步所有文件）
+
+**根本原因**:
+- `SyncRepository.scanDirectory()` 方法在扫描目录时，会检查文件是否已存在于数据库中
+- 如果文件已存在（`existingFile != null`），则不会将其添加到待同步列表
+- 只有新文件（`existingFile == null`）或修改过的文件才会被标记为待同步
+- 这导致第一次添加目录时，已有的文件被忽略
+
+**修复方案**:
+- 修改 `scanDirectory()` 方法，添加"第一次扫描"的判断逻辑
+- 使用 `directory.lastScanTime == null` 判断是否是第一次扫描
+- 第一次扫描时，将所有未同步的文件（`syncStatus != SYNCED`）都标记为待同步
+- 非第一次扫描时，保持原有逻辑（只同步新增和修改的文件）
+
+**修改内容**:
+```kotlin
+// 判断是否是第一次扫描该目录
+val isFirstScan = directory.lastScanTime == null
+if (isFirstScan) {
+    Log.d(TAG, "第一次扫描目录: ${directory.directoryPath}，将同步所有文件")
+}
+
+// 在处理文件时
+if (existingFile == null) {
+    // 新文件，添加到待同步列表
+    files.add(syncFile)
+} else if (isFirstScan && existingFile.syncStatus != SyncStatus.SYNCED) {
+    // 第一次扫描目录时，将所有未同步的文件标记为待同步
+    val updatedFile = existingFile.copy(
+        syncStatus = SyncStatus.PENDING,
+        updatedAt = System.currentTimeMillis()
+    )
+    syncFileDao.update(updatedFile)
+    files.add(updatedFile)
+} else if (!isFirstScan && existingFile.modifiedTime < modifiedTime) {
+    // 非第一次扫描时，只有文件修改时间变化才重新同步
+    val updatedFile = existingFile.copy(
+        syncStatus = SyncStatus.PENDING,
+        updatedAt = System.currentTimeMillis()
+    )
+    syncFileDao.update(updatedFile)
+    files.add(updatedFile)
+}
+```
+
+**影响范围**:
+- ✅ 第一次添加同步目录时，所有已有文件都会被同步
+- ✅ 符合用户期望，提升用户体验
+- ✅ 不影响后续的增量同步逻辑
+- ✅ 已同步的文件不会重复同步
+
+**相关文件**:
+- `SyncRepository.kt` - 修改scanDirectory方法
+
+**技术要点**:
+- 使用 `lastScanTime == null` 判断是否是第一次扫描
+- 第一次扫描时，将所有未同步的文件标记为待同步
+- 已同步的文件（`syncStatus == SYNCED`）不会重复同步
+- 保持增量同步的高效性
+
+**用户价值**:
+- ✅ 第一次添加目录时，自动同步所有已有文件
+- ✅ 符合用户直觉，无需手动操作
+- ✅ 提升自动同步功能的完整性
+- ✅ 避免用户困惑（为什么已有文件没有同步）
+
+**编译状态**:
+- ✅ 编译通过，无错误
+- ✅ 功能正常，可以测试
+
+---
+
+*最后更新时间: 2026-01-28 17:00*

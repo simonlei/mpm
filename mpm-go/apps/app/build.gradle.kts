@@ -138,6 +138,9 @@ dependencies {
     // LocalBroadcastManager
     implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
     
+    // DocumentFile
+    implementation("androidx.documentfile:documentfile:1.0.1")
+    
     // Accompanist
     implementation(libs.accompanist.permissions)
     implementation(libs.accompanist.systemuicontroller)

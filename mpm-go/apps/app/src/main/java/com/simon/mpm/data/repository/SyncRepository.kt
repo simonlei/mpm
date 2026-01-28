@@ -3,8 +3,11 @@ package com.simon.mpm.data.repository
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
+import androidx.documentfile.provider.DocumentFile
 import com.simon.mpm.common.Constants
 import com.simon.mpm.data.database.dao.SyncDirectoryDao
 import com.simon.mpm.data.database.dao.SyncFileDao
@@ -117,12 +120,80 @@ class SyncRepository @Inject constructor(
     }
     
     /**
+     * 将DocumentsContract URI转换为真实的文件系统路径
+     */
+    private fun getPathFromUri(uri: String): String? {
+        return try {
+            if (!uri.startsWith("content://")) {
+                // 已经是文件系统路径
+                return uri
+            }
+            
+            val treeUri = Uri.parse(uri)
+            val docId = DocumentsContract.getTreeDocumentId(treeUri)
+            
+            Log.d(TAG, "URI: $uri")
+            Log.d(TAG, "Document ID: $docId")
+            
+            // 解析document ID
+            // 格式通常是: "primary:DCIM" 或 "0000-0000:DCIM"
+            val split = docId.split(":")
+            if (split.size < 2) {
+                Log.e(TAG, "无效的document ID格式: $docId")
+                return null
+            }
+            
+            val type = split[0]
+            val path = split[1]
+            
+            // 根据存储类型构建真实路径
+            val realPath = when {
+                type.equals("primary", ignoreCase = true) -> {
+                    // 主存储（内部存储）
+                    "${Environment.getExternalStorageDirectory().absolutePath}/$path"
+                }
+                type.matches(Regex("^[0-9A-F]{4}-[0-9A-F]{4}$")) -> {
+                    // SD卡存储
+                    // 尝试从/storage目录查找
+                    "/storage/$type/$path"
+                }
+                else -> {
+                    Log.e(TAG, "未知的存储类型: $type")
+                    null
+                }
+            }
+            
+            Log.d(TAG, "转换后的真实路径: $realPath")
+            realPath
+        } catch (e: Exception) {
+            Log.e(TAG, "URI转换失败: $uri", e)
+            null
+        }
+    }
+    
+    /**
      * 扫描指定目录下的媒体文件
      */
     suspend fun scanDirectory(directory: SyncDirectory): Result<List<SyncFile>> {
         return try {
             val files = mutableListOf<SyncFile>()
             val fileTypes = preferencesManager.syncFileTypes.first()
+            
+            // 将URI转换为真实路径
+            val realPath = getPathFromUri(directory.directoryPath)
+            if (realPath == null) {
+                Log.e(TAG, "无法转换目录URI为真实路径: ${directory.directoryPath}")
+                return Result.failure(Exception("无法转换目录URI为真实路径"))
+            }
+            
+            Log.d(TAG, "开始扫描目录: ${directory.directoryPath}")
+            Log.d(TAG, "真实路径: $realPath")
+            
+            // 判断是否是第一次扫描该目录
+            val isFirstScan = directory.lastScanTime == null
+            if (isFirstScan) {
+                Log.d(TAG, "第一次扫描目录，将同步所有文件")
+            }
             
             // 使用MediaStore扫描媒体文件
             val projection = arrayOf(
@@ -150,7 +221,10 @@ class SyncRepository @Inject constructor(
                 }
             }
             
-            val selectionArgs = arrayOf("${directory.directoryPath}%")
+            val selectionArgs = arrayOf("$realPath%")
+            
+            Log.d(TAG, "MediaStore查询条件: $selection")
+            Log.d(TAG, "查询参数: ${selectionArgs.joinToString()}")
             
             context.contentResolver.query(
                 MediaStore.Files.getContentUri("external"),
@@ -164,16 +238,27 @@ class SyncRepository @Inject constructor(
                 val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
                 val modifiedColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)
                 
+                val totalCount = cursor.count
+                Log.d(TAG, "MediaStore查询到 $totalCount 个文件")
+                
+                var fileIndex = 0
                 while (cursor.moveToNext()) {
+                    fileIndex++
                     val filePath = cursor.getString(dataColumn)
                     val fileName = cursor.getString(nameColumn)
                     val fileSize = cursor.getLong(sizeColumn)
                     val modifiedTime = cursor.getLong(modifiedColumn) * 1000 // 转换为毫秒
                     
+                    Log.d(TAG, "[$fileIndex/$totalCount] 文件: $fileName")
+                    Log.d(TAG, "  路径: $filePath")
+                    Log.d(TAG, "  大小: $fileSize bytes")
+                    
                     // 检查文件是否已存在于数据库
                     val existingFile = syncFileDao.getByFilePath(filePath)
+                    
                     if (existingFile == null) {
                         // 新文件，添加到待同步列表
+                        Log.d(TAG, "  状态: 新文件，添加到待同步列表")
                         val syncFile = SyncFile(
                             filePath = filePath,
                             fileName = fileName,
@@ -182,8 +267,21 @@ class SyncRepository @Inject constructor(
                             syncStatus = SyncStatus.PENDING
                         )
                         files.add(syncFile)
-                    } else if (existingFile.modifiedTime < modifiedTime) {
-                        // 文件已修改，更新状态为待同步
+                    } else if (existingFile.syncStatus == SyncStatus.FAILED) {
+                        // 文件同步失败，重新标记为待同步
+                        Log.d(TAG, "  状态: 文件同步失败，重新标记为待同步")
+                        val updatedFile = existingFile.copy(
+                            fileSize = fileSize,
+                            modifiedTime = modifiedTime,
+                            syncStatus = SyncStatus.PENDING,
+                            failureReason = null,
+                            updatedAt = System.currentTimeMillis()
+                        )
+                        syncFileDao.update(updatedFile)
+                        files.add(updatedFile)
+                    } else if (isFirstScan && existingFile.syncStatus != SyncStatus.SYNCED) {
+                        // 第一次扫描目录时，将所有未同步的文件标记为待同步
+                        Log.d(TAG, "  状态: 第一次扫描，文件已存在但未同步 (${existingFile.syncStatus})，标记为待同步")
                         val updatedFile = existingFile.copy(
                             fileSize = fileSize,
                             modifiedTime = modifiedTime,
@@ -192,8 +290,30 @@ class SyncRepository @Inject constructor(
                         )
                         syncFileDao.update(updatedFile)
                         files.add(updatedFile)
+                    } else if (!isFirstScan && existingFile.modifiedTime < modifiedTime) {
+                        // 非第一次扫描时，只有文件修改时间变化才重新同步
+                        Log.d(TAG, "  状态: 文件已修改 (旧时间: ${existingFile.modifiedTime}, 新时间: $modifiedTime)，标记为待同步")
+                        val updatedFile = existingFile.copy(
+                            fileSize = fileSize,
+                            modifiedTime = modifiedTime,
+                            syncStatus = SyncStatus.PENDING,
+                            updatedAt = System.currentTimeMillis()
+                        )
+                        syncFileDao.update(updatedFile)
+                        files.add(updatedFile)
+                    } else {
+                        // 文件已存在且无需同步
+                        if (existingFile != null) {
+                            Log.d(TAG, "  状态: 文件已存在，状态=${existingFile.syncStatus}, 跳过")
+                        }
                     }
                 }
+            }
+            
+            // 如果MediaStore查询不到文件，尝试使用DocumentFile直接扫描
+            if (files.isEmpty()) {
+                Log.d(TAG, "MediaStore未找到文件，尝试使用DocumentFile直接扫描")
+                scanDirectoryWithDocumentFile(directory, files, isFirstScan)
             }
             
             // 批量插入新文件
@@ -340,6 +460,127 @@ class SyncRepository @Inject constructor(
         } catch (e: Exception) {
             Log.e(TAG, "计算文件哈希失败: $filePath", e)
             null
+        }
+    }
+    
+    /**
+     * 使用DocumentFile直接扫描目录（备用方案）
+     */
+    private suspend fun scanDirectoryWithDocumentFile(
+        directory: SyncDirectory,
+        files: MutableList<SyncFile>,
+        isFirstScan: Boolean
+    ) {
+        try {
+            val treeUri = Uri.parse(directory.directoryPath)
+            val documentFile = DocumentFile.fromTreeUri(context, treeUri)
+            
+            if (documentFile == null || !documentFile.exists() || !documentFile.isDirectory) {
+                Log.e(TAG, "无效的目录URI: ${directory.directoryPath}")
+                return
+            }
+            
+            Log.d(TAG, "使用DocumentFile扫描目录: ${documentFile.name}")
+            
+            val fileTypes = preferencesManager.syncFileTypes.first()
+            val allFiles = mutableListOf<DocumentFile>()
+            
+            // 递归扫描所有文件
+            fun scanRecursive(dir: DocumentFile) {
+                dir.listFiles().forEach { file ->
+                    if (file.isDirectory) {
+                        scanRecursive(file)
+                    } else if (file.isFile) {
+                        allFiles.add(file)
+                    }
+                }
+            }
+            
+            scanRecursive(documentFile)
+            
+            Log.d(TAG, "DocumentFile扫描到 ${allFiles.size} 个文件")
+            
+            // 过滤文件类型
+            val filteredFiles = allFiles.filter { file ->
+                val mimeType = file.type ?: ""
+                when (fileTypes) {
+                    Constants.SYNC_FILE_TYPE_IMAGES -> mimeType.startsWith("image/")
+                    Constants.SYNC_FILE_TYPE_VIDEOS -> mimeType.startsWith("video/")
+                    else -> mimeType.startsWith("image/") || mimeType.startsWith("video/")
+                }
+            }
+            
+            Log.d(TAG, "过滤后剩余 ${filteredFiles.size} 个媒体文件")
+            
+            // 处理每个文件
+            filteredFiles.forEachIndexed { index, file ->
+                val fileName = file.name ?: "unknown"
+                val fileSize = file.length()
+                val modifiedTime = file.lastModified()
+                
+                Log.d(TAG, "[${index + 1}/${filteredFiles.size}] 文件: $fileName")
+                Log.d(TAG, "  URI: ${file.uri}")
+                Log.d(TAG, "  大小: $fileSize bytes")
+                Log.d(TAG, "  类型: ${file.type}")
+                
+                // 使用URI作为文件路径（因为无法获取真实路径）
+                val filePath = file.uri.toString()
+                
+                // 检查文件是否已存在于数据库
+                val existingFile = syncFileDao.getByFilePath(filePath)
+                
+                if (existingFile == null) {
+                    // 新文件，添加到待同步列表
+                    Log.d(TAG, "  状态: 新文件，添加到待同步列表")
+                    val syncFile = SyncFile(
+                        filePath = filePath,
+                        fileName = fileName,
+                        fileSize = fileSize,
+                        modifiedTime = modifiedTime,
+                        syncStatus = SyncStatus.PENDING
+                    )
+                    files.add(syncFile)
+                } else if (existingFile.syncStatus == SyncStatus.FAILED) {
+                    // 文件同步失败，重新标记为待同步
+                    Log.d(TAG, "  状态: 文件同步失败，重新标记为待同步")
+                    val updatedFile = existingFile.copy(
+                        fileSize = fileSize,
+                        modifiedTime = modifiedTime,
+                        syncStatus = SyncStatus.PENDING,
+                        failureReason = null,
+                        updatedAt = System.currentTimeMillis()
+                    )
+                    syncFileDao.update(updatedFile)
+                    files.add(updatedFile)
+                } else if (isFirstScan && existingFile.syncStatus != SyncStatus.SYNCED) {
+                    // 第一次扫描目录时，将所有未同步的文件标记为待同步
+                    Log.d(TAG, "  状态: 第一次扫描，文件已存在但未同步 (${existingFile.syncStatus})，标记为待同步")
+                    val updatedFile = existingFile.copy(
+                        fileSize = fileSize,
+                        modifiedTime = modifiedTime,
+                        syncStatus = SyncStatus.PENDING,
+                        updatedAt = System.currentTimeMillis()
+                    )
+                    syncFileDao.update(updatedFile)
+                    files.add(updatedFile)
+                } else if (!isFirstScan && existingFile.modifiedTime < modifiedTime) {
+                    // 非第一次扫描时，只有文件修改时间变化才重新同步
+                    Log.d(TAG, "  状态: 文件已修改 (旧时间: ${existingFile.modifiedTime}, 新时间: $modifiedTime)，标记为待同步")
+                    val updatedFile = existingFile.copy(
+                        fileSize = fileSize,
+                        modifiedTime = modifiedTime,
+                        syncStatus = SyncStatus.PENDING,
+                        updatedAt = System.currentTimeMillis()
+                    )
+                    syncFileDao.update(updatedFile)
+                    files.add(updatedFile)
+                } else {
+                    // 文件已存在且无需同步
+                    Log.d(TAG, "  状态: 文件已存在，状态=${existingFile.syncStatus}, 跳过")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "DocumentFile扫描失败", e)
         }
     }
     

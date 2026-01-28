@@ -198,11 +198,24 @@ class PhotoSyncService : Service() {
             }
 
             try {
+                // 解析URI（支持content URI和文件路径）
+                val uri = if (file.filePath.startsWith("content://")) {
+                    Uri.parse(file.filePath)
+                } else {
+                    Uri.fromFile(File(file.filePath))
+                }
+                
                 // 检查文件是否存在
-                val fileObj = File(file.filePath)
-                if (!fileObj.exists()) {
-                    Log.w(TAG, "文件不存在: ${file.filePath}")
-                    syncRepository.updateFileFailure(file.id, "文件不存在")
+                val fileExists = try {
+                    contentResolver.openInputStream(uri)?.use { true } ?: false
+                } catch (e: Exception) {
+                    Log.w(TAG, "无法打开文件: ${file.filePath}", e)
+                    false
+                }
+                
+                if (!fileExists) {
+                    Log.w(TAG, "文件不存在或无法访问: ${file.filePath}")
+                    syncRepository.updateFileFailure(file.id, "文件不存在或无法访问")
                     failedCount++
                     syncedCount++
                     continue
@@ -219,7 +232,6 @@ class PhotoSyncService : Service() {
                 notificationHelper.updateSyncProgress(syncedCount, totalCount)
 
                 // 上传文件
-                val uri = Uri.fromFile(fileObj)
                 val result = photoRepository.uploadPhoto(
                     uri = uri,
                     fileName = targetPath,
