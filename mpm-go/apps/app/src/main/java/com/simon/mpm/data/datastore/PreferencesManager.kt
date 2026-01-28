@@ -43,6 +43,7 @@ class PreferencesManager @Inject constructor(
         val SYNC_WIFI_ONLY = booleanPreferencesKey(Constants.PREF_SYNC_WIFI_ONLY)
         val SYNC_FILE_TYPES = stringPreferencesKey(Constants.PREF_SYNC_FILE_TYPES)
         val LAST_SYNC_TIME = stringPreferencesKey(Constants.PREF_LAST_SYNC_TIME)
+        val SYNC_CONFLICT_STRATEGY = stringPreferencesKey(Constants.PREF_SYNC_CONFLICT_STRATEGY)
     }
     
     // 服务器地址
@@ -193,6 +194,17 @@ class PreferencesManager @Inject constructor(
     suspend fun setLastSyncTime(time: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.LAST_SYNC_TIME] = time
+        }
+    }
+    
+    // 同步冲突策略
+    val syncConflictStrategy: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SYNC_CONFLICT_STRATEGY] ?: "SKIP"
+    }
+    
+    suspend fun setSyncConflictStrategy(strategy: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SYNC_CONFLICT_STRATEGY] = strategy
         }
     }
     

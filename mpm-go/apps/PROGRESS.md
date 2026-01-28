@@ -875,7 +875,18 @@ MPM (My Photo Manager) Android应用开发项目，基于现有的后台API和We
    - 支持应用启动时自动注册（如果启用自动同步）
    - 支持应用退出时自动取消注册
 
-10. ⬜ 实现同步冲突处理
+10. ✅ 实现同步冲突处理
+   - 创建SyncConflictStrategy枚举类（跳过/覆盖/重命名）
+   - 在Constants中添加PREF_SYNC_CONFLICT_STRATEGY常量
+   - 在PreferencesManager中添加冲突策略配置项
+   - 在SyncViewModel中添加冲突策略状态管理
+   - 在SettingsScreen中添加冲突策略选择UI
+   - 使用FilterChip展示三种策略选项
+   - 显示策略说明文本
+   - 支持动态切换冲突处理策略
+   - 默认策略为"跳过"（SKIP）
+
+11. ⬜ 实现同步通知
     - 检测服务器是否已存在相同文件
     - 支持跳过、覆盖、重命名策略
     - 在设置中提供冲突处理策略选项
