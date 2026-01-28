@@ -42,15 +42,16 @@ class MpmApplication : Application(), Configuration.Provider {
         // 初始化Coil
         Coil.setImageLoader(imageLoader)
         
-        // 初始化媒体内容观察者
+        // 异步初始化媒体内容观察者（不阻塞应用启动）
         initMediaObserver()
     }
     
     /**
      * 初始化媒体内容观察者
+     * 使用IO线程异步初始化，避免阻塞主线程
      */
     private fun initMediaObserver() {
-        applicationScope.launch {
+        applicationScope.launch(Dispatchers.IO) {
             try {
                 // 检查是否启用自动同步
                 val autoSyncEnabled = preferencesManager.autoSyncEnabled.first()
@@ -59,6 +60,7 @@ class MpmApplication : Application(), Configuration.Provider {
                 }
             } catch (e: Exception) {
                 // 忽略错误，不影响应用启动
+                android.util.Log.e("MpmApplication", "Failed to init media observer", e)
             }
         }
     }
