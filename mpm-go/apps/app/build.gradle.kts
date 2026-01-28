@@ -25,8 +25,22 @@ android {
         }
     }
 
+    // 签名配置
+    signingConfigs {
+        create("release") {
+            // 从项目根目录读取keystore文件
+            storeFile = file("../mpm-release.keystore")
+            // 从环境变量或gradle.properties读取密码
+            storePassword = project.findProperty("KEYSTORE_PASSWORD") as String? ?: System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = "mpm"
+            keyPassword = project.findProperty("KEY_PASSWORD") as String? ?: System.getenv("KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
+            // 使用签名配置
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

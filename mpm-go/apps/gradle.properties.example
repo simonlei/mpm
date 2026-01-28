@@ -1,0 +1,14 @@
+# MPM Android 签名配置示例
+# 
+# 使用方法：
+# 1. 复制此文件为 gradle.properties
+# 2. 填写你的实际密码
+# 3. gradle.properties 已在 .gitignore 中，不会被提交到Git
+#
+# 注意：请妥善保管密码，不要泄露！
+
+# Keystore密码（生成keystore时设置的密码）
+KEYSTORE_PASSWORD=your_keystore_password_here
+
+# Key密码（如果与keystore密码相同，填写相同的值）
+KEY_PASSWORD=your_key_password_here

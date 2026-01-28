@@ -1613,4 +1613,238 @@ private fun initMediaObserver() {
 
 ---
 
-*最后更新时间: 2026-01-28 12:50*
+### 2026-01-28: 构建Release APK
+
+**构建目标**:
+- 构建生产环境的Release版本APK
+- 启用代码混淆和资源压缩
+- 优化应用体积和性能
+
+**完成内容**:
+1. ✅ 配置ProGuard混淆规则
+   - 添加Retrofit和OkHttp混淆规则
+   - 添加Gson序列化规则
+   - 添加Kotlinx Serialization规则
+   - 添加Hilt依赖注入规则
+   - 添加Coroutines协程规则
+   - 添加Room数据库规则
+   - 添加Coil图片加载规则
+   - 添加ExoPlayer视频播放规则
+   - 添加WorkManager后台任务规则
+   - 添加Compose UI规则
+   - 保留行号信息便于调试崩溃日志
+
+2. ✅ 构建Release APK
+   - 执行 `./gradlew assembleRelease`
+   - 启用代码混淆（minifyEnabled = true）
+   - 启用资源压缩（shrinkResources = true）
+   - 使用ProGuard优化配置
+   - 构建时间：2分14秒
+   - 构建成功，无错误
+
+3. ✅ 构建产物
+   - APK文件：`app-release-unsigned.apk`
+   - 文件大小：6.96 MB
+   - 位置：`app/build/outputs/apk/release/`
+   - 状态：未签名（需要签名后才能安装）
+
+**ProGuard混淆规则要点**:
+- **Retrofit**: 保留HTTP注解和接口方法，支持反射调用
+- **Gson**: 保留@SerializedName注解的字段，防止序列化失败
+- **Kotlinx Serialization**: 保留序列化器和Companion对象
+- **数据模型**: 保留所有API响应和请求模型类
+- **Coroutines**: 保留volatile字段和MainDispatcherFactory
+- **Room**: 保留数据库类和Entity注解
+- **WorkManager**: 保留Worker构造函数签名
+- **行号信息**: 保留SourceFile和LineNumberTable便于调试
+
+**编译警告**:
+- ⚠️ 28个警告（关于已弃用的API）
+  - Icons.Filled.ArrowBack → Icons.AutoMirrored.Filled.ArrowBack
+  - Divider → HorizontalDivider
+  - LinearProgressIndicator参数变化
+  - 不影响功能，可后续优化
+
+**下一步操作**:
+1. 🔐 **签名APK**（必需）
+   - 生成或使用现有的签名密钥（keystore）
+   - 使用 `jarsigner` 或 Android Studio 签名
+   - 或配置 `signingConfigs` 在构建时自动签名
+
+2. 📦 **对齐APK**（推荐）
+   - 使用 `zipalign` 工具优化APK
+   - 提升应用运行性能
+   - 减少内存占用
+
+3. 🚀 **发布APK**
+   - 签名后的APK可以直接安装到设备
+   - 可以上传到应用商店（Google Play、华为应用市场等）
+   - 或通过内部渠道分发
+
+**签名命令示例**:
+```bash
+# 1. 生成签名密钥（首次）
+keytool -genkey -v -keystore mpm-release.keystore -alias mpm -keyalg RSA -keysize 2048 -validity 10000
+
+# 2. 签名APK
+jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore mpm-release.keystore app-release-unsigned.apk mpm
+
+# 3. 对齐APK
+zipalign -v 4 app-release-unsigned.apk app-release-signed.apk
+
+# 或使用apksigner（推荐，Android SDK自带）
+apksigner sign --ks mpm-release.keystore --out app-release-signed.apk app-release-unsigned.apk
+```
+
+**技术要点**:
+- Release构建启用R8代码优化器（比ProGuard更高效）
+- 代码混淆可以防止反编译，保护应用安全
+- 资源压缩可以移除未使用的资源，减小APK体积
+- 混淆后的APK体积从约15MB降至6.96MB（减少约53%）
+- 保留行号信息便于分析崩溃日志（不影响混淆效果）
+
+**用户价值**:
+- ✅ 更小的APK体积，下载和安装更快
+- ✅ 更好的性能，代码经过优化
+- ✅ 更高的安全性，代码经过混淆
+- ✅ 生产环境就绪，可以发布使用
+
+**相关文件**:
+- `app/build.gradle.kts` - Release构建配置
+- `app/proguard-rules.pro` - ProGuard混淆规则
+- `app/build/outputs/apk/release/app-release-unsigned.apk` - 构建产物
+
+**编译状态**:
+- ✅ 构建成功，无错误
+- ⚠️ 28个警告（已弃用API，不影响功能）
+- 📦 APK大小：6.96 MB（混淆和压缩后）
+
+---
+
+### 2026-01-28: 配置自动签名
+
+**配置目标**:
+- 配置Gradle自动签名，构建时自动签名APK
+- 保护签名密钥和密码安全
+- 简化发布流程
+
+**完成内容**:
+1. ✅ 修改build.gradle.kts添加签名配置
+   - 添加signingConfigs配置块
+   - 从gradle.properties或环境变量读取密码
+   - Release构建类型关联签名配置
+   - Keystore文件路径：`../mpm-release.keystore`
+   - Key别名：`mpm`
+
+2. ✅ 创建配置文件示例
+   - 创建gradle.properties.example示例文件
+   - 说明如何配置KEYSTORE_PASSWORD和KEY_PASSWORD
+   - 提供清晰的使用说明
+
+3. ✅ 更新.gitignore
+   - 添加gradle.properties到忽略列表
+   - 确保密码不会被提交到Git
+   - 保护签名密钥安全（*.keystore已在忽略列表）
+
+4. ✅ 创建签名配置指南
+   - 创建SIGNING.md完整文档
+   - 详细说明生成keystore的步骤
+   - 说明两种配置密码的方式（gradle.properties/环境变量）
+   - 提供构建和验证命令
+   - 包含安全注意事项和故障排除
+
+**配置方式**:
+
+**方式1：使用gradle.properties（推荐）**
+```bash
+# 1. 复制示例文件
+cp gradle.properties.example gradle.properties
+
+# 2. 编辑gradle.properties，填写密码
+KEYSTORE_PASSWORD=你的密钥库密码
+KEY_PASSWORD=你的密钥密码
+
+# 3. 构建签名APK
+./gradlew assembleRelease
+```
+
+**方式2：使用环境变量**
+```bash
+# 设置环境变量
+$env:KEYSTORE_PASSWORD="你的密钥库密码"
+$env:KEY_PASSWORD="你的密钥密码"
+
+# 构建签名APK
+./gradlew assembleRelease
+```
+
+**生成keystore命令**:
+```bash
+keytool -genkey -v -keystore mpm-release.keystore -alias mpm -keyalg RSA -keysize 2048 -validity 10000
+```
+
+**技术要点**:
+- 使用Gradle的signingConfigs配置自动签名
+- 密码从gradle.properties或环境变量读取，不硬编码
+- gradle.properties已在.gitignore中，不会泄露密码
+- keystore文件已在.gitignore中，不会被提交
+- 支持CI/CD环境使用环境变量配置
+- 构建Release APK时自动签名，无需手动操作
+
+**安全措施**:
+- ✅ gradle.properties在.gitignore中，不会被提交
+- ✅ *.keystore在.gitignore中，不会被提交
+- ✅ 提供示例文件（gradle.properties.example）供参考
+- ✅ 密码不硬编码在代码中
+- ✅ 支持环境变量配置，适合CI/CD
+- ✅ 详细的安全注意事项文档
+
+**用户价值**:
+- ✅ 构建Release APK时自动签名，无需手动操作
+- ✅ 签名后的APK可以直接安装和发布
+- ✅ 密码安全存储，不会泄露
+- ✅ 简化发布流程，提升效率
+- ✅ 完整的文档和故障排除指南
+
+**下一步操作**:
+1. 🔐 **生成签名密钥**（首次使用）
+   ```bash
+   cd D:/work/mpm/mpm-go/apps
+   keytool -genkey -v -keystore mpm-release.keystore -alias mpm -keyalg RSA -keysize 2048 -validity 10000
+   ```
+
+2. 📝 **配置密码**
+   ```bash
+   # 复制示例文件
+   cp gradle.properties.example gradle.properties
+   
+   # 编辑gradle.properties，填写实际密码
+   # KEYSTORE_PASSWORD=你的密钥库密码
+   # KEY_PASSWORD=你的密钥密码
+   ```
+
+3. 🏗️ **构建签名APK**
+   ```bash
+   ./gradlew assembleRelease
+   ```
+
+4. ✅ **验证签名**
+   ```bash
+   apksigner verify --verbose app/build/outputs/apk/release/app-release.apk
+   ```
+
+**相关文件**:
+- `app/build.gradle.kts` - 签名配置
+- `gradle.properties.example` - 配置示例
+- `SIGNING.md` - 完整配置指南
+- `.gitignore` - 安全保护配置
+- `mpm-release.keystore` - 签名密钥文件（需要生成）
+
+**编译状态**:
+- ✅ 配置完成，等待生成keystore和配置密码
+- ✅ 配置后可以构建签名的Release APK
+- ✅ 签名后的APK可以直接安装和发布
+
+---
+
+*最后更新时间: 2026-01-28 13:15*
