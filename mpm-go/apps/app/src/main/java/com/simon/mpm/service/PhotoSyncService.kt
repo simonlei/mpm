@@ -8,6 +8,7 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.IBinder
 import android.util.Log
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.simon.mpm.common.Constants
 import com.simon.mpm.common.Result
 import com.simon.mpm.data.database.entity.SyncStatus
@@ -20,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.File
@@ -39,6 +41,9 @@ class PhotoSyncService : Service() {
         private const val TAG = "PhotoSyncService"
         const val ACTION_START_SYNC = "action_start_sync"
         const val ACTION_STOP_SYNC = "action_stop_sync"
+        const val ACTION_SYNC_COMPLETED = "com.simon.mpm.SYNC_COMPLETED"
+        const val EXTRA_SUCCESS_COUNT = "extra_success_count"
+        const val EXTRA_FAILED_COUNT = "extra_failed_count"
 
         /**
          * 启动同步服务
@@ -143,6 +148,9 @@ class PhotoSyncService : Service() {
                 if (newFilesCount == 0) {
                     Log.d(TAG, "没有新文件需要同步")
                     notificationHelper.showSyncCompleteNotification(0, 0)
+                    sendSyncCompletedBroadcast(0, 0)
+                    // 延迟停止服务，确保广播被接收
+                    delay(500)
                     stopSelf()
                     return@launch
                 }
@@ -256,7 +264,11 @@ class PhotoSyncService : Service() {
 
         Log.d(TAG, "同步完成: 成功=$successCount, 失败=$failedCount")
 
-        // 停止服务
+        // 发送同步完成广播
+        sendSyncCompletedBroadcast(successCount, failedCount)
+
+        // 延迟停止服务，确保广播被接收
+        delay(500)
         stopSelf()
     }
 
@@ -272,6 +284,19 @@ class PhotoSyncService : Service() {
         val month = monthFormat.format(date)
 
         return "$account/$year/$month/$fileName"
+    }
+
+    /**
+     * 发送同步完成广播
+     */
+    private fun sendSyncCompletedBroadcast(successCount: Int, failedCount: Int) {
+        val intent = Intent(ACTION_SYNC_COMPLETED).apply {
+            putExtra(EXTRA_SUCCESS_COUNT, successCount)
+            putExtra(EXTRA_FAILED_COUNT, failedCount)
+        }
+        // 使用LocalBroadcastManager发送应用内广播
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+        Log.d(TAG, "已发送同步完成广播(LocalBroadcast): success=$successCount, failed=$failedCount")
     }
 
     /**

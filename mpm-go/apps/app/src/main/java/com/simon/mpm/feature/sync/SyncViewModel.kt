@@ -1,9 +1,14 @@
 package com.simon.mpm.feature.sync
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.simon.mpm.data.database.entity.SyncDirectory
 import com.simon.mpm.data.database.entity.SyncFile
 import com.simon.mpm.data.database.entity.SyncStatus
@@ -60,6 +65,9 @@ class SyncViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(SyncUiState())
     val uiState: StateFlow<SyncUiState> = _uiState.asStateFlow()
+
+    private var syncCompletedReceiver: BroadcastReceiver? = null
+    private var applicationContext: Context? = null
 
     init {
         loadSyncConfig()
@@ -256,6 +264,10 @@ class SyncViewModel @Inject constructor(
                 _uiState.update { state ->
                     state.copy(isSyncing = true, errorMessage = null)
                 }
+
+                // 保存context并注册广播接收器
+                applicationContext = context.applicationContext
+                registerSyncCompletedReceiver(context)
 
                 // 启动同步服务
                 PhotoSyncService.startSync(context)
@@ -535,5 +547,65 @@ class SyncViewModel @Inject constructor(
         loadSyncConfig()
         loadSyncDirectories()
         loadSyncStatistics()
+    }
+
+    /**
+     * 注册同步完成广播接收器
+     */
+    private fun registerSyncCompletedReceiver(context: Context) {
+        // 如果已经注册，先注销
+        unregisterSyncCompletedReceiver()
+
+        syncCompletedReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == PhotoSyncService.ACTION_SYNC_COMPLETED) {
+                    val successCount = intent.getIntExtra(PhotoSyncService.EXTRA_SUCCESS_COUNT, 0)
+                    val failedCount = intent.getIntExtra(PhotoSyncService.EXTRA_FAILED_COUNT, 0)
+                    
+                    Log.d(TAG, "收到同步完成广播: success=$successCount, failed=$failedCount")
+                    
+                    // 重置同步状态
+                    _uiState.update { state ->
+                        state.copy(isSyncing = false)
+                    }
+                    
+                    // 刷新统计信息
+                    loadSyncStatistics()
+                    loadSyncConfig()
+                    
+                    // 注销接收器
+                    unregisterSyncCompletedReceiver()
+                }
+            }
+        }
+
+        val filter = IntentFilter(PhotoSyncService.ACTION_SYNC_COMPLETED)
+        // 使用LocalBroadcastManager注册应用内广播接收器
+        LocalBroadcastManager.getInstance(context).registerReceiver(syncCompletedReceiver!!, filter)
+        
+        Log.d(TAG, "已注册同步完成广播接收器(LocalBroadcast)")
+    }
+
+    /**
+     * 注销同步完成广播接收器
+     */
+    private fun unregisterSyncCompletedReceiver() {
+        syncCompletedReceiver?.let { receiver ->
+            try {
+                applicationContext?.let { ctx ->
+                    LocalBroadcastManager.getInstance(ctx).unregisterReceiver(receiver)
+                    Log.d(TAG, "已注销同步完成广播接收器(LocalBroadcast)")
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "注销广播接收器失败", e)
+            }
+            syncCompletedReceiver = null
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        unregisterSyncCompletedReceiver()
+        Log.d(TAG, "ViewModel已清理")
     }
 }

@@ -135,6 +135,9 @@ dependencies {
     // WorkManager
     implementation(libs.work.runtime.ktx)
     
+    // LocalBroadcastManager
+    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
+    
     // Accompanist
     implementation(libs.accompanist.permissions)
     implementation(libs.accompanist.systemuicontroller)
