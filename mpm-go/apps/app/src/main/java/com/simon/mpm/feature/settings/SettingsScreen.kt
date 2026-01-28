@@ -72,7 +72,6 @@ fun SettingsScreen(
                     onAutoSyncToggle = viewModel::toggleAutoSync,
                     onWifiOnlyToggle = viewModel::toggleSyncWifiOnly,
                     onIntervalChange = viewModel::setSyncInterval,
-                    onConflictStrategyChange = viewModel::setSyncConflictStrategy,
                     onManualSync = { viewModel.startManualSync(context) },
                     onAddDirectory = { directoryPicker.launch(null) },
                     onDeleteDirectory = viewModel::showDeleteConfirmDialog,
@@ -133,7 +132,6 @@ private fun SyncSettingsSection(
     onAutoSyncToggle: (Boolean) -> Unit,
     onWifiOnlyToggle: (Boolean) -> Unit,
     onIntervalChange: (String) -> Unit,
-    onConflictStrategyChange: (String) -> Unit,
     onManualSync: () -> Unit,
     onAddDirectory: () -> Unit,
     onDeleteDirectory: (SyncDirectory) -> Unit,
@@ -214,41 +212,6 @@ private fun SyncSettingsSection(
                         )
                     }
                 }
-            }
-            
-            Divider()
-            
-            // 冲突策略
-            Column {
-                Text("文件冲突处理")
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    listOf(
-                        "SKIP" to "跳过",
-                        "OVERWRITE" to "覆盖",
-                        "RENAME" to "重命名"
-                    ).forEach { (strategy, label) ->
-                        FilterChip(
-                            selected = uiState.syncConflictStrategy == strategy,
-                            onClick = { onConflictStrategyChange(strategy) },
-                            label = { Text(label) },
-                            enabled = uiState.autoSyncEnabled
-                        )
-                    }
-                }
-                Text(
-                    text = when (uiState.syncConflictStrategy) {
-                        "SKIP" -> "服务器已存在相同文件时跳过上传"
-                        "OVERWRITE" -> "服务器已存在相同文件时覆盖"
-                        "RENAME" -> "服务器已存在相同文件时重命名新文件"
-                        else -> ""
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
             }
             
             Divider()

@@ -1393,4 +1393,79 @@ apps/
 
 ---
 
-*最后更新时间: 2026-01-28 10:20*
+### 2026-01-28: 修复PhotoSyncWorker构造函数问题
+
+**问题描述**:
+- 运行时报错：`NoSuchMethodException: com.simon.mpm.worker.PhotoSyncWorker.<init> [class android.content.Context, class androidx.work.WorkerParameters]`
+- 原因是使用 `@HiltWorker` 时，构造函数参数不能使用 `private val` 修饰符
+- WorkManager 无法找到正确的构造函数签名
+
+**修复方案**:
+- 移除构造函数参数的 `private val` 修饰符
+- 将 `context` 参数改为不保存为属性，使用父类的 `applicationContext` 替代
+- 修改为：`@Assisted context: Context, @Assisted params: WorkerParameters`
+- 在需要使用 context 的地方改用 `applicationContext`（CoroutineWorker 的内置属性）
+- 使用 `by lazy` 延迟初始化 `notificationHelper`
+
+**影响范围**:
+- ✅ PhotoSyncWorker 现在可以正常实例化
+- ✅ WorkManager 可以正确调度自动同步任务
+- ✅ Hilt 依赖注入正常工作
+
+**相关文件**:
+- `PhotoSyncWorker.kt` - 修复构造函数签名
+
+**技术要点**:
+- `@HiltWorker` 要求构造函数参数使用 `@Assisted` 注解
+- 构造函数参数不能使用 `private val` 修饰符（会导致签名不匹配）
+- `CoroutineWorker` 提供了 `applicationContext` 属性，可以直接使用
+- Hilt 会自动注入其他依赖（如 `PreferencesManager`）
+
+---
+
+### 2026-01-28: 移除客户端冲突处理选项
+
+**背景说明**:
+- 服务器已经实现了重复文件的检查功能
+- 客户端不需要重复实现冲突处理逻辑
+- 简化客户端代码，减少不必要的配置选项
+
+**修改内容**:
+1. ✅ 移除SettingsScreen中的"文件冲突处理"UI选项
+   - 删除冲突策略选择器（跳过/覆盖/重命名）
+   - 删除相关的说明文本
+   - 移除onConflictStrategyChange回调参数
+
+2. ✅ 移除SyncViewModel中的冲突策略相关代码
+   - 从SyncUiState中删除syncConflictStrategy字段
+   - 删除setSyncConflictStrategy方法
+   - 从loadSyncConfig中移除冲突策略加载逻辑
+
+3. ✅ 移除PreferencesManager中的冲突策略配置
+   - 删除SYNC_CONFLICT_STRATEGY键定义
+   - 删除syncConflictStrategy Flow
+   - 删除setSyncConflictStrategy方法
+
+4. ✅ 移除Constants中的冲突策略常量
+   - 删除PREF_SYNC_CONFLICT_STRATEGY常量定义
+
+**影响范围**:
+- ✅ 设置页面UI更简洁，减少用户困惑
+- ✅ 代码更简洁，减少维护成本
+- ✅ 服务器端统一处理重复文件检查
+- ✅ 编译通过，无错误
+
+**相关文件**:
+- `SettingsScreen.kt` - 移除冲突处理UI
+- `SyncViewModel.kt` - 移除冲突策略状态管理
+- `PreferencesManager.kt` - 移除冲突策略配置
+- `Constants.kt` - 移除冲突策略常量
+
+**技术要点**:
+- 服务器端已实现重复文件检查，客户端无需重复实现
+- 简化配置选项，提升用户体验
+- 保持代码简洁，遵循"不要重复造轮子"原则
+
+---
+
+*最后更新时间: 2026-01-28 10:50*

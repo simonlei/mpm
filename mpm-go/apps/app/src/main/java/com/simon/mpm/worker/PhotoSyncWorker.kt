@@ -19,17 +19,17 @@ import kotlinx.coroutines.flow.first
  */
 @HiltWorker
 class PhotoSyncWorker @AssistedInject constructor(
-    @Assisted private val context: Context,
-    @Assisted workerParams: WorkerParameters,
+    @Assisted context: Context,
+    @Assisted params: WorkerParameters,
     private val preferencesManager: PreferencesManager
-) : CoroutineWorker(context, workerParams) {
+) : CoroutineWorker(context, params) {
 
     companion object {
         private const val TAG = "PhotoSyncWorker"
         const val WORK_NAME = "photo_sync_work"
     }
 
-    private val notificationHelper = NotificationHelper(context)
+    private val notificationHelper by lazy { NotificationHelper(applicationContext) }
 
     override suspend fun doWork(): Result {
         Log.d(TAG, "同步Worker开始执行")
@@ -43,7 +43,7 @@ class PhotoSyncWorker @AssistedInject constructor(
             }
 
             // 启动前台服务执行同步
-            PhotoSyncService.startSync(context)
+            PhotoSyncService.startSync(applicationContext)
             
             Log.d(TAG, "同步Worker执行成功")
             Result.success()

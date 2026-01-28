@@ -36,7 +36,6 @@ data class SyncUiState(
     val autoSyncEnabled: Boolean = false,
     val syncWifiOnly: Boolean = false,
     val syncInterval: String = "24",
-    val syncConflictStrategy: String = "SKIP",
     val lastSyncTime: String = "",
     val errorMessage: String? = null,
     val showAddDirectoryDialog: Boolean = false,
@@ -77,7 +76,6 @@ class SyncViewModel @Inject constructor(
                 val autoSyncEnabled = preferencesManager.autoSyncEnabled.first()
                 val syncWifiOnly = preferencesManager.syncWifiOnly.first()
                 val syncInterval = preferencesManager.syncInterval.first()
-                val syncConflictStrategy = preferencesManager.syncConflictStrategy.first()
                 val lastSyncTime = preferencesManager.lastSyncTime.first() ?: ""
 
                 _uiState.update { state ->
@@ -85,12 +83,11 @@ class SyncViewModel @Inject constructor(
                         autoSyncEnabled = autoSyncEnabled,
                         syncWifiOnly = syncWifiOnly,
                         syncInterval = syncInterval,
-                        syncConflictStrategy = syncConflictStrategy,
                         lastSyncTime = lastSyncTime
                     )
                 }
 
-                Log.d(TAG, "同步配置已加载: autoSync=$autoSyncEnabled, wifiOnly=$syncWifiOnly, interval=$syncInterval, conflictStrategy=$syncConflictStrategy")
+                Log.d(TAG, "同步配置已加载: autoSync=$autoSyncEnabled, wifiOnly=$syncWifiOnly, interval=$syncInterval")
             } catch (e: Exception) {
                 Log.e(TAG, "加载同步配置失败", e)
                 _uiState.update { state ->
@@ -238,26 +235,6 @@ class SyncViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "设置同步间隔失败", e)
-                _uiState.update { state ->
-                    state.copy(errorMessage = "操作失败: ${e.message}")
-                }
-            }
-        }
-    }
-
-    /**
-     * 设置同步冲突策略
-     */
-    fun setSyncConflictStrategy(strategy: String) {
-        viewModelScope.launch {
-            try {
-                preferencesManager.setSyncConflictStrategy(strategy)
-                _uiState.update { state ->
-                    state.copy(syncConflictStrategy = strategy)
-                }
-                Log.d(TAG, "同步冲突策略已更新为: $strategy")
-            } catch (e: Exception) {
-                Log.e(TAG, "设置同步冲突策略失败", e)
                 _uiState.update { state ->
                     state.copy(errorMessage = "操作失败: ${e.message}")
                 }

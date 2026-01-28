@@ -23,7 +23,6 @@ object Constants {
     const val PREF_SYNC_WIFI_ONLY = "sync_wifi_only"
     const val PREF_SYNC_FILE_TYPES = "sync_file_types"
     const val PREF_LAST_SYNC_TIME = "last_sync_time"
-    const val PREF_SYNC_CONFLICT_STRATEGY = "sync_conflict_strategy"
     
     // 图片质量
     const val IMAGE_QUALITY_ORIGINAL = "original"
