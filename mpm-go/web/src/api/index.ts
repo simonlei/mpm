@@ -266,3 +266,16 @@ export const getProgressApi = (taskId: string) => {
 export const getTotpApi = () => {
   return request.post<ApiResponse<string>>('/api/totp')
 }
+
+// ============ 管理相关 ============
+export interface FixPhotosResult {
+  total: number
+  success: number
+  failed: number
+  message: string
+}
+
+export const fixZeroDimensionPhotosApi = () => {
+  return request.get<ApiResponse<FixPhotosResult>>('/api/fixZeroDimensionPhotos')
+}
+

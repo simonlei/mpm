@@ -78,6 +78,14 @@
               回收站
             </t-menu-item>
             
+            <!-- 管理菜单 - 仅管理员可见 -->
+            <t-menu-item v-if="userStore.user?.is_admin" value="admin">
+              <template #icon>
+                <t-icon name="setting" />
+              </template>
+              管理
+            </t-menu-item>
+            
             <t-menu-item value="logout" @click="handleLogout">
               <template #icon>
                 <t-icon name="poweroff" />

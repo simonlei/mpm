@@ -62,6 +62,12 @@ const routes: RouteRecordRaw[] = [
         name: 'Upload',
         component: () => import('@/views/Upload.vue'),
         meta: { title: '上传' }
+      },
+      {
+        path: 'admin',
+        name: 'Admin',
+        component: () => import('@/views/Admin.vue'),
+        meta: { title: '管理', requiresAdmin: true }
       }
     ]
   }
@@ -78,6 +84,9 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth !== false && !userStore.isAuthenticated) {
     next('/login')
   } else if (to.path === '/login' && userStore.isAuthenticated) {
+    next('/')
+  } else if (to.meta.requiresAdmin && !userStore.user?.is_admin) {
+    // 如果需要管理员权限但用户不是管理员，重定向到首页
     next('/')
   } else {
     next()
