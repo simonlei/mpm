@@ -344,18 +344,21 @@ class PhotoRepository @Inject constructor(
      * @param uri 照片URI
      * @param fileName 文件名
      * @param lastModified 最后修改时间（毫秒时间戳）
+     * @param contentType 文件类型（如：image/jpeg, video/mp4）
      */
     suspend fun uploadPhoto(
         uri: android.net.Uri,
         fileName: String,
         lastModified: Long,
-        context: android.content.Context
+        context: android.content.Context,
+        contentType: String = "image/*"
     ): Result<Unit> {
         return try {
             Log.d(TAG, "uploadPhoto: 开始上传")
             Log.d(TAG, "  - uri: $uri")
             Log.d(TAG, "  - fileName: $fileName")
             Log.d(TAG, "  - lastModified: $lastModified")
+            Log.d(TAG, "  - contentType: $contentType")
             
             // 读取文件内容
             val inputStream = context.contentResolver.openInputStream(uri)
@@ -366,9 +369,9 @@ class PhotoRepository @Inject constructor(
             
             Log.d(TAG, "  - 文件大小: ${bytes.size} bytes")
             
-            // 创建RequestBody
+            // 创建RequestBody，使用传入的contentType
             val requestBody = bytes.toRequestBody(
-                "image/*".toMediaTypeOrNull()
+                contentType.toMediaTypeOrNull()
             )
             
             // 创建MultipartBody.Part

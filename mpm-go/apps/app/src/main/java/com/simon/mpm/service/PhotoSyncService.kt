@@ -51,6 +51,51 @@ class PhotoSyncService : Service() {
         const val EXTRA_FILE_MODIFIED_TIMES = "extra_file_modified_times"
 
         /**
+         * 根据URI和文件名获取Content-Type
+         * 优先使用ContentResolver获取真实MIME类型（可以正确识别动态照片等特殊情况）
+         * 如果获取失败，则根据文件扩展名判断
+         */
+        private fun getContentType(context: Context, uri: Uri, fileName: String): String {
+            // 优先尝试从ContentResolver获取真实的MIME类型
+            val mimeTypeFromUri = try {
+                context.contentResolver.getType(uri)
+            } catch (e: Exception) {
+                Log.w(TAG, "无法从URI获取MIME类型: $uri", e)
+                null
+            }
+            
+            if (!mimeTypeFromUri.isNullOrBlank()) {
+                Log.d(TAG, "从URI获取到MIME类型: $mimeTypeFromUri")
+                return mimeTypeFromUri
+            }
+            
+            // 回退到基于文件扩展名的判断
+            Log.d(TAG, "使用文件扩展名判断MIME类型")
+            val extension = fileName.substringAfterLast('.', "").lowercase()
+            return when (extension) {
+                // 图片格式
+                "jpg", "jpeg" -> "image/jpeg"
+                "png" -> "image/png"
+                "gif" -> "image/gif"
+                "webp" -> "image/webp"
+                "bmp" -> "image/bmp"
+                "heic", "heif" -> "image/heic"
+                // 视频格式
+                "mp4" -> "video/mp4"
+                "mov" -> "video/quicktime"
+                "avi" -> "video/x-msvideo"
+                "mkv" -> "video/x-matroska"
+                "webm" -> "video/webm"
+                "3gp" -> "video/3gpp"
+                "m4v" -> "video/x-m4v"
+                "wmv" -> "video/x-ms-wmv"
+                "flv" -> "video/x-flv"
+                // 默认
+                else -> "application/octet-stream"
+            }
+        }
+
+        /**
          * 启动自动同步服务
          */
         fun startSync(context: Context) {
@@ -279,12 +324,17 @@ class PhotoSyncService : Service() {
                 // 更新进度通知
                 notificationHelper.updateUploadProgress(uploadedCount, totalCount)
 
+                // 获取文件类型（优先从URI获取真实MIME类型）
+                val contentType = getContentType(this@PhotoSyncService, uri, fileName)
+                Log.d(TAG, "文件类型: $contentType")
+
                 // 上传文件
                 val result = photoRepository.uploadPhoto(
                     uri = uri,
                     fileName = targetPath,
                     lastModified = lastModified,
-                    context = this@PhotoSyncService
+                    context = this@PhotoSyncService,
+                    contentType = contentType
                 )
 
                 when (result) {
@@ -378,12 +428,17 @@ class PhotoSyncService : Service() {
                 // 更新进度通知
                 notificationHelper.updateSyncProgress(syncedCount, totalCount)
 
+                // 获取文件类型（优先从URI获取真实MIME类型）
+                val contentType = getContentType(this@PhotoSyncService, uri, file.fileName)
+                Log.d(TAG, "文件类型: $contentType")
+
                 // 上传文件
                 val result = photoRepository.uploadPhoto(
                     uri = uri,
                     fileName = targetPath,
                     lastModified = file.modifiedTime,
-                    context = this@PhotoSyncService
+                    context = this@PhotoSyncService,
+                    contentType = contentType
                 )
 
                 when (result) {
