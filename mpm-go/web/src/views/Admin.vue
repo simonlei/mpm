@@ -3,14 +3,16 @@
     <t-card title="系统管理" bordered>
       <div class="admin-content">
         <t-space direction="vertical" size="large">
-          <!-- 图片修复区域 -->
-          <t-card title="图片修复工具" hoverable>
+          <!-- 媒体文件修复区域 -->
+          <t-card title="媒体文件修复工具" hoverable>
             <div class="tool-item">
               <div class="tool-info">
-                <h3>修复宽高为0的图片</h3>
+                <h3>修复宽高为0的图片和视频</h3>
                 <p class="tool-description">
-                  扫描数据库中宽高为0的图片，从COS下载原图计算宽高并更新，同时生成缩略图上传到COS。
-                  适用于超大图片导致COS无法生成缩略图的情况。
+                  扫描数据库中宽高为0的图片和视频文件。<br/>
+                  <strong>图片：</strong>从COS下载原图计算宽高并更新，同时生成缩略图上传到COS。<br/>
+                  <strong>视频：</strong>从COS下载视频文件，使用ffprobe获取宽高、时长、录像时间等元数据并更新。<br/>
+                  适用于超大文件或格式特殊导致COS无法获取元数据的情况。
                 </p>
               </div>
               <t-button 
@@ -75,7 +77,7 @@ const handleFixZeroDimensionPhotos = async () => {
       MessagePlugin.error('修复失败：未知错误')
     }
   } catch (error: any) {
-    console.error('修复图片失败:', error)
+    console.error('修复媒体文件失败:', error)
     MessagePlugin.error('修复失败：' + (error.message || '网络错误'))
   } finally {
     fixingPhotos.value = false

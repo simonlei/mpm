@@ -286,14 +286,14 @@ func updatePhotoActivity(req *UpdateImageRequest) {
 	}
 }
 
-// fixZeroDimensionPhotos 修复宽高为0的图片
+// fixZeroDimensionPhotos 修复宽高为0的图片和视频
 func fixZeroDimensionPhotos(c *gin.Context) {
-	l.Info("Starting to fix photos with zero dimensions")
+	l.Info("Starting to fix photos/videos with zero dimensions")
 	
 	total, success, err := fixPhotosWithZeroDimensions()
 	if err != nil {
-		l.Error("Failed to fix photos:", err)
-		c.JSON(500, Response{1, fmt.Sprintf("Failed to fix photos: %v", err)})
+		l.Error("Failed to fix photos/videos:", err)
+		c.JSON(500, Response{1, fmt.Sprintf("Failed to fix photos/videos: %v", err)})
 		return
 	}
 
@@ -301,7 +301,7 @@ func fixZeroDimensionPhotos(c *gin.Context) {
 		"total":   total,
 		"success": success,
 		"failed":  total - success,
-		"message": fmt.Sprintf("Fixed %d out of %d photos", success, total),
+		"message": fmt.Sprintf("Fixed %d out of %d photos/videos", success, total),
 	}})
 }
 

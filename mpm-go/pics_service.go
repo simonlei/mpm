@@ -10,6 +10,7 @@ import (
 	_ "image/png"
 	"mpm-go/model"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -307,12 +308,64 @@ func saveVideo(fileName string, size int64, lastModified, key, name string) *mod
 	video.MediaType = "video"
 	checkInBlacklist(video)
 	db().Create(&video)
+	
+	// 使用 ffprobe 获取视频元数据
+	ffprobeInfo, err := getVideoMetadataFromFFProbe(fileName)
+	if err != nil {
+		l.Warn("Failed to get video metadata from ffprobe:", err)
+	} else {
+		// 提取视频创建时间
+		if creationTime, err := extractVideoCreationTime(ffprobeInfo); err == nil {
+			video.TakenDate = model.DateTime(creationTime)
+			l.Info("Got video creation time from ffprobe:", creationTime)
+		} else {
+			// 如果无法从 ffprobe 获取创建时间，使用 lastModified
+			video.TakenDate = model.DateTime(time.UnixMilli(parseInt64(lastModified)))
+			l.Info("Using lastModified as creation time:", lastModified)
+		}
+		
+		// 从 ffprobe 获取宽高和时长信息
+		for _, stream := range ffprobeInfo.Streams {
+			if stream.CodecType == "video" {
+				video.Width = stream.Width
+				video.Height = stream.Height
+				break
+			}
+		}
+		if ffprobeInfo.Format.Duration != "" {
+			video.Duration = parseFloat(ffprobeInfo.Format.Duration)
+		}
+	}
+	
 	generatePoster(key, video)
+	
+	// 从 COS CI API 获取视频元数据
 	getVideoMetadata(key, video)
-	// TODO: 应该有办法获取到video的拍摄时间吧？
-	video.TakenDate = model.DateTime(time.UnixMilli(parseInt64(lastModified)))
+	
+	// 如果 COS CI API 返回的宽高都是 0，使用 ffprobe 的数据
+	if (video.Width == 0 || video.Height == 0) && ffprobeInfo != nil {
+		for _, stream := range ffprobeInfo.Streams {
+			if stream.CodecType == "video" && stream.Width > 0 && stream.Height > 0 {
+				video.Width = stream.Width
+				video.Height = stream.Height
+				l.Info("Using ffprobe dimensions:", video.Width, "x", video.Height)
+				break
+			}
+		}
+		// 如果时长也是0，使用 ffprobe 的时长
+		if video.Duration == 0 && ffprobeInfo.Format.Duration != "" {
+			video.Duration = parseFloat(ffprobeInfo.Format.Duration)
+			l.Info("Using ffprobe duration:", video.Duration)
+		}
+	}
+	
+	// 如果创建时间仍然为零，使用 lastModified
+	if time.Time(video.TakenDate).IsZero() {
+		video.TakenDate = model.DateTime(time.UnixMilli(parseInt64(lastModified)))
+	}
+	
 	db().Save(&video)
-	_, _, err := Cos().Object.Copy(context.Background(), "video/"+video.Name+".mp4",
+	_, _, err = Cos().Object.Copy(context.Background(), "video/"+video.Name+".mp4",
 		fmt.Sprintf("%s.cos.%s.myqcloud.com/%s", viper.GetString("cos.bucket"), viper.GetString("cos.region"), key), nil)
 	if err == nil {
 		Cos().Object.Delete(context.Background(), key)
@@ -375,6 +428,70 @@ func createConvertTemplate() string {
 		l.Error(err)
 	}
 	return result.Template.TemplateId
+}
+
+// ffprobeVideoInfo 使用 ffprobe 获取视频元数据的结构体
+type ffprobeVideoInfo struct {
+	Streams []struct {
+		CodecType string `json:"codec_type"`
+		Width     int    `json:"width"`
+		Height    int    `json:"height"`
+	} `json:"streams"`
+	Format struct {
+		Duration string            `json:"duration"`
+		Tags     map[string]string `json:"tags"`
+	} `json:"format"`
+}
+
+// getVideoMetadataFromFFProbe 使用 ffprobe 从本地视频文件获取元数据
+func getVideoMetadataFromFFProbe(filePath string) (*ffprobeVideoInfo, error) {
+	cmd := exec.Command("ffprobe",
+		"-v", "quiet",
+		"-print_format", "json",
+		"-show_format",
+		"-show_streams",
+		filePath)
+	
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("ffprobe execution failed: %w", err)
+	}
+	
+	var info ffprobeVideoInfo
+	if err := json.Unmarshal(output, &info); err != nil {
+		return nil, fmt.Errorf("failed to parse ffprobe output: %w", err)
+	}
+	
+	return &info, nil
+}
+
+// extractVideoCreationTime 从 ffprobe 信息中提取视频创建时间
+func extractVideoCreationTime(info *ffprobeVideoInfo) (time.Time, error) {
+	// 尝试从不同的标签字段中获取创建时间
+	tags := info.Format.Tags
+	
+	// 常见的创建时间标签
+	timeKeys := []string{"creation_time", "date", "com.apple.quicktime.creationdate"}
+	
+	for _, key := range timeKeys {
+		if timeStr, ok := tags[key]; ok && timeStr != "" {
+			// 尝试多种时间格式解析
+			formats := []string{
+				time.RFC3339,
+				"2006-01-02T15:04:05.000000Z",
+				"2006-01-02 15:04:05",
+				"2006-01-02T15:04:05",
+			}
+			
+			for _, format := range formats {
+				if t, err := time.Parse(format, timeStr); err == nil {
+					return t, nil
+				}
+			}
+		}
+	}
+	
+	return time.Time{}, fmt.Errorf("no valid creation time found")
 }
 
 func getVideoMetadata(key string, video *model.TPhoto) {
@@ -442,11 +559,11 @@ func sameFileExist(fileName string, key, name string, size int64) *model.TPhoto 
 	}
 }
 
-// fixPhotoWithZeroDimension 修复单张宽高为0的图片
+// fixPhotoWithZeroDimension 修复单张宽高为0的图片或视频
 func fixPhotoWithZeroDimension(photo *model.TPhoto) error {
-	l.Info("Fixing photo", photo.ID, photo.Name)
+	l.Info("Fixing photo/video", photo.ID, photo.Name, "media_type:", photo.MediaType)
 	
-	// 1. 从COS下载原图到临时文件
+	// 1. 从COS下载原图/视频到临时文件
 	tmpDir := os.TempDir()
 	tmpOriginal := filepath.Join(tmpDir, fmt.Sprintf("fix_%s", uuid.New().String()))
 	tmpSmall := filepath.Join(tmpDir, fmt.Sprintf("fix_small_%s.jpg", uuid.New().String()))
@@ -464,7 +581,7 @@ func fixPhotoWithZeroDimension(photo *model.TPhoto) error {
 		cosKey = "origin/" + photo.Name
 	}
 
-	// 下载原图
+	// 下载原图/视频
 	resp, err := Cos().Object.Get(context.Background(), cosKey, nil)
 	if err != nil {
 		return fmt.Errorf("failed to download original file: %w", err)
@@ -483,8 +600,45 @@ func fixPhotoWithZeroDimension(photo *model.TPhoto) error {
 	}
 	tmpFile.Close()
 
-	// 2. 如果是图片，获取宽高并生成缩略图
-	if photo.MediaType == "photo" {
+	// 2. 根据媒体类型处理
+	if photo.MediaType == "video" {
+		// 使用ffprobe获取视频元数据
+		ffprobeInfo, err := getVideoMetadataFromFFProbe(tmpOriginal)
+		if err != nil {
+			return fmt.Errorf("failed to get video metadata from ffprobe: %w", err)
+		}
+
+		// 更新宽高
+		for _, stream := range ffprobeInfo.Streams {
+			if stream.CodecType == "video" && stream.Width > 0 && stream.Height > 0 {
+				photo.Width = stream.Width
+				photo.Height = stream.Height
+				l.Info("Updated video dimensions from ffprobe", photo.ID, "width:", photo.Width, "height:", photo.Height)
+				break
+			}
+		}
+
+		// 更新时长
+		if ffprobeInfo.Format.Duration != "" {
+			photo.Duration = parseFloat(ffprobeInfo.Format.Duration)
+			l.Info("Updated video duration from ffprobe", photo.ID, "duration:", photo.Duration)
+		}
+
+		// 尝试提取创建时间
+		if creationTime, err := extractVideoCreationTime(ffprobeInfo); err == nil {
+			if time.Time(photo.TakenDate).IsZero() || time.Time(photo.TakenDate).Year() < 2000 {
+				photo.TakenDate = model.DateTime(creationTime)
+				l.Info("Updated video creation time from ffprobe", photo.ID, "taken_date:", creationTime)
+			}
+		}
+
+		// 保存视频元数据到数据库
+		if err := db().Save(photo).Error; err != nil {
+			return fmt.Errorf("failed to update video metadata: %w", err)
+		}
+
+		l.Info("Successfully fixed video metadata", photo.ID, photo.Name)
+	} else if photo.MediaType == "photo" {
 		// 打开图片获取尺寸
 		srcImage, err := imaging.Open(tmpOriginal)
 		if err != nil {
@@ -537,25 +691,25 @@ func fixPhotoWithZeroDimension(photo *model.TPhoto) error {
 	return nil
 }
 
-// fixPhotosWithZeroDimensions 批量修复宽高为0的图片
+// fixPhotosWithZeroDimensions 批量修复宽高为0的图片和视频
 func fixPhotosWithZeroDimensions() (int, int, error) {
-	var photos []model.TPhoto
+	var items []model.TPhoto
 	
-	// 查找宽高为0的图片
-	if err := db().Where("(width = 0 OR height = 0) AND media_type = ?", "photo").
+	// 查找宽高为0的图片和视频
+	if err := db().Where("(width = 0 OR height = 0)").
 		Where("trashed = ?", false).
-		Find(&photos).Error; err != nil {
-		return 0, 0, fmt.Errorf("failed to query photos: %w", err)
+		Find(&items).Error; err != nil {
+		return 0, 0, fmt.Errorf("failed to query photos/videos: %w", err)
 	}
 
-	total := len(photos)
+	total := len(items)
 	success := 0
 	
-	l.Info("Found photos with zero dimensions:", total)
+	l.Info("Found photos/videos with zero dimensions:", total)
 
-	for _, photo := range photos {
-		if err := fixPhotoWithZeroDimension(&photo); err != nil {
-			l.Error("Failed to fix photo", photo.ID, err)
+	for _, item := range items {
+		if err := fixPhotoWithZeroDimension(&item); err != nil {
+			l.Error("Failed to fix photo/video", item.ID, item.MediaType, err)
 		} else {
 			success++
 		}
