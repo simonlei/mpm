@@ -72,3 +72,27 @@ func Test_FFProbe(t *testing.T) {
 		t.Log("No creation time found:", err)
 	}
 }
+
+func Test_FFmpegThumbnail(t *testing.T) {
+	// 测试使用ffmpeg生成视频缩略图
+	videoPath := "/tmp/test_video.mp4"
+	if _, err := os.Stat(videoPath); os.IsNotExist(err) {
+		t.Skip("Test video file not found, skipping ffmpeg thumbnail test")
+		return
+	}
+	
+	outputPath := "/tmp/test_thumbnail.jpg"
+	defer os.Remove(outputPath)
+	
+	err := generateVideoThumbnailWithFFmpeg(videoPath, outputPath)
+	if err != nil {
+		t.Fatal("Failed to generate thumbnail:", err)
+	}
+	
+	// 检查缩略图是否生成成功
+	if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+		t.Error("Thumbnail file not created")
+	} else {
+		t.Log("Thumbnail generated successfully at:", outputPath)
+	}
+}

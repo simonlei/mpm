@@ -525,6 +525,38 @@ func generatePoster(key string, video *model.TPhoto) {
 	}
 }
 
+// checkCosObjectExists 检查COS对象是否存在
+func checkCosObjectExists(key string) bool {
+	_, err := Cos().Object.Head(context.Background(), key, nil)
+	return err == nil
+}
+
+// generateVideoThumbnailWithFFmpeg 使用ffmpeg生成视频缩略图
+func generateVideoThumbnailWithFFmpeg(videoPath, outputPath string) error {
+	// 使用ffmpeg在视频的第1秒位置截取一帧作为缩略图
+	// -ss 1: 从第1秒开始
+	// -i: 输入文件
+	// -vframes 1: 只提取1帧
+	// -vf scale: 缩放到合适的尺寸，保持宽高比
+	// -q:v 2: 设置图片质量 (1-31, 越小质量越好)
+	cmd := exec.Command("ffmpeg",
+		"-ss", "1",
+		"-i", videoPath,
+		"-vframes", "1",
+		"-vf", "scale='min(2560,iw)':'min(1440,ih)':force_original_aspect_ratio=decrease",
+		"-q:v", "2",
+		"-y", // 覆盖输出文件
+		outputPath)
+	
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("ffmpeg execution failed: %w, output: %s", err, string(output))
+	}
+	
+	l.Info("FFmpeg thumbnail generated successfully")
+	return nil
+}
+
 func checkInBlacklist(p *model.TPhoto) {
 	var existBlock model.TBlockPhoto
 	db().Where("md5", p.MD5).Where("sha1", p.SHA1).Where("size", p.Size).First(&existBlock)
@@ -635,6 +667,32 @@ func fixPhotoWithZeroDimension(photo *model.TPhoto) error {
 		// 保存视频元数据到数据库
 		if err := db().Save(photo).Error; err != nil {
 			return fmt.Errorf("failed to update video metadata: %w", err)
+		}
+
+		// 检查视频缩略图是否存在
+		thumbnailKey := "small/" + photo.Name
+		if !checkCosObjectExists(thumbnailKey) {
+			l.Info("Video thumbnail not found, generating with ffmpeg", photo.ID)
+			// 使用ffmpeg生成缩略图
+			if err := generateVideoThumbnailWithFFmpeg(tmpOriginal, tmpSmall); err != nil {
+				l.Error("Failed to generate thumbnail with ffmpeg:", err)
+			} else {
+				// 上传缩略图到COS
+				thumbFile, err := os.Open(tmpSmall)
+				if err != nil {
+					l.Error("Failed to open thumbnail file:", err)
+				} else {
+					defer thumbFile.Close()
+					_, err = Cos().Object.Put(context.Background(), thumbnailKey, thumbFile, nil)
+					if err != nil {
+						l.Error("Failed to upload thumbnail to COS:", err)
+					} else {
+						l.Info("Successfully generated and uploaded video thumbnail", photo.ID)
+					}
+				}
+			}
+		} else {
+			l.Info("Video thumbnail already exists", photo.ID)
 		}
 
 		l.Info("Successfully fixed video metadata", photo.ID, photo.Name)
