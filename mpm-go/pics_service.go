@@ -775,3 +775,232 @@ func fixPhotosWithZeroDimensions() (int, int, error) {
 
 	return total, success, nil
 }
+
+// forceFixPhotoById 强制修复指定ID的照片/视频
+func forceFixPhotoById(photoId int64) error {
+	var photo model.TPhoto
+	if err := db().First(&photo, photoId).Error; err != nil {
+		return fmt.Errorf("photo not found: %w", err)
+	}
+
+	l.Info("Force fixing photo/video", photo.ID, photo.Name, "media_type:", photo.MediaType)
+
+	// 1. 从COS下载文件到临时目录
+	tmpDir := os.TempDir()
+	tmpOriginal := filepath.Join(tmpDir, fmt.Sprintf("force_fix_%s", uuid.New().String()))
+	tmpSmall := filepath.Join(tmpDir, fmt.Sprintf("force_fix_small_%s.jpg", uuid.New().String()))
+
+	defer func() {
+		os.Remove(tmpOriginal)
+		os.Remove(tmpSmall)
+	}()
+
+	// 根据当前类型确定COS路径
+	var cosKey string
+	if photo.MediaType == "video" {
+		cosKey = "video/" + photo.Name + ".mp4"
+	} else {
+		cosKey = "origin/" + photo.Name
+	}
+
+	// 下载文件
+	resp, err := Cos().Object.Get(context.Background(), cosKey, nil)
+	if err != nil {
+		return fmt.Errorf("failed to download file from COS: %w", err)
+	}
+	defer resp.Body.Close()
+
+	tmpFile, err := os.Create(tmpOriginal)
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %w", err)
+	}
+	defer tmpFile.Close()
+
+	if _, err = tmpFile.ReadFrom(resp.Body); err != nil {
+		return fmt.Errorf("failed to save temp file: %w", err)
+	}
+	tmpFile.Close()
+
+	// 2. 根据媒体类型进行修复
+	if photo.MediaType == "photo" {
+		// 尝试按图片类型修复
+		if err := forceFixAsImage(&photo, tmpOriginal, tmpSmall); err != nil {
+			l.Warn("Failed to fix as image, trying as video:", err)
+			// 按图片修复失败，尝试按视频修复
+			if err := forceFixAsVideo(&photo, tmpOriginal, tmpSmall, true); err != nil {
+				return fmt.Errorf("failed to fix as both image and video: %w", err)
+			}
+			// 成功按视频修复，需要迁移文件
+			if err := migratePhotoToVideo(&photo, cosKey); err != nil {
+				l.Error("Failed to migrate file from origin to video:", err)
+				// 迁移失败不影响元数据更新
+			}
+		}
+	} else if photo.MediaType == "video" {
+		// 按视频类型修复
+		if err := forceFixAsVideo(&photo, tmpOriginal, tmpSmall, false); err != nil {
+			return fmt.Errorf("failed to fix video: %w", err)
+		}
+	}
+
+	l.Info("Successfully force fixed photo/video", photo.ID, photo.Name)
+	return nil
+}
+
+// forceFixAsImage 强制按图片类型修复
+func forceFixAsImage(photo *model.TPhoto, imagePath, thumbnailPath string) error {
+	// 打开图片获取尺寸
+	srcImage, err := imaging.Open(imagePath)
+	if err != nil {
+		return fmt.Errorf("failed to open as image: %w", err)
+	}
+
+	bounds := srcImage.Bounds()
+	width := bounds.Dx()
+	height := bounds.Dy()
+
+	if width == 0 || height == 0 {
+		return fmt.Errorf("invalid image dimensions: %dx%d", width, height)
+	}
+
+	// 更新宽高
+	photo.Width = width
+	photo.Height = height
+
+	// 生成缩略图
+	maxWidth := 2560
+	maxHeight := 1440
+	var thumbnail image.Image
+	if width > maxWidth || height > maxHeight {
+		thumbnail = imaging.Fit(srcImage, maxWidth, maxHeight, imaging.Lanczos)
+	} else {
+		thumbnail = srcImage
+	}
+
+	// 保存缩略图
+	if err := imaging.Save(thumbnail, thumbnailPath, imaging.JPEGQuality(85)); err != nil {
+		return fmt.Errorf("failed to save thumbnail: %w", err)
+	}
+
+	// 上传缩略图到COS
+	thumbFile, err := os.Open(thumbnailPath)
+	if err != nil {
+		return fmt.Errorf("failed to open thumbnail: %w", err)
+	}
+	defer thumbFile.Close()
+
+	_, err = Cos().Object.Put(context.Background(), "small/"+photo.Name, thumbFile, nil)
+	if err != nil {
+		return fmt.Errorf("failed to upload thumbnail to COS: %w", err)
+	}
+
+	// 保存到数据库
+	if err := db().Save(photo).Error; err != nil {
+		return fmt.Errorf("failed to update photo in database: %w", err)
+	}
+
+	l.Info("Successfully fixed as image", photo.ID, "dimensions:", width, "x", height)
+	return nil
+}
+
+// forceFixAsVideo 强制按视频类型修复
+func forceFixAsVideo(photo *model.TPhoto, videoPath, thumbnailPath string, needChangeType bool) error {
+	// 使用ffprobe获取视频元数据
+	ffprobeInfo, err := getVideoMetadataFromFFProbe(videoPath)
+	if err != nil {
+		return fmt.Errorf("failed to get video metadata from ffprobe: %w", err)
+	}
+
+	// 提取宽高
+	videoWidth := 0
+	videoHeight := 0
+	for _, stream := range ffprobeInfo.Streams {
+		if stream.CodecType == "video" && stream.Width > 0 && stream.Height > 0 {
+			videoWidth = stream.Width
+			videoHeight = stream.Height
+			break
+		}
+	}
+
+	if videoWidth == 0 || videoHeight == 0 {
+		return fmt.Errorf("failed to get valid video dimensions")
+	}
+
+	// 更新宽高
+	photo.Width = videoWidth
+	photo.Height = videoHeight
+
+	// 更新时长
+	if ffprobeInfo.Format.Duration != "" {
+		photo.Duration = parseFloat(ffprobeInfo.Format.Duration)
+	}
+
+	// 尝试提取创建时间
+	if creationTime, err := extractVideoCreationTime(ffprobeInfo); err == nil {
+		if time.Time(photo.TakenDate).IsZero() || time.Time(photo.TakenDate).Year() < 2000 {
+			photo.TakenDate = model.DateTime(creationTime)
+		}
+	}
+
+	// 如果需要变更类型
+	if needChangeType {
+		photo.MediaType = "video"
+		l.Info("Changed media type from photo to video", photo.ID)
+	}
+
+	// 生成视频缩略图
+	if err := generateVideoThumbnailWithFFmpeg(videoPath, thumbnailPath); err != nil {
+		l.Warn("Failed to generate video thumbnail:", err)
+	} else {
+		// 上传缩略图到COS
+		thumbFile, err := os.Open(thumbnailPath)
+		if err != nil {
+			l.Error("Failed to open thumbnail file:", err)
+		} else {
+			defer thumbFile.Close()
+			_, err = Cos().Object.Put(context.Background(), "small/"+photo.Name, thumbFile, nil)
+			if err != nil {
+				l.Error("Failed to upload thumbnail to COS:", err)
+			} else {
+				l.Info("Successfully uploaded video thumbnail", photo.ID)
+			}
+		}
+	}
+
+	// 保存到数据库
+	if err := db().Save(photo).Error; err != nil {
+		return fmt.Errorf("failed to update video in database: %w", err)
+	}
+
+	l.Info("Successfully fixed as video", photo.ID, "dimensions:", videoWidth, "x", videoHeight, "duration:", photo.Duration)
+	return nil
+}
+
+// migratePhotoToVideo 将文件从 origin/Name 迁移到 video/Name.mp4
+func migratePhotoToVideo(photo *model.TPhoto, oldKey string) error {
+	newKey := "video/" + photo.Name + ".mp4"
+	
+	// 使用COS的Copy方法复制文件
+	sourceURL := fmt.Sprintf("%s.cos.%s.myqcloud.com/%s", 
+		viper.GetString("cos.bucket"), 
+		viper.GetString("cos.region"), 
+		oldKey)
+	
+	_, _, err := Cos().Object.Copy(context.Background(), newKey, sourceURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to copy file to new location: %w", err)
+	}
+	
+	l.Info("Successfully copied file from", oldKey, "to", newKey)
+	
+	// 删除旧文件
+	_, err = Cos().Object.Delete(context.Background(), oldKey)
+	if err != nil {
+		l.Warn("Failed to delete old file:", oldKey, err)
+		// 删除失败不返回错误，因为主要目标已完成
+	} else {
+		l.Info("Successfully deleted old file:", oldKey)
+	}
+	
+	return nil
+}

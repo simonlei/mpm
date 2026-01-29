@@ -684,7 +684,70 @@ MPM-GO 是一个照片管理系统的后端服务，基于 Gin 框架开发，�
 
 ### 12. 工具接口 (Utils)
 
-#### 12.1 生成 TOTP 验证码
+#### 12.1 修复宽高为0的图片和视频
+- **URL**: `/api/fixZeroDimensionPhotos`
+- **Method**: `GET`
+- **描述**: 批量修复数据库中宽高为0的图片和视频文件
+- **处理流程**:
+  - **图片**: 从COS下载原图，计算宽高并更新，生成缩略图上传
+  - **视频**: 从COS下载视频，使用ffprobe获取宽高、时长、录像时间等元数据，使用ffmpeg生成缩略图
+- **请求参数**: 无
+- **响应示例**:
+  ```json
+  {
+    "code": 0,
+    "data": {
+      "total": 10,
+      "success": 9,
+      "failed": 1,
+      "message": "Fixed 9 out of 10 photos/videos"
+    }
+  }
+  ```
+
+#### 12.2 强制修复指定照片/视频
+- **URL**: `/api/forceFixPhotoById`
+- **Method**: `POST`
+- **描述**: 对指定ID的照片/视频进行强制修复，支持智能类型识别和转换
+- **请求参数**:
+  ```json
+  {
+    "id": 123
+  }
+  ```
+- **处理流程**:
+  1. **如果是图片类型**:
+     - 首先按图片类型进行修复（获取宽高、生成缩略图）
+     - 如果图片修复失败，尝试按视频类型修复
+     - 如果按视频修复成功，自动将媒体类型从`photo`改为`video`，并将文件从`origin/Name`迁移到`video/Name.mp4`
+  2. **如果是视频类型**:
+     - 使用ffprobe获取宽高、时长、录像时间
+     - 检查缩略图是否存在，不存在则使用ffmpeg生成
+- **响应示例**:
+  ```json
+  {
+    "code": 0,
+    "data": {
+      "message": "Photo/video fixed successfully",
+      "photo": {
+        "id": 123,
+        "name": "example_video",
+        "width": 1920,
+        "height": 1080,
+        "mediaType": "video",
+        "duration": 125.5,
+        "takenDate": "2024-01-01T10:30:00Z",
+        "thumb": "small/example_video/thumb"
+      }
+    }
+  }
+  ```
+- **使用场景**:
+  - 单个文件元数据缺失或错误
+  - 文件类型识别错误（图片实际是视频）
+  - COS自动处理失败的特殊格式文件
+
+#### 12.3 生成 TOTP 验证码
 - **URL**: `/api/totp`
 - **Method**: `POST`
 - **描述**: 生成基于时间的一次性密码（TOTP）

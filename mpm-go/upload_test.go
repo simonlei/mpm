@@ -96,3 +96,16 @@ func Test_FFmpegThumbnail(t *testing.T) {
 		t.Log("Thumbnail generated successfully at:", outputPath)
 	}
 }
+
+func Test_ForceFixPhotoById(t *testing.T) {
+	// 测试强制修复指定ID的照片/视频
+	// 注意: 需要配置数据库和COS才能运行此测试
+	t.Skip("Skipping force fix test - requires database and COS configuration")
+	
+	// 示例使用:
+	// err := forceFixPhotoById(12345)
+	// if err != nil {
+	//     t.Fatal("Failed to force fix photo:", err)
+	// }
+	// t.Log("Photo fixed successfully")
+}
