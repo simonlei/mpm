@@ -370,18 +370,21 @@ class PhotoRepository @Inject constructor(
             Log.d(TAG, "  - 文件大小: ${bytes.size} bytes")
             
             // 创建RequestBody，使用传入的contentType
-            val requestBody = bytes.toRequestBody(
-                contentType.toMediaTypeOrNull()
-            )
+            val mediaType = contentType.toMediaTypeOrNull()
+            Log.d(TAG, "  - MediaType: $mediaType")
             
-            // 创建MultipartBody.Part
+            val requestBody = bytes.toRequestBody(mediaType)
+            
+            // 创建MultipartBody.Part，明确指定Content-Type
             val filePart = okhttp3.MultipartBody.Part.createFormData(
                 "file",
                 fileName,
                 requestBody
             )
             
-            Log.d(TAG, "  - MultipartBody.Part 创建完成，filename=$fileName")
+            Log.d(TAG, "  - MultipartBody.Part 创建完成")
+            Log.d(TAG, "    - filename: $fileName")
+            Log.d(TAG, "    - Content-Type: $contentType")
             
             // 创建lastModified的RequestBody
             val lastModifiedBody = lastModified.toString().toRequestBody(

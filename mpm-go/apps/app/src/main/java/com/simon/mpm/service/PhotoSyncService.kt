@@ -52,21 +52,30 @@ class PhotoSyncService : Service() {
 
         /**
          * 根据URI和文件名获取Content-Type
-         * 优先使用ContentResolver获取真实MIME类型（可以正确识别动态照片等特殊情况）
-         * 如果获取失败，则根据文件扩展名判断
+         * 优先读取文件头判断真实MIME类型（可以正确识别动态照片等特殊情况）
+         * 如果读取失败，则根据文件扩展名判断
          */
         private fun getContentType(context: Context, uri: Uri, fileName: String): String {
-            // 优先尝试从ContentResolver获取真实的MIME类型
-            val mimeTypeFromUri = try {
-                context.contentResolver.getType(uri)
+            // 优先尝试读取文件头来判断真实的MIME类型
+            val mimeTypeFromHeader = try {
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    // 读取文件头（前12个字节足够判断大部分格式）
+                    val header = ByteArray(12)
+                    val bytesRead = inputStream.read(header)
+                    if (bytesRead > 0) {
+                        detectMimeTypeFromHeader(header, bytesRead)
+                    } else {
+                        null
+                    }
+                }
             } catch (e: Exception) {
-                Log.w(TAG, "无法从URI获取MIME类型: $uri", e)
+                Log.w(TAG, "无法读取文件头: $uri", e)
                 null
             }
             
-            if (!mimeTypeFromUri.isNullOrBlank()) {
-                Log.d(TAG, "从URI获取到MIME类型: $mimeTypeFromUri")
-                return mimeTypeFromUri
+            if (!mimeTypeFromHeader.isNullOrBlank()) {
+                Log.d(TAG, "从文件头检测到MIME类型: $mimeTypeFromHeader")
+                return mimeTypeFromHeader
             }
             
             // 回退到基于文件扩展名的判断
@@ -93,6 +102,78 @@ class PhotoSyncService : Service() {
                 // 默认
                 else -> "application/octet-stream"
             }
+        }
+
+        /**
+         * 根据文件头字节判断MIME类型
+         */
+        private fun detectMimeTypeFromHeader(header: ByteArray, size: Int): String? {
+            if (size < 4) return null
+            
+            // JPEG: FF D8 FF
+            if (header[0] == 0xFF.toByte() && header[1] == 0xD8.toByte() && header[2] == 0xFF.toByte()) {
+                return "image/jpeg"
+            }
+            
+            // PNG: 89 50 4E 47
+            if (header[0] == 0x89.toByte() && header[1] == 0x50.toByte() && 
+                header[2] == 0x4E.toByte() && header[3] == 0x47.toByte()) {
+                return "image/png"
+            }
+            
+            // GIF: 47 49 46 38
+            if (header[0] == 0x47.toByte() && header[1] == 0x49.toByte() && 
+                header[2] == 0x46.toByte() && header[3] == 0x38.toByte()) {
+                return "image/gif"
+            }
+            
+            // WebP: 52 49 46 46 ... 57 45 42 50
+            if (size >= 12 && header[0] == 0x52.toByte() && header[1] == 0x49.toByte() && 
+                header[2] == 0x46.toByte() && header[3] == 0x46.toByte() &&
+                header[8] == 0x57.toByte() && header[9] == 0x45.toByte() && 
+                header[10] == 0x42.toByte() && header[11] == 0x50.toByte()) {
+                return "image/webp"
+            }
+            
+            // MP4/MOV: 检查 ftyp box (偏移4字节处)
+            if (size >= 12) {
+                val ftyp = String(header, 4, 4, Charsets.ISO_8859_1)
+                when {
+                    ftyp.startsWith("ftyp") -> {
+                        // 进一步检查品牌
+                        val brand = if (size >= 12) String(header, 8, 4, Charsets.ISO_8859_1) else ""
+                        return when {
+                            brand.startsWith("mp4") || brand.startsWith("isom") || 
+                            brand.startsWith("M4V") || brand.startsWith("M4A") -> "video/mp4"
+                            brand.startsWith("qt") -> "video/quicktime"
+                            else -> "video/mp4" // 默认为MP4
+                        }
+                    }
+                }
+            }
+            
+            // AVI: 52 49 46 46 ... 41 56 49 20
+            if (size >= 12 && header[0] == 0x52.toByte() && header[1] == 0x49.toByte() && 
+                header[2] == 0x46.toByte() && header[3] == 0x46.toByte() &&
+                header[8] == 0x41.toByte() && header[9] == 0x56.toByte() && 
+                header[10] == 0x49.toByte() && header[11] == 0x20.toByte()) {
+                return "video/x-msvideo"
+            }
+            
+            // HEIC/HEIF: ftyp heic/heix/hevc/hevx/mif1
+            if (size >= 12) {
+                val ftyp = String(header, 4, 4, Charsets.ISO_8859_1)
+                if (ftyp.startsWith("ftyp")) {
+                    val brand = String(header, 8, 4, Charsets.ISO_8859_1)
+                    if (brand.startsWith("heic") || brand.startsWith("heix") || 
+                        brand.startsWith("hevc") || brand.startsWith("hevx") || 
+                        brand.startsWith("mif1")) {
+                        return "image/heic"
+                    }
+                }
+            }
+            
+            return null
         }
 
         /**
