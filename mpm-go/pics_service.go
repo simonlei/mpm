@@ -220,6 +220,17 @@ func setInfosFromFile(fileName string, lastModified string, photo *model.TPhoto)
 		l.Error("Can't open file")
 	} else {
 		defer file.Close()
+		
+		// 如果宽高为0，尝试从图片文件获取尺寸信息
+		if photo.Width == 0 || photo.Height == 0 {
+			if imgConfig, _, err := image.DecodeConfig(file); err == nil {
+				photo.Width = imgConfig.Width
+				photo.Height = imgConfig.Height
+			}
+			// 重置文件指针到开头，以便后续读取exif
+			file.Seek(0, 0)
+		}
+		
 		exif, err := imagemeta.Decode(file)
 		if err != nil {
 			l.Error("Can't read exif info", err)
