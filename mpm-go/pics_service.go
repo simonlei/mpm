@@ -441,3 +441,125 @@ func sameFileExist(fileName string, key, name string, size int64) *model.TPhoto 
 		}
 	}
 }
+
+// fixPhotoWithZeroDimension 修复单张宽高为0的图片
+func fixPhotoWithZeroDimension(photo *model.TPhoto) error {
+	l.Info("Fixing photo", photo.ID, photo.Name)
+	
+	// 1. 从COS下载原图到临时文件
+	tmpDir := os.TempDir()
+	tmpOriginal := filepath.Join(tmpDir, fmt.Sprintf("fix_%s", uuid.New().String()))
+	tmpSmall := filepath.Join(tmpDir, fmt.Sprintf("fix_small_%s.jpg", uuid.New().String()))
+	
+	defer func() {
+		os.Remove(tmpOriginal)
+		os.Remove(tmpSmall)
+	}()
+
+	// 确定原图在COS中的路径
+	var cosKey string
+	if photo.MediaType == "video" {
+		cosKey = "video/" + photo.Name + ".mp4"
+	} else {
+		cosKey = "origin/" + photo.Name
+	}
+
+	// 下载原图
+	resp, err := Cos().Object.Get(context.Background(), cosKey, nil)
+	if err != nil {
+		return fmt.Errorf("failed to download original file: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// 保存到临时文件
+	tmpFile, err := os.Create(tmpOriginal)
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %w", err)
+	}
+	defer tmpFile.Close()
+
+	if _, err = tmpFile.ReadFrom(resp.Body); err != nil {
+		return fmt.Errorf("failed to save temp file: %w", err)
+	}
+	tmpFile.Close()
+
+	// 2. 如果是图片，获取宽高并生成缩略图
+	if photo.MediaType == "photo" {
+		// 打开图片获取尺寸
+		srcImage, err := imaging.Open(tmpOriginal)
+		if err != nil {
+			return fmt.Errorf("failed to open image: %w", err)
+		}
+
+		bounds := srcImage.Bounds()
+		width := bounds.Dx()
+		height := bounds.Dy()
+
+		// 更新数据库中的宽高
+		photo.Width = width
+		photo.Height = height
+		if err := db().Save(photo).Error; err != nil {
+			return fmt.Errorf("failed to update photo dimensions: %w", err)
+		}
+
+		l.Info("Updated photo dimensions", photo.ID, "width:", width, "height:", height)
+
+		// 生成缩略图
+		maxWidth := 2560
+		maxHeight := 1440
+		var thumbnail image.Image
+		if width > maxWidth || height > maxHeight {
+			thumbnail = imaging.Fit(srcImage, maxWidth, maxHeight, imaging.Lanczos)
+		} else {
+			thumbnail = srcImage
+		}
+
+		// 保存缩略图
+		if err := imaging.Save(thumbnail, tmpSmall, imaging.JPEGQuality(85)); err != nil {
+			return fmt.Errorf("failed to save thumbnail: %w", err)
+		}
+
+		// 上传缩略图到COS
+		smallFile, err := os.Open(tmpSmall)
+		if err != nil {
+			return fmt.Errorf("failed to open thumbnail: %w", err)
+		}
+		defer smallFile.Close()
+
+		_, err = Cos().Object.Put(context.Background(), "small/"+photo.Name, smallFile, nil)
+		if err != nil {
+			return fmt.Errorf("failed to upload thumbnail to COS: %w", err)
+		}
+
+		l.Info("Successfully fixed photo and uploaded thumbnail", photo.ID, photo.Name)
+	}
+
+	return nil
+}
+
+// fixPhotosWithZeroDimensions 批量修复宽高为0的图片
+func fixPhotosWithZeroDimensions() (int, int, error) {
+	var photos []model.TPhoto
+	
+	// 查找宽高为0的图片
+	if err := db().Where("(width = 0 OR height = 0) AND media_type = ?", "photo").
+		Where("trashed = ?", false).
+		Find(&photos).Error; err != nil {
+		return 0, 0, fmt.Errorf("failed to query photos: %w", err)
+	}
+
+	total := len(photos)
+	success := 0
+	
+	l.Info("Found photos with zero dimensions:", total)
+
+	for _, photo := range photos {
+		if err := fixPhotoWithZeroDimension(&photo); err != nil {
+			l.Error("Failed to fix photo", photo.ID, err)
+		} else {
+			success++
+		}
+	}
+
+	return total, success, nil
+}

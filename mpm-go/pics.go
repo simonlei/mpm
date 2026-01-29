@@ -285,3 +285,23 @@ func updatePhotoActivity(req *UpdateImageRequest) {
 		req.Latitude = &ac.Latitude
 	}
 }
+
+// fixZeroDimensionPhotos 修复宽高为0的图片
+func fixZeroDimensionPhotos(c *gin.Context) {
+	l.Info("Starting to fix photos with zero dimensions")
+	
+	total, success, err := fixPhotosWithZeroDimensions()
+	if err != nil {
+		l.Error("Failed to fix photos:", err)
+		c.JSON(500, Response{1, fmt.Sprintf("Failed to fix photos: %v", err)})
+		return
+	}
+
+	c.JSON(200, Response{0, map[string]interface{}{
+		"total":   total,
+		"success": success,
+		"failed":  total - success,
+		"message": fmt.Sprintf("Fixed %d out of %d photos", success, total),
+	}})
+}
+
