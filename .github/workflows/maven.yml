@@ -42,7 +42,7 @@ jobs:
         cp ../entrypoint.sh .
         echo '
           FROM alpine:3.23.0
-          RUN yum install -y ffmpeg
+          RUN apk add ffmpeg
           COPY . /
           WORKDIR .
           ENTRYPOINT ["/bin/sh","/entrypoint.sh"]
