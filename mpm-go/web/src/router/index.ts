@@ -16,55 +16,55 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
     children: [
       {
-        path: 'photos',
+        path: '/photos',
         name: 'Photos',
         component: () => import('@/views/Photos.vue'),
         meta: { title: '照片' }
       },
       {
-        path: 'map',
+        path: '/map',
         name: 'Map',
         component: () => import('@/views/Map.vue'),
         meta: { title: '地图' }
       },
       {
-        path: 'faces',
+        path: '/faces',
         name: 'Faces',
         component: () => import('@/views/Faces.vue'),
         meta: { title: '人脸' }
       },
       {
-        path: 'activities',
+        path: '/activities',
         name: 'Activities',
         component: () => import('@/views/Activities.vue'),
         meta: { title: '活动' }
       },
       {
-        path: 'albums',
+        path: '/albums',
         name: 'Albums',
         component: () => import('@/views/Albums.vue'),
         meta: { title: '相册' }
       },
       {
-        path: 'folders',
+        path: '/folders',
         name: 'Folders',
         component: () => import('@/views/Folders.vue'),
         meta: { title: '文件夹' }
       },
       {
-        path: 'trash',
+        path: '/trash',
         name: 'Trash',
         component: () => import('@/views/Trash.vue'),
         meta: { title: '回收站' }
       },
       {
-        path: 'upload',
+        path: '/upload',
         name: 'Upload',
         component: () => import('@/views/Upload.vue'),
         meta: { title: '上传' }
       },
       {
-        path: 'admin',
+        path: '/admin',
         name: 'Admin',
         component: () => import('@/views/Admin.vue'),
         meta: { title: '管理', requiresAdmin: true }
