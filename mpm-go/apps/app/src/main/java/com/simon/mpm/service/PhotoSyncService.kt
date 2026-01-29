@@ -41,12 +41,17 @@ class PhotoSyncService : Service() {
         private const val TAG = "PhotoSyncService"
         const val ACTION_START_SYNC = "action_start_sync"
         const val ACTION_STOP_SYNC = "action_stop_sync"
+        const val ACTION_MANUAL_UPLOAD = "action_manual_upload"
         const val ACTION_SYNC_COMPLETED = "com.simon.mpm.SYNC_COMPLETED"
         const val EXTRA_SUCCESS_COUNT = "extra_success_count"
         const val EXTRA_FAILED_COUNT = "extra_failed_count"
+        const val EXTRA_FILE_URIS = "extra_file_uris"
+        const val EXTRA_FILE_NAMES = "extra_file_names"
+        const val EXTRA_FILE_SIZES = "extra_file_sizes"
+        const val EXTRA_FILE_MODIFIED_TIMES = "extra_file_modified_times"
 
         /**
-         * 启动同步服务
+         * 启动自动同步服务
          */
         fun startSync(context: Context) {
             val intent = Intent(context, PhotoSyncService::class.java).apply {
@@ -63,6 +68,26 @@ class PhotoSyncService : Service() {
                 action = ACTION_STOP_SYNC
             }
             context.startService(intent)
+        }
+
+        /**
+         * 启动手动上传服务
+         */
+        fun startManualUpload(
+            context: Context,
+            fileUris: List<String>,
+            fileNames: List<String>,
+            fileSizes: List<Long>,
+            fileModifiedTimes: List<Long>
+        ) {
+            val intent = Intent(context, PhotoSyncService::class.java).apply {
+                action = ACTION_MANUAL_UPLOAD
+                putStringArrayListExtra(EXTRA_FILE_URIS, ArrayList(fileUris))
+                putStringArrayListExtra(EXTRA_FILE_NAMES, ArrayList(fileNames))
+                putExtra(EXTRA_FILE_SIZES, fileSizes.toLongArray())
+                putExtra(EXTRA_FILE_MODIFIED_TIMES, fileModifiedTimes.toLongArray())
+            }
+            context.startForegroundService(intent)
         }
     }
 
@@ -96,6 +121,11 @@ class PhotoSyncService : Service() {
             }
             ACTION_STOP_SYNC -> {
                 stopSync()
+            }
+            ACTION_MANUAL_UPLOAD -> {
+                if (!isSyncing) {
+                    startManualUpload(intent)
+                }
             }
         }
 
@@ -181,6 +211,114 @@ class PhotoSyncService : Service() {
     }
 
     /**
+     * 开始手动上传
+     */
+    private fun startManualUpload(intent: Intent) {
+        isSyncing = true
+
+        // 必须在5秒内调用startForeground
+        val notification = notificationHelper.createUploadProgressNotification(0, 1)
+        startForeground(NotificationHelper.NOTIFICATION_ID, notification)
+
+        // 获取上传文件信息
+        val fileUris = intent.getStringArrayListExtra(EXTRA_FILE_URIS) ?: emptyList()
+        val fileNames = intent.getStringArrayListExtra(EXTRA_FILE_NAMES) ?: emptyList()
+        val fileSizes = intent.getLongArrayExtra(EXTRA_FILE_SIZES)?.toList() ?: emptyList()
+        val fileModifiedTimes = intent.getLongArrayExtra(EXTRA_FILE_MODIFIED_TIMES)?.toList() ?: emptyList()
+
+        if (fileUris.isEmpty()) {
+            Log.w(TAG, "没有文件需要上传")
+            stopSelf()
+            return
+        }
+
+        Log.d(TAG, "开始手动上传 ${fileUris.size} 个文件")
+
+        serviceScope.launch {
+            try {
+                uploadManualFiles(fileUris, fileNames, fileSizes, fileModifiedTimes)
+            } catch (e: Exception) {
+                Log.e(TAG, "手动上传异常", e)
+                notificationHelper.showUploadFailedNotification(fileUris.size)
+                stopSelf()
+            }
+        }
+    }
+
+    /**
+     * 上传手动选择的文件
+     */
+    private suspend fun uploadManualFiles(
+        fileUris: List<String>,
+        fileNames: List<String>,
+        fileSizes: List<Long>,
+        fileModifiedTimes: List<Long>
+    ) {
+        val totalCount = fileUris.size
+        var uploadedCount = 0
+        var successCount = 0
+        var failedCount = 0
+
+        val account = preferencesManager.account.first() ?: "unknown"
+
+        fileUris.forEachIndexed { index, uriString ->
+            if (!isSyncing) {
+                Log.d(TAG, "上传已取消")
+                return@forEachIndexed
+            }
+
+            try {
+                val uri = Uri.parse(uriString)
+                val fileName = fileNames.getOrNull(index) ?: "unknown"
+                val lastModified = fileModifiedTimes.getOrNull(index) ?: System.currentTimeMillis()
+
+                // 构建目标路径
+                val targetPath = buildTargetPath(account, lastModified, fileName)
+                Log.d(TAG, "上传文件: $fileName -> $targetPath")
+
+                // 更新进度通知
+                notificationHelper.updateUploadProgress(uploadedCount, totalCount)
+
+                // 上传文件
+                val result = photoRepository.uploadPhoto(
+                    uri = uri,
+                    fileName = targetPath,
+                    lastModified = lastModified,
+                    context = this@PhotoSyncService
+                )
+
+                when (result) {
+                    is Result.Success -> {
+                        successCount++
+                        Log.d(TAG, "上传成功: $fileName")
+                    }
+                    is Result.Error -> {
+                        failedCount++
+                        Log.e(TAG, "上传失败: $fileName - ${result.message}", result.exception)
+                    }
+                    else -> {}
+                }
+
+                uploadedCount++
+
+            } catch (e: Exception) {
+                failedCount++
+                Log.e(TAG, "上传异常", e)
+            }
+        }
+
+        // 显示完成通知
+        if (successCount > 0 || failedCount > 0) {
+            notificationHelper.showUploadCompleteNotification(successCount, failedCount)
+        }
+
+        Log.d(TAG, "手动上传完成: 成功=$successCount, 失败=$failedCount")
+
+        // 停止服务
+        stopSelf()
+    }
+
+    /**
      * 上传文件
      */
     private suspend fun uploadFiles(files: List<com.simon.mpm.data.database.entity.SyncFile>) {
@@ -224,9 +362,18 @@ class PhotoSyncService : Service() {
                 // 更新状态为同步中
                 syncRepository.updateFileStatus(file.id, SyncStatus.SYNCING)
 
+                // 重新获取最佳日期时间（优先EXIF拍摄日期）
+                // 这样可以确保即使数据库中的旧记录没有更新，也能使用正确的EXIF日期
+                val bestDateTime = com.simon.mpm.util.FileMetadataHelper.getBestDateTimeFromPath(
+                    context = this@PhotoSyncService,
+                    filePath = file.filePath,
+                    fallbackModifiedTime = file.modifiedTime
+                )
+                
                 // 构建目标路径
-                val targetPath = buildTargetPath(account, file.modifiedTime, file.fileName)
+                val targetPath = buildTargetPath(account, bestDateTime, file.fileName)
                 Log.d(TAG, "同步文件: ${file.fileName} -> $targetPath")
+                Log.d(TAG, "  使用日期: $bestDateTime (数据库中的日期: ${file.modifiedTime})")
 
                 // 更新进度通知
                 notificationHelper.updateSyncProgress(syncedCount, totalCount)

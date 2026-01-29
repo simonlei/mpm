@@ -47,7 +47,10 @@ object AppModule {
     @Singleton
     fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            // 使用HEADERS级别，避免记录文件上传时的二进制内容
+            // HEADERS: 记录请求和响应的头部信息，不记录body内容
+            // 这样可以避免上传文件时输出大量二进制数据，提升性能
+            level = HttpLoggingInterceptor.Level.HEADERS
         }
     }
     

@@ -36,13 +36,7 @@
             </intent-filter>
         </activity>
         
-        <!-- 照片上传前台服务 -->
-        <service
-            android:name=".service.PhotoUploadService"
-            android:foregroundServiceType="dataSync"
-            android:exported="false" />
-        
-        <!-- 照片自动同步前台服务 -->
+        <!-- 照片同步和上传前台服务（统一服务，支持自动同步和手动上传两种模式） -->
         <service
             android:name=".service.PhotoSyncService"
             android:foregroundServiceType="dataSync"

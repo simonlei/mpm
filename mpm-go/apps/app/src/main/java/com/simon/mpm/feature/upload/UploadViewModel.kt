@@ -197,7 +197,7 @@ class UploadViewModel @Inject constructor(
         val fileSizes = _uiState.value.files.map { it.size }
         val fileModifiedTimes = _uiState.value.files.map { it.lastModified }
 
-        com.simon.mpm.service.PhotoUploadService.start(
+        com.simon.mpm.service.PhotoSyncService.startManualUpload(
             context = context,
             fileUris = fileUris,
             fileNames = fileNames,
@@ -273,7 +273,6 @@ class UploadViewModel @Inject constructor(
                 arrayOf(
                     MediaStore.MediaColumns.DISPLAY_NAME,
                     MediaStore.MediaColumns.SIZE,
-                    MediaStore.Images.Media.DATE_TAKEN,
                     MediaStore.MediaColumns.DATE_MODIFIED
                 ),
                 null,
@@ -285,23 +284,22 @@ class UploadViewModel @Inject constructor(
                 if (it.moveToFirst()) {
                     val nameIndex = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
                     val sizeIndex = it.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE)
+                    val dateModifiedIndex = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED)
                     
                     val fileName = it.getString(nameIndex)
                     val size = it.getLong(sizeIndex)
+                    val dateModified = it.getLong(dateModifiedIndex) * 1000 // 转换为毫秒
                     
                     Log.d(TAG, "  - DISPLAY_NAME: $fileName")
                     
-                    // 获取拍摄时间和修改时间
-                    val dateTakenIndex = it.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN)
-                    val dateModifiedIndex = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED)
+                    // 使用共用工具类获取最佳日期时间（优先EXIF拍摄日期）
+                    val lastModified = com.simon.mpm.util.FileMetadataHelper.getBestDateTime(
+                        context = context,
+                        uri = uri,
+                        fallbackModifiedTime = dateModified
+                    )
                     
-                    val dateTaken = if (dateTakenIndex >= 0) it.getLong(dateTakenIndex) else 0L
-                    val dateModified = it.getLong(dateModifiedIndex) * 1000 // 转换为毫秒
-                    
-                    // 优先使用拍摄时间，如果拍摄时间为0则使用文件修改时间
-                    val lastModified = if (dateTaken > 0) dateTaken else dateModified
-                    
-                    Log.d(TAG, "文件信息: $fileName, dateTaken=$dateTaken, dateModified=$dateModified, lastModified=$lastModified")
+                    Log.d(TAG, "文件信息: $fileName, 最终日期: $lastModified (${Date(lastModified)})")
                     
                     Triple(fileName, size, lastModified)
                 } else {

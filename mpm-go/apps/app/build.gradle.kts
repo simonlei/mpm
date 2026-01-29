@@ -111,6 +111,9 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
     
+    // ExifInterface
+    implementation(libs.androidx.exifinterface)
+    
     // Media3 ExoPlayer
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.ui)

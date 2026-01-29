@@ -247,11 +247,19 @@ class SyncRepository @Inject constructor(
                     val filePath = cursor.getString(dataColumn)
                     val fileName = cursor.getString(nameColumn)
                     val fileSize = cursor.getLong(sizeColumn)
-                    val modifiedTime = cursor.getLong(modifiedColumn) * 1000 // 转换为毫秒
+                    val fileModifiedTime = cursor.getLong(modifiedColumn) * 1000 // 转换为毫秒
+                    
+                    // 使用共用工具类获取最佳日期时间（优先EXIF拍摄日期）
+                    val modifiedTime = com.simon.mpm.util.FileMetadataHelper.getBestDateTimeFromPath(
+                        context = context,
+                        filePath = filePath,
+                        fallbackModifiedTime = fileModifiedTime
+                    )
                     
                     Log.d(TAG, "[$fileIndex/$totalCount] 文件: $fileName")
                     Log.d(TAG, "  路径: $filePath")
                     Log.d(TAG, "  大小: $fileSize bytes")
+                    Log.d(TAG, "  日期: $modifiedTime (文件修改=$fileModifiedTime)")
                     
                     // 检查文件是否已存在于数据库
                     val existingFile = syncFileDao.getByFilePath(filePath)
