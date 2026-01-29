@@ -18,7 +18,7 @@ func uploadPhoto(c *gin.Context) {
 		panic(err)
 	}
 	defer file.Close()
-	l.Info("total files %d with %d, upload user: %s", header.Size, lastModified, account)
+	l.Infof("total files %d with %d, upload user: %s", header.Size, lastModified, account)
 	key := "upload/" + getFullPathName(header.Header.Get("Content-Disposition"))
 	tmpFile, err := os.CreateTemp("", "mpm*"+header.Filename)
 

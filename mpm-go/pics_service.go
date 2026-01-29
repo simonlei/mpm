@@ -4,11 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"mpm-go/model"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/disintegration/imaging"
 	"github.com/evanoberholster/imagemeta"
 	"github.com/google/uuid"
 	"github.com/spf13/viper"
@@ -101,7 +107,11 @@ func generateSmallPic(key, name string) {
 		},
 	})
 	if err != nil {
-		l.Error("Can't generate small pic", err)
+		// 如果COS图片处理失败（比如图片太大），尝试本地生成缩略图
+		l.Warn("COS can't generate small pic, trying local generation", err)
+		if localErr := generateSmallPicLocally(key, name); localErr != nil {
+			l.Error("Can't generate small pic locally either", localErr)
+		}
 	} else {
 		l.Info("Generate small pic result", result)
 		// format := result.ProcessResults[0].Format
@@ -115,6 +125,91 @@ func generateSmallPic(key, name string) {
 		   log.info("ci upload result: " + Json.toJson(result));
 		*/
 	}
+}
+
+// generateSmallPicLocally 在本地生成缩略图并上传到COS
+func generateSmallPicLocally(key, name string) error {
+	// 1. 从COS下载原图到临时文件
+	tmpDir := os.TempDir()
+	tmpOriginal := filepath.Join(tmpDir, fmt.Sprintf("original_%s", uuid.New().String()))
+	
+	// 根据配置决定输出格式和扩展名
+	format := viper.GetString("smallphoto.format")
+	var ext string
+	switch format {
+	case "webp", "png":
+		ext = ".jpg" // webp不支持，统一用jpg
+	default:
+		ext = ".jpg"
+	}
+	tmpSmall := filepath.Join(tmpDir, fmt.Sprintf("small_%s%s", uuid.New().String(), ext))
+	
+	defer func() {
+		os.Remove(tmpOriginal)
+		os.Remove(tmpSmall)
+	}()
+
+	// 下载原图
+	resp, err := Cos().Object.Get(context.Background(), key, nil)
+	if err != nil {
+		return fmt.Errorf("failed to download original image: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// 保存到临时文件
+	tmpFile, err := os.Create(tmpOriginal)
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %w", err)
+	}
+	defer tmpFile.Close()
+
+	if _, err = tmpFile.ReadFrom(resp.Body); err != nil {
+		return fmt.Errorf("failed to save temp file: %w", err)
+	}
+	tmpFile.Close()
+
+	// 2. 打开并解码图片
+	srcImage, err := imaging.Open(tmpOriginal)
+	if err != nil {
+		return fmt.Errorf("failed to open image: %w", err)
+	}
+
+	// 3. 生成缩略图 (最大尺寸 2560x1440)
+	bounds := srcImage.Bounds()
+	width := bounds.Dx()
+	height := bounds.Dy()
+	
+	maxWidth := 2560
+	maxHeight := 1440
+	
+	// 计算缩放比例，保持宽高比
+	var thumbnail image.Image
+	if width > maxWidth || height > maxHeight {
+		thumbnail = imaging.Fit(srcImage, maxWidth, maxHeight, imaging.Lanczos)
+	} else {
+		thumbnail = srcImage
+	}
+
+	// 4. 保存缩略图，使用JPEG格式（通用且高效）
+	saveErr := imaging.Save(thumbnail, tmpSmall, imaging.JPEGQuality(85))
+	if saveErr != nil {
+		return fmt.Errorf("failed to save thumbnail: %w", saveErr)
+	}
+
+	// 5. 上传缩略图到COS的 /small/ 路径
+	smallFile, err := os.Open(tmpSmall)
+	if err != nil {
+		return fmt.Errorf("failed to open thumbnail: %w", err)
+	}
+	defer smallFile.Close()
+
+	_, err = Cos().Object.Put(context.Background(), "small/"+name, smallFile, nil)
+	if err != nil {
+		return fmt.Errorf("failed to upload thumbnail to COS: %w", err)
+	}
+
+	l.Info("Successfully generated and uploaded thumbnail locally for", name)
+	return nil
 }
 
 func setInfosFromFile(fileName string, lastModified string, photo *model.TPhoto) {
