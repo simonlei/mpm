@@ -275,7 +275,7 @@ data class FolderTreeResponse(
 
 /**
  * 文件夹节点
- * 服务端返回格式：{"id":11,"path":"/1625621476402_txt","title":"txt(4)","parent_id":-1}
+ * 服务端返回格式：{"id":11,"path":"/1625621476402_txt","title":"txt(4)","parent_id":-1,"has_children":true}
  */
 data class FolderNode(
     @SerializedName("id")
@@ -289,6 +289,9 @@ data class FolderNode(
     
     @SerializedName("parent_id")
     val parentId: Int,
+    
+    @SerializedName("has_children")
+    val hasChildren: Boolean = false,
     
     @SerializedName("children")
     val children: List<FolderNode>? = null

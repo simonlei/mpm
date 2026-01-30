@@ -32,7 +32,7 @@ fun AlbumsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val folderTree by viewModel.folderTree.collectAsState()
-    val expandedPaths by viewModel.expandedPaths.collectAsState()
+    val expandedNodeIds by viewModel.expandedNodeIds.collectAsState()
     val selectedPath by viewModel.selectedPath.collectAsState()
     val folderPhotos by viewModel.folderPhotos.collectAsState()
     val breadcrumbs by viewModel.breadcrumbs.collectAsState()
@@ -73,7 +73,7 @@ fun AlbumsScreen(
                 // 横屏模式：左右分栏布局
                 LandscapeLayout(
                     folderTree = folderTree,
-                    expandedPaths = expandedPaths,
+                    expandedNodeIds = expandedNodeIds,
                     selectedPath = selectedPath,
                     folderPhotos = folderPhotos,
                     isLoading = uiState.isLoading,
@@ -86,7 +86,7 @@ fun AlbumsScreen(
                 // 竖屏模式：面包屑导航 + 照片网格 + 底部抽屉
                 PortraitLayout(
                     folderTree = folderTree,
-                    expandedPaths = expandedPaths,
+                    expandedNodeIds = expandedNodeIds,
                     selectedPath = selectedPath,
                     folderPhotos = folderPhotos,
                     breadcrumbs = breadcrumbs,
@@ -151,7 +151,7 @@ fun AlbumsScreen(
                 
                 FolderTreePanel(
                     folders = folderTree,
-                    expandedPaths = expandedPaths,
+                    expandedNodeIds = expandedNodeIds,
                     selectedPath = selectedPath,
                     onFolderToggle = viewModel::toggleFolder,
                     onFolderSelect = { path ->
@@ -170,12 +170,12 @@ fun AlbumsScreen(
 @Composable
 private fun LandscapeLayout(
     folderTree: List<FolderNode>,
-    expandedPaths: Set<String>,
+    expandedNodeIds: Set<Int>,
     selectedPath: String?,
     folderPhotos: List<Photo>,
     isLoading: Boolean,
     isLoadingPhotos: Boolean,
-    onFolderToggle: (String) -> Unit,
+    onFolderToggle: (Int) -> Unit,
     onFolderSelect: (String) -> Unit,
     onPhotoClick: (Photo) -> Unit
 ) {
@@ -189,7 +189,7 @@ private fun LandscapeLayout(
         ) {
             FolderTreePanel(
                 folders = folderTree,
-                expandedPaths = expandedPaths,
+                expandedNodeIds = expandedNodeIds,
                 selectedPath = selectedPath,
                 onFolderToggle = onFolderToggle,
                 onFolderSelect = onFolderSelect
@@ -252,13 +252,13 @@ private fun LandscapeLayout(
 @Composable
 private fun PortraitLayout(
     folderTree: List<FolderNode>,
-    expandedPaths: Set<String>,
+    expandedNodeIds: Set<Int>,
     selectedPath: String?,
     folderPhotos: List<Photo>,
     breadcrumbs: List<String>,
     isLoading: Boolean,
     isLoadingPhotos: Boolean,
-    onFolderToggle: (String) -> Unit,
+    onFolderToggle: (Int) -> Unit,
     onFolderSelect: (String) -> Unit,
     onPhotoClick: (Photo) -> Unit,
     onShowFolderTree: () -> Unit,
@@ -293,7 +293,7 @@ private fun PortraitLayout(
             // 未选中文件夹时显示目录树
             FolderTreePanel(
                 folders = folderTree,
-                expandedPaths = expandedPaths,
+                expandedNodeIds = expandedNodeIds,
                 selectedPath = selectedPath,
                 onFolderToggle = onFolderToggle,
                 onFolderSelect = onFolderSelect
@@ -368,9 +368,9 @@ private fun BreadcrumbNavigation(
 @Composable
 private fun FolderTreePanel(
     folders: List<FolderNode>,
-    expandedPaths: Set<String>,
+    expandedNodeIds: Set<Int>,
     selectedPath: String?,
-    onFolderToggle: (String) -> Unit,
+    onFolderToggle: (Int) -> Unit,
     onFolderSelect: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -405,11 +405,11 @@ private fun FolderTreePanel(
                 FolderTreeItem(
                     folder = folder,
                     level = 0,
-                    isExpanded = folder.path in expandedPaths,
+                    isExpanded = folder.id in expandedNodeIds,
                     isSelected = folder.path == selectedPath,
-                    onToggle = { onFolderToggle(folder.path) },
+                    onToggle = { onFolderToggle(folder.id) },
                     onSelect = { onFolderSelect(folder.path) },
-                    expandedPaths = expandedPaths,
+                    expandedNodeIds = expandedNodeIds,
                     selectedPath = selectedPath,
                     onFolderToggle = onFolderToggle,
                     onFolderSelect = onFolderSelect
@@ -430,9 +430,9 @@ private fun FolderTreeItem(
     isSelected: Boolean,
     onToggle: () -> Unit,
     onSelect: () -> Unit,
-    expandedPaths: Set<String>,
+    expandedNodeIds: Set<Int>,
     selectedPath: String?,
-    onFolderToggle: (String) -> Unit,
+    onFolderToggle: (Int) -> Unit,
     onFolderSelect: (String) -> Unit
 ) {
     Column {
@@ -458,9 +458,8 @@ private fun FolderTreeItem(
                     ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 展开/折叠图标（只有当children不为空时才显示）
-                val hasChildren = !folder.children.isNullOrEmpty()
-                if (hasChildren) {
+                // 展开/折叠图标（根据hasChildren字段决定是否显示）
+                if (folder.hasChildren) {
                     IconButton(
                         onClick = onToggle,
                         modifier = Modifier.size(24.dp)
@@ -502,30 +501,20 @@ private fun FolderTreeItem(
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                     modifier = Modifier.weight(1f)
                 )
-                
-                // 照片数量 - 暂时隐藏，因为服务端返回的数据中没有单独的photoCount字段
-                // title字段中包含了数量信息，例如 "txt(4)"
-                /*
-                Text(
-                    text = "${folder.photoCount}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                */
             }
         }
         
-        // 子文件夹
+        // 子文件夹（只在展开且children不为null时显示）
         if (isExpanded && folder.children != null) {
             folder.children.forEach { childFolder ->
                 FolderTreeItem(
                     folder = childFolder,
                     level = level + 1,
-                    isExpanded = childFolder.path in expandedPaths,
+                    isExpanded = childFolder.id in expandedNodeIds,
                     isSelected = childFolder.path == selectedPath,
-                    onToggle = { onFolderToggle(childFolder.path) },
+                    onToggle = { onFolderToggle(childFolder.id) },
                     onSelect = { onFolderSelect(childFolder.path) },
-                    expandedPaths = expandedPaths,
+                    expandedNodeIds = expandedNodeIds,
                     selectedPath = selectedPath,
                     onFolderToggle = onFolderToggle,
                     onFolderSelect = onFolderSelect

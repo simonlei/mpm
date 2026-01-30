@@ -23,16 +23,16 @@ class AlbumsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AlbumsUiState())
     val uiState: StateFlow<AlbumsUiState> = _uiState.asStateFlow()
 
-    // 文件夹树数据（完整树结构）
-    private val _fullFolderTree = MutableStateFlow<List<FolderNode>>(emptyList())
-    
-    // 根节点列表（parent_id=-1的节点）
+    // 文件夹树数据（动态加载的树结构）
     private val _folderTree = MutableStateFlow<List<FolderNode>>(emptyList())
     val folderTree: StateFlow<List<FolderNode>> = _folderTree.asStateFlow()
 
-    // 展开的节点路径集合
-    private val _expandedPaths = MutableStateFlow<Set<String>>(emptySet())
-    val expandedPaths: StateFlow<Set<String>> = _expandedPaths.asStateFlow()
+    // 展开的节点ID集合（用于记录哪些节点已展开）
+    private val _expandedNodeIds = MutableStateFlow<Set<Int>>(emptySet())
+    val expandedNodeIds: StateFlow<Set<Int>> = _expandedNodeIds.asStateFlow()
+    
+    // 正在加载子节点的节点ID集合
+    private val _loadingNodeIds = MutableStateFlow<Set<Int>>(emptySet())
 
     // 当前选中的文件夹路径
     private val _selectedPath = MutableStateFlow<String?>(null)
@@ -51,25 +51,24 @@ class AlbumsViewModel @Inject constructor(
     }
 
     /**
-     * 加载文件夹树
+     * 加载根节点（parent_id=-1）
      */
     fun loadFolderTree() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
+            // 加载根节点（parent_id=-1）
             photoRepository.getFoldersTree(
                 trashed = false,
-                star = false
+                star = false,
+                parentId = -1
             ).collect { result ->
                 when (result) {
                     is Result.Loading -> {
                         _uiState.update { it.copy(isLoading = true) }
                     }
                     is Result.Success -> {
-                        // 保存完整树结构
-                        _fullFolderTree.value = result.data
-                        // 只展示根节点（parent_id=-1）
-                        _folderTree.value = result.data.filter { it.parentId == -1 }
+                        _folderTree.value = result.data
                         _uiState.update { 
                             it.copy(
                                 isLoading = false,
@@ -89,18 +88,93 @@ class AlbumsViewModel @Inject constructor(
             }
         }
     }
+    
+    /**
+     * 加载指定节点的子节点
+     */
+    private fun loadChildNodes(parentId: Int) {
+        viewModelScope.launch {
+            // 标记正在加载
+            _loadingNodeIds.update { it + parentId }
+            
+            photoRepository.getFoldersTree(
+                trashed = false,
+                star = false,
+                parentId = parentId
+            ).collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        // 将子节点插入到树中
+                        _folderTree.update { tree ->
+                            insertChildNodes(tree, parentId, result.data)
+                        }
+                        // 移除加载标记
+                        _loadingNodeIds.update { it - parentId }
+                    }
+                    is Result.Error -> {
+                        _uiState.update { it.copy(error = result.message) }
+                        _loadingNodeIds.update { it - parentId }
+                    }
+                    is Result.Loading -> {}
+                }
+            }
+        }
+    }
+    
+    /**
+     * 递归插入子节点到树中
+     */
+    private fun insertChildNodes(
+        nodes: List<FolderNode>,
+        parentId: Int,
+        children: List<FolderNode>
+    ): List<FolderNode> {
+        return nodes.map { node ->
+            if (node.id == parentId) {
+                // 找到父节点，插入子节点
+                node.copy(children = children)
+            } else if (node.children != null) {
+                // 递归查找子节点
+                node.copy(children = insertChildNodes(node.children, parentId, children))
+            } else {
+                node
+            }
+        }
+    }
 
     /**
      * 切换节点展开/折叠状态
      */
-    fun toggleFolder(path: String) {
-        _expandedPaths.update { current ->
-            if (path in current) {
-                current - path
-            } else {
-                current + path
+    fun toggleFolder(nodeId: Int) {
+        val isExpanded = nodeId in _expandedNodeIds.value
+        
+        if (isExpanded) {
+            // 折叠节点
+            _expandedNodeIds.update { it - nodeId }
+        } else {
+            // 展开节点
+            _expandedNodeIds.update { it + nodeId }
+            
+            // 检查是否已加载子节点
+            val node = findNodeById(_folderTree.value, nodeId)
+            if (node != null && node.children == null) {
+                // 子节点未加载，发起请求
+                loadChildNodes(nodeId)
             }
         }
+    }
+    
+    /**
+     * 根据ID查找节点
+     */
+    private fun findNodeById(nodes: List<FolderNode>, nodeId: Int): FolderNode? {
+        for (node in nodes) {
+            if (node.id == nodeId) return node
+            node.children?.let { children ->
+                findNodeById(children, nodeId)?.let { return it }
+            }
+        }
+        return null
     }
 
     /**
