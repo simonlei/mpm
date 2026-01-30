@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -19,8 +20,11 @@ import androidx.navigation.navArgument
 import com.simon.mpm.feature.activities.ActivitiesScreen
 import com.simon.mpm.feature.activities.ActivityDetailScreen
 import com.simon.mpm.feature.albums.AlbumsScreen
+import com.simon.mpm.feature.locations.LocationsScreen
+import com.simon.mpm.feature.people.PeopleScreen
 import com.simon.mpm.feature.photos.PhotoListScreen
 import com.simon.mpm.feature.settings.SettingsScreen
+import com.simon.mpm.feature.timeline.TimelineScreen
 import com.simon.mpm.feature.upload.UploadScreen
 import com.simon.mpm.navigation.BottomNavItem
 import com.simon.mpm.navigation.Routes
@@ -42,10 +46,8 @@ fun HomeScreen(
     
     Scaffold(
         bottomBar = {
-            // 只在非设置页面显示底部导航栏
-            if (currentRoute != Routes.SETTINGS) {
-                BottomNavigationBar(navController = navController)
-            }
+            // 所有页面都显示底部导航栏
+            BottomNavigationBar(navController = navController)
         }
     ) { paddingValues ->
         HomeNavGraph(
@@ -119,11 +121,11 @@ private fun HomeNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Routes.PHOTOS,
+        startDestination = Routes.ALL_PHOTOS,
         modifier = Modifier.padding(navPaddingValues)
     ) {
-        // 照片页面
-        composable(Routes.PHOTOS) {
+        // 全部照片页面
+        composable(Routes.ALL_PHOTOS) {
             PhotoListScreen(
                 onPhotoClick = { photo ->
                     onNavigateToPhotoDetail(photo.id)
@@ -137,7 +139,48 @@ private fun HomeNavGraph(
             )
         }
         
-        // 活动页面
+        // 相册页面
+        composable(Routes.ALBUMS) {
+            AlbumsScreen()
+        }
+        
+        // 时间轴页面
+        composable(Routes.TIMELINE) {
+            TimelineScreen(
+                onPhotoClick = { photo ->
+                    onNavigateToPhotoDetail(photo.id)
+                }
+            )
+        }
+        
+        // 位置页面
+        composable(Routes.LOCATIONS) {
+            LocationsScreen()
+        }
+        
+        // 人脸页面
+        composable(Routes.PEOPLE) {
+            PeopleScreen()
+        }
+        
+        // 设置页面
+        composable(Routes.SETTINGS) {
+            SettingsScreen(
+                onLogout = onLogout,
+                onNavigateToActivities = {
+                    navController.navigate(Routes.ACTIVITIES) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToUpload = {
+                    navController.navigate(Routes.UPLOAD) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+        
+        // 保留旧路由用于兼容（从设置页跳转）
         composable(Routes.ACTIVITIES) {
             ActivitiesScreen(
                 onActivityClick = { activityId ->
@@ -145,20 +188,9 @@ private fun HomeNavGraph(
                 }
             )
         }
-
-        // 相册页面
-        composable(Routes.ALBUMS) {
-            AlbumsScreen()
-        }
         
-        // 上传页面
         composable(Routes.UPLOAD) {
             UploadScreen()
-        }
-        
-        // 设置页面
-        composable(Routes.SETTINGS) {
-            SettingsScreen(onLogout = onLogout)
         }
     }
 }

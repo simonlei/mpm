@@ -8,12 +8,18 @@ object Routes {
     const val LOGIN = "login"
     const val HOME = "home"
     
-    // 底部导航路由
-    const val PHOTOS = "photos"
-    const val ACTIVITIES = "activities"
-    const val ALBUMS = "albums"
-    const val UPLOAD = "upload"
-    const val SETTINGS = "settings"
+    // 底部导航路由（6个Tab）
+    const val ALL_PHOTOS = "all_photos"      // 全部照片
+    const val ALBUMS = "albums"              // 相册
+    const val TIMELINE = "timeline"          // 时间轴
+    const val LOCATIONS = "locations"        // 位置
+    const val PEOPLE = "people"              // 人脸
+    const val SETTINGS = "settings"          // 设置
+    
+    // 保留旧路由用于兼容（将在设置页中使用）
+    const val PHOTOS = "photos"              // 已废弃，保留用于兼容
+    const val ACTIVITIES = "activities"      // 活动页面（在设置中访问）
+    const val UPLOAD = "upload"              // 上传页面（在设置中访问）
     
     // 详情页路由
     const val PHOTO_LIST = "photo_list"

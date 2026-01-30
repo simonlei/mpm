@@ -31,6 +31,8 @@ import java.util.*
 @Composable
 fun SettingsScreen(
     onLogout: () -> Unit,
+    onNavigateToActivities: () -> Unit = {},
+    onNavigateToUpload: () -> Unit = {},
     viewModel: SyncViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -90,7 +92,11 @@ fun SettingsScreen(
             
             // 其他设置区域
             item {
-                OtherSettingsSection()
+                OtherSettingsSection(
+                    onNavigateToActivities = onNavigateToActivities,
+                    onNavigateToUpload = onNavigateToUpload,
+                    onLogout = onLogout
+                )
             }
         }
     }
@@ -439,7 +445,11 @@ private fun StatItem(
  * 其他设置区域
  */
 @Composable
-private fun OtherSettingsSection() {
+private fun OtherSettingsSection(
+    onNavigateToActivities: () -> Unit,
+    onNavigateToUpload: () -> Unit,
+    onLogout: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -448,17 +458,84 @@ private fun OtherSettingsSection() {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "其他设置",
+                text = "功能",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             
+            // 活动管理
+            SettingItem(
+                icon = Icons.Default.Event,
+                title = "活动管理",
+                subtitle = "查看和管理照片活动",
+                onClick = onNavigateToActivities
+            )
+            
+            Divider()
+            
+            // 照片上传
+            SettingItem(
+                icon = Icons.Default.CloudUpload,
+                title = "照片上传",
+                subtitle = "手动上传照片到服务器",
+                onClick = onNavigateToUpload
+            )
+            
+            Divider()
+            
+            // 退出登录
+            SettingItem(
+                icon = Icons.Default.ExitToApp,
+                title = "退出登录",
+                subtitle = "退出当前账号",
+                onClick = onLogout,
+                iconTint = MaterialTheme.colorScheme.error
+            )
+        }
+    }
+}
+
+/**
+ * 设置项
+ */
+@Composable
+private fun SettingItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    iconTint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = iconTint,
+            modifier = Modifier.size(24.dp)
+        )
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "更多设置功能开发中...",
-                style = MaterialTheme.typography.bodyMedium,
+                text = title,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
