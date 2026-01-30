@@ -69,6 +69,7 @@ func setupEngine() {
 	r.POST("/api/deleteUser", deleteUser)
 	r.POST("/api/totp", totp)
 	r.GET("/api/fixZeroDimensionPhotos", fixZeroDimensionPhotos)
+	r.POST("/api/forceFixPhotoById", forceFixPhotoByIdApi)
 
 	r.GET("/cos/*path", cachecontrol.New(cachecontrol.CacheAssetsForeverPreset), proxyCos)
 

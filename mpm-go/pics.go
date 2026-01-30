@@ -286,14 +286,14 @@ func updatePhotoActivity(req *UpdateImageRequest) {
 	}
 }
 
-// fixZeroDimensionPhotos 修复宽高为0的图片
+// fixZeroDimensionPhotos 修复宽高为0的图片和视频
 func fixZeroDimensionPhotos(c *gin.Context) {
-	l.Info("Starting to fix photos with zero dimensions")
+	l.Info("Starting to fix photos/videos with zero dimensions")
 	
 	total, success, err := fixPhotosWithZeroDimensions()
 	if err != nil {
-		l.Error("Failed to fix photos:", err)
-		c.JSON(500, Response{1, fmt.Sprintf("Failed to fix photos: %v", err)})
+		l.Error("Failed to fix photos/videos:", err)
+		c.JSON(500, Response{1, fmt.Sprintf("Failed to fix photos/videos: %v", err)})
 		return
 	}
 
@@ -301,7 +301,39 @@ func fixZeroDimensionPhotos(c *gin.Context) {
 		"total":   total,
 		"success": success,
 		"failed":  total - success,
-		"message": fmt.Sprintf("Fixed %d out of %d photos", success, total),
+		"message": fmt.Sprintf("Fixed %d out of %d photos/videos", success, total),
+	}})
+}
+
+// forceFixPhotoByIdApi 强制修复指定ID的照片/视频
+func forceFixPhotoByIdApi(c *gin.Context) {
+	var req IdReq
+	if err := c.BindJSON(&req); err != nil {
+		l.Error("Can't bind request:", err)
+		c.JSON(400, Response{1, "Invalid request"})
+		return
+	}
+
+	l.Info("Force fixing photo/video with ID:", req.Id)
+
+	if err := forceFixPhotoById(int64(req.Id)); err != nil {
+		l.Error("Failed to force fix photo/video:", err)
+		c.JSON(500, Response{1, fmt.Sprintf("Failed to force fix: %v", err)})
+		return
+	}
+
+	// 修复成功后，重新查询照片信息返回
+	var photo model.TPhoto
+	if err := db().First(&photo, req.Id).Error; err != nil {
+		l.Error("Failed to fetch updated photo:", err)
+		c.JSON(500, Response{1, "Fixed but failed to fetch updated data"})
+		return
+	}
+
+	photos := addThumbField([]*model.TPhoto{&photo})
+	c.JSON(200, Response{0, map[string]interface{}{
+		"message": "Photo/video fixed successfully",
+		"photo":   photos[0],
 	}})
 }
 

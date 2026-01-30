@@ -279,3 +279,7 @@ export const fixZeroDimensionPhotosApi = () => {
   return request.get<ApiResponse<FixPhotosResult>>('/api/fixZeroDimensionPhotos')
 }
 
+export const forceFixPhotoByIdApi = (data: { id: number }) => {
+  return request.post<ApiResponse<{ message: string; photo: Photo }>>('/api/forceFixPhotoById', data)
+}
+
