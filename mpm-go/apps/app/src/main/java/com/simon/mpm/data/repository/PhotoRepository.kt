@@ -305,6 +305,29 @@ class PhotoRepository @Inject constructor(
     }
 
     /**
+     * 获取文件夹树
+     */
+    fun getFoldersTree(
+        trashed: Boolean = false,
+        star: Boolean = false,
+        parentId: Int? = null
+    ): Flow<Result<List<FolderNode>>> = flow {
+        emit(Result.Loading)
+        
+        val result = safeApiCall {
+            apiService.getFoldersData(
+                GetFoldersDataRequest(
+                    trashed = if (trashed) true else null,
+                    star = if (star) true else null,
+                    parentId = parentId
+                )
+            )
+        }
+        
+        emit(result)
+    }
+
+    /**
      * 获取所有活动列表
      */
     fun getActivities(): Flow<Result<List<Activity>>> = flow {
@@ -334,6 +357,19 @@ class PhotoRepository @Inject constructor(
             Log.d(TAG, "getAllTags: 成功获取 ${result.data.size} 个标签")
         } else if (result is Result.Error) {
             Log.e(TAG, "getAllTags: 获取失败 - ${result.exception.message}")
+        }
+        
+        emit(result)
+    }
+
+    /**
+     * 获取已命名的人脸列表
+     */
+    fun getFacesWithName(): Flow<Result<List<NamedFace>>> = flow {
+        emit(Result.Loading)
+        
+        val result = safeApiCall {
+            apiService.getFacesWithName(emptyMap())
         }
         
         emit(result)

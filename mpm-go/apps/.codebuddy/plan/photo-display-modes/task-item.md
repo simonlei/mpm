@@ -2,105 +2,118 @@
 
 ## 任务清单
 
-### 阶段一：导航架构调整（基于现有HomeScreen）
-
-- [ ] 1. 调整底部导航配置
-   - 修改 `Routes.kt`，将现有的5个路由改为6个：`ALL_PHOTOS`、`ALBUMS`、`TIMELINE`、`LOCATIONS`、`PEOPLE`、`SETTINGS`
-   - 修改 `BottomNavItem.kt`，更新底部导航项配置（移除 `PHOTOS` 和 `ACTIVITIES`，新增 `ALL_PHOTOS`、`TIMELINE`、`LOCATIONS`、`PEOPLE`）
-   - 更新 `HomeNavGraph`，调整导航路由映射关系
+- [x] 1. 调整底部导航架构（从5个Tab改为6个）
+   - 修改 `HomeScreen` 的底部导航栏，将原有的5个Tab（照片、活动、相册、上传、设置）改为6个Tab（全部、相册、时间、位置、人脸、设置）
+   - 更新 `MpmNavGraph` 路由配置，添加新的路由常量：`Routes.ALL_PHOTOS`、`Routes.TIMELINE`、`Routes.LOCATIONS`、`Routes.PEOPLE`
+   - 更新底部导航的图标和文本标签，使用Material Icons：`Photo`、`Folder`、`CalendarMonth`、`LocationOn`、`Face`、`Settings`
    - _需求：1.1, 1.2, 1.3_
-   - _复用：现有的 `HomeScreen`、`BottomNavigationBar`、`MpmNavGraph`_
 
-### 阶段二：改造和增强现有照片功能
+- [x] 2. 创建设置页主入口（整合活动和上传功能）
+   - 创建 `SettingsScreen.kt`，作为设置页的主入口界面
+   - 使用 `LazyColumn` 实现设置项列表，包含：活动、照片上传、同步设置、存储管理、关于应用等入口
+   - 配置导航路由，点击「活动」和「照片上传」时导航到现有的 `ActivityScreen` 和 `UploadScreen`
+   - 使用Material Design 3的ListItem组件，确保符合设计规范
+   - _需求：7.1, 7.2, 7.3, 7.4_
 
-- [ ] 2. 改造现有PhotoListScreen为AllPhotosScreen
-   - 将现有的 `PhotoListScreen` 重命名或复制为 `AllPhotosScreen`
-   - 复用现有的照片网格展示逻辑（`LazyVerticalGrid` + Coil）
-   - 复用现有的分页加载逻辑
-   - 增强筛选功能：添加收藏状态筛选（使用 `PhotoRepository.getPhotos(star = ...)` 参数）
-   - 增强排序功能：添加排序选项UI（使用 `order` 参数）
-   - 复用现有的长按多选和批量操作逻辑
+- [x] 3. 实现全部照片列表模式（AllPhotosScreen）
+   - 创建 `AllPhotosScreen.kt` 和 `AllPhotosViewModel.kt`
+   - 使用 `LazyVerticalGrid` 实现照片网格布局（3列或4列可配置）
+   - 调用 `PhotoRepository.getPhotos()` 获取照片列表，支持分页加载（使用 `start` 和 `size` 参数）
+   - 实现下拉刷新功能（使用 `PullRefreshIndicator`）
+   - 添加筛选和排序功能：筛选面板支持文件类型（照片/视频）、收藏状态；排序支持按时间、文件名、文件大小
+   - 实现长按进入多选模式，支持批量操作
+   - 复用现有的 `Photo` 数据模型和 `onNavigateToPhotoDetail` 导航逻辑
    - _需求：2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8_
-   - _复用：现有的 `PhotoListScreen`、`PhotoListViewModel`、`PhotoRepository.getPhotos()`_
 
-- [ ] 3. 增强现有AlbumsScreen功能
-   - 保持现有的 `AlbumsScreen` 相册列表展示逻辑
-   - 增加面包屑导航组件（在TopAppBar中显示当前路径）
-   - 增加目录展开/折叠功能（如果目录层级超过3层）
-   - 增加长按相册操作菜单（重命名、删除、下载）
-   - 复用现有的 `PhotoRepository.getPhotos(path = ...)` API
-   - _需求：3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8_
-   - _复用：现有的 `AlbumsScreen`、`AlbumsViewModel`_
+- [x] 4. 增强相册目录树模式（AlbumsScreen）
+- [x] 4.1 实现横竖屏自适应布局
+   - 修改现有的 `AlbumsScreen.kt`，使用 `LocalConfiguration` 判断横竖屏
+   - 横屏模式：实现左右分栏布局（`Row` + `weight(0.3f)` 和 `weight(0.7f)`），左侧显示目录树，右侧显示照片网格
+   - 竖屏模式：实现面包屑导航 + 底部抽屉布局（`ModalBottomSheet`）
+   - _需求：3.9, 3.10_
 
-### 阶段三：新增时间轴和位置功能
+- [x] 4.2 实现目录树组件（FolderTreePanel）
+   - 创建 `FolderTreePanel` 可组合函数，支持目录树的展开/折叠操作
+   - 使用 `LazyColumn` 实现目录树列表，每个目录项显示：文件夹图标、相册名称、照片数量
+   - 实现目录点击事件，调用 `PhotoRepository.getPhotos(path = ...)` 获取该目录的照片
+   - 高亮显示当前选中的目录（使用Primary颜色背景）
+   - _需求：3.1, 3.2, 3.3, 3.7_
 
-- [ ] 4. 创建TimelineScreen（基于现有模式）
-   - 参考 `AlbumsScreen` 的实现模式，创建 `TimelineScreen.kt` 和 `TimelineViewModel.kt`
-   - 使用现有的 `PhotoRepository.getPhotosDateTree()` API
-   - 复用现有的 `TreeNode` 数据模型
-   - 使用 `LazyColumn` 实现年份和月份的可展开列表（参考相册的展开逻辑）
-   - 点击月份时调用 `PhotoRepository.getPhotos(dateKey = "YYYY-MM")`
-   - 复用现有的照片网格组件展示月份照片
-   - _需求：4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.10_
-   - _复用：`PhotoRepository.getPhotosDateTree()`、`TreeNode`、照片网格组件_
+- [x] 4.3 实现面包屑导航和底部抽屉
+   - 创建 `BreadcrumbNavigation` 可组合函数，显示当前路径（如：首页 > 2024 > 春游）
+   - 在面包屑右侧添加目录图标按钮，点击展开 `ModalBottomSheet`
+   - 实现底部抽屉（占屏幕60-70%高度），内部嵌入 `FolderTreePanel`
+   - 点击目录后自动收起抽屉，更新面包屑和照片网格
+   - _需求：3.4, 3.5, 3.11, 3.12_
 
-- [ ] 5. 创建LocationsScreen（列表视图）
-   - 参考 `AllPhotosScreen` 的实现模式，创建 `LocationsScreen.kt` 和 `LocationsViewModel.kt`
-   - 调用 `PhotoRepository.getPhotos()` 获取所有照片
-   - 在ViewModel中按 `Photo.address` 字段分组（客户端分组逻辑）
-   - 以列表形式展示地点分组（复用现有的列表Item组件）
-   - 点击地点进入照片列表（复用 `AllPhotosScreen` 的网格展示）
-   - _需求：5.1, 5.2, 5.3, 5.11_
-   - _复用：`PhotoRepository.getPhotos()`、`Photo` 模型、照片网格组件_
+- [x] 5. 实现时间轴树形展示模式（TimelineScreen）
+   - 创建 `TimelineScreen.kt` 和 `TimelineViewModel.kt`
+   - 调用 `PhotoRepository.getPhotosDateTree()` 获取时间树数据（年-月结构）
+   - 使用 `LazyColumn` 实现可展开/折叠的时间树列表
+   - 年份项显示：年份、照片总数、代表性封面图；月份项显示：月份、照片数量、月份封面图
+   - 点击月份时调用 `PhotoRepository.getPhotos(dateKey = "YYYY-MM")` 获取该月照片
+   - 实现快速滚动条（右侧显示年份刻度）
+   - 默认展开最近的年份和月份
+   - _需求：4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.10_
 
-### 阶段四：人脸识别和设置页整合
+- [x] 6. 实现地理位置列表展示模式（LocationsScreen）
+   - 创建 `LocationsScreen.kt` 和 `LocationsViewModel.kt`
+   - 调用 `PhotoRepository.getPhotos()` 获取所有照片，按 `Photo.address` 字段分组
+   - 使用 `LazyColumn` 实现地点列表，每个地点项显示：地点名称、照片数量、代表性封面图
+   - 点击地点项时导航到该地点的照片列表页面
+   - 处理空状态：如果照片没有GPS信息，显示友好提示
+   - _需求：5.1, 5.2, 5.3, 5.10_
 
-- [ ] 6. 创建PeopleScreen（需确认服务端API）
-   - 确认服务端是否已实现人脸识别相关API
-   - 如果API已实现，参考 `AllPhotosScreen` 创建 `PeopleScreen.kt` 和 `PeopleViewModel.kt`
-   - 调用服务端API获取人物列表
-   - 以网格形式展示人物（复用照片网格的布局逻辑）
-   - 点击人物调用 `PhotoRepository.getPhotos(faceId = ...)` 获取照片
-   - 如果服务端未实现，创建占位页面显示"功能开发中"
-   - _需求：6.1, 6.2, 6.3, 6.4, 6.5_
-   - _复用：`PhotoRepository.getPhotos()`、照片网格组件_
+- [x] 7. 实现人脸识别分组展示模式（PeopleScreen）
+   - 创建 `PeopleScreen.kt` 和 `PeopleViewModel.kt`
+   - 调用服务端人脸识别API获取人物列表（需确认API是否已实现）
+   - 使用 `LazyVerticalGrid` 实现人物网格，每个人物项显示：头像、名称（或「未命名」）、照片数量
+   - 点击人物项时调用 `PhotoRepository.getPhotos(faceId = ...)` 获取该人物的照片列表
+   - 实现长按操作菜单：重命名、合并人物、隐藏人物
+   - 处理空状态：如果服务端未识别出任何人脸，显示「暂无识别到的人物」
+   - _需求：6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10_
 
-- [ ] 7. 创建SettingsScreen并整合现有功能
-   - 创建 `SettingsScreen.kt`，使用列表形式展示功能入口
-   - 在 `HomeNavGraph` 中配置导航到现有的 `ActivityScreen` 和 `UploadScreen`
-   - 添加功能入口：活动、照片上传、同步设置、存储管理、关于应用
-   - 实现点击功能入口的导航逻辑
-   - _需求：7.1, 7.2, 7.3, 7.4, 7.5_
-   - _复用：现有的 `ActivityScreen`、`UploadScreen`_
+- [x] 8. 实现状态保持和性能优化
+   - 在所有ViewModel中使用 `SavedStateHandle` 保存浏览状态（滚动位置、筛选条件、展开状态等）
+   - 确保所有照片列表使用 `LazyVerticalGrid` 的懒加载机制，避免内存溢出
+   - 配置Coil图片加载：优先加载缩略图（`Photo.thumb`），支持渐进式加载
+   - 实现网络请求失败的错误处理：使用 `Result.Error` 状态显示友好提示和重试按钮
+   - 确保所有模式支持下拉刷新功能
+   - _需求：1.4, 1.5, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.8, 8.10_
 
-### 阶段五：通用组件抽取和性能优化
+- [x] 9. 确保照片详情页兼容性
+   - 验证所有模式的照片点击事件都正确调用 `onNavigateToPhotoDetail(photoId)`
+   - 确保现有的 `PhotoDetailScreen` 支持从不同模式进入后的左右滑动切换
+   - 验证照片详情页的操作功能（分享、下载、删除）在所有模式下都能正常工作
+   - _需求：9.1, 9.2, 9.3, 9.7_
 
-- [ ] 8. 抽取通用照片网格组件
-   - 从现有的 `PhotoListScreen` 中抽取照片网格逻辑为 `PhotoGrid.kt` 可复用组件
-   - 支持3/4列布局配置参数
-   - 保持现有的Coil图片加载配置
-   - 保持现有的懒加载和内存回收机制
-   - 在 `AllPhotosScreen`、`TimelineScreen`、`LocationsScreen` 中复用该组件
-   - _需求：8.1, 8.2, 8.3_
-   - _复用：现有的照片网格实现、Coil配置_
+- [ ] 10. 编写单元测试和集成测试
+   - 为 `AllPhotosViewModel`、`TimelineViewModel`、`LocationsViewModel`、`PeopleViewModel` 编写单元测试
+   - 测试状态管理：加载状态、成功状态、错误状态、空状态
+   - 测试分页加载逻辑、筛选排序逻辑、展开折叠逻辑
+   - 测试 `SavedStateHandle` 的状态保存和恢复
+   - 确保核心业务逻辑单元测试覆盖率 > 60%
+   - _需求：非功能性需求 - 代码质量_
 
-- [ ] 9. 统一状态管理和错误处理
-   - 检查现有的 `Result<T>` 或 `UiState` 状态管理模式
-   - 如果不存在，创建 `UiState` sealed class（Loading, Success, Error, Empty）
-   - 在各ViewModel中统一使用该状态管理模式
-   - 复用现有的错误提示和重试逻辑
-   - 实现下拉刷新和上拉加载更多的通用逻辑
-   - _需求：8.4, 8.8_
-   - _复用：现有的错误处理逻辑_
+## 实施说明
 
-- [ ] 10. 实现状态保持和性能优化
-   - 在各ViewModel中使用 `SavedStateHandle` 保存浏览状态（滚动位置、筛选条件）
-   - 检查现有的Coil缓存配置，确保已启用内存缓存和磁盘缓存
-   - 复用现有的弱网环境优化策略（优先加载缩略图）
-   - 复用现有的网络请求失败重试机制
-   - 确保屏幕旋转时状态保持
-   - _需求：1.4, 1.5, 8.5, 8.6, 8.7, 8.10_
-   - _复用：现有的Coil配置、网络请求逻辑_
+### 开发顺序建议
+1. **第一阶段（核心架构）**：任务1、任务2 - 建立导航架构基础
+2. **第二阶段（核心功能）**：任务3、任务4、任务5 - 实现三个主要照片浏览模式
+3. **第三阶段（扩展功能）**：任务6、任务7 - 实现地理位置和人脸识别模式
+4. **第四阶段（优化和测试）**：任务8、任务9、任务10 - 性能优化和测试
+
+### 技术要点
+- **复用现有代码**：充分利用 `PhotoRepository`、`Photo` 模型、`PhotoDetailScreen` 等现有组件
+- **状态管理**：统一使用 `StateFlow` + `sealed class` 管理UI状态
+- **导航管理**：使用 `Navigation Compose` + `SavedStateHandle` 实现状态保持
+- **图片加载**：使用Coil的缓存机制，优先加载缩略图
+- **Material Design 3**：所有UI组件遵循MD3设计规范，支持深色模式
+
+### 注意事项
+- 任务7（人脸识别）需要先确认服务端API是否已实现，如未实现可暂时跳过
+- 任务6（地理位置）优先实现列表视图，地图视图作为v2.0功能
+- 所有任务都应该在前一个任务的基础上逐步递进，确保每个步骤都是可独立测试的
 
 ## 技术实现要点
 

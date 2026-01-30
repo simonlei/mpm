@@ -141,7 +141,11 @@ private fun HomeNavGraph(
         
         // 相册页面
         composable(Routes.ALBUMS) {
-            AlbumsScreen()
+            AlbumsScreen(
+                onPhotoClick = { photo ->
+                    onNavigateToPhotoDetail(photo.id)
+                }
+            )
         }
         
         // 时间轴页面
@@ -155,12 +159,20 @@ private fun HomeNavGraph(
         
         // 位置页面
         composable(Routes.LOCATIONS) {
-            LocationsScreen()
+            LocationsScreen(
+                onPhotoClick = { photo ->
+                    onNavigateToPhotoDetail(photo.id)
+                }
+            )
         }
         
         // 人脸页面
         composable(Routes.PEOPLE) {
-            PeopleScreen()
+            PeopleScreen(
+                onPhotoClick = { photo ->
+                    onNavigateToPhotoDetail(photo.id)
+                }
+            )
         }
         
         // 设置页面

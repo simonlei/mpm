@@ -275,19 +275,23 @@ data class FolderTreeResponse(
 
 /**
  * 文件夹节点
+ * 服务端返回格式：{"id":11,"path":"/1625621476402_txt","title":"txt(4)","parent_id":-1}
  */
 data class FolderNode(
+    @SerializedName("id")
+    val id: Int,
+    
     @SerializedName("path")
     val path: String,
     
-    @SerializedName("name")
-    val name: String,
+    @SerializedName("title")
+    val title: String?,
     
-    @SerializedName("photoCount")
-    val photoCount: Int,
+    @SerializedName("parent_id")
+    val parentId: Int,
     
     @SerializedName("children")
-    val children: List<FolderNode>?
+    val children: List<FolderNode>? = null
 )
 
 /**

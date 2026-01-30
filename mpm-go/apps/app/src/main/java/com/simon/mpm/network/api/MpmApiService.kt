@@ -158,7 +158,7 @@ interface MpmApiService {
      * 获取文件夹树
      */
     @POST("/api/getFoldersData")
-    suspend fun getFoldersData(@Body request: GetFoldersDataRequest): ApiResponse<FolderTreeResponse>
+    suspend fun getFoldersData(@Body request: GetFoldersDataRequest): ApiResponse<List<FolderNode>>
     
     /**
      * 获取所有标签
