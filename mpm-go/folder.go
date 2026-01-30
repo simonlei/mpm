@@ -11,14 +11,15 @@ import (
 type FoldersDataRequest struct {
 	Trashed  bool
 	Star     bool
-	ParentId int
+	ParentId int `json:"parent_id"`
 }
 
 type FoldersResp struct {
-	Id       int    `json:"id"`
-	Path     string `json:"path"`
-	Title    string `json:"title"`
-	ParentId int    `json:"parent_id"`
+	Id          int    `json:"id"`
+	Path        string `json:"path"`
+	Title       string `json:"title"`
+	ParentId    int    `json:"parent_id"`
+	HasChildren bool   `json:"has_children"`
 }
 
 func getFoldersData(c *gin.Context) {
@@ -28,7 +29,8 @@ func getFoldersData(c *gin.Context) {
 		l.Info("Can't bind request:", err)
 		return
 	}
-	sql := `select f.id, f.path, concat(f.name,'(',count(distinct p.id),')') title, f.parent_id parent_id
+	sql := `select f.id, f.path, concat(f.name,'(',count(distinct p.id),')') title, f.parent_id parent_id,
+	               exists(select 1 from t_files fc where fc.parent_id = f.id and fc.is_folder = true) as has_children
 	               from t_files f
 	               left join t_files fp on fp.path like concat(f.path, '%%')
 	               left join t_photos p  on fp.photo_id=p.id

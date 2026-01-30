@@ -90,12 +90,12 @@ const loadRootNodes = async () => {
         folderMap.value.set(folder.id, folder)
       })
       
-      // 创建树节点，默认都有 + 号
+      // 创建树节点，根据 has_children 字段决定是否显示 + 号
       // 在懒加载模式下，需要设置 children 为 true 才能显示 + 号
       treeData.value = res.data.map(folder => ({
         value: folder.id,
         label: folder.title,
-        children: true // true 表示可能有子节点，会显示 + 号
+        children: folder.has_children || undefined // 有子节点时显示 + 号，否则不显示
       }))
     }
   } catch (error) {
@@ -135,7 +135,7 @@ const loadChildren = async (node: any): Promise<TreeNode[]> => {
         return res.data.map(folder => ({
           value: folder.id,
           label: folder.title,
-          children: true // true 表示可能有子节点，会显示 + 号
+          children: folder.has_children || undefined // 根据实际情况决定是否显示 + 号
         }))
       } else {
         // 没有子节点，返回空数组（+ 号会消失）
