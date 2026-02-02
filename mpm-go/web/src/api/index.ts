@@ -116,6 +116,7 @@ export interface FolderData {
   path: string
   title: string
   parent_id: number
+  has_children: boolean
 }
 
 export const getFoldersDataApi = (data: { trashed: boolean; star: boolean; parent_id: number }) => {

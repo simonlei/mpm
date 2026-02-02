@@ -22,11 +22,18 @@ func getCount(c *gin.Context) {
 }
 
 type GetPicsRequest struct {
-	Star, Video, Trashed, IdOnly bool
-	Start, FaceId, IdRank        int
-	Size                         int `default:"75"`
-	DateKey, Path, Tag           string
-	Order                        string `default:"id"`
+	Star     bool   `json:"star"`
+	Video    bool   `json:"video"`
+	Trashed  bool   `json:"trashed"`
+	IdOnly   bool   `json:"id_only"`
+	Start    int    `json:"start"`
+	FaceId   int    `json:"face_id"`
+	IdRank   int    `json:"id_rank"`
+	Size     int    `json:"size" default:"75"`
+	DateKey  string `json:"date_key"`
+	Path     string `json:"path"`
+	Tag      string `json:"tag"`
+	Order    string `json:"order" default:"id"`
 }
 
 func getPics(c *gin.Context) {
