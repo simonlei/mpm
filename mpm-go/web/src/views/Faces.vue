@@ -30,7 +30,7 @@
           >
             <div class="face-avatar-small">
               <img
-                :src="`/get_face_img/${face.face_id}/0`"
+                :src="`/get_face_img/${face.face_id}/${face.selected_face || 0}`"
                 :alt="face.name || '未命名'"
                 @error="handleImageError"
               />
