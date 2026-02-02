@@ -102,13 +102,13 @@ data class Photo(
  * 照片列表响应
  */
 data class PicsResponse(
-    @SerializedName("totalRows")
+    @SerializedName("total_rows")
     val totalRows: Int,
     
-    @SerializedName("startRow")
+    @SerializedName("start_row")
     val startRow: Int,
     
-    @SerializedName("endRow")
+    @SerializedName("end_row")
     val endRow: Int,
     
     @SerializedName("data")
@@ -150,7 +150,7 @@ data class LoginResponse(
  * 任务响应
  */
 data class TaskResponse(
-    @SerializedName("taskId")
+    @SerializedName("task_id")
     val taskId: String
 )
 
