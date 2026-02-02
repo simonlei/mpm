@@ -226,7 +226,7 @@ const loadAllPhotosCount = async () => {
       size: 1
     })
     if (res.code === 0) {
-      totalCount.value = res.data.totalRows
+      totalCount.value = res.data.total_rows
     }
   } catch (error) {
     console.error('Load all photos count error:', error)

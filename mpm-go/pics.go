@@ -119,10 +119,10 @@ func getPics(c *gin.Context) {
 				l.Info("getPics error", tx.Error)
 			}
 			c.JSON(200, Response{0, map[string]interface{}{
-				"totalRows": total,
-				"startRow":  req.Start,
-				"endRow":    req.Start + len(results),
-				"data":      results}})
+				"total_rows": total,
+				"start_row":  req.Start,
+				"end_row":    req.Start + len(results),
+				"data":       results}})
 		} else {
 			sql += fmt.Sprintf(" limit %d, %d", req.Start, req.Size)
 			l.Info("sql is ", sql)
@@ -134,10 +134,10 @@ func getPics(c *gin.Context) {
 			}
 			results = addThumbField(results)
 			c.JSON(200, Response{0, map[string]interface{}{
-				"totalRows": total,
-				"startRow":  req.Start,
-				"endRow":    req.Start + len(results),
-				"data":      results}})
+				"total_rows": total,
+				"start_row":  req.Start,
+				"end_row":    req.Start + len(results),
+				"data":       results}})
 		}
 	} else {
 		/*

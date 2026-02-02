@@ -22,14 +22,14 @@
         <template #filters>
           <!-- 时间筛选提示 -->
           <t-tag
-            v-if="filters.dateKey !== null"
+            v-if="filters.date_key !== null"
             theme="primary"
             variant="light"
             closable
             @close="handleDateSelect(null)"
           >
             <template #icon><t-icon name="time" /></template>
-            {{ getDateKeyLabel(filters.dateKey) }}
+            {{ getDateKeyLabel(filters.date_key) }}
           </t-tag>
           
           <t-button
@@ -222,11 +222,11 @@ const filters = reactive({
   star: false,
   video: false,
   order: '-taken_date' as string,
-  dateKey: null as number | null
+  date_key: null as number | null
 })
 
 const emptyText = computed(() => {
-  if (filters.dateKey !== null) {
+  if (filters.date_key !== null) {
     return '该时间段暂无照片'
   }
   return '请在左侧选择时间段'
@@ -287,8 +287,8 @@ const toggleFilter = (key: 'star' | 'video') => {
 }
 
 // 处理日期选择
-const handleDateSelect = (dateKey: number | null) => {
-  filters.dateKey = dateKey
+const handleDateSelect = (date_key: number | null) => {
+  filters.date_key = date_key
   resetAndLoad()
 }
 
@@ -303,7 +303,7 @@ const loadPhotosApi = async (start: number, size: number): Promise<Photo[]> => {
       size,
       order: filters.order,
       tag: searchTag.value || undefined,
-      dateKey: filters.dateKey?.toString() || undefined
+      date_key: filters.date_key?.toString() || undefined
     })
     
     if (res.code === 0) {

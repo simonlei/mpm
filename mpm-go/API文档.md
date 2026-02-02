@@ -162,14 +162,14 @@ MPM-GO 是一个照片管理系统的后端服务，基于 Gin 框架开发，�
   {
     "code": 0,
     "data": {
-      "totalRows": 1000,
-      "startRow": 0,
-      "endRow": 75,
+      "total_rows": 1000,
+      "start_row": 0,
+      "end_row": 75,
       "data": [
         {
           "id": 1,
           "name": "photo_name.jpg",
-          "takenDate": "2024-01-01T10:30:00Z",
+          "taken_date": "2024-01-01T10:30:00Z",
           "latitude": 39.9042,
           "longitude": 116.4074,
           "address": "北京市朝阳区",
@@ -180,7 +180,7 @@ MPM-GO 是一个照片管理系统的后端服务，基于 Gin 框架开发，�
           "trashed": false,
           "thumb": "small/photo_name.jpg/thumb",
           "activity": 1,
-          "activityDesc": "2024-01-01 春游 活动描述",
+          "activity_desc": "2024-01-01 春游 活动描述",
           "tag": "风景,旅游"
         }
       ]

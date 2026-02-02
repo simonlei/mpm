@@ -49,21 +49,21 @@ export interface GetPicsParams {
   star?: boolean
   video?: boolean
   trashed?: boolean
-  idOnly?: boolean
+  id_only?: boolean
   start: number
   size: number
-  dateKey?: string
+  date_key?: string
   path?: string
   tag?: string
   face_id?: number
   order?: string
-  idRank?: number
+  id_rank?: number
 }
 
 export interface PicsResponse {
-  totalRows: number
-  startRow: number
-  endRow: number
+  total_rows: number
+  start_row: number
+  end_row: number
   data: Photo[]
 }
 

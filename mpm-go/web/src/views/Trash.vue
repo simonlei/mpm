@@ -23,14 +23,14 @@
         <template #filters>
           <!-- 时间筛选提示 -->
           <t-tag
-            v-if="dateKey !== null"
+            v-if="date_key !== null"
             theme="primary"
             variant="light"
             closable
             @close="handleDateSelect(null)"
           >
             <template #icon><t-icon name="time" /></template>
-            {{ getDateKeyLabel(dateKey) }}
+            {{ getDateKeyLabel(date_key) }}
           </t-tag>
           
           <t-alert theme="warning" message="回收站中的照片可以恢复" />
@@ -114,7 +114,7 @@ const photoGridRef = ref<InstanceType<typeof PhotoGrid> | null>(null)
 const dateTreeRef = ref<InstanceType<typeof DateTree> | null>(null)
 const totalCount = ref(0)
 const emptying = ref(false)
-const dateKey = ref<string | null>(null)
+const date_key = ref<string | null>(null)
 
 const progressVisible = ref(false)
 const progressData = reactive({
@@ -129,18 +129,18 @@ let progressTimer: number | null = null
 // 处理时间线选择
 const handleDateSelect = (nodeId: number | null) => {
   if (nodeId === null) {
-    dateKey.value = null
+    date_key.value = null
   } else if (nodeId >= 1000000) {
     // 活动节点: ID = 1000000 + activityId
-    dateKey.value = String(nodeId)
+    date_key.value = String(nodeId)
   } else if (nodeId >= 100) {
     // 月份节点: ID = year * 100 + month
     const year = Math.floor(nodeId / 100)
     const month = nodeId % 100
-    dateKey.value = `${year}${String(month).padStart(2, '0')}`
+    date_key.value = `${year}${String(month).padStart(2, '0')}`
   } else {
     // 年份节点: ID = year
-    dateKey.value = String(nodeId)
+    date_key.value = String(nodeId)
   }
   
   // 刷新照片列表
@@ -174,7 +174,7 @@ const loadPhotosWrapper = async (start: number, size: number): Promise<Photo[]> 
       start,
       size,
       order: '-taken_date',
-      dateKey: dateKey.value || undefined
+      date_key: date_key.value || undefined
     })
     
     if (res.code === 0) {
