@@ -3,8 +3,9 @@ package com.simon.mpm.feature.people
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.simon.mpm.common.Result
+import com.simon.mpm.data.datastore.PreferencesManager
 import com.simon.mpm.data.repository.PhotoRepository
-import com.simon.mpm.network.model.NamedFace
+import com.simon.mpm.network.model.Face
 import com.simon.mpm.network.model.Photo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -16,16 +17,25 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class PeopleViewModel @Inject constructor(
-    private val photoRepository: PhotoRepository
+    private val photoRepository: PhotoRepository,
+    private val preferencesManager: PreferencesManager
 ) : ViewModel() {
 
     // UI状态
     private val _uiState = MutableStateFlow(PeopleUiState())
     val uiState: StateFlow<PeopleUiState> = _uiState.asStateFlow()
 
+    // 服务器地址
+    val serverUrl: StateFlow<String> = preferencesManager.serverUrl
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ""
+        )
+
     // 人脸列表
-    private val _faces = MutableStateFlow<List<NamedFace>>(emptyList())
-    val faces: StateFlow<List<NamedFace>> = _faces.asStateFlow()
+    private val _faces = MutableStateFlow<List<Face>>(emptyList())
+    val faces: StateFlow<List<Face>> = _faces.asStateFlow()
 
     // 当前选中的人脸ID
     private val _selectedFaceId = MutableStateFlow<Int?>(null)
@@ -46,18 +56,23 @@ class PeopleViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
-            photoRepository.getFacesWithName().collect { result ->
+            photoRepository.getFaces(
+                showHidden = false,
+                page = 1,
+                size = 100,
+                nameFilter = ""
+            ).collect { result ->
                 when (result) {
                     is Result.Loading -> {
                         _uiState.update { it.copy(isLoading = true) }
                     }
                     is Result.Success -> {
-                        _faces.value = result.data
+                        _faces.value = result.data.faces
                         _uiState.update { 
                             it.copy(
                                 isLoading = false,
                                 error = null,
-                                hasFaces = result.data.isNotEmpty()
+                                hasFaces = result.data.faces.isNotEmpty()
                             )
                         }
                     }

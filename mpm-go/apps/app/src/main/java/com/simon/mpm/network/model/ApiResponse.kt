@@ -210,36 +210,41 @@ data class FaceListResponse(
 
 /**
  * 人脸
+ * 对应后端 FaceGetResp 结构
  */
 data class Face(
-    @SerializedName("id")
-    val id: Int,
+    @SerializedName("person_id")
+    val personId: String,
+    
+    @SerializedName("face_id")
+    val faceId: Int,
     
     @SerializedName("name")
     val name: String?,
     
+    @SerializedName("selected_face")
+    val selectedFace: Int,
+    
+    @SerializedName("collected")
+    val collected: Int,
+    
     @SerializedName("hidden")
-    val hidden: Boolean,
+    val hidden: Int,
     
-    @SerializedName("star")
-    val star: Boolean,
-    
-    @SerializedName("photoCount")
-    val photoCount: Int
+    @SerializedName("count")
+    val count: Int
 )
 
 /**
  * 已命名的人脸
+ * 对应后端 FaceNameResp 结构
  */
 data class NamedFace(
-    @SerializedName("id")
-    val id: Int,
+    @SerializedName("face_id")
+    val faceId: Int,
     
     @SerializedName("name")
-    val name: String,
-    
-    @SerializedName("photoCount")
-    val photoCount: Int
+    val name: String
 )
 
 /**

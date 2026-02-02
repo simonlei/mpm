@@ -363,6 +363,31 @@ class PhotoRepository @Inject constructor(
     }
 
     /**
+     * 获取人脸列表（包括未命名的）
+     */
+    fun getFaces(
+        showHidden: Boolean = false,
+        page: Int = 1,
+        size: Int = 100,
+        nameFilter: String = ""
+    ): Flow<Result<FaceListResponse>> = flow {
+        emit(Result.Loading)
+        
+        val result = safeApiCall {
+            apiService.getFaces(
+                GetFacesRequest(
+                    showHidden = showHidden,
+                    page = page,
+                    size = size,
+                    nameFilter = nameFilter.ifEmpty { null }
+                )
+            )
+        }
+        
+        emit(result)
+    }
+
+    /**
      * 获取已命名的人脸列表
      */
     fun getFacesWithName(): Flow<Result<List<NamedFace>>> = flow {

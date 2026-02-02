@@ -34,7 +34,7 @@ data class GetPicsRequest(
     @SerializedName("trashed")
     val trashed: Boolean? = null,
     
-    @SerializedName("idOnly")
+    @SerializedName("id_only")
     val idOnly: Boolean? = null,
     
     @SerializedName("start")
@@ -43,7 +43,7 @@ data class GetPicsRequest(
     @SerializedName("size")
     val size: Int = 75,
     
-    @SerializedName("dateKey")
+    @SerializedName("date_key")
     val dateKey: String? = null,
     
     @SerializedName("path")
@@ -58,7 +58,7 @@ data class GetPicsRequest(
     @SerializedName("order")
     val order: String? = null,
     
-    @SerializedName("idRank")
+    @SerializedName("id_rank")
     val idRank: Int? = null
 )
 
@@ -106,7 +106,7 @@ data class CreateOrUpdateActivityRequest(
     @SerializedName("activity")
     val activity: ActivityData,
     
-    @SerializedName("fromPhoto")
+    @SerializedName("from_photo")
     val fromPhoto: Int? = null
 )
 
@@ -145,7 +145,7 @@ data class DeleteActivityRequest(
  * 获取人脸列表请求参数
  */
 data class GetFacesRequest(
-    @SerializedName("showHidden")
+    @SerializedName("show_hidden")
     val showHidden: Boolean? = null,
     
     @SerializedName("page")
@@ -154,7 +154,7 @@ data class GetFacesRequest(
     @SerializedName("size")
     val size: Int = 20,
     
-    @SerializedName("nameFilter")
+    @SerializedName("name_filter")
     val nameFilter: String? = null
 )
 
@@ -232,7 +232,7 @@ data class UpdateFolderDateRequest(
     @SerializedName("path")
     val path: String,
     
-    @SerializedName("toDate")
+    @SerializedName("to_date")
     val toDate: String
 )
 
@@ -254,10 +254,10 @@ data class UpdateFolderGisRequest(
  * 移动文件夹请求参数
  */
 data class MoveFolderRequest(
-    @SerializedName("fromPath")
+    @SerializedName("from_path")
     val fromPath: String,
     
-    @SerializedName("toId")
+    @SerializedName("to_id")
     val toId: String,
     
     @SerializedName("merge")

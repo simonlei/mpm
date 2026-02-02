@@ -5,18 +5,26 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
+import com.simon.mpm.common.Constants
 import com.simon.mpm.feature.photos.PhotoGrid
 import com.simon.mpm.feature.photos.StandardPhotoGridItem
-import com.simon.mpm.network.model.NamedFace
+import com.simon.mpm.network.model.Face
 import com.simon.mpm.network.model.Photo
 
 /**
@@ -128,7 +136,7 @@ fun PeopleScreen(
                     FaceGrid(
                         faces = faces,
                         onFaceClick = { face ->
-                            viewModel.selectFace(face.id)
+                            viewModel.selectFace(face.faceId)
                         }
                     )
                 }
@@ -167,8 +175,8 @@ fun PeopleScreen(
  */
 @Composable
 private fun FaceGrid(
-    faces: List<NamedFace>,
-    onFaceClick: (NamedFace) -> Unit
+    faces: List<Face>,
+    onFaceClick: (Face) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
@@ -191,9 +199,12 @@ private fun FaceGrid(
  */
 @Composable
 private fun FaceItem(
-    face: NamedFace,
+    face: Face,
     onClick: () -> Unit
 ) {
+    val viewModel: PeopleViewModel = hiltViewModel()
+    val serverUrl by viewModel.serverUrl.collectAsState()
+    
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -208,26 +219,28 @@ private fun FaceItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // 头像占位符
-            Box(
+            // 人脸图片
+            val faceImageUrl = "$serverUrl${Constants.FACE_IMG_PATH}/${face.faceId}/${face.selectedFace}"
+            
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(faceImageUrl)
+                    .crossfade(true)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .build(),
+                contentDescription = face.name ?: "未命名",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(80.dp)
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Face,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+                    .clip(CircleShape)
+            )
             
             Spacer(modifier = Modifier.height(8.dp))
             
             // 名称
             Text(
-                text = face.name.ifEmpty { "未命名" },
+                text = face.name?.ifEmpty { "未命名" } ?: "未命名",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1
@@ -245,7 +258,7 @@ private fun FaceItem(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "${face.photoCount}",
+                    text = "${face.count}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
