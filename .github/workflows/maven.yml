@@ -42,7 +42,10 @@ jobs:
         cp ../entrypoint.sh .
         echo '
           FROM alpine:3.23.0
-          RUN apk add ffmpeg
+          #RUN apk add ffmpeg
+          RUN apk update \
+            && apk add --no-cache ffmpeg \
+            && rm -rf /var/cache/apk/*
           COPY . /
           WORKDIR .
           ENTRYPOINT ["/bin/sh","/entrypoint.sh"]

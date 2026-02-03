@@ -13,6 +13,7 @@
     <div v-loading="loading" class="tree-container">
       <t-tree
         v-if="treeData.length > 0"
+        :key="treeKey"
         :data="treeData"
         :keys="treeKeys"
         :expand-all="false"
@@ -20,10 +21,12 @@
         :activable="true"
         :active-multiple="false"
         :value="selectedId ? [selectedId] : []"
+        v-model:expanded="expandedKeys"
         :lazy="true"
         :load="loadChildren"
         hover
         @active="handleNodeClick"
+        @expand="handleExpand"
       >
         <template #label="{ node }">
           <span class="tree-node-label">
@@ -66,7 +69,8 @@ const loading = ref(false)
 const treeData = ref<TreeNode[]>([])
 const selectedId = ref<number | null>(null)
 const folderMap = ref<Map<number, FolderData>>(new Map())
-const loadedNodeIds = ref<Set<number>>(new Set())
+const expandedKeys = ref<number[]>([])
+const treeKey = ref(0)
 
 const treeKeys = {
   value: 'value',
@@ -91,11 +95,13 @@ const loadRootNodes = async () => {
       })
       
       // 创建树节点，根据 has_children 字段决定是否显示 + 号
-      // 在懒加载模式下，需要设置 children 为 true 才能显示 + 号
+      // 在懒加载模式下：
+      // - 有子节点：设置 children: true（显示展开按钮，但不加载子节点）
+      // - 无子节点：设置 children: []（不显示展开按钮）
       treeData.value = res.data.map(folder => ({
         value: folder.id,
         label: folder.title,
-        children: folder.has_children || undefined // 有子节点时显示 + 号，否则不显示
+        children: folder.has_children ? true : []
       }))
     }
   } catch (error) {
@@ -109,11 +115,6 @@ const loadRootNodes = async () => {
 const loadChildren = async (node: any): Promise<TreeNode[]> => {
   const nodeId = node.value
   
-  // 如果已经加载过，直接返回空数组
-  if (loadedNodeIds.value.has(nodeId)) {
-    return []
-  }
-  
   try {
     // 调用 API 获取子节点
     const res = await getFoldersDataApi({
@@ -123,9 +124,6 @@ const loadChildren = async (node: any): Promise<TreeNode[]> => {
     })
     
     if (res.code === 0) {
-      // 标记已加载
-      loadedNodeIds.value.add(nodeId)
-      
       if (res.data.length > 0) {
         // 有子节点，添加子节点数据
         res.data.forEach(folder => {
@@ -135,7 +133,7 @@ const loadChildren = async (node: any): Promise<TreeNode[]> => {
         return res.data.map(folder => ({
           value: folder.id,
           label: folder.title,
-          children: folder.has_children || undefined // 根据实际情况决定是否显示 + 号
+          children: folder.has_children ? true : []
         }))
       } else {
         // 没有子节点，返回空数组（+ 号会消失）
@@ -163,11 +161,17 @@ const handleNodeClick = (value: number[], context: any) => {
   }
 }
 
+// 处理展开事件
+const handleExpand = (value: number[], context: any) => {
+  console.log('Expand event:', value, context)
+}
+
 // 刷新树（清空缓存，重新加载）
 const refreshTree = () => {
-  loadedNodeIds.value.clear()
   folderMap.value.clear()
   selectedId.value = null
+  expandedKeys.value = []
+  treeKey.value++ // 强制重新渲染树组件
   loadRootNodes()
 }
 
@@ -350,4 +354,15 @@ onMounted(() => {
   font-weight: 500;
   margin-bottom: 4px;
 }
+
+/* 修复收起节点后的空白问题 */
+.tree-container :deep(.t-tree__children) {
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+.tree-container :deep(.t-tree__item--hidden) {
+  display: none !important;
+}
+
 </style>
