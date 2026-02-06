@@ -57,6 +57,35 @@
             </div>
           </t-card>
 
+          <!-- TOTP工具 -->
+          <t-card title="TOTP" hoverable>
+            <div class="tool-item">
+              <div class="tool-info">
+                <h3>获取TOTP验证码</h3>
+                <p class="tool-description">
+                  生成基于时间的一次性密码（Time-based One-Time Password）用于双因素认证。
+                </p>
+              </div>
+              <t-button 
+                theme="primary" 
+                :loading="loadingTotp"
+                @click="handleGetTotp"
+              >
+                {{ loadingTotp ? '获取中...' : '获取TOTP' }}
+              </t-button>
+            </div>
+          </t-card>
+
+          <!-- TOTP结果显示 -->
+          <t-card v-if="totpResult" title="TOTP结果">
+            <div class="result-content">
+              <div class="result-item">
+                <span class="result-label">验证码：</span>
+                <span class="result-value totp-code">{{ totpResult }}</span>
+              </div>
+            </div>
+          </t-card>
+
           <!-- 修复结果显示 -->
           <t-card v-if="fixResult" title="修复结果">
             <div class="result-content">
@@ -117,13 +146,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
-import { fixZeroDimensionPhotosApi, forceFixPhotoByIdApi } from '@/api'
+import { fixZeroDimensionPhotosApi, forceFixPhotoByIdApi, getTotpApi } from '@/api'
 
 const fixingPhotos = ref(false)
 const fixResult = ref<any>(null)
 const fixingById = ref(false)
 const fixById = ref<number | undefined>(undefined)
 const singleFixResult = ref<any>(null)
+const loadingTotp = ref(false)
+const totpResult = ref<string | null>(null)
 
 const handleFixZeroDimensionPhotos = async () => {
   fixingPhotos.value = true
@@ -177,6 +208,29 @@ const handleForceFixById = async () => {
     MessagePlugin.error('修复失败：' + (error.message || '网络错误'))
   } finally {
     fixingById.value = false
+  }
+}
+
+const handleGetTotp = async () => {
+  loadingTotp.value = true
+  totpResult.value = null
+  
+  try {
+    const response = await getTotpApi()
+    
+    console.log('TOTP API Response:', response)
+    
+    if (response.code === 0) {
+      totpResult.value = response.data
+      MessagePlugin.success('TOTP获取成功！')
+    } else {
+      MessagePlugin.error('获取TOTP失败：未知错误')
+    }
+  } catch (error: any) {
+    console.error('获取TOTP失败:', error)
+    MessagePlugin.error('获取TOTP失败：' + (error.message || '网络错误'))
+  } finally {
+    loadingTotp.value = false
   }
 }
 </script>
@@ -251,5 +305,13 @@ const handleForceFixById = async () => {
 
 .result-value.failed {
   color: var(--td-error-color);
+}
+
+.totp-code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: var(--td-brand-color);
 }
 </style>
