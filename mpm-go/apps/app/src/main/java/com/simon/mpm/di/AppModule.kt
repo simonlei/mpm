@@ -20,6 +20,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -31,6 +32,7 @@ import javax.inject.Singleton
 object AppModule {
     
     private const val DEFAULT_TIMEOUT = 30L
+    private const val UPLOAD_TIMEOUT = 120L
     
     // ========== 网络层依赖 ==========
     
@@ -151,6 +153,21 @@ object AppModule {
             .hostnameVerifier { _, _ -> true } // 信任所有主机名
             .build()
     }
+
+    /**
+     * 上传专用 OkHttpClient，120s 读写超时
+     */
+    @Provides
+    @Singleton
+    @Named("upload")
+    fun provideUploadOkHttpClient(
+        okHttpClient: OkHttpClient
+    ): OkHttpClient {
+        return okHttpClient.newBuilder()
+            .readTimeout(UPLOAD_TIMEOUT, TimeUnit.SECONDS)
+            .writeTimeout(UPLOAD_TIMEOUT, TimeUnit.SECONDS)
+            .build()
+    }
     
     @Provides
     @Singleton
@@ -168,6 +185,33 @@ object AppModule {
     @Provides
     @Singleton
     fun provideMpmApiService(retrofit: Retrofit): MpmApiService {
+        return retrofit.create(MpmApiService::class.java)
+    }
+
+    /**
+     * 上传专用 Retrofit 实例，使用上传专用 OkHttpClient
+     */
+    @Provides
+    @Singleton
+    @Named("upload")
+    fun provideUploadRetrofit(
+        @Named("upload") okHttpClient: OkHttpClient,
+        gson: Gson
+    ): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("http://placeholder.com/")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+    }
+
+    /**
+     * 上传专用 MpmApiService
+     */
+    @Provides
+    @Singleton
+    @Named("upload")
+    fun provideUploadMpmApiService(@Named("upload") retrofit: Retrofit): MpmApiService {
         return retrofit.create(MpmApiService::class.java)
     }
     

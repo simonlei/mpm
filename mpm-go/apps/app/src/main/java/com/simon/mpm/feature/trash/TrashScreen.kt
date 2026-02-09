@@ -23,15 +23,13 @@ import com.simon.mpm.feature.photos.TrashPhotoGridItem
 @Composable
 fun TrashScreen(
     onBack: () -> Unit,
-    onPhotoClick: (com.simon.mpm.network.model.Photo) -> Unit = {},
+    onPhotoClick: (Int) -> Unit = {},
     shouldRefresh: Boolean = false,
     viewModel: PhotoListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val photos by viewModel.photos.collectAsStateWithLifecycle()
     val totalCount by viewModel.totalCount.collectAsStateWithLifecycle()
-    
-    val serverUrl = "http://127.0.0.1:8080" // 临时硬编码，实际应该从PreferencesManager获取
     
     // 监听刷新信号
     LaunchedEffect(shouldRefresh) {
@@ -100,7 +98,7 @@ fun TrashScreen(
                 hasMore = uiState.hasMore,
                 emptyText = if (totalCount == 0) "回收站为空\n删除的照片会在这里显示" else "正在加载...",
                 emptyIcon = Icons.Default.DeleteForever,
-                onPhotoClick = onPhotoClick,
+                onPhotoClick = { photo -> onPhotoClick(photo.id) },
                 onLoadMore = { viewModel.loadMore() },
                 onRefresh = { viewModel.refresh() },
                 photoItemContent = { photo ->

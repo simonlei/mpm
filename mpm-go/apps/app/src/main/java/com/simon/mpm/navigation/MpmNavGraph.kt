@@ -10,7 +10,7 @@ import com.simon.mpm.feature.activities.ActivityDetailScreen
 import com.simon.mpm.feature.auth.LoginScreen
 import com.simon.mpm.feature.home.HomeScreen
 import com.simon.mpm.feature.photos.PhotoDetailScreen
-import com.simon.mpm.feature.photos.TrashScreen
+import com.simon.mpm.feature.trash.TrashScreen
 import com.simon.mpm.feature.splash.SplashScreen
 
 /**

@@ -38,51 +38,82 @@ class LocationsViewModel @Inject constructor(
         loadLocations()
     }
 
+    companion object {
+        private const val PAGE_SIZE = 200
+        private const val MAX_LOAD_COUNT = 5000
+    }
+
     /**
-     * 加载地理位置数据
+     * 加载地理位置数据（分批加载，避免一次性加载大量数据导致内存问题）
      */
     fun loadLocations() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            
-            // 获取所有照片
-            photoRepository.getPhotos(
-                start = 0,
-                size = 1000,  // 获取足够多的照片用于分组
-                order = "-taken_date"
-            ).collect { result ->
-                when (result) {
-                    is Result.Loading -> {
-                        _uiState.update { it.copy(isLoading = true) }
-                    }
-                    is Result.Success -> {
-                        val photos = result.data.data ?: emptyList()
-                        
-                        // 按地址分组
-                        val groups = photos
+
+            val accumulatedGroups = mutableMapOf<String, MutableList<Photo>>()
+            var start = 0
+            var hasMore = true
+
+            while (hasMore && start < MAX_LOAD_COUNT) {
+                val batchResult = loadBatch(start)
+                when (batchResult) {
+                    is BatchResult.Success -> {
+                        // 合并到累积分组中
+                        batchResult.photos
                             .filter { !it.address.isNullOrBlank() }
-                            .groupBy { it.address!! }
-                        
-                        _locationGroups.value = groups
-                        _uiState.update { 
-                            it.copy(
-                                isLoading = false,
-                                error = null,
-                                hasPhotosWithLocation = groups.isNotEmpty()
-                            )
+                            .forEach { photo ->
+                                accumulatedGroups.getOrPut(photo.address!!) { mutableListOf() }
+                                    .add(photo)
+                            }
+
+                        hasMore = batchResult.photos.size >= PAGE_SIZE
+                        start += PAGE_SIZE
+
+                        // 每批加载后更新 UI
+                        _locationGroups.value = accumulatedGroups.toMap()
+                        _uiState.update {
+                            it.copy(hasPhotosWithLocation = accumulatedGroups.isNotEmpty())
                         }
                     }
-                    is Result.Error -> {
-                        _uiState.update { 
-                            it.copy(
-                                isLoading = false,
-                                error = result.message
-                            )
+                    is BatchResult.Error -> {
+                        _uiState.update {
+                            it.copy(isLoading = false, error = batchResult.message)
                         }
+                        return@launch
                     }
                 }
             }
+
+            _uiState.update { it.copy(isLoading = false) }
         }
+    }
+
+    /**
+     * 加载单批数据
+     */
+    private suspend fun loadBatch(start: Int): BatchResult {
+        var batchResult: BatchResult = BatchResult.Error("未知错误")
+        photoRepository.getPhotos(
+            start = start,
+            size = PAGE_SIZE,
+            order = "-taken_date"
+        ).collect { result ->
+            when (result) {
+                is Result.Success -> {
+                    batchResult = BatchResult.Success(result.data.data ?: emptyList())
+                }
+                is Result.Error -> {
+                    batchResult = BatchResult.Error(result.message ?: "加载失败")
+                }
+                is Result.Loading -> { /* 忽略 */ }
+            }
+        }
+        return batchResult
+    }
+
+    private sealed class BatchResult {
+        data class Success(val photos: List<Photo>) : BatchResult()
+        data class Error(val message: String) : BatchResult()
     }
 
     /**

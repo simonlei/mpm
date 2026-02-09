@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.map
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -25,7 +26,8 @@ import javax.inject.Singleton
 @Singleton
 class PhotoRepository @Inject constructor(
     private val apiService: MpmApiService,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    @Named("upload") private val uploadApiService: MpmApiService
 ) : BaseRepository() {
 
     companion object {
@@ -452,9 +454,9 @@ class PhotoRepository @Inject constructor(
                 "text/plain".toMediaTypeOrNull()
             )
             
-            // 调用API（后端返回 {"code":0,"data":0}，data 是 Int 类型）
+            // 调用上传专用API（使用120s超时的上传专用客户端）
             val result = safeApiCall {
-                apiService.uploadPhoto(filePart, lastModifiedBody)
+                uploadApiService.uploadPhoto(filePart, lastModifiedBody)
             }
             
             Log.d(TAG, "uploadPhoto: 上传完成 $fileName - ${result.javaClass.simpleName}")

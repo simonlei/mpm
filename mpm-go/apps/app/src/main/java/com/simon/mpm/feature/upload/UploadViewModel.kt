@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.simon.mpm.common.Result
 import com.simon.mpm.data.datastore.PreferencesManager
 import com.simon.mpm.data.repository.PhotoRepository
+import com.simon.mpm.util.MimeTypeHelper
+import com.simon.mpm.util.PathHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,9 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 import javax.inject.Inject
 
 /**
@@ -65,132 +65,6 @@ class UploadViewModel @Inject constructor(
 
     companion object {
         private const val TAG = "UploadViewModel"
-        
-        /**
-         * 根据URI和文件名获取Content-Type
-         * 优先读取文件头判断真实MIME类型（可以正确识别动态照片等特殊情况）
-         * 如果读取失败，则根据文件扩展名判断
-         */
-        private fun getContentType(context: Context, uri: Uri, fileName: String): String {
-            // 优先尝试读取文件头来判断真实的MIME类型
-            val mimeTypeFromHeader = try {
-                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    // 读取文件头（前12个字节足够判断大部分格式）
-                    val header = ByteArray(12)
-                    val bytesRead = inputStream.read(header)
-                    if (bytesRead > 0) {
-                        detectMimeTypeFromHeader(header, bytesRead)
-                    } else {
-                        null
-                    }
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "无法读取文件头: $uri", e)
-                null
-            }
-            
-            if (!mimeTypeFromHeader.isNullOrBlank()) {
-                Log.d(TAG, "从文件头检测到MIME类型: $mimeTypeFromHeader")
-                return mimeTypeFromHeader
-            }
-            
-            // 回退到基于文件扩展名的判断
-            Log.d(TAG, "使用文件扩展名判断MIME类型")
-            val extension = fileName.substringAfterLast('.', "").lowercase()
-            return when (extension) {
-                // 图片格式
-                "jpg", "jpeg" -> "image/jpeg"
-                "png" -> "image/png"
-                "gif" -> "image/gif"
-                "webp" -> "image/webp"
-                "bmp" -> "image/bmp"
-                "heic", "heif" -> "image/heic"
-                // 视频格式
-                "mp4" -> "video/mp4"
-                "mov" -> "video/quicktime"
-                "avi" -> "video/x-msvideo"
-                "mkv" -> "video/x-matroska"
-                "webm" -> "video/webm"
-                "3gp" -> "video/3gpp"
-                "m4v" -> "video/x-m4v"
-                "wmv" -> "video/x-ms-wmv"
-                "flv" -> "video/x-flv"
-                // 默认
-                else -> "application/octet-stream"
-            }
-        }
-
-        /**
-         * 根据文件头字节判断MIME类型
-         */
-        private fun detectMimeTypeFromHeader(header: ByteArray, size: Int): String? {
-            if (size < 4) return null
-            
-            // JPEG: FF D8 FF
-            if (header[0] == 0xFF.toByte() && header[1] == 0xD8.toByte() && header[2] == 0xFF.toByte()) {
-                return "image/jpeg"
-            }
-            
-            // PNG: 89 50 4E 47
-            if (header[0] == 0x89.toByte() && header[1] == 0x50.toByte() && 
-                header[2] == 0x4E.toByte() && header[3] == 0x47.toByte()) {
-                return "image/png"
-            }
-            
-            // GIF: 47 49 46 38
-            if (header[0] == 0x47.toByte() && header[1] == 0x49.toByte() && 
-                header[2] == 0x46.toByte() && header[3] == 0x38.toByte()) {
-                return "image/gif"
-            }
-            
-            // WebP: 52 49 46 46 ... 57 45 42 50
-            if (size >= 12 && header[0] == 0x52.toByte() && header[1] == 0x49.toByte() && 
-                header[2] == 0x46.toByte() && header[3] == 0x46.toByte() &&
-                header[8] == 0x57.toByte() && header[9] == 0x45.toByte() && 
-                header[10] == 0x42.toByte() && header[11] == 0x50.toByte()) {
-                return "image/webp"
-            }
-            
-            // MP4/MOV: 检查 ftyp box (偏移4字节处)
-            if (size >= 12) {
-                val ftyp = String(header, 4, 4, Charsets.ISO_8859_1)
-                when {
-                    ftyp.startsWith("ftyp") -> {
-                        // 进一步检查品牌
-                        val brand = if (size >= 12) String(header, 8, 4, Charsets.ISO_8859_1) else ""
-                        return when {
-                            brand.startsWith("mp4") || brand.startsWith("isom") || 
-                            brand.startsWith("M4V") || brand.startsWith("M4A") -> "video/mp4"
-                            brand.startsWith("qt") -> "video/quicktime"
-                            else -> "video/mp4" // 默认为MP4
-                        }
-                    }
-                }
-            }
-            
-            // AVI: 52 49 46 46 ... 41 56 49 20
-            if (size >= 12 && header[0] == 0x52.toByte() && header[1] == 0x49.toByte() && 
-                header[2] == 0x46.toByte() && header[3] == 0x46.toByte() &&
-                header[8] == 0x41.toByte() && header[9] == 0x56.toByte() && 
-                header[10] == 0x49.toByte() && header[11] == 0x20.toByte()) {
-                return "video/x-msvideo"
-            }
-            
-            // HEIC/HEIF: ftyp heic/heix/hevc/hevx/mif1
-            if (size >= 12) {
-                val ftyp = String(header, 4, 4, Charsets.ISO_8859_1)
-                if (ftyp.startsWith("ftyp")) {
-                    val brand = String(header, 8, 4, Charsets.ISO_8859_1)
-                    if (brand.startsWith("heic") || brand.startsWith("heix") || 
-                        brand.startsWith("hevc") || brand.startsWith("hevx") || 
-                        brand.startsWith("mif1")) {
-                        return "image/heic"
-                    }
-                }
-            }
-            
-            return null
-        }
     }
 
     private val _uiState = MutableStateFlow(UploadUiState())
@@ -253,11 +127,11 @@ class UploadViewModel @Inject constructor(
                 updateFileStatus(index, UploadStatus.Uploading)
                 
                 // 构建文件路径：用户名/年份/月份/原文件名
-                val targetPath = buildTargetPath(account, file.lastModified, file.fileName)
+                val targetPath = PathHelper.buildTargetPath(account, file.lastModified, file.fileName)
                 Log.d(TAG, "准备上传: 原文件名=${file.fileName}, 目标路径=$targetPath, lastModified=${file.lastModified}")
                 
                 // 获取文件类型（优先从URI获取真实MIME类型）
-                val contentType = getContentType(context, file.uri, file.fileName)
+                val contentType = MimeTypeHelper.getContentType(context, file.uri, file.fileName)
                 Log.d(TAG, "文件类型: $contentType")
                 
                 // 上传文件
@@ -362,20 +236,6 @@ class UploadViewModel @Inject constructor(
         _uiState.update { state ->
             state.copy(isUploadingInBackground = false)
         }
-    }
-
-    /**
-     * 构建目标路径：用户名/年份/月份/原文件名
-     */
-    private fun buildTargetPath(account: String, lastModified: Long, fileName: String): String {
-        val date = Date(lastModified)
-        val yearFormat = SimpleDateFormat("yyyy", Locale.getDefault())
-        val monthFormat = SimpleDateFormat("MM", Locale.getDefault())
-        
-        val year = yearFormat.format(date)
-        val month = monthFormat.format(date)
-        
-        return "$account/$year/$month/$fileName"
     }
 
     /**

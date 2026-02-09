@@ -46,7 +46,7 @@ private object VideoCacheManager {
         if (simpleCache == null) {
             val cacheDir = File(context.cacheDir, "video_cache")
             // 增加缓存大小到1GB，提升缓存命中率
-            val cacheEvictor = LeastRecentlyUsedCacheEvictor(1024 * 1024 * 1024L) // 1GB 缓存
+            val cacheEvictor = LeastRecentlyUsedCacheEvictor(256 * 1024 * 1024L) // 256MB 缓存
             simpleCache = SimpleCache(cacheDir, cacheEvictor, androidx.media3.database.StandaloneDatabaseProvider(context))
         }
         return simpleCache!!
