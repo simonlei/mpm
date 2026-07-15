@@ -44,19 +44,20 @@ type FaceNameResp struct {
 func getFaces(c *gin.Context) {
 	var req FaceGetRequest
 	c.BindJSON(&req)
+	params := map[string]interface{}{}
 	sqlStr := `select person_id, i.face_id, name, selected_face, collected, hidden, count(*) as count
 	    	from photo_face_info i
 	    	left join t_face on t_face.id=i.face_id
 	    	where person_id is not null`
-	sqlStr = setConditions(req.ShowHidden, req.NameFilter, sqlStr)
+	sqlStr = setConditions(req.ShowHidden, req.NameFilter, sqlStr, params)
 
 	countSql := "select count(*) c from (" + sqlStr + ") t"
 	var count int
-	db().Raw(countSql).Scan(&count)
+	db().Raw(countSql, params).Scan(&count)
 
 	limit := fmt.Sprintf(" limit %d, %d", (req.Page-1)*req.Size, req.Size)
 	var data []FaceGetResp
-	db().Raw(sqlStr + limit).Find(&data)
+	db().Raw(sqlStr+limit, params).Find(&data)
 
 	c.JSON(http.StatusOK, Response{0, map[string]interface{}{
 		"total": count,
@@ -64,12 +65,13 @@ func getFaces(c *gin.Context) {
 	}})
 }
 
-func setConditions(showHidden bool, nameFilter, s string) string {
+func setConditions(showHidden bool, nameFilter, s string, params map[string]interface{}) string {
 	if !showHidden {
 		s = s + " and t_face.hidden=false"
 	}
-	if strings.TrimSpace(nameFilter) != "" {
-		s = s + " and name like '%" + strings.TrimSpace(nameFilter) + "%'"
+	if name := strings.TrimSpace(nameFilter); name != "" {
+		s = s + " and name like @nameFilter"
+		params["nameFilter"] = "%" + name + "%"
 	}
 	return s + " group by i.face_id order by collected desc, count(*) desc, i.face_id"
 }

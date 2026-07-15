@@ -21,6 +21,22 @@ func getCount(c *gin.Context) {
 	c.JSON(200, Response{0, count})
 }
 
+// allowedOrderColumns 列出 t_photos 允许排序的列，防止 order 参数被拼接进 SQL 造成注入
+var allowedOrderColumns = map[string]bool{
+	"id": true, "name": true, "size": true, "width": true, "height": true,
+	"trashed": true, "star": true, "latitude": true, "longitude": true,
+	"address": true, "taken_date": true, "media_type": true, "duration": true,
+	"rotate": true, "tags": true, "activity": true, "md5": true, "sha1": true,
+}
+
+// validOrderColumn 校验排序字段，非法值回退到 id，避免 SQL 注入
+func validOrderColumn(col string) string {
+	if allowedOrderColumns[col] {
+		return col
+	}
+	return "id"
+}
+
 type GetPicsRequest struct {
 	Star     bool   `json:"star"`
 	Video    bool   `json:"video"`
@@ -75,7 +91,8 @@ func getPics(c *gin.Context) {
 		cnds = append(cnds, "media_type = 'video' ")
 	}
 	if req.Tag != "" {
-		cnds = append(cnds, "concat(',', tags, ',') like '%,"+req.Tag+",%'")
+		cnds = append(cnds, "concat(',', tags, ',') like @tag")
+		params["tag"] = "%," + req.Tag + ",%"
 	}
 	dateKey, _ := strconv.Atoi(req.DateKey)
 	switch {
@@ -106,7 +123,7 @@ func getPics(c *gin.Context) {
 		}
 		sql += " from t_photos " + joinSql + " where "
 		sql += strings.Join(cnds, " and ")
-		sql += " order by t_photos." + req.Order
+		sql += " order by t_photos." + validOrderColumn(req.Order)
 		if desc {
 			sql += " desc"
 		}

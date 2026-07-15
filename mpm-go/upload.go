@@ -19,8 +19,8 @@ func uploadPhoto(c *gin.Context) {
 	}
 	defer file.Close()
 	l.Infof("total files %d with %d, upload user: %s", header.Size, lastModified, account)
-	key := "upload/" + getFullPathName(header.Header.Get("Content-Disposition"))
-	tmpFile, err := os.CreateTemp("", "mpm*"+header.Filename)
+	key := "upload/" + sanitizeRelPath(getFullPathName(header.Header.Get("Content-Disposition")))
+	tmpFile, err := os.CreateTemp("", "mpm*"+sanitizeFileName(header.Filename))
 
 	if err != nil {
 		panic(err)
@@ -57,6 +57,29 @@ func getFullPathName(s string) string {
 		}
 	}
 	return ""
+}
+
+// sanitizeRelPath 去掉相对路径中的 ".." 与 "." 段以及多余分隔符，防止路径穿越
+func sanitizeRelPath(p string) string {
+	p = strings.NewReplacer("\\", "/").Replace(p)
+	parts := strings.Split(p, "/")
+	clean := make([]string, 0, len(parts))
+	for _, part := range parts {
+		if part == "" || part == "." || part == ".." {
+			continue
+		}
+		clean = append(clean, part)
+	}
+	return strings.Join(clean, "/")
+}
+
+// sanitizeFileName 仅保留文件名（去除任何目录成分），用于创建临时文件，避免写入临时目录之外
+func sanitizeFileName(name string) string {
+	name = sanitizeRelPath(name)
+	if i := strings.LastIndex(name, "/"); i >= 0 {
+		name = name[i+1:]
+	}
+	return name
 }
 
 func uploadFile(key, lastModified, contentType string, size int64, fileName string, uploadUser string) {
